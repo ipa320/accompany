@@ -1,0 +1,9 @@
+<stack>
+  <description brief="accompany">accompany</description>
+  <author>Maintained by Ulrich Reiser (Ulrich.Reiser (at) ipa.fraunhofer.de), Richard Bormann (Richard.Bormann (at) ipa.fraunhofer.de) </author>
+  <license>LGPL</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany</url>
+  <depend stack="ros" />
+
+</stack>
