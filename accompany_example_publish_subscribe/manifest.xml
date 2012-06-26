@@ -1,0 +1,17 @@
+<package>
+  <description brief="accompany_example_publish_subscribe">
+
+     accompany_example_publish_subscribe is an example package that implements a publishing component, i.e. a component that permanently provides a data stream, and a subribing component that constantly receives this data stream.
+
+  </description>
+  <author>Richard Bormann</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_example_publish_subscribe</url>
+
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/> 
+
+</package>
+
+

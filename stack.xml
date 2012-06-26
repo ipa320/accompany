@@ -1,9 +1,10 @@
 <stack>
   <description brief="accompany">accompany</description>
-  <author>Maintained by Ulrich Reiser (Ulrich.Reiser (at) ipa.fraunhofer.de), Richard Bormann (Richard.Bormann (at) ipa.fraunhofer.de) </author>
-  <license>LGPL</license>  
+  <author>Maintained by Ulrich Reiser (Ulrich.Reiser (at) ipa.fraunhofer.de), Richard Bormann (Richard.Bormann (at) ipa.fraunhofer.de)</author>
+  <license>BSD,LGPL</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/accompany</url>
   <depend stack="ros" />
+  <depend stack="ros_comm" /> <!-- std_msgs, roscpp -->
 
 </stack>
