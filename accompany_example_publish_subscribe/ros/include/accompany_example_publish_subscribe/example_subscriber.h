@@ -1,10 +1,10 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
-class Example_subscriber
+class ExampleSubscriber
 {
 public:
-	Example_subscriber(ros::NodeHandle nh);
+	ExampleSubscriber(ros::NodeHandle nh);
 	void init();
 	void receiveCallback(const std_msgs::String::ConstPtr& msg);
 

@@ -1,22 +1,22 @@
 #include "accompany_example_service/example_service_server.h"
 
-Example_service_server::Example_service_server(ros::NodeHandle nh)
+ExampleServiceServer::ExampleServiceServer(ros::NodeHandle nh)
 {
 	node_ = nh;
 }
 
 
-void Example_service_server::init()
+void ExampleServiceServer::init()
 {
 	/**
 	* The advertiseService() function is how you tell ROS that you want to provide a service for other modules (software nodes).
 	*/
 
-	service_server_square_ = node_.advertiseService("square_number", &Example_service_server::square_number, this);
+	service_server_square_ = node_.advertiseService("square_number", &ExampleServiceServer::square_number, this);
 }
 
 
-bool Example_service_server::square_number(accompany_example_service::Message::Request &req, accompany_example_service::Message::Response &res)
+bool ExampleServiceServer::square_number(accompany_example_service::Message::Request &req, accompany_example_service::Message::Response &res)
 {
 	// this callback function is executed each time a request comes in for this service server
 	// here we just read the number from the request, square it and put the result into the response, the response is automatically sent back to the caller when this function returns

@@ -53,6 +53,7 @@ int main(int argc, char **argv)
 		req.number = num;
 
 		// this calls the service server to process our request message and put the result into the response message
+		// this call is blocking, i.e. this program will not proceed until the service server sends the response
 		bool success = ros::service::call("square_number", req, res);
 
 		if (success == true)

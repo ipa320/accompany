@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	// create an instance of the exemplary service server class
-	Example_service_server srv(n);
+	ExampleServiceServer srv(n);
 
 	// initialize the service server (for details see comments in class)
 	srv.init();

@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 
-#include "accompany_example_publish_subscribe/example_publisher.h"
+#include "accompany_example_action/example_action_client.h"
 
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	* You must call one of the versions of ros::init() before using any other
 	* part of the ROS system.
 	*/
-	ros::init(argc, argv, "publisher");
+	ros::init(argc, argv, "action_client");
 
 	/**
 	* NodeHandle is the main access point to communications with the ROS system.
@@ -26,14 +26,19 @@ int main(int argc, char **argv)
 	*/
 	ros::NodeHandle n;
 
-	// create an instance of the exemplary publisher class
-	ExamplePublisher pub(n);
+	ExampleActionClient client(n);
 
-	// initialize the publishers (for details see comments in class)
-	pub.init();
+	// only proceed if the action server is available
+	bool serverAvailable = client.init();
+	if (serverAvailable == false)
+	{
+		std::cout << "The connection to the action server could not be established.\n" << std::endl;
+		return -1;
+	}
+	std::cout << "The action server was found.\n" << std::endl;
 
-	// publish messages
-	pub.do_publish();
+	// start the interactive client
+	client.run();
 
 	return 0;
 }
