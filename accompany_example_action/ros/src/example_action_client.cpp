@@ -29,7 +29,7 @@ void ExampleActionClient::run()
 			return;
 		goal.number = num;
 
-		// this calls the action server to process our goal message and send result message which will cause the execution of the callback function
+		// this calls the action server to process our goal message and send result message which will cause the execution of the doneCb callback function
 		// this call is not blocking, i.e. this program can proceed immediately after the action call
 		action_client_square_.sendGoal(goal, boost::bind(&ExampleActionClient::doneCb, this, _1, _2), boost::bind(&ExampleActionClient::activeCb, this), boost::bind(&ExampleActionClient::feedbackCb, this, _1));
 	}
