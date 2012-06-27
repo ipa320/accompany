@@ -8,7 +8,7 @@ public:
 	void init();
 	void receiveCallback(const std_msgs::String::ConstPtr& msg);
 
-private:
+protected:
 
 	ros::NodeHandle node_;
 	ros::Subscriber string_subscriber_;

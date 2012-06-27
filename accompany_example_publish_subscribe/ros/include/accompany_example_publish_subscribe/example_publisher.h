@@ -8,7 +8,7 @@ public:
 	void init();
 	void do_publish();
 
-private:
+protected:
 
 	ros::NodeHandle node_;
 	ros::Publisher string_publisher_;
