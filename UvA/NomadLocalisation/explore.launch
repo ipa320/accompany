@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- Laser coordinate frame relative to base_link -->
+  <node pkg="tf" type="static_transform_publisher" name="laser_frame_broadcaster" args="0.11 0 0 0 0 0 base_link laser 100"/>
+
+  <!-- SLAM -->
+  <node name="gmapping" pkg="gmapping" type="slam_gmapping" >
+    <param name="scan" value="base_scan"/>
+  </node>
+
+  <!-- joystick -->
+  <node name="joy" pkg="joy" />
+  
+
+  <!-- FreedomJoystick -->
+  <node name="FreedomJoystick" pkg="FreedomJoystick" />
+
+  <!-- Nomad -->
+  <node name="Nomad" pkg="Nomad" type="Nomad" >
+    <param name="scan" value="base_scan"/>
+  </node>
+
+</launch>
