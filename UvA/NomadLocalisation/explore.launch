@@ -9,11 +9,11 @@
   </node>
 
   <!-- joystick -->
-  <node name="joy" pkg="joy" />
+  <node name="joy" pkg="joy" type="joy" />
   
 
   <!-- FreedomJoystick -->
-  <node name="FreedomJoystick" pkg="FreedomJoystick" />
+  <node name="FreedomJoystick" pkg="FreedomJoystick" type="FreedomJoystick" />
 
   <!-- Nomad -->
   <node name="Nomad" pkg="Nomad" type="Nomad" >
