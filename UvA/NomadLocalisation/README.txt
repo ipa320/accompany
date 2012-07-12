@@ -36,7 +36,7 @@ Optionally start the visualisation:
   rosrun rviz rviz -d ./rviz.vcg
 
 Drive the robot around in the environment using the joystick so that
-all walls are seen by the laser.
+all walls are detected by the laser.
 
 Save the resulting map:
 
@@ -62,4 +62,8 @@ Start the visualisation:
 Start the localisation:
 
   roslaunch localise.launch
+
+Optionally click "2D Pose Estimate" button in visualisation and
+click-drag the correct position of the robot on the map.
+
 

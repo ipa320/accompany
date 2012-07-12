@@ -3,10 +3,8 @@
   <!-- Laser coordinate frame relative to base_link -->
   <node pkg="tf" type="static_transform_publisher" name="laser_frame_broadcaster" args="0.11 0 0 0 0 0 /base_link /laser 100"/>
 
-  <!-- SLAM -->
-  <node name="gmapping" pkg="gmapping" type="slam_gmapping" >
-    <param name="scan" value="base_scan"/>
-  </node>
+  <!-- AMCL -->
+  <node pkg="amcl" type="amcl" name="acml"/>
 
   <!-- laser scanner-->
   <node name="hokuyo_node" pkg="hokuyo_node" type="hokuyo_node" />
