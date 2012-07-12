@@ -1,10 +1,14 @@
 
-
 # -------------------------
 # ---  Introduction
 # -------------------------
 
-This document describes how to localise the Nomad robot
+This document describes how to first build a map of the environment
+and then localise the Nomad robot based on the fixed coordinate system
+of the map.
+
+See 'NomadLocalisation.odg' for an overview of the data flow between
+the components involved.
 
 # -------------------------
 # ---  Dependencies
@@ -64,6 +68,7 @@ Start the localisation:
   roslaunch localise.launch
 
 Optionally click "2D Pose Estimate" button in visualisation and
-click-drag the correct position of the robot on the map.
+click-drag the correct position of the robot on the visualized map.
 
-
+Now when driving the robot around the transform from /map to
+/base_link gives the location of the robot within the map.
