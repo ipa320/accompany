@@ -8,13 +8,14 @@ int main(int argc,char **argv)
 
   // read files
 
-  // create publisher
+  // create publishers and subscribers
   ros::NodeHandle n;
-  ros::Publisher humanLocationsPub = n.advertise<HumanTracker::HumanLocations>("/humanLocations", 10);
+  ros::Publisher humanLocationsPub=n.advertise<HumanTracker::HumanLocations>("/humanLocations",10);
 
-  int test=0;
+  int position=0;
+  int direction=1;
 
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(2);
   while(ros::ok())
   {
     // read image from camera
@@ -24,15 +25,17 @@ int main(int argc,char **argv)
     // publish human locations
     HumanTracker::HumanLocations humanLocations;
     geometry_msgs::Vector3 v;
-    v.x=1+(test*0.1);
+    v.x=1+(position*0.1);
     v.y=2;
     v.z=0;
     humanLocations.locations.push_back(v);
     v.x=3;
-    v.y=3+(test*0.2);
+    v.y=3+(position*0.2);
     v.z=0;
     humanLocations.locations.push_back(v);
-    test=(test+1)%100;
+    position+=direction;
+    if (position>100 || position<0)
+      direction*=-1;
     humanLocationsPub.publish(humanLocations);
 
     // publish samples particles

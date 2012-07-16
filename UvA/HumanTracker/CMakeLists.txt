@@ -29,4 +29,5 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(Tracker src/Tracker.cpp)
+include_directories ("${PROJECT_SOURCE_DIR}/src")
+rosbuild_add_executable(Tracker src/Tracker.cpp src/MyTracker.cpp)
