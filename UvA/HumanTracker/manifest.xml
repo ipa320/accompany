@@ -1,0 +1,15 @@
+<package>
+  <description brief="HumanTracker">
+
+     HumanTracker
+
+  </description>
+  <author>Bas Terwijn</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/HumanTracker</url>
+  <depend package="roscpp"/>
+
+</package>
+
+
