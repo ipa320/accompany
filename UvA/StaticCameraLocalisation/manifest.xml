@@ -1,0 +1,15 @@
+<package>
+  <description brief="StaticCameraLocalisation">
+
+     StaticCameraLocalisation
+
+  </description>
+  <author>Bas Terwijn</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/StaticCameraLocalisation</url>
+  <depend package="roscpp"/>
+
+</package>
+
+
