@@ -26,7 +26,7 @@ void MyTracker::trackHumans(const HumanTracker::HumanLocations::ConstPtr& humanL
       double dy=humanLocations->locations[i].y-it->location.y;
       double dz=humanLocations->locations[i].z-it->location.z;
       double squaredDistance=dx*dx+dy*dy+dz*dz;
-      cout<<"squaredDistance:"<<squaredDistance<<endl;
+      //cout<<"squaredDistance: "<<squaredDistance<<endl;
       if (squaredDistance<bestDist)
       {
         bestDist=squaredDistance;
@@ -35,12 +35,12 @@ void MyTracker::trackHumans(const HumanTracker::HumanLocations::ConstPtr& humanL
     }
     if (bestDist<maxDist) // if match found assign to best
     {
-      cout<<"match found"<<endl;
+      //cout<<"match found"<<endl;
       assigned.insert(i);
       update(humanLocations,i,best);
     }
-    else
-      cout<<"no match found"<<endl;
+    //else
+    //cout<<"no match found"<<endl;
   }
 
   // if no match found create new track
@@ -56,10 +56,15 @@ void MyTracker::trackHumans(const HumanTracker::HumanLocations::ConstPtr& humanL
 HumanTracker::TrackedHumans MyTracker::getTrackedHumans()
 {
   removeOldTracks();
+  ros::Time now=ros::Time::now();
   HumanTracker::TrackedHumans trackedHumans;
   for (list<HumanTracker::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
   {
-    trackedHumans.trackedHumans.push_back(*it);
+    ros::Duration duration=now-(it->lastSeen);
+    if (duration.toSec()<0.5) // only add when seen recently
+    {
+      trackedHumans.trackedHumans.push_back(*it);
+    }
   }
   return trackedHumans;
 }
@@ -75,15 +80,15 @@ void MyTracker::removeOldTracks()
   for (list<HumanTracker::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();)
   {
     ros::Duration duration=now-(it->lastSeen);
-    cout<<"old: "<<duration.toSec()<<endl;
+    //cout<<"old: "<<duration.toSec()<<"  ";
     if (duration.toSec()>=2) // if 2 or more seconds old, remove
     {
-      cout<<"remove"<<endl;
+      //cout<<"remove"<<endl;
       it=trackedHumansList.erase(it);
     }
     else
     {
-      cout<<"keep"<<endl;
+      //cout<<"keep"<<endl;
       it++;
     }
   }

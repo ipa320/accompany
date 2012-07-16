@@ -14,12 +14,13 @@ MyTracker myTracker;
 
 void humanLocationsReceived(const HumanTracker::HumanLocations::ConstPtr& humanLocations)
 {
-  for (unsigned int i=0;i<humanLocations->locations.size();i++)
+  /*for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
     cout<<"humanLocations["<<i<<"].x="<<humanLocations->locations[i].x<<endl;
     cout<<"humanLocations["<<i<<"].y="<<humanLocations->locations[i].y<<endl;
     cout<<"humanLocations["<<i<<"].z="<<humanLocations->locations[i].z<<endl;
   }
+  */
   myTracker.trackHumans(humanLocations);
   trackedHumansPub.publish(myTracker.getTrackedHumans());
 }
