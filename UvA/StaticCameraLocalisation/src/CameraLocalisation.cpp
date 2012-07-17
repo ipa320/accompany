@@ -9,7 +9,7 @@
 
 int main(int argc,char **argv)
 {
-  ros::init(argc, argv, "Localisation");
+  ros::init(argc, argv, "CameraLocalisation");
 
   srand(time(0));// initialize random number generator
 

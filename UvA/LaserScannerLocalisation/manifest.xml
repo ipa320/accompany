@@ -11,6 +11,8 @@
   <depend package="roscpp"/>
   <depend package="sensor_msgs" />
   <depend package="tf"/>
+  <depend package="StaticCameraLocalisation"/>
+  <depend package="HumanTracker"/>
 
 </package>
 

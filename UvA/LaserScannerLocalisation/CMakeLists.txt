@@ -31,4 +31,4 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
 rosbuild_add_executable(BuildHumanModel src/BuildHumanModel.cpp)
-rosbuild_add_executable(Localisation src/Localisation.cpp)
+rosbuild_add_executable(LaserLocalisation src/LaserLocalisation.cpp)

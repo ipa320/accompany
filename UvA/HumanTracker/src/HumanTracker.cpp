@@ -27,7 +27,7 @@ void humanLocationsReceived(const HumanTracker::HumanLocations::ConstPtr& humanL
 
 int main(int argc,char **argv)
 {
-  ros::init(argc, argv, "Tracker");
+  ros::init(argc, argv, "HumanTracker");
 
   // create publisher and subscribers
   ros::NodeHandle n;
