@@ -21,7 +21,7 @@ int main(int argc,char **argv)
   po::options_description optionsDescription("Allowed options");
   optionsDescription.add_options()
     ("help", "produce help message")
-    ("particles,p","publish particles instead of human locations directly")
+    ("particles,p","publish particles and do not publish human locations directly")
     ("nrparticles,n", po::value<int>(&nrParticles)->default_value(10),"number of particles to sample (implies -p)")
     ;
   po::variables_map variablesMap;
