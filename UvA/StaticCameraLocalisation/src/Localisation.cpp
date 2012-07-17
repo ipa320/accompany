@@ -1,16 +1,24 @@
 
 #include <ros/ros.h>
 #include <HumanTracker/HumanLocations.h>
+#include <StaticCameraLocalisation/HumanLocationsParticle.h>
+#include <StaticCameraLocalisation/HumanLocationsParticles.h>
+
+#include <ctime>
+#include <cstdlib>
 
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "Localisation");
+
+  srand(time(0));// initialize random number generator
 
   // read files
 
   // create publishers and subscribers
   ros::NodeHandle n;
   ros::Publisher humanLocationsPub=n.advertise<HumanTracker::HumanLocations>("/humanLocations",10);
+  ros::Publisher humanLocationsParticlesPub=n.advertise<StaticCameraLocalisation::HumanLocationsParticles>("/humanLocationsParticles",10);
 
   // generate dummy data
   int max=100;
@@ -46,8 +54,24 @@ int main(int argc,char **argv)
     }
     humanLocationsPub.publish(humanLocations);
 
-    // publish samples particles
-    
+    // publish human locations particles
+    StaticCameraLocalisation::HumanLocationsParticles humanLocationsParticles;
+    int numberOfParticles=10;
+    for (int i=0;i<numberOfParticles;i++)
+    {
+      StaticCameraLocalisation::HumanLocationsParticle humanLocationsParticle;
+      int numberOfLocations=(rand()%humanLocations.locations.size())+1;
+      for (int l=0;l<numberOfLocations;l++)
+      {
+        int randomLoc=(rand()%humanLocations.locations.size());// random location index
+        geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
+        humanLocationsParticle.locations.push_back(v);// add location to particle
+      }
+      humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
+      humanLocationsParticles.particles.push_back(humanLocationsParticle);
+    }
+    humanLocationsParticlesPub.publish(humanLocationsParticles);
+
     ros::spinOnce();
     loop_rate.sleep();
   }
