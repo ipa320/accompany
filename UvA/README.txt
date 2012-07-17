@@ -46,7 +46,7 @@ and install with
 
   cd cmn
   mkdir build
-  cd buikd
+  cd build
   cmake ../src
   make
   sudo make install  
