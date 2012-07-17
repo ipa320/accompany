@@ -9,6 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/LaserScannerLocalisation</url>
   <depend package="roscpp"/>
+  <depend package="sensor_msgs" />
+  <depend package="tf"/>
 
 </package>
 

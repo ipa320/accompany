@@ -12,6 +12,7 @@ int main(int argc,char **argv)
   ros::NodeHandle n;
   ros::Publisher humanLocationsPub=n.advertise<HumanTracker::HumanLocations>("/humanLocations",10);
 
+  // generate dummy data
   int max=100;
   int count=0;
   int direction=1;
