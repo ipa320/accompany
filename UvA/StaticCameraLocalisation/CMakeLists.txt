@@ -30,7 +30,12 @@ rosbuild_genmsg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(CalibrationIntrinsic src/CalibrationIntrinsic.cpp)
+
 rosbuild_add_executable(CalibrationExtrinsic src/CalibrationExtrinsic.cpp)
+
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
+
 rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
+
 rosbuild_add_executable(CameraLocalisation src/CameraLocalisation.cpp)
+target_link_libraries(CameraLocalisation boost_program_options)

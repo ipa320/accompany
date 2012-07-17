@@ -6,12 +6,38 @@
 
 #include <ctime>
 #include <cstdlib>
+#include <iostream>
+using namespace std;
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 
 int main(int argc,char **argv)
 {
-  ros::init(argc, argv, "CameraLocalisation");
+  // options
+  bool particles=false;
+  int nrParticles;
+  // boost parameters parsing
+  po::options_description optionsDescription("Allowed options");
+  optionsDescription.add_options()
+    ("help", "produce help message")
+    ("particles,p","publish particles instead of human locations directly")
+    ("nrparticles,n", po::value<int>(&nrParticles)->default_value(10),"number of particles to sample (implies -p)")
+    ;
+  po::variables_map variablesMap;
+  po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+  po::notify(variablesMap);
+  
+  if (variablesMap.count("help"))
+  {
+    cout<<optionsDescription<<endl;
+    return 1;
+  }
+  if (variablesMap.count("particles") || variablesMap.count("nrparticles"))
+    particles=true;
 
-  srand(time(0));// initialize random number generator
+  // init ros
+  ros::init(argc, argv, "CameraLocalisation");
 
   // read files
 
@@ -24,6 +50,8 @@ int main(int argc,char **argv)
   int max=100;
   int count=0;
   int direction=1;
+
+  srand(time(0));// initialize random number generator
 
   ros::Rate loop_rate(2);
   while(ros::ok())
@@ -52,25 +80,28 @@ int main(int argc,char **argv)
       count=0;
       direction*=-1;
     }
+    if (!particles)
     humanLocationsPub.publish(humanLocations);
 
     // publish human locations particles
-    StaticCameraLocalisation::HumanLocationsParticles humanLocationsParticles;
-    int numberOfParticles=10;
-    for (int i=0;i<numberOfParticles;i++)
+    if (particles)
     {
-      StaticCameraLocalisation::HumanLocationsParticle humanLocationsParticle;
-      int numberOfLocations=(rand()%humanLocations.locations.size())+1;
-      for (int l=0;l<numberOfLocations;l++)
+      StaticCameraLocalisation::HumanLocationsParticles humanLocationsParticles;
+      for (int i=0;i<nrParticles;i++)
       {
-        int randomLoc=(rand()%humanLocations.locations.size());// random location index
-        geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
-        humanLocationsParticle.locations.push_back(v);// add location to particle
+        StaticCameraLocalisation::HumanLocationsParticle humanLocationsParticle;
+        int numberOfLocations=(rand()%humanLocations.locations.size())+1;
+        for (int l=0;l<numberOfLocations;l++)
+        {
+          int randomLoc=(rand()%humanLocations.locations.size());// random location index
+          geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
+          humanLocationsParticle.locations.push_back(v);// add location to particle
+        }
+        humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
+        humanLocationsParticles.particles.push_back(humanLocationsParticle);
       }
-      humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
-      humanLocationsParticles.particles.push_back(humanLocationsParticle);
+      humanLocationsParticlesPub.publish(humanLocationsParticles);
     }
-    humanLocationsParticlesPub.publish(humanLocationsParticles);
 
     ros::spinOnce();
     loop_rate.sleep();
