@@ -38,18 +38,24 @@ and install using:
   make
   sudo make install
 
+Clone cmn with (non-public, this requires ssh access to server!!)
 
-# -------------------------
-# ---  LikelihoodFromFisheyeCamera
-# -------------------------
+  git clone ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn 
 
-Compile cmn
+and install with
 
-  cd $ACCOMPANY_PATH/UvA/LikelihoodFromFisheyeCamera/cmn
+  cd cmn
   mkdir build
-  cd build
-  cmake ../src -DHAS_VXL=ON -DVXL_BASE_DIR=/usr/local/include/vxl
+  cd buikd
+  cmake ../src
   make
+  sudo make install  
+
+
+
+# -------------------------
+# ---  other stuff ...............
+# -------------------------
 
 Compile bnaic
 
