@@ -22,7 +22,7 @@ INCLUDE_DIRECTORIES(${OPENCV_INCLUDE_DIR})
 LINK_DIRECTORIES(${OPENCV_LIB_DIR})
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
@@ -35,9 +35,13 @@ LINK_DIRECTORIES(${OPENCV_LIB_DIR})
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(CalibrationIntrinsic src/CalibrationIntrinsic.cpp)
-TARGET_LINK_LIBRARIES(CalibrationIntrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d)
+TARGET_LINK_LIBRARIES(CalibrationIntrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d boost_program_options)
 
 rosbuild_add_executable(CalibrationExtrinsic src/CalibrationExtrinsic.cpp)
+
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
+
 rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
-rosbuild_add_executable(Localisation src/Localisation.cpp)
+
+rosbuild_add_executable(CameraLocalisation src/CameraLocalisation.cpp)
+target_link_libraries(CameraLocalisation boost_program_options)
