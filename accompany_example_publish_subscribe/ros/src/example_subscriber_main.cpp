@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 	ros::NodeHandle n;
 
 	// create an instance of the exemplary subscriber class
-	Example_subscriber sub(n);
+	ExampleSubscriber sub(n);
 
 	// initialize the subscribers (for details see comments in class)
 	sub.init();

@@ -1,0 +1,11 @@
+# Squares the input number and returns the result
+#
+# goal message = the request
+float64 number		# the number which shall be squared, see www.ros.org for other data types available
+---
+# result message
+float64 numberSquared	# the square of number
+---
+# feedback message
+# here you might define some intermediate feedback message that reports about the current status of computation -> useful if the handling of the request might take several seconds or longer
+float32 percentageDone	# this is just a number telling how far the action accomplished the task (in the program the computations are delayed to show the effect)

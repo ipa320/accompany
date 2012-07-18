@@ -1,0 +1,16 @@
+<package>
+  <description brief="accompany_example_service">
+
+     accompany_example_service is an example package that implements a service providing component, i.e. a component that may be called to deliver some requested response, and a service calling component which initiates the service at the server side.
+
+  </description>
+  <author>Richard Bormann</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_example_service</url>
+
+  <depend package="roscpp"/>
+
+</package>
+
+

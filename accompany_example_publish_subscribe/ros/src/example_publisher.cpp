@@ -2,13 +2,13 @@
 
 #include <sstream>
 
-Example_publisher::Example_publisher(ros::NodeHandle nh)
+ExamplePublisher::ExamplePublisher(ros::NodeHandle nh)
 {
 	node_ = nh;
 }
 
 
-void Example_publisher::init()
+void ExamplePublisher::init()
 {
 	/**
 	* The advertise() function is how you tell ROS that you want to
@@ -35,7 +35,7 @@ void Example_publisher::init()
 }
 
 
-void Example_publisher::do_publish()
+void ExamplePublisher::do_publish()
 {
 	// publishing rate
 	ros::Rate loop_rate(10);

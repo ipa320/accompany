@@ -2,13 +2,13 @@
 
 #include <sstream>
 
-Example_subscriber::Example_subscriber(ros::NodeHandle nh)
+ExampleSubscriber::ExampleSubscriber(ros::NodeHandle nh)
 {
 	node_ = nh;
 }
 
 
-void Example_subscriber::init()
+void ExampleSubscriber::init()
 {
 	/**
 	* The subscribe() call is how you tell ROS that you want to receive messages
@@ -25,11 +25,11 @@ void Example_subscriber::init()
 	* is the number of messages that will be buffered up before beginning to throw
 	* away the oldest ones.
 	*/
-	string_subscriber_ = node_.subscribe("example_publisher", 10, &Example_subscriber::receiveCallback, this);
+	string_subscriber_ = node_.subscribe("example_publisher", 10, &ExampleSubscriber::receiveCallback, this);
 }
 
 
-void Example_subscriber::receiveCallback(const std_msgs::String::ConstPtr& msg)
+void ExampleSubscriber::receiveCallback(const std_msgs::String::ConstPtr& msg)
 {
 	ROS_INFO("I heard: [%s]", msg->data.c_str());
 }

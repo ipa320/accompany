@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 
-#include "accompany_example_publish_subscribe/example_publisher.h"
+#include "accompany_example_service/example_service_server.h"
 
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 	* You must call one of the versions of ros::init() before using any other
 	* part of the ROS system.
 	*/
-	ros::init(argc, argv, "publisher");
+	ros::init(argc, argv, "service_server");
 
 	/**
 	* NodeHandle is the main access point to communications with the ROS system.
@@ -26,14 +26,18 @@ int main(int argc, char **argv)
 	*/
 	ros::NodeHandle n;
 
-	// create an instance of the exemplary publisher class
-	ExamplePublisher pub(n);
+	// create an instance of the exemplary service server class
+	ExampleServiceServer srv(n);
 
-	// initialize the publishers (for details see comments in class)
-	pub.init();
+	// initialize the service server (for details see comments in class)
+	srv.init();
 
-	// publish messages
-	pub.do_publish();
+	/**
+	* ros::spin() will enter a loop, pumping callbacks.  With this version, all
+	* callbacks will be called from within this thread (the main one).  ros::spin()
+	* will exit when Ctrl-C is pressed, or the node is shutdown by the master.
+	*/
+	ros::spin();
 
 	return 0;
 }
