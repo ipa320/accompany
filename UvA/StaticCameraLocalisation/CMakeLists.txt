@@ -16,6 +16,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+SET( OPENCV_INCLUDE_DIR /usr/local/include)
+SET( OPENCV_LIB_DIR /usr/local/lib)
+INCLUDE_DIRECTORIES(${OPENCV_INCLUDE_DIR})
+LINK_DIRECTORIES(${OPENCV_LIB_DIR})
+
 #uncomment if you have defined messages
 #rosbuild_genmsg()
 #uncomment if you have defined services
@@ -30,6 +35,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(CalibrationIntrinsic src/CalibrationIntrinsic.cpp)
+TARGET_LINK_LIBRARIES(CalibrationIntrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d)
+
 rosbuild_add_executable(CalibrationExtrinsic src/CalibrationExtrinsic.cpp)
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
 rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
