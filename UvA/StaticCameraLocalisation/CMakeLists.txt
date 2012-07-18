@@ -34,6 +34,7 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+# rosbuild
 rosbuild_add_executable(CalibrationIntrinsic src/CalibrationIntrinsic.cpp)
 TARGET_LINK_LIBRARIES(CalibrationIntrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d boost_program_options)
 
