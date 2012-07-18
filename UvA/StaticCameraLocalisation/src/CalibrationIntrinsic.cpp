@@ -238,7 +238,7 @@ int main( int argc, char** argv )
     // handling arguments
     po::options_description optionsDescription("Allowed options");
     optionsDescription.add_options()
-        ("help", "produce help message")
+        ("help,h", "produce help message\n")
         ("height,h", po::value<int>(&height),"the number of inner corners per one of board dimension\n")
         ("width,w", po::value<int>(&width),"the number of inner corners per another board dimension\n")
         ("output,o", po::value<string>(&outputFilename),"the output filename for intrinsic parameter\n")
@@ -250,7 +250,7 @@ int main( int argc, char** argv )
     po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
     po::notify(variablesMap);
 
-    if (variablesMap.count("help"))
+    if (variablesMap.count("help") || argc < 2)
     {
         cout<<optionsDescription<<endl;
         return 1;
