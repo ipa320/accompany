@@ -238,7 +238,7 @@ int main( int argc, char** argv )
     // handling arguments
     po::options_description optionsDescription("Allowed options");
     optionsDescription.add_options()
-        ("help,h", "produce help message\n")
+        ("help", "produce help message\n")
         ("height,h", po::value<int>(&height),"the number of inner corners per one of board dimension\n")
         ("width,w", po::value<int>(&width),"the number of inner corners per another board dimension\n")
         ("output,o", po::value<string>(&outputFilename),"the output filename for intrinsic parameter\n")
@@ -250,16 +250,28 @@ int main( int argc, char** argv )
     po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
     po::notify(variablesMap);
 
-    if (variablesMap.count("help") || argc < 2)
+    try
     {
-        cout<<optionsDescription<<endl;
+        po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+        po::notify(variablesMap);
+    }
+    catch( const std::exception& e)
+    {
+        std::cout << "--------------------" << std::endl;
+        std::cerr << "- "<<e.what() << std::endl;
+        std::cout << "--------------------" << std::endl;
+        std::cout <<  optionsDescription << std::endl;
+        return 1;
+    }
+
+    if (variablesMap.count("help"))
+    {
+        cout << optionsDescription << endl;
         return 1;
     }
 
     boardSize.width = width;
     boardSize.height = height;
-
-    cout << inputFilename << endl;
 
     float squareSize = 1.f, aspectRatio = 1.f;
     Mat cameraMatrix, distCoeffs;

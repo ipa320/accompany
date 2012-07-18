@@ -72,10 +72,22 @@ int main( int argc, char** argv )
         ;
         
     po::variables_map variablesMap;
-    po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
-    po::notify(variablesMap);
     
-    if (variablesMap.count("help") || argc < 2)
+    try
+    {
+        po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+        po::notify(variablesMap);
+    }
+    catch( const std::exception& e)
+    {
+        std::cout << "--------------------" << std::endl;
+        std::cerr << "- "<<e.what() << std::endl;
+        std::cout << "--------------------" << std::endl;
+        std::cout <<  optionsDescription << std::endl;
+        return 1;
+    }
+    
+    if (variablesMap.count("help"))
     {
         cout<<optionsDescription<<endl;
         return 1;
