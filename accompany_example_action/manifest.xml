@@ -1,0 +1,18 @@
+<package>
+  <description brief="accompany_example_action">
+
+     accompany_example_action is an example package that implements an action providing component, i.e. a component that may be called to deliver some requested response, and an action calling component which initiates the action at the server side. Actions are very similar to services but actions may not interrupt your program until you receive the response.
+
+  </description>
+  <author>Richard Bormann</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_example_action</url>
+
+  <depend package="roscpp"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+
+</package>
+
+
