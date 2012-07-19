@@ -16,9 +16,32 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
+INCLUDE(FindPkgConfig)
+pkg_check_modules(XML2 REQUIRED libxml-2.0)
+SET( CMAKE_CXX_FLAGS ${XML2_CFLAGS})
+SET(HOME "/home/ninghang")
+SET( VXL_BASE_DIR /usr/include/vxl CACHE PATH "Location of the VXL library source code")
+SET( CMN_SRC_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn/src CACHE PATH "Location of the CMN library source code")
+SET( CMN_LIB_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn_build CACHE PATH "Location of the CMN compiled library")
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_DIR}/core ${VXL_BASE_DIR} ${VXL_BASE_DIR}/vcl ${CMN_SRC_DIR})
+LINK_DIRECTORIES(${VXL_BASE_DIR}/lib ${CMN_LIB_DIR})
+
+ADD_LIBRARY( helpers
+  ${PROJECT_SOURCE_DIR}/src/Helpers.cc
+  ${PROJECT_SOURCE_DIR}/src/Background.cc
+  ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
+  ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
+  )
+
+ADD_LIBRARY( calib
+  ${PROJECT_SOURCE_DIR}/src/hu/cameraModel.cpp
+  ${PROJECT_SOURCE_DIR}/src/hu/xmlUtil.cpp
+  )
+
 SET( OPENCV_INCLUDE_DIR /usr/local/include)
 SET( OPENCV_LIB_DIR /usr/local/lib)
 INCLUDE_DIRECTORIES(${OPENCV_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 LINK_DIRECTORIES(${OPENCV_LIB_DIR})
 
 #uncomment if you have defined messages
@@ -44,6 +67,7 @@ TARGET_LINK_LIBRARIES(CalibrationExtrinsic opencv_core opencv_calib3d opencv_img
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
 
 rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
+TARGET_LINK_LIBRARIES( CreatePrior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
 rosbuild_add_executable(CameraLocalisation src/CameraLocalisation.cpp)
 target_link_libraries(CameraLocalisation boost_program_options)

@@ -64,11 +64,10 @@ int main( int argc, char** argv )
     // handling arguments
     po::options_description optionsDescription("Allowed options\n");
     optionsDescription.add_options()
-        ("help,h", "produce help message\n")
-        ("intrinsicFile,i", po::value<string>(&intrinsicFile),"the input filename for intrinsic parameter\n")
-        ("extrinsicFile,o", po::value<string>(&extrinsicFile),"the output filename for extrinsic parameter\n")
-        ("point2d,p", po::value<string>(&points2dFile),"the annotated 2D points on the image space\n")
-        ("point3d,q", po::value<string>(&points3dFile),"the corresponding 3D coordinates in the world frame\n")
+        ("intrinsicFile,i", po::value<string>(&intrinsicFile)->required(),"the input filename for intrinsic parameter\n")
+        ("extrinsicFile,o", po::value<string>(&extrinsicFile)->required(),"the output filename for extrinsic parameter\n")
+        ("point2d,p", po::value<string>(&points2dFile)->required(),"the annotated 2D points on the image space\n")
+        ("point3d,q", po::value<string>(&points3dFile)->required(),"the corresponding 3D coordinates in the world frame\n")
         ;
         
     po::variables_map variablesMap;
@@ -84,12 +83,6 @@ int main( int argc, char** argv )
         std::cerr << "- "<<e.what() << std::endl;
         std::cout << "--------------------" << std::endl;
         std::cout <<  optionsDescription << std::endl;
-        return 1;
-    }
-    
-    if (variablesMap.count("help"))
-    {
-        cout<<optionsDescription<<endl;
         return 1;
     }
 

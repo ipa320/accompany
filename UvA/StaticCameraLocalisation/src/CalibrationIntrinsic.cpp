@@ -238,11 +238,10 @@ int main( int argc, char** argv )
     // handling arguments
     po::options_description optionsDescription("Allowed options");
     optionsDescription.add_options()
-        ("help", "produce help message\n")
-        ("height,h", po::value<int>(&height),"the number of inner corners per one of board dimension\n")
-        ("width,w", po::value<int>(&width),"the number of inner corners per another board dimension\n")
-        ("output,o", po::value<string>(&outputFilename),"the output filename for intrinsic parameter\n")
-        ("input,i", po::value<string>(&inputFilename),"the text file with a list of the images of the board\n")
+        ("height,h", po::value<int>(&height)->required(),"the number of inner corners per one of board dimension\n")
+        ("width,w", po::value<int>(&width)->required(),"the number of inner corners per another board dimension\n")
+        ("output,o", po::value<string>(&outputFilename)->required(),"the output filename for intrinsic parameter\n")
+        ("input,i", po::value<string>(&inputFilename)->required(),"the text file with a list of the images of the board\n")
         ("undist,u", po::value<bool>(&undistortImage)->default_value(false),"show undistorted images after calibration\n")
         ;
 
@@ -261,12 +260,6 @@ int main( int argc, char** argv )
         std::cerr << "- "<<e.what() << std::endl;
         std::cout << "--------------------" << std::endl;
         std::cout <<  optionsDescription << std::endl;
-        return 1;
-    }
-
-    if (variablesMap.count("help"))
-    {
-        cout << optionsDescription << endl;
         return 1;
     }
 
