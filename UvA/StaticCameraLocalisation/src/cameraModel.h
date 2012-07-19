@@ -10,7 +10,7 @@
 #ifndef _CAMERA_MODEL_OBJECT_H_
 #define _CAMERA_MODEL_OBJECT_H_
 
-#include "hu/xmlUtil.h"
+#include "xmlUtil.h"
 
 #include "opencv2/opencv.hpp"
 #include "string"

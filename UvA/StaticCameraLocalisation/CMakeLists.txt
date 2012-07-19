@@ -34,8 +34,8 @@ ADD_LIBRARY( helpers
   )
 
 ADD_LIBRARY( calib
-  ${PROJECT_SOURCE_DIR}/src/hu/cameraModel.cpp
-  ${PROJECT_SOURCE_DIR}/src/hu/xmlUtil.cpp
+  ${PROJECT_SOURCE_DIR}/src/cameraModel.cpp
+  ${PROJECT_SOURCE_DIR}/src/xmlUtil.cpp
   )
 
 SET( OPENCV_INCLUDE_DIR /usr/local/include)
@@ -65,6 +65,7 @@ rosbuild_add_executable(CalibrationExtrinsic src/CalibrationExtrinsic.cpp)
 TARGET_LINK_LIBRARIES(CalibrationExtrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui boost_program_options)
 
 rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
+TARGET_LINK_LIBRARIES(BuildBackgroundModel helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
 rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
 TARGET_LINK_LIBRARIES( CreatePrior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})

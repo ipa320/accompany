@@ -1,7 +1,7 @@
 #ifndef CAM_CALIB_HH
 #define CAM_CALIB_HH
 
-#include <hu/cameraModel.h>
+#include <cameraModel.h>
 #include <data/XmlPackable.hh>
 #include <math.h>
 #include <vector>

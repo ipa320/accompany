@@ -16,7 +16,7 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/xmlreader.h>
 
-#include <hu/cameraModel.h>
+#include <cameraModel.h>
 
 using namespace std;
 using namespace Hu;
