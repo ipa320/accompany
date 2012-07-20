@@ -297,8 +297,8 @@ void scanRest(vector<unsigned> &existing,
           // marginal.push_back(marginalLogProb);
           marginal.push_back(bestLogProb);
 
-          if (existing.size() > 2)// TODO knowing the number of persons in the scene
-              return;
+//          if (existing.size() > 2)// TODO knowing the number of persons in the scene
+//              return;
           
           scanRest(existing, existingMask, logSumPixelFGProb, logSumPixelBGProb,
                    logNumPrior, /*logLocPrior, */logPosProb, marginal, lSum);
@@ -407,7 +407,7 @@ void updateTracks(unsigned imgNum, const vector<unsigned> &positions)
      }
 }
 
-void findPerson(unsigned imgNum,
+HumanTracker::HumanLocations findPerson(unsigned imgNum,
                 vector<IplImage *>src,
                 const vector< vnl_vector<FLOAT> > &imgVec,
                 vector< vnl_vector<FLOAT> > &bgVec,
@@ -453,11 +453,19 @@ void findPerson(unsigned imgNum,
 ////////     f1.close();
 
      
+     // REPORTING LOCATIONS
      cout << "locations found are" << endl;
+     HumanTracker::HumanLocations humanLocations;
+     geometry_msgs::Vector3 v;
      for (unsigned i=0; i!=existing.size(); ++i)
      {
 //          cout << existing[i] << endl;
+          WorldPoint wp = scanLocations[existing[i]];
           cout << " " << scanLocations[existing[i]];
+          v.x=wp.x;
+          v.y=wp.y;
+          v.z=0;
+          humanLocations.locations.push_back(v);
      }
      cout << endl << "===========" << endl;
      
@@ -552,6 +560,8 @@ void findPerson(unsigned imgNum,
           // cout << key << endl;
           break;
      }
+     
+     return humanLocations;
 }
 
 void initStaticProbs() {
@@ -671,62 +681,24 @@ int main(int argc,char **argv)
      vector<FLOAT>
           sum(cam.size());
           
-          
-     while (true)
-     {
-       for (unsigned c=0; c!=cam.size(); ++c)
-       {
-	     cvCvtColor(src[c],cvt[c],TO_INT_FMT);
-
-	     img2vec(cvt[c],img[c]);
-	     bgModel[c].getBackground(img[c],bg[c]);
-
-	     if (PRODUCER_BUILDS_BACKGROUND)
-	       cam[c].computeBGProbDiff(img[c], bg[c], sumPixel[c],sum[c]);
-
-       }
-       findPerson(cnt++, src, img, bg,
-		  sum,logSumPixelFGProb, sumPixel);
-
-
-        // get new image //TODO
-        // release image here // TODO
-        IplImage* testImage = loadImage("/home/ninghang/workspace/frames/wcam_20120112_vid4/0900.jpg");
-        vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
-        image[0] = testImage;
-         src=image;
-         
-         for (unsigned c=0; c!=cam.size(); ++c) {
-             if (!src[c]) 
-             {
-                cout << "camera " << c << "is empty, exit" << endl;
-                exit(0);
-             }
-         }
-     }
      
   ros::Rate loop_rate(2);
   while(ros::ok())
   {
-    // read image from camera
-
-    // process image
-
-    // publish human locations
     HumanTracker::HumanLocations humanLocations;
-    geometry_msgs::Vector3 v;
-    v.x=10+((direction<0)*max+count*direction)*0.1;
-    v.y=1;
-    v.z=0;
-    humanLocations.locations.push_back(v);
-    v.x=3;
-    v.y=10+((direction<0)*max+count*direction)*0.2;
-    v.z=0;
-    humanLocations.locations.push_back(v);
-    v.x=5+count*0.15;
-    v.y=5+count*0.15;
-    v.z=0;
-    humanLocations.locations.push_back(v);
+  
+    for (unsigned c=0; c!=cam.size(); ++c)
+    {
+        cvCvtColor(src[c],cvt[c],TO_INT_FMT);
+
+        img2vec(cvt[c],img[c]);
+        bgModel[c].getBackground(img[c],bg[c]);
+
+        if (PRODUCER_BUILDS_BACKGROUND)
+            cam[c].computeBGProbDiff(img[c], bg[c], sumPixel[c],sum[c]);
+    }
+    humanLocations = findPerson(cnt++, src, img, bg, sum, logSumPixelFGProb, sumPixel);
+    
     if (++count>=max)
     {
       count=0;
@@ -753,6 +725,21 @@ int main(int argc,char **argv)
         humanLocationsParticles.particles.push_back(humanLocationsParticle);
       }
       humanLocationsParticlesPub.publish(humanLocationsParticles);
+    }
+    
+    // get new image //TODO
+    // release image here // TODO
+    IplImage* testImage = loadImage("/home/ninghang/workspace/frames/wcam_20120112_vid4/0900.jpg");
+    vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
+    image[0] = testImage;
+    src=image;
+
+    for (unsigned c=0; c!=cam.size(); ++c) {
+        if (!src[c]) 
+        {
+            cout << "camera " << c << "is empty, exit" << endl;
+            exit(0);
+        }
     }
 
     ros::spinOnce();
