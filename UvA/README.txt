@@ -120,16 +120,12 @@ Compile bnaic
   
     rostopic echo /humanLocations
 
-  
+= TODO
 
-
-
-    
-
-     
-
-  
-
-
-
-
+ - Build a tracker
+ 
+ - Adaptive background model
+ 
+ - Multiple camera tracking
+ 
+ - Final testing on frame stream
