@@ -104,5 +104,8 @@ int main( int argc, char** argv )
 	cv::FileStorage fs_extrinsic(extrinsicFile, cv::FileStorage::WRITE);
 	fs_extrinsic << "rvec" << rvec;
 	fs_extrinsic << "tvec" << tvec;
+	
+	cout << endl;
+	cout << "extrinsic parameters saved to " << extrinsicFile << endl;
 }
 

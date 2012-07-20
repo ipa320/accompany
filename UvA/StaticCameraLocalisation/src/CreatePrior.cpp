@@ -220,7 +220,8 @@ int main(int argc, char **argv) {
                 << " " << priorHull[i].z << endl;
     }
     outfile.close();
-     
+    cout << endl;
+    cout << "prior saved to " << outputPrior_file << endl; 
      for (unsigned i=0; i!=img.size(); ++i) 
           cvReleaseImage(&img[i]);
      return 0;

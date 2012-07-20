@@ -72,3 +72,6 @@ TARGET_LINK_LIBRARIES( CreatePrior helpers calib opencv_calib3d opencv_highgui o
 
 rosbuild_add_executable(CameraLocalisation src/CameraLocalisation.cpp)
 target_link_libraries(CameraLocalisation helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+
+rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
+target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc boost_program_options)

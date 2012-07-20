@@ -166,6 +166,8 @@ void saveCameraParams( const string& filename,
         }
         cvWriteComment( *fs, "a set of 6-tuples (rotation vector + translation vector) for each view", 0 );
         fs << "extrinsic_parameters" << bigmat;
+        cout << endl;
+        cout << "intrinsic parameters saved to " << filename << endl;
     }
 
     if( !imagePoints.empty() )
@@ -233,33 +235,31 @@ int main( int argc, char** argv )
     Size boardSize, imageSize;
 
     bool undistortImage = false;
+    unsigned int display;
     string outputFilename, inputFilename;
 
     // handling arguments
-    po::options_description optionsDescription("Allowed options");
+    po::options_description optionsDescription("Allowed options\n");
     optionsDescription.add_options()
         ("height,h", po::value<int>(&height)->required(),"the number of inner corners per one of board dimension\n")
         ("width,w", po::value<int>(&width)->required(),"the number of inner corners per another board dimension\n")
         ("output,o", po::value<string>(&outputFilename)->required(),"the output filename for intrinsic parameter\n")
         ("input,i", po::value<string>(&inputFilename)->required(),"the text file with a list of the images of the board\n")
         ("undist,u", po::value<bool>(&undistortImage)->default_value(false),"show undistorted images after calibration\n")
+        ("display,d", po::value<unsigned int>(&display)->default_value(0),"display time of calibrated chessboard patterns (in mini-seconds), default 0 means no display\n")
         ;
-
-    po::variables_map variablesMap;
-    po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
-    po::notify(variablesMap);
-
     try
     {
+        po::variables_map variablesMap;
         po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
         po::notify(variablesMap);
     }
     catch( const std::exception& e)
     {
         std::cout << "--------------------" << std::endl;
-        std::cerr << "- "<<e.what() << std::endl;
+        std::cout <<  optionsDescription << std::endl;        
         std::cout << "--------------------" << std::endl;
-        std::cout <<  optionsDescription << std::endl;
+        std::cerr << "- "<<e.what() << std::endl;
         return 1;
     }
 
@@ -343,7 +343,8 @@ int main( int argc, char** argv )
 
         imshow("Image View", view);
 
-        waitKey(50);
+        if (display > 0)
+            waitKey(display);
 
         if( mode == CAPTURING && imagePoints.size() >= (unsigned)nframes )
         {
@@ -372,7 +373,8 @@ int main( int argc, char** argv )
             undistort( view, rview, cameraMatrix, distCoeffs, cameraMatrix );
 //            remap(view, rview, map1, map2, INTER_LINEAR);
             imshow("Image View", rview);
-            waitKey();
+            if (display > 0)
+                waitKey(display);
         }
     }
 
