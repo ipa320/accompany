@@ -631,17 +631,17 @@ int main(int argc,char **argv)
 
 
 
-     if (argc != 5) {
-          cout << "Usage: threadtest <input stream> <bg train|model> <calib> <prior>" << endl;
+     if (argc != 4) {
+          cout << "Usage: threadtest <bg train|model> <calib> <prior>" << endl;
           return 1;
      }
 
      unsigned CAM_NUM = 1;
 
      // INITIALIZATION
-     getBackground(argv[2], bgModel);
-     loadCalibrations(argv[3]);
-     loadWorldPriorHull(argv[4], priorHull);
+     getBackground(argv[1], bgModel);
+     loadCalibrations(argv[2]);
+     loadWorldPriorHull(argv[3], priorHull);
      assert_eq(bgModel.size(), CAM_NUM);
      assert_eq(cam.size(), bgModel.size());
      genScanLocations(priorHull,scanres, scanLocations);
