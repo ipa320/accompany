@@ -618,6 +618,9 @@ int main(int argc,char **argv)
 
   srand(time(0));// initialize random number generator
 
+
+
+
      if (argc != 5) {
           cout << "Usage: threadtest <input stream> <bg train|model> <calib> <prior>" << endl;
           return 1;
@@ -701,7 +704,13 @@ int main(int argc,char **argv)
              }
          }
      }
+     
+  ros::Rate loop_rate(2);
+  while(ros::ok())
+  {
+    // read image from camera
 
+    // process image
 
     // publish human locations
     HumanTracker::HumanLocations humanLocations;
@@ -747,7 +756,8 @@ int main(int argc,char **argv)
     }
 
     ros::spinOnce();
-//    loop_rate.sleep();
+    loop_rate.sleep();
+  }
 
   return 0;
 }
