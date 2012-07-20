@@ -64,3 +64,34 @@ Compile bnaic
   cd build
   cmake ../src -DVXL_BASE_DIR=/usr/local/include/vxl -DCMN_SRC_DIR=../../cmn/src -DCMN_LIB_DIR=../../cmn/build -DOPENCV_DIR=/usr/include/opencv-2.3.1/
   make
+  
+# --------------------------------------
+# --- Package StaticCameraLocalisation
+# --------------------------------------
+
+Nodes Dependency
+  
+  - CameraLocalisation [main function to localize persons]
+     |
+     - CalibrationIntrinsic [calibrate intrinsic parameters of overhead camera]
+     |
+     - CalibrationExtrinsic [calibrate extrinsic parameters of overhead camera]
+     |
+     - CreatePrior [select a region on the groundplane]
+     |
+     - BuildBackgroundModel [build background model with PCA]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
