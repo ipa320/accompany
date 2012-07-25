@@ -24,6 +24,41 @@ SET( VXL_BASE_DIR /usr/include/vxl CACHE PATH "Location of the VXL library sourc
 SET( CMN_SRC_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn/src CACHE PATH "Location of the CMN library source code")
 SET( CMN_LIB_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn_build CACHE PATH "Location of the CMN compiled library")
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_DIR}/core ${VXL_BASE_DIR} ${VXL_BASE_DIR}/vcl ${CMN_SRC_DIR})
+
+# now search for required headers in usual places instead of relying on set paths above
+
+# check cmn headers
+find_path(CMN_INCLUDE_DIR cmn/random.hh
+  HINTS  /usr/include/cmn /usr/local/include/cmn ${CMN_SRC_DIR}
+  PATH_SUFFIXES cmn) 
+if (NOT CMN_INCLUDE_DIR)
+  message(FATAL_ERROR "Could not find 'cmn/random.hh', please install cmn from ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn.git or set CMN_SRC_DIR")
+else (NOT CMN_INCLUDE_DIR)
+  include_directories(${CMN_INCLUDE_DIR})
+endif (NOT CMN_INCLUDE_DIR)
+
+# check vxl headers
+find_path(VNL_INCLUDE_DIR vnl/vnl_vector.h
+  HINTS  /usr/include/vxl/core /usr/local/include/vxl/core ${VXL_BASE_DIR}/core
+  PATH_SUFFIXES vnl) 
+if (NOT VNL_INCLUDE_DIR)
+  message(FATAL_ERROR "Could not find 'vnl/vnl_vector.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
+else (NOT VNL_INCLUDE_DIR)
+  include_directories(${VNL_INCLUDE_DIR})
+endif (NOT VNL_INCLUDE_DIR)
+
+# check vcl headers
+find_path(VCL_INCLUDE_DIR vcl/vcl_iosfwd.h
+  HINTS  /usr/include/vxl /usr/local/include/vxl ${VXL_BASE_DIR}
+  PATH_SUFFIXES vcl) 
+if (NOT VCL_INCLUDE_DIR)
+  message(FATAL_ERROR "Could not find 'vcl/vcl_iosfwd.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
+else (NOT VCL_INCLUDE_DIR)
+  include_directories(${VCL_INCLUDE_DIR} ${VCL_INCLUDE_DIR}/vcl)
+endif (NOT VCL_INCLUDE_DIR)
+
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_DIR}/core ${VXL_BASE_DIR} ${VXL_BASE_DIR}/vcl )
 LINK_DIRECTORIES(${VXL_BASE_DIR}/lib ${CMN_LIB_DIR})
 
 ADD_LIBRARY( helpers

@@ -407,7 +407,7 @@ void updateTracks(unsigned imgNum, const vector<unsigned> &positions)
      }
 }
 
-HumanTracker::HumanLocations findPerson(unsigned imgNum,
+accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
                 vector<IplImage *>src,
                 const vector< vnl_vector<FLOAT> > &imgVec,
                 vector< vnl_vector<FLOAT> > &bgVec,
@@ -455,7 +455,7 @@ HumanTracker::HumanLocations findPerson(unsigned imgNum,
      
      // REPORTING LOCATIONS
      cout << "locations found are" << endl;
-     HumanTracker::HumanLocations humanLocations;
+     accompany_human_tracker::HumanLocations humanLocations;
      geometry_msgs::Vector3 v;
      for (unsigned i=0; i!=existing.size(); ++i)
      {
@@ -685,7 +685,7 @@ int main(int argc,char **argv)
   ros::Rate loop_rate(2);
   while(ros::ok())
   {
-    HumanTracker::HumanLocations humanLocations;
+    accompany_human_tracker::HumanLocations humanLocations;
   
     for (unsigned c=0; c!=cam.size(); ++c)
     {
