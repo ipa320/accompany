@@ -1,0 +1,19 @@
+<package>
+  <description brief="accompany_laser_scanner_localisation">
+
+     accompany_laser_scanner_localisation
+
+  </description>
+  <author>Bas Terwijn</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_laser_scanner_localisation</url>
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs" />
+  <depend package="tf"/>
+  <depend package="accompany_static_camera_localisation"/>
+  <depend package="accompany_human_tracker"/>
+
+</package>
+
+

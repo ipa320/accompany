@@ -1,8 +1,8 @@
 
 #include <ros/ros.h>
-#include <HumanTracker/HumanLocations.h>
-#include <StaticCameraLocalisation/HumanLocationsParticle.h>
-#include <StaticCameraLocalisation/HumanLocationsParticles.h>
+#include <accompany_human_tracker/HumanLocations.h>
+#include <accompany_static_camera_localisation/HumanLocationsParticle.h>
+#include <accompany_static_camera_localisation/HumanLocationsParticles.h>
 
 #include <ctime>
 #include <cstdlib>
@@ -43,8 +43,8 @@ int main(int argc,char **argv)
 
   // create publishers and subscribers
   ros::NodeHandle n;
-  ros::Publisher humanLocationsPub=n.advertise<HumanTracker::HumanLocations>("/humanLocations",10);
-  ros::Publisher humanLocationsParticlesPub=n.advertise<StaticCameraLocalisation::HumanLocationsParticles>("/humanLocationsParticles",10);
+  ros::Publisher humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
+  ros::Publisher humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
 
   // generate dummy data
   int max=100;
@@ -61,7 +61,7 @@ int main(int argc,char **argv)
     // process image
 
     // publish human locations
-    HumanTracker::HumanLocations humanLocations;
+    accompany_human_tracker::HumanLocations humanLocations;
     geometry_msgs::Vector3 v;
     v.x=10+((direction<0)*max+count*direction)*0.1;
     v.y=1;
@@ -86,10 +86,10 @@ int main(int argc,char **argv)
     // publish human locations particles
     if (particles)
     {
-      StaticCameraLocalisation::HumanLocationsParticles humanLocationsParticles;
+      accompany_static_camera_localisation::HumanLocationsParticles humanLocationsParticles;
       for (int i=0;i<nrParticles;i++)
       {
-        StaticCameraLocalisation::HumanLocationsParticle humanLocationsParticle;
+        accompany_static_camera_localisation::HumanLocationsParticle humanLocationsParticle;
         int numberOfLocations=(rand()%humanLocations.locations.size())+1;
         for (int l=0;l<numberOfLocations;l++)
         {

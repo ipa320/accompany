@@ -3,8 +3,8 @@
 #include <tf/transform_listener.h>
 #include <tf/tfMessage.h>
 #include <sensor_msgs/LaserScan.h>
-#include <StaticCameraLocalisation/HumanLocationsParticles.h>
-#include <HumanTracker/HumanLocations.h>
+#include <accompany_static_camera_localisation/HumanLocationsParticles.h>
+#include <accompany_human_tracker/HumanLocations.h>
 
 #include <ctime>
 #include <cstdlib>
@@ -35,10 +35,10 @@ void laserScanReceived(const sensor_msgs::LaserScan& scan_msg)
   }
 }
 
-void humanLocationsParticlesReceived(const StaticCameraLocalisation::HumanLocationsParticles& particles)
+void humanLocationsParticlesReceived(const accompany_static_camera_localisation::HumanLocationsParticles& particles)
 {
   // select best particle
-  StaticCameraLocalisation::HumanLocationsParticle bestParticle;
+  accompany_static_camera_localisation::HumanLocationsParticle bestParticle;
   bestParticle.weight=0;
   for (int i=0;i<particles.particles.size();i++)
   {
@@ -48,7 +48,7 @@ void humanLocationsParticlesReceived(const StaticCameraLocalisation::HumanLocati
     }
   }
   // publish locations of best particle
-  HumanTracker::HumanLocations humanLocations;
+  accompany_human_tracker::HumanLocations humanLocations;
   humanLocations.locations=bestParticle.locations;
   humanLocationsPub.publish(humanLocations);
 }
@@ -63,7 +63,7 @@ int main(int argc,char **argv)
   transformListenerPtr=&transformListener;
   ros::Subscriber laserScanSub= n.subscribe("/scan", 10,laserScanReceived);
   ros::Subscriber humanLocationsParticlesSub= n.subscribe("/humanLocationsParticles", 10,humanLocationsParticlesReceived);
-  humanLocationsPub=n.advertise<HumanTracker::HumanLocations>("/humanLocations",10);
+  humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
 
   ros::spin(); // wait for shutdown
 

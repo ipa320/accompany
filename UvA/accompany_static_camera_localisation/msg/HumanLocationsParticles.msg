@@ -1,1 +1,0 @@
-StaticCameraLocalisation/HumanLocationsParticle[] particles

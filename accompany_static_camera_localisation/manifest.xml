@@ -1,0 +1,17 @@
+<package>
+  <description brief="accompany_static_camera_localisation">
+
+     accompany_static_camera_localisation
+
+  </description>
+  <author>Bas Terwijn</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_static_camera_localisation</url>
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+  <depend package="accompany_human_tracker"/>
+
+</package>
+
+
