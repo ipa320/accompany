@@ -64,3 +64,68 @@ Compile bnaic
   cd build
   cmake ../src -DVXL_BASE_DIR=/usr/local/include/vxl -DCMN_SRC_DIR=../../cmn/src -DCMN_LIB_DIR=../../cmn/build -DOPENCV_DIR=/usr/include/opencv-2.3.1/
   make
+  
+# ----------------------------------------
+# --- Package StaticCameraLocalisation ---
+# ----------------------------------------
+
+= OVERVIEW OF AVAILABLE NODES
+  
+  - CameraLocalisation [main function to localize persons]
+  
+  - BuildBackgroundModel [build background model with PCA]
+  
+  - CreatePrior [select a region on the groundplane]
+  
+  - CalibrationExtrinsic [calibrate extrinsic parameters of overhead camera]
+  
+  - CalibrationIntrinsic [calibrate intrinsic parameters of overhead camera]
+  
+  
+= TEST ROUTINE
+
+ - Go to test folder:
+
+    cd StaticCameraLocalisation/test
+
+ - Create a image list containing chessboard patterns:
+    
+    rosrun StaticCameraLocalisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+    
+ - Intrinsic calibration:
+
+    rosrun StaticCameraLocalisation CalibrationIntrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+  
+ - Extrinsic calibration:
+
+    rosrun StaticCameraLocalisation CalibrationExtrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+  
+ - Create prior locations (select area that persons can walk on):
+
+    rosrun StaticCameraLocalisation CreatePrior -i imagelist_background.txt -p params.xml -o prior.txt
+  
+ - Build background model:
+
+    rosrun StaticCameraLocalisation BuildBackgroundModel -i imagelist_background.txt -o bgmodel.xml
+  
+ - Camera Localization
+
+    roscore
+  
+    *open another terminal*
+  
+    rosrun StaticCameraLocalisation CameraLocalisation bgmodel.xml params.xml prior.txt
+  
+    *open another terminal*
+  
+    rostopic echo /humanLocations
+
+= TODO
+
+ - Build a tracker
+ 
+ - Adaptive background model
+ 
+ - Multiple camera tracking
+ 
+ - Final testing on frame stream
