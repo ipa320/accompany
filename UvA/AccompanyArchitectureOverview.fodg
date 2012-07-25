@@ -5,9 +5,9 @@
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
    <config:config-item config:name="VisibleAreaTop" config:type="int">-13033</config:config-item>
-   <config:config-item config:name="VisibleAreaLeft" config:type="int">-1127</config:config-item>
-   <config:config-item config:name="VisibleAreaWidth" config:type="int">33847</config:config-item>
-   <config:config-item config:name="VisibleAreaHeight" config:type="int">28681</config:config-item>
+   <config:config-item config:name="VisibleAreaLeft" config:type="int">-1323</config:config-item>
+   <config:config-item config:name="VisibleAreaWidth" config:type="int">33846</config:config-item>
+   <config:config-item config:name="VisibleAreaHeight" config:type="int">28680</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view1</config:config-item>
@@ -38,8 +38,8 @@
      <config:config-item config:name="EditModeNotes" config:type="int">0</config:config-item>
      <config:config-item config:name="EditModeHandout" config:type="int">1</config:config-item>
      <config:config-item config:name="VisibleAreaTop" config:type="int">-13033</config:config-item>
-     <config:config-item config:name="VisibleAreaLeft" config:type="int">-1127</config:config-item>
-     <config:config-item config:name="VisibleAreaWidth" config:type="int">50811</config:config-item>
+     <config:config-item config:name="VisibleAreaLeft" config:type="int">-1323</config:config-item>
+     <config:config-item config:name="VisibleAreaWidth" config:type="int">39591</config:config-item>
      <config:config-item config:name="VisibleAreaHeight" config:type="int">82414</config:config-item>
      <config:config-item config:name="GridCoarseWidth" config:type="int">1270</config:config-item>
      <config:config-item config:name="GridCoarseHeight" config:type="int">1270</config:config-item>
@@ -91,7 +91,7 @@
    <config:config-item config:name="PrintQuality" config:type="int">0</config:config-item>
    <config:config-item config:name="PrinterIndependentLayout" config:type="string">low-resolution</config:config-item>
    <config:config-item config:name="PrinterName" config:type="string">Generic Printer</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">kAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAtgAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6TGV0dGVyAER1cGxleDpOb25lAAASAENPTVBBVF9EVVBMRVhfTU9ERQoARFVQTEVYX09GRg==</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">kAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAtgAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKRHVwbGV4Ok5vbmUAUGFnZVNpemU6TGV0dGVyAAASAENPTVBBVF9EVVBMRVhfTU9ERQoARFVQTEVYX09GRg==</config:config-item>
    <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
    <config:config-item config:name="ScaleDenominator" config:type="int">1</config:config-item>
    <config:config-item config:name="ScaleNumerator" config:type="int">1</config:config-item>
@@ -593,19 +593,19 @@
     <draw:connector draw:style-name="gr4" draw:text-style-name="P1" draw:layer="layout" draw:type="line" svg:x1="19.098cm" svg:y1="3.032cm" svg:x2="15.267cm" svg:y2="24.975cm" draw:start-shape="id17" draw:start-glue-point="7" draw:end-shape="id18" draw:end-glue-point="11" svg:d="m19098 3032-3831 21943">
      <text:p/>
     </draw:connector>
-    <draw:frame draw:style-name="gr7" draw:text-style-name="P2" draw:layer="layout" svg:width="9.739cm" svg:height="1.119cm" svg:x="26.527cm" svg:y="22.106cm">
+    <draw:frame draw:style-name="gr7" draw:text-style-name="P2" draw:layer="layout" svg:width="14.019cm" svg:height="1.119cm" svg:x="26.527cm" svg:y="22.106cm">
      <draw:text-box>
-      <text:p><text:span text:style-name="T1">Static Camera Localisation</text:span></text:p>
+      <text:p><text:span text:style-name="T1">accompany_static_camera_localisation</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame draw:style-name="gr8" draw:text-style-name="P2" draw:layer="layout" svg:width="6.894cm" svg:height="1.119cm" svg:x="0.837cm" svg:y="17.002cm">
+    <draw:frame draw:style-name="gr8" draw:text-style-name="P2" draw:layer="layout" svg:width="10.954cm" svg:height="1.119cm" svg:x="0.841cm" svg:y="17.28cm">
      <draw:text-box>
-      <text:p><text:span text:style-name="T1">Robot Localisation</text:span></text:p>
+      <text:p><text:span text:style-name="T1">accompany_robot_localisation</text:span></text:p>
      </draw:text-box>
     </draw:frame>
-    <draw:frame draw:style-name="gr9" draw:text-style-name="P2" draw:layer="layout" svg:width="9.875cm" svg:height="1.119cm" svg:x="4.302cm" svg:y="35.417cm">
+    <draw:frame draw:style-name="gr9" draw:text-style-name="P2" draw:layer="layout" svg:width="14.066cm" svg:height="1.119cm" svg:x="4.302cm" svg:y="35.417cm">
      <draw:text-box>
-      <text:p><text:span text:style-name="T1">Laser Scanner Localisation</text:span></text:p>
+      <text:p><text:span text:style-name="T1">accompany_laser_scanner_localisation</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:connector draw:style-name="gr4" draw:text-style-name="P3" draw:layer="layout" draw:type="line" svg:x1="32.433cm" svg:y1="13.827cm" svg:x2="21.892cm" svg:y2="24.495cm" draw:start-shape="id11" draw:start-glue-point="7" draw:end-shape="id22" draw:end-glue-point="4" svg:d="m32433 13827-10541 10668">
@@ -617,9 +617,9 @@
     <draw:connector draw:style-name="gr4" draw:text-style-name="P3" draw:layer="layout" draw:type="line" svg:x1="32.433cm" svg:y1="9.763cm" svg:x2="35.891cm" svg:y2="6.582cm" draw:start-shape="id11" draw:start-glue-point="5" draw:end-shape="id2" draw:end-glue-point="7" svg:d="m32433 9763 3458-3181">
      <text:p/>
     </draw:connector>
-    <draw:frame draw:style-name="gr10" draw:text-style-name="P2" draw:layer="layout" svg:width="5.806cm" svg:height="1.119cm" svg:x="28.722cm" svg:y="48.752cm">
+    <draw:frame draw:style-name="gr10" draw:text-style-name="P2" draw:layer="layout" svg:width="10.082cm" svg:height="1.119cm" svg:x="28.722cm" svg:y="48.752cm">
      <draw:text-box>
-      <text:p><text:span text:style-name="T1">Human Tracker</text:span></text:p>
+      <text:p><text:span text:style-name="T1">accompany_human_tracker</text:span></text:p>
      </draw:text-box>
     </draw:frame>
     <draw:connector draw:style-name="gr4" draw:text-style-name="P1" draw:layer="layout" draw:line-skew="-7.492cm" svg:x1="7.921cm" svg:y1="2.905cm" svg:x2="21.892cm" svg:y2="24.495cm" draw:start-shape="id29" draw:start-glue-point="2" draw:end-shape="id22" draw:end-glue-point="4" svg:d="m7921 2905v3302h13971v18288">
