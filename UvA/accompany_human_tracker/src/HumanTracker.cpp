@@ -1,7 +1,7 @@
 
 #include <ros/ros.h>
-#include <HumanTracker/HumanLocations.h>
-#include <HumanTracker/TrackedHumans.h>
+#include <accompany_human_tracker/HumanLocations.h>
+#include <accompany_human_tracker/TrackedHumans.h>
 
 #include <MyTracker.h>
 
@@ -12,7 +12,7 @@ using namespace std;
 ros::Publisher trackedHumansPub;
 MyTracker myTracker;
 
-void humanLocationsReceived(const HumanTracker::HumanLocations::ConstPtr& humanLocations)
+void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
 {
   /*for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
@@ -31,8 +31,8 @@ int main(int argc,char **argv)
 
   // create publisher and subscribers
   ros::NodeHandle n;
-  trackedHumansPub=n.advertise<HumanTracker::TrackedHumans>("/trackedHumans",10);
-  ros::Subscriber humanLocationsSub=n.subscribe<HumanTracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
+  trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
+  ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
   
   // read human indentities
 

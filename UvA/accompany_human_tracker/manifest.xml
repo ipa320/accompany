@@ -1,13 +1,13 @@
 <package>
-  <description brief="HumanTracker">
+  <description brief="accompany_human_tracker">
 
-     HumanTracker
+     accompany_human_tracker
 
   </description>
   <author>Bas Terwijn</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/HumanTracker</url>
+  <url>http://ros.org/wiki/accompany_human_tracker</url>
   <depend package="roscpp"/>
   <depend package="geometry_msgs"/>
 
