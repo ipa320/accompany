@@ -4,10 +4,10 @@
  <office:meta><meta:initial-creator>Bas Terwijn</meta:initial-creator><meta:creation-date>2012-07-16T16:36:40</meta:creation-date><dc:date>2012-07-16T18:15:12</dc:date><dc:creator>Bas Terwijn</dc:creator><meta:editing-duration>PT24M45S</meta:editing-duration><meta:editing-cycles>6</meta:editing-cycles><meta:generator>LibreOffice/3.5$Linux_X86_64 LibreOffice_project/7122e39-92ed229-498d286-15e43b4-d70da21</meta:generator><meta:document-statistic meta:object-count="84"/></office:meta>
  <office:settings>
   <config:config-item-set config:name="ooo:view-settings">
-   <config:config-item config:name="VisibleAreaTop" config:type="int">-13033</config:config-item>
-   <config:config-item config:name="VisibleAreaLeft" config:type="int">-1323</config:config-item>
-   <config:config-item config:name="VisibleAreaWidth" config:type="int">33846</config:config-item>
-   <config:config-item config:name="VisibleAreaHeight" config:type="int">28680</config:config-item>
+   <config:config-item config:name="VisibleAreaTop" config:type="int">28146</config:config-item>
+   <config:config-item config:name="VisibleAreaLeft" config:type="int">-1186</config:config-item>
+   <config:config-item config:name="VisibleAreaWidth" config:type="int">33845</config:config-item>
+   <config:config-item config:name="VisibleAreaHeight" config:type="int">28679</config:config-item>
    <config:config-item-map-indexed config:name="Views">
     <config:config-item-map-entry>
      <config:config-item config:name="ViewId" config:type="string">view1</config:config-item>
@@ -37,10 +37,10 @@
      <config:config-item config:name="EditModeStandard" config:type="int">0</config:config-item>
      <config:config-item config:name="EditModeNotes" config:type="int">0</config:config-item>
      <config:config-item config:name="EditModeHandout" config:type="int">1</config:config-item>
-     <config:config-item config:name="VisibleAreaTop" config:type="int">-13033</config:config-item>
-     <config:config-item config:name="VisibleAreaLeft" config:type="int">-1323</config:config-item>
-     <config:config-item config:name="VisibleAreaWidth" config:type="int">39591</config:config-item>
-     <config:config-item config:name="VisibleAreaHeight" config:type="int">82414</config:config-item>
+     <config:config-item config:name="VisibleAreaTop" config:type="int">28146</config:config-item>
+     <config:config-item config:name="VisibleAreaLeft" config:type="int">-1186</config:config-item>
+     <config:config-item config:name="VisibleAreaWidth" config:type="int">56430</config:config-item>
+     <config:config-item config:name="VisibleAreaHeight" config:type="int">25638</config:config-item>
      <config:config-item config:name="GridCoarseWidth" config:type="int">1270</config:config-item>
      <config:config-item config:name="GridCoarseHeight" config:type="int">1270</config:config-item>
      <config:config-item config:name="GridFineWidth" config:type="int">127</config:config-item>
@@ -91,7 +91,7 @@
    <config:config-item config:name="PrintQuality" config:type="int">0</config:config-item>
    <config:config-item config:name="PrinterIndependentLayout" config:type="string">low-resolution</config:config-item>
    <config:config-item config:name="PrinterName" config:type="string">Generic Printer</config:config-item>
-   <config:config-item config:name="PrinterSetup" config:type="base64Binary">kAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAtgAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKRHVwbGV4Ok5vbmUAUGFnZVNpemU6TGV0dGVyAAASAENPTVBBVF9EVVBMRVhfTU9ERQoARFVQTEVYX09GRg==</config:config-item>
+   <config:config-item config:name="PrinterSetup" config:type="base64Binary">kAH+/0dlbmVyaWMgUHJpbnRlcgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAU0dFTlBSVAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWAAMAtgAAAAAAAAAIAFZUAAAkbQAASm9iRGF0YSAxCnByaW50ZXI9R2VuZXJpYyBQcmludGVyCm9yaWVudGF0aW9uPVBvcnRyYWl0CmNvcGllcz0xCm1hcmdpbmRhanVzdG1lbnQ9MCwwLDAsMApjb2xvcmRlcHRoPTI0CnBzbGV2ZWw9MApwZGZkZXZpY2U9MApjb2xvcmRldmljZT0wClBQRENvbnRleERhdGEKUGFnZVNpemU6TGV0dGVyAER1cGxleDpOb25lAAASAENPTVBBVF9EVVBMRVhfTU9ERQoARFVQTEVYX09GRg==</config:config-item>
    <config:config-item config:name="SaveVersionOnClose" config:type="boolean">false</config:config-item>
    <config:config-item config:name="ScaleDenominator" config:type="int">1</config:config-item>
    <config:config-item config:name="ScaleNumerator" config:type="int">1</config:config-item>
@@ -247,16 +247,16 @@
    <style:graphic-properties draw:stroke="dash" draw:stroke-dash="Fine_20_Dashed" draw:marker-end="Arrow" draw:fill="none" draw:textarea-horizontal-align="justify" draw:textarea-vertical-align="middle" draw:auto-grow-height="false"/>
   </style:style>
   <style:style style:name="gr7" style:family="graphic" style:parent-style-name="standard">
-   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="9.239cm"/>
+   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="13.519cm"/>
   </style:style>
   <style:style style:name="gr8" style:family="graphic" style:parent-style-name="standard">
-   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="6.394cm"/>
+   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="10.454cm"/>
   </style:style>
   <style:style style:name="gr9" style:family="graphic" style:parent-style-name="standard">
-   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="9.375cm"/>
+   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="13.566cm"/>
   </style:style>
   <style:style style:name="gr10" style:family="graphic" style:parent-style-name="standard">
-   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="5.306cm"/>
+   <style:graphic-properties draw:stroke="none" svg:stroke-color="#000000" draw:marker-end="Arrow" draw:fill="none" draw:fill-color="#ffffff" draw:textarea-horizontal-align="left" draw:auto-grow-height="true" draw:auto-grow-width="true" fo:min-height="0.869cm" fo:min-width="9.582cm"/>
   </style:style>
   <style:style style:name="P1" style:family="paragraph">
    <style:paragraph-properties fo:text-align="center"/>
@@ -340,11 +340,11 @@
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 6800 10800 0 0 10800 10800 21600 21600 10800" draw:text-areas="0 6800 21600 18200" draw:type="flowchart-magnetic-disk" draw:enhanced-path="M 0 3400 Y 10800 0 21600 3400 L 21600 18200 Y 10800 21600 0 18200 Z N M 0 3400 Y 10800 6800 21600 3400 N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id4" draw:id="id4" draw:layer="layout" svg:width="4.318cm" svg:height="1.524cm" svg:x="3.413cm" svg:y="9.509cm">
-     <text:p text:style-name="P1">GMapping</text:p>
+     <text:p text:style-name="P1">gmapping</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id6" draw:id="id6" draw:layer="layout" svg:width="5.334cm" svg:height="1.524cm" svg:x="8.874cm" svg:y="9.382cm">
-     <text:p text:style-name="P1">AMCL localisation</text:p>
+     <text:p text:style-name="P1">amcl</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id5" draw:id="id5" draw:layer="layout" svg:width="3.302cm" svg:height="1.651cm" svg:x="3.921cm" svg:y="12.684cm">
@@ -357,24 +357,24 @@
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 0 10800 10800 21600 21600 10800" draw:text-areas="5400 5400 16200 16200" draw:type="diamond" draw:enhanced-path="M 10800 0 L 21600 10800 10800 21600 0 10800 10800 0 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id8" draw:id="id8" draw:layer="layout" svg:width="4.826cm" svg:height="1.397cm" svg:x="39.735cm" svg:y="1.127cm">
-     <text:p text:style-name="P1">Fish-eye camera</text:p>
+     <text:p text:style-name="P1">fish-eye camera</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:type="rectangle" draw:enhanced-path="M 0 0 L 21600 0 21600 21600 0 21600 0 0 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id9" draw:id="id9" draw:layer="layout" svg:width="5.715cm" svg:height="1.778cm" svg:x="29.067cm" svg:y="5.064cm">
-     <text:p text:style-name="P1">Calibration Intrinsic</text:p>
+     <text:p text:style-name="P1">calibration intrinsic</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id2" draw:id="id2" draw:layer="layout" svg:width="5.842cm" svg:height="1.778cm" svg:x="35.036cm" svg:y="5.064cm">
-     <text:p text:style-name="P1">Calibration Extrinsic</text:p>
+     <text:p text:style-name="P1">calibration extrinsic</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id10" draw:id="id10" draw:layer="layout" svg:width="6.477cm" svg:height="2.032cm" svg:x="44.561cm" svg:y="5.064cm">
-     <text:p text:style-name="P1">Build Background </text:p>
-     <text:p text:style-name="P1">Model</text:p>
+     <text:p text:style-name="P1">build background </text:p>
+     <text:p text:style-name="P1">model</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id3" draw:id="id3" draw:layer="layout" svg:width="5.588cm" svg:height="1.905cm" svg:x="51.292cm" svg:y="5.064cm">
-     <text:p text:style-name="P1">Create Prior</text:p>
+     <text:p text:style-name="P1">create prior</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id11" draw:id="id11" draw:layer="layout" svg:width="3.429cm" svg:height="4.064cm" svg:x="30.718cm" svg:y="9.763cm">
@@ -400,8 +400,8 @@
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 6800 10800 0 0 10800 10800 21600 21600 10800" draw:text-areas="0 6800 21600 18200" draw:type="flowchart-magnetic-disk" draw:enhanced-path="M 0 3400 Y 10800 0 21600 3400 L 21600 18200 Y 10800 21600 0 18200 Z N M 0 3400 Y 10800 6800 21600 3400 N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id15" draw:id="id15" draw:layer="layout" svg:width="6.731cm" svg:height="2.413cm" svg:x="37.83cm" svg:y="17.764cm">
-     <text:p text:style-name="P1">Camera</text:p>
-     <text:p text:style-name="P1">Localisation</text:p>
+     <text:p text:style-name="P1">camera</text:p>
+     <text:p text:style-name="P1">localisation</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr1" draw:text-style-name="P1" xml:id="id16" draw:id="id16" draw:layer="layout" svg:width="3.683cm" svg:height="2.921cm" svg:x="46.593cm" svg:y="17.51cm">
@@ -410,7 +410,7 @@
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 6800 10800 0 0 10800 10800 21600 21600 10800" draw:text-areas="0 6800 21600 18200" draw:type="flowchart-magnetic-disk" draw:enhanced-path="M 0 3400 Y 10800 0 21600 3400 L 21600 18200 Y 10800 21600 0 18200 Z N M 0 3400 Y 10800 6800 21600 3400 N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id1" draw:id="id1" draw:layer="layout" svg:width="5.461cm" svg:height="1.27cm" svg:x="46.593cm" svg:y="1.127cm">
-     <text:p text:style-name="P1">Human annotation</text:p>
+     <text:p text:style-name="P1">human annotation</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:type="rectangle" draw:enhanced-path="M 0 0 L 21600 0 21600 21600 0 21600 0 0 Z N"/>
     </draw:custom-shape>
     <draw:connector draw:style-name="gr3" draw:text-style-name="P1" draw:layer="layout" draw:type="line" svg:x1="49.323cm" svg:y1="2.397cm" svg:x2="40.023cm" svg:y2="5.324cm" draw:start-shape="id1" draw:start-glue-point="2" draw:end-shape="id2" draw:end-glue-point="11" svg:d="m49323 2397-9300 2927">
@@ -474,18 +474,18 @@
      <text:p/>
     </draw:connector>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id18" draw:id="id18" draw:layer="layout" svg:width="8.382cm" svg:height="2.413cm" svg:x="8.112cm" svg:y="24.622cm">
-     <text:p text:style-name="P1">Build Background</text:p>
-     <text:p text:style-name="P1">Model</text:p>
+     <text:p text:style-name="P1">build background</text:p>
+     <text:p text:style-name="P1">model</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id22" draw:id="id22" draw:layer="layout" svg:width="7.239cm" svg:height="2.159cm" svg:x="18.272cm" svg:y="24.495cm">
-     <text:p text:style-name="P1">Build Human</text:p>
-     <text:p text:style-name="P1">Model</text:p>
+     <text:p text:style-name="P1">build human</text:p>
+     <text:p text:style-name="P1">model</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id20" draw:id="id20" draw:layer="layout" svg:width="5.715cm" svg:height="1.651cm" svg:x="14.335cm" svg:y="33.639cm">
-     <text:p text:style-name="P1">Laser</text:p>
-     <text:p text:style-name="P1">Localisation</text:p>
+     <text:p text:style-name="P1">laser</text:p>
+     <text:p text:style-name="P1">localisation</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr5" draw:text-style-name="P1" xml:id="id19" draw:id="id19" draw:layer="layout" svg:width="5.207cm" svg:height="2.921cm" svg:x="9.763cm" svg:y="29.194cm">
@@ -547,8 +547,8 @@
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 0 10800 10800 21600 21600 10800" draw:text-areas="5400 5400 16200 16200" draw:type="diamond" draw:enhanced-path="M 10800 0 L 21600 10800 10800 21600 0 10800 10800 0 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id26" draw:id="id26" draw:layer="layout" svg:width="4.064cm" svg:height="1.778cm" svg:x="34.147cm" svg:y="43.418cm">
-     <text:p text:style-name="P1">Human</text:p>
-     <text:p text:style-name="P1">Tracker</text:p>
+     <text:p text:style-name="P1">human</text:p>
+     <text:p text:style-name="P1">tracker</text:p>
      <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:glue-points="10800 0 3163 3163 0 10800 3163 18437 10800 21600 18437 18437 21600 10800 18437 3163" draw:text-areas="3163 3163 18437 18437" draw:type="ellipse" draw:enhanced-path="U 10800 10800 10800 10800 0 360 Z N"/>
     </draw:custom-shape>
     <draw:custom-shape draw:style-name="gr2" draw:text-style-name="P1" xml:id="id27" draw:id="id27" draw:layer="layout" svg:width="7.112cm" svg:height="2.286cm" svg:x="32.623cm" svg:y="46.593cm">
