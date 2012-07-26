@@ -107,7 +107,7 @@ int main(int argc, char **argv) {
     string imagelist_file, params_file, outputPrior_file;
           
     // handling arguments
-    po::options_description optionsDescription("Allowed options\n");
+    po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
     optionsDescription.add_options()
         ("imagelist,i", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
         ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")

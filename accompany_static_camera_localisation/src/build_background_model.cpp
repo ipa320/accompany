@@ -26,18 +26,11 @@ inline FLOAT gaussProb(FLOAT sqdiff, FLOAT sigmasq)
 
 int main(int argc, char **argv) {
 
-//     if (argc < 3 || argc > 5)  {
-//          cout << "Usage: buildbgmodel <trainset> <outfile.xml> [no. components] [no. frames]\n"
-//               << "   if the number of frames to use is specified, that many frames are selected at random\n"
-//               << "   otherwise, 80% of all frames are used." << endl;
-//          return 1;
-//     }
-
     string imagelist_training, output_background_model;
     int num_components, num_frames;
           
     // handling arguments
-    po::options_description optionsDescription("Allowed options\n");
+    po::options_description optionsDescription("Build the eigen-background model for background subtraction\nAllowed options\n");
     optionsDescription.add_options()
         ("imagelist_training,i", po::value<string>(&imagelist_training)->required(),"the input image list for training\n")
         ("output_background_model,o", po::value<string>(&output_background_model)->required(),"the output background model\n")

@@ -62,7 +62,7 @@ int main( int argc, char** argv )
 	string intrinsicFile, extrinsicFile, points3dFile, points2dFile;
 
     // handling arguments
-    po::options_description optionsDescription("Allowed options\n");
+    po::options_description optionsDescription("Calibrate extrinsic parameters of camera, give rotation matrix and translation matrix to world frame\nAllowed options\n");
     optionsDescription.add_options()
         ("intrinsicFile,i", po::value<string>(&intrinsicFile)->required(),"the input filename for intrinsic parameter\n")
         ("extrinsicFile,o", po::value<string>(&extrinsicFile)->required(),"the output filename for extrinsic parameter\n")
