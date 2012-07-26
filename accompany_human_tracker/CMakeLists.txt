@@ -30,4 +30,4 @@ rosbuild_genmsg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 include_directories ("${PROJECT_SOURCE_DIR}/src")
-rosbuild_add_executable(HumanTracker src/HumanTracker.cpp src/MyTracker.cpp)
+rosbuild_add_executable(human_tracker src/human_tracker.cpp src/MyTracker.cpp)
