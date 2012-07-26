@@ -1,4 +1,6 @@
-
+#                         #
+# UNIVERSITY OF AMSTERDAM #
+#           2012          #
 
 # -------------------------
 # ---  Introduction
@@ -86,27 +88,27 @@ Compile bnaic
 
  - Go to test folder:
 
-    cd StaticCameraLocalisation/test
+    cd [accompany folder]/accompany_static_camera_localisation/test
 
  - Create a image list containing chessboard patterns:
     
-    rosrun StaticCameraLocalisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+    rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
     
  - Intrinsic calibration:
 
-    rosrun StaticCameraLocalisation CalibrationIntrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+    rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
   
  - Extrinsic calibration:
 
-    rosrun StaticCameraLocalisation CalibrationExtrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+    rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
   
  - Create prior locations (select area that persons can walk on):
 
-    rosrun StaticCameraLocalisation CreatePrior -i imagelist_background.txt -p params.xml -o prior.txt
+    rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
   
  - Build background model:
 
-    rosrun StaticCameraLocalisation BuildBackgroundModel -i imagelist_background.txt -o bgmodel.xml
+    rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
   
  - Camera Localization
 
@@ -114,7 +116,7 @@ Compile bnaic
   
     *open another terminal*
   
-    rosrun StaticCameraLocalisation CameraLocalisation bgmodel.xml params.xml prior.txt
+    rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt
   
     *open another terminal*
   

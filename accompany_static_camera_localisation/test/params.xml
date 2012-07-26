@@ -9,8 +9,8 @@
         <sigma2>16</sigma2>
         <sigma3>16</sigma3>
         <scanres>5</scanres>
-        <IntrinsicFile>/home/ninghang/workspace/data/fisheye/calib/src/camera_may21.xml</IntrinsicFile>
-        <ExtrinsicFile>/home/ninghang/Software/PeopleDetectionGwenn/src_build/extrinsic_param.xml</ExtrinsicFile>
+        <IntrinsicFile>camera_intrinsic.xml</IntrinsicFile>
+        <ExtrinsicFile>camera_extrinsic.xml</ExtrinsicFile>
         <SCALE>1</SCALE>
       </Elt>
     </Vector>

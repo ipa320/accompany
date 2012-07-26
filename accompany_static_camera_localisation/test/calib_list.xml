@@ -1,7 +1,11 @@
 <?xml version="1.0"?>
 <opencv_storage>
 <images>
-  left01.jpg left02.jpg left03.jpg left04.jpg left05.jpg left06.jpg
-  left07.jpg left08.jpg left09.jpg left11.jpg left12.jpg left13.jpg
-  left14.jpg</images>
+  pattern_test/left01.jpg pattern_test/left02.jpg
+  pattern_test/left03.jpg pattern_test/left04.jpg
+  pattern_test/left05.jpg pattern_test/left06.jpg
+  pattern_test/left07.jpg pattern_test/left08.jpg
+  pattern_test/left09.jpg pattern_test/left11.jpg
+  pattern_test/left12.jpg pattern_test/left13.jpg
+  pattern_test/left14.jpg</images>
 </opencv_storage>

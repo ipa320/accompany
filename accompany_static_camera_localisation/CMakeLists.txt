@@ -93,20 +93,20 @@ rosbuild_genmsg()
 #target_link_libraries(example ${PROJECT_NAME})
 
 # rosbuild
-rosbuild_add_executable(CalibrationIntrinsic src/CalibrationIntrinsic.cpp)
-TARGET_LINK_LIBRARIES(CalibrationIntrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d boost_program_options)
+rosbuild_add_executable(calibration_intrinsic src/calibration_intrinsic.cpp)
+TARGET_LINK_LIBRARIES(calibration_intrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d boost_program_options)
 
-rosbuild_add_executable(CalibrationExtrinsic src/CalibrationExtrinsic.cpp)
-TARGET_LINK_LIBRARIES(CalibrationExtrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui boost_program_options)
+rosbuild_add_executable(calibration_extrinsic src/calibration_extrinsic.cpp)
+TARGET_LINK_LIBRARIES(calibration_extrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui boost_program_options)
 
-rosbuild_add_executable(BuildBackgroundModel src/BuildBackgroundModel.cpp)
-TARGET_LINK_LIBRARIES(BuildBackgroundModel helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+rosbuild_add_executable(build_background_model src/build_background_model.cpp)
+TARGET_LINK_LIBRARIES(build_background_model helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
-rosbuild_add_executable(CreatePrior src/CreatePrior.cpp)
-TARGET_LINK_LIBRARIES( CreatePrior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+rosbuild_add_executable(create_prior src/create_prior.cpp)
+TARGET_LINK_LIBRARIES( create_prior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
-rosbuild_add_executable(CameraLocalisation src/CameraLocalisation.cpp)
-target_link_libraries(CameraLocalisation helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+rosbuild_add_executable(camera_localization src/camera_localization.cpp)
+target_link_libraries(camera_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
 rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
 target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc boost_program_options)
