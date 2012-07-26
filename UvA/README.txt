@@ -51,22 +51,35 @@ and install with
   cd build
   cmake ../src
   make
-  sudo make install  
+  sudo make install
+
+Install gstreamer
+
+  sudo apt-get install gstreamer-tools
+
+Install the gscam ROS package from file: dependencies/gscam.tar.gz
+This file has been slightly altered to drop old frames (sync=false)
+and so always provide the last frame.
+
+----------------------------------------
+Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
+
+display stream:
+
+  gst-launch rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! xvimagesink sync=false
+
+save stream to file:
+
+  gst-launch rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! jpegenc ! avimux ! filesink location=video.avi
+
+publish stream in ros:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! ffmpegcolorspace"
+  rosrun gscam gscam --sync false
+----------------------------------------
 
 
 
-# -------------------------
-# ---  other stuff ...............
-# -------------------------
-
-Compile bnaic
-
-  cd $ACCOMPANY_PATH/UvA/LikelihoodFromFisheyeCamera/bnaic
-  mkdir build
-  cd build
-  cmake ../src -DVXL_BASE_DIR=/usr/local/include/vxl -DCMN_SRC_DIR=../../cmn/src -DCMN_LIB_DIR=../../cmn/build -DOPENCV_DIR=/usr/include/opencv-2.3.1/
-  make
-  
 # ----------------------------------------
 # --- Package StaticCameraLocalisation ---
 # ----------------------------------------
