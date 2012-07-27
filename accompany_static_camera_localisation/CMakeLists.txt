@@ -109,4 +109,11 @@ rosbuild_add_executable(camera_localization src/camera_localization.cpp)
 target_link_libraries(camera_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
 rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
-target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc boost_program_options)
+target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc)
+
+rosbuild_add_executable(create_background_list src/create_background_list.cpp)
+target_link_libraries(create_background_list opencv_highgui opencv_core opencv_imgproc)
+
+rosbuild_add_executable(annotate_image_points src/annotate_image_points.cpp)
+target_link_libraries(annotate_image_points opencv_highgui opencv_core opencv_imgproc helpers calib cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt ${XML2_LDFLAGS})
+

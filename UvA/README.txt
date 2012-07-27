@@ -86,18 +86,23 @@ publish stream in ros:
 
 = OVERVIEW OF AVAILABLE NODES
   
-  - CameraLocalisation [main function to localize persons]
+  - camera_localisation [main function to localize persons]
   
-  - BuildBackgroundModel [build background model with PCA]
+  - build_background_model [build background model with PCA]
   
-  - CreatePrior [select a region on the groundplane]
+  - create_prior [select a region on the groundplane]
   
-  - CalibrationExtrinsic [calibrate extrinsic parameters of overhead camera]
+  - calibration_extrinsic [calibrate extrinsic parameters of overhead camera]
   
-  - CalibrationIntrinsic [calibrate intrinsic parameters of overhead camera]
+  - calibration_intrinsic [calibrate intrinsic parameters of overhead camera]
   
+  - create_calibration_list [create a list of images]
   
-= TEST ROUTINE
+  - annotate_image_points [annotate points on the image space]
+  
+# -------------------------
+# ---  Test Routine
+# -------------------------
 
  - Go to test folder:
 
@@ -134,6 +139,121 @@ publish stream in ros:
     *open another terminal*
   
     rostopic echo /humanLocations
+
+
+
+# -------------------------
+# ---  Preparation
+# -------------------------
+
+A1 paper, printer, black or gray tape (more than 10m), tape measure, (wooden or metal) board
+
+Download checkerboard pattern from:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration?action=AttachFile&do=view&target=check-108.pdf
+  
+and print out checkerboard pattern on A1 paper, then attach the paper onto a board like:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
+  
+Use tape to make cross markers on the floor and also on the wall, with an interval of 1 meter. The markers represent the world coordinates frame. Write the coordinates of markers into a file, an example is:
+
+  points3D.txt
+  ------------
+  0,0,0
+  0,1000,0
+  3000,0,1000
+  ... 
+
+# -----------------------------------
+# ---  Camera Intrinsic Calibration
+# -----------------------------------
+  
+Set gscam to capture frames with FULL resolution and default frame rate:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0 
+  
+Run calibration:
+
+  rosrun camera_calibration cameracalibrator.py --size 9x6 --square 1 image:=/gscam/image_raw camera:=/gscam
+  
+For calibration, refer to:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
+
+Save calibrated display with extension ".ini"
+
+  roscd accompany_static_camera_localisation
+  mkdir res
+  cd res
+  gedit calib_intrinsic.ini
+  [copy diplayed messages] 
+
+Parse .ini to standard calibration extension ".yml"
+
+  rosrun camera_calibration_parser convert calib.ini calib_intrinsic.yml
+  
+# -----------------------------------
+# ---  Camera Extrinsic Calibration
+# ----------------------------------- 
+
+Annotate marker locations in a full resolution frame
+
+  mkdir marker
+  cd marker
+  rosrun image_view image_view image:=/gscam/image_raw
+  
+Right click to save a frame, make sure all markers are present
+
+Create a image list
+  
+  rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
+
+Annotate corresponding 2D points on video frames
+ 
+  roscd accompany_static_camera_localisation/res  
+  rosrun accompany_static_camera_localisation annotate_image_points marker/marker_list.txt points2D.txt
+  [NOTE: press ENTER to save ]
+
+Copy points3D.txt to res folder
+ 
+  cp [location]/points3D.txt .
+
+
+# -----------------------------------
+# ---  Camera Extrinsic Calibration
+# -----------------------------------
+Save some background images in REDUCED resolution
+
+  
+
+
+Set gscam to capture frames with REDUCED resolution and default frame rate:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486 , framerate=15/1 ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0
+
+Capture a few background frames:
+
+  roscd accompany_static_camera_localisation
+  mkdir res
+  cd res
+  mkdir background
+  cd background
+  rosrun image_view image_view image:=/gscam/image_raw
+
+Right click to store background frames
+
+Create a background image list
+
+  
+
+  
+  
+  
+
+
 
 = TODO
 
