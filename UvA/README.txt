@@ -104,42 +104,31 @@ publish stream in ros:
 # ---  Test Routine
 # -------------------------
 
- - Go to test folder:
-
-    cd [accompany folder]/accompany_static_camera_localisation/test
-
- - Create a image list containing chessboard patterns:
+Create a image list containing chessboard patterns:
+  
+  roscd /accompany_static_camera_localisation/test
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
     
-    rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
-    
- - Intrinsic calibration:
+Intrinsic calibration:
 
-    rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
   
- - Extrinsic calibration:
+Extrinsic calibration:
 
-    rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
   
- - Create prior locations (select area that persons can walk on):
+Create prior locations (select area that persons can walk on):
 
-    rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
+  rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
   
- - Build background model:
+Build background model:
 
-    rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
+  rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
   
- - Camera Localization
+Camera Localization
 
-    roscore
-  
-    *open another terminal*
-  
-    rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt
-  
-    *open another terminal*
-  
-    rostopic echo /humanLocations
-
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rostopic echo /humanLocations
 
 
 # -------------------------
@@ -182,7 +171,7 @@ For calibration, refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
 
-Save calibrated display with extension ".ini"
+Save calibrated display with extension ".ini":
 
   roscd accompany_static_camera_localisation
   mkdir res
@@ -190,15 +179,18 @@ Save calibrated display with extension ".ini"
   gedit calib_intrinsic.ini
   [copy diplayed messages] 
 
-Parse .ini to standard calibration extension ".yml"
+Parse .ini to standard calibration extension ".yml":
 
-  rosrun camera_calibration_parser convert calib.ini calib_intrinsic.yml
+  rosrun camera_calibration_parsers convert calib.ini calib_intrinsic.yml
+
+# Copy info in .ini to .xml, remove comma
+# TODO: calibration with own package?
   
 # -----------------------------------
 # ---  Camera Extrinsic Calibration
 # ----------------------------------- 
 
-Annotate marker locations in a full resolution frame
+Annotate marker locations in a full resolution frame:
 
   mkdir marker
   cd marker
@@ -206,56 +198,70 @@ Annotate marker locations in a full resolution frame
   
 Right click to save a frame, make sure all markers are present
 
-Create a image list
+Create a image list:
   
   rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
 
-Annotate corresponding 2D points on video frames
+Annotate corresponding 2D points on video frames:
  
   roscd accompany_static_camera_localisation/res  
   rosrun accompany_static_camera_localisation annotate_image_points marker/marker_list.txt points2D.txt
   [NOTE: press ENTER to save ]
 
-Copy points3D.txt to res folder
+Copy points3D.txt to res folder:
  
   cp [location]/points3D.txt .
+  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
 
+Copy param.xml and set SCALE based on the desired resolution
 
 # -----------------------------------
-# ---  Camera Extrinsic Calibration
+# ---  Build background model
 # -----------------------------------
-Save some background images in REDUCED resolution
 
-  
-
-
-Set gscam to capture frames with REDUCED resolution and default frame rate:
+Restart gscam and capture background images with REDUCED resolution:
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486 , framerate=15/1 ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
 
-  roscd accompany_static_camera_localisation
-  mkdir res
-  cd res
+  roscd accompany_static_camera_localisation/res
   mkdir background
   cd background
   rosrun image_view image_view image:=/gscam/image_raw
 
-Right click to store background frames
+Right click to store a few background frames
 
-Create a background image list
-
+Create a background image list:
   
-
+  rosrun accompany_static_camera_localisation create_background_list background_list.txt *.jpg
   
+Build background model:
   
-  
+  roscd accompany_static_camera_localisation/res
+  rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml  
 
+# -----------------------------------
+# ---  Create Prior
+# -----------------------------------
 
+Select a walkable region:
+
+  rosrun accompany_static_camera_localisation create_prior -i background/background_list.txt -p params.xml -o prior.txt
+
+# -----------------------------------
+# ---  Localization
+# -----------------------------------
+
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rostopic echo /humanLocations
 
 = TODO
+
+ - calibrate with own ros package, compare results
+ 
+ - feed with live frames
 
  - Build a tracker
  

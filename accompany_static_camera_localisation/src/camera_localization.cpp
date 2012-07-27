@@ -650,7 +650,7 @@ int main(int argc,char **argv)
      logLocPrior.fill(-log(scanLocations.size()));
         
      // load the first image to get image size //TODO
-     IplImage* testImage = loadImage("0900.jpg"); // TODO release after use
+     IplImage* testImage = loadImage("test_frames/frame0000.jpg"); // TODO release after use
      vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
      image[0] = testImage;
 
@@ -747,7 +747,7 @@ int main(int argc,char **argv)
     
     // get new image //TODO
     // release image here // TODO
-    IplImage* testImage = loadImage("0900.jpg");
+    IplImage* testImage = loadImage("test_frames/frame0000.jpg"); //TODO
     vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
     image[0] = testImage;
     src=image;
