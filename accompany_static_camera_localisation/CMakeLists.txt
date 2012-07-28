@@ -117,3 +117,6 @@ target_link_libraries(create_background_list opencv_highgui opencv_core opencv_i
 rosbuild_add_executable(annotate_image_points src/annotate_image_points.cpp)
 target_link_libraries(annotate_image_points opencv_highgui opencv_core opencv_imgproc helpers calib cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt ${XML2_LDFLAGS})
 
+rosbuild_add_executable( annotate_pos src/annotatepos.cc )
+target_link_libraries( annotate_pos helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt ${XML2_LDFLAGS})
+
