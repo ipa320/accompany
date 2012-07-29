@@ -154,10 +154,32 @@ Use tape to make cross markers on the floor and also on the wall, with an interv
   3000,0,1000
   ... 
 
+Check camera manual
+
+  focal length
+  image
+
 # -----------------------------------
 # ---  Camera Intrinsic Calibration
 # -----------------------------------
+
+Record a video containing patterns
+
+Select informative frames
+
+Create a image list containing chessboard patterns:
   
+  roscd /accompany_static_camera_localisation/test
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+    
+Intrinsic calibration:
+
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+
+# -----------------------------------
+# ---  Camera Intrinsic Calibration (alternative)
+# -----------------------------------
+
 Set gscam to capture frames with FULL resolution and default frame rate:
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
@@ -211,6 +233,9 @@ Annotate corresponding 2D points on video frames:
 Copy points3D.txt to res folder:
  
   cp [location]/points3D.txt .
+  
+Calibrate extrinsic parameters
+
   rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
 
 Copy param.xml and set SCALE based on the desired resolution
