@@ -218,8 +218,7 @@ Parse .ini to standard calibration extension ".yml":
 
 Annotate marker locations in a full resolution frame:
 
-  mkdir marker
-  cd marker
+  roscd accompany_static_camera_localisation/res/marker
   rosrun image_view image_view image:=/gscam/image_raw
   
 Right click to save a frame, make sure all markers are present
@@ -237,12 +236,14 @@ Annotate corresponding 2D points on video frames:
 Copy points3D.txt to res folder:
  
   cp [location]/points3D.txt .
-  
-Calibrate extrinsic parameters
+
+Double check if points2D and points3D are correct
+
+Calibrate extrinsic parameters:
 
   rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
 
-Copy param.xml and set SCALE based on the desired resolution
+Modify param.xml and set SCALE based on the desired resolution
 
 # -----------------------------------
 # ---  Build background model
