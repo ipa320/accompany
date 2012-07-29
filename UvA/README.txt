@@ -135,7 +135,7 @@ Camera Localization
 # ---  Preparation
 # -------------------------
 
-A1 paper, printer, black or gray tape (more than 10m), tape measure, (wooden or metal) board
+Required: A1 paper, (wooden or metal) board, black or gray tape (more than 10m), tape measure.
 
 Download checkerboard pattern from:
 
@@ -163,22 +163,26 @@ Check camera manual
 # ---  Camera Intrinsic Calibration
 # -----------------------------------
 
-Record a video containing patterns
+Record a video in FULL resolution with varying attitude of a checkerboard:
 
-Select informative frames
-
-Create a image list containing chessboard patterns:
+  roscd accompany_static_camera_localisation/res/
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0
   
-  roscd /accompany_static_camera_localisation/test
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+image saver? and throw out non-informative frames
+
+Create a image list:
+  
+  roscd  accompany_static_camera_localisation/res/
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml calib_frames/*
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -i calib_list.xml -o camera_intrinsic.xml 
 
-# -----------------------------------
+# ------------------------------------------------
 # ---  Camera Intrinsic Calibration (alternative)
-# -----------------------------------
+# ------------------------------------------------
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
