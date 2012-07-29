@@ -1,13 +1,15 @@
 #                         #
 # UNIVERSITY OF AMSTERDAM #
+#    ACCOMPANT PROJECT    #
 #           2012          #
+#                         #
+
 
 # -------------------------
 # ---  Introduction
 # -------------------------
 
-This document describes how to build and use the UvA modules of the
-Accompany project. We assume installation on Ubuntu 11.10 (Oneiric).
+This document describes how to build and use the UvA modules (T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
 
 We assume ACCOMPANY_PATH points to the root of the accompany
 directory.
@@ -80,11 +82,12 @@ publish stream in ros:
 
 
 
-# ----------------------------------------
-# --- Package StaticCameraLocalisation ---
-# ----------------------------------------
+# --------------------------------------------
+# ---  Package:
+# ---  accompany_static_camera_localisation
+# --------------------------------------------
 
-= OVERVIEW OF AVAILABLE NODES
+Nodes Overview:
   
   - camera_localisation [main function to localize persons]
   
