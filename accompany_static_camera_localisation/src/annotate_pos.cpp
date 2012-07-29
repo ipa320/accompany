@@ -197,7 +197,7 @@ int main(int argc, char **argv)
           imgs;
      listImages(argv[1],imgs);
      cam = vector<CamCalib>(imgs[0].size());
-     img = vector<IplImage *>(imgs[0].size());
+     img = vector<IplImage*>(imgs[0].size());
 
      unsigned
           index = 0;

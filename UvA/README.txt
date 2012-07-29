@@ -9,7 +9,7 @@
 # ---  Introduction
 # -------------------------
 
-This document describes how to build and use the UvA modules (T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
+This document describes how to build and use the UvA modules (DoW T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
 
 We assume ACCOMPANY_PATH points to the root of the accompany
 directory.
@@ -163,28 +163,34 @@ Check camera manual
   image
 
 # -----------------------------------
-# ---  Camera Intrinsic Calibration
+# ---  Intrinsic Calibration
 # -----------------------------------
 
-Record a video in FULL resolution with varying attitude of a checkerboard:
+Open camera in FULL resolution
 
-  roscd accompany_static_camera_localisation/res/
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
+
+Record a few frames containing a checkerboard:
+
+  roscd accompany_static_camera_localisation/res/
+  mkdir calib_frames
+  cd calib_frames
+  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
   
-image saver? and throw out non-informative frames
+Filter out non-informative calibration frames in the folder
 
 Create a image list:
   
   roscd  accompany_static_camera_localisation/res/
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml calib_frames/*
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml calib_frames/*.*g
     
 Intrinsic calibration:
 
   rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -i calib_list.xml -o camera_intrinsic.xml 
 
 # ------------------------------------------------
-# ---  Camera Intrinsic Calibration (alternative)
+# ---  Intrinsic Calibration (alternative)
 # ------------------------------------------------
 
 Set gscam to capture frames with FULL resolution and default frame rate:
@@ -208,12 +214,7 @@ Save calibrated display with extension ".ini":
   gedit calib_intrinsic.ini
   [copy diplayed messages] 
 
-Parse .ini to standard calibration extension ".yml":
-
-  rosrun camera_calibration_parsers convert calib.ini calib_intrinsic.yml
-
-# Copy info in .ini to .xml, remove comma
-# TODO: calibration with own package?
+Copy info in .ini to .xml, remove comma
   
 # -----------------------------------
 # ---  Camera Extrinsic Calibration
@@ -221,12 +222,14 @@ Parse .ini to standard calibration extension ".yml":
 
 Annotate marker locations in a full resolution frame:
 
-  roscd accompany_static_camera_localisation/res/marker
+  roscd accompany_static_camera_localisation/res/
+  mkdir marker
+  cd marker
   rosrun image_view image_view image:=/gscam/image_raw
   
 Right click to save a frame, make sure all markers are present
 
-Create a image list:
+Create a image list of the marker:
   
   rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
 
@@ -246,7 +249,7 @@ Calibrate extrinsic parameters:
 
   rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
 
-Modify param.xml and set SCALE based on the desired resolution
+Modify param.xml and set SCALE according to the desired resolution
 
 # -----------------------------------
 # ---  Build background model
@@ -273,8 +276,8 @@ Create a background image list:
 Build background model:
   
   roscd accompany_static_camera_localisation/res
-  rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml  
-
+  rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml
+  
 # -----------------------------------
 # ---  Create Prior
 # -----------------------------------
@@ -282,6 +285,14 @@ Build background model:
 Select a walkable region:
 
   rosrun accompany_static_camera_localisation create_prior -i background/background_list.txt -p params.xml -o prior.txt
+
+# -----------------------------------
+# ---  Checkpoint calibration
+# -----------------------------------
+
+Check calibration results:
+
+  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt
 
 # -----------------------------------
 # ---  Localization

@@ -9,9 +9,9 @@
         <sigma2>16</sigma2>
         <sigma3>16</sigma3>
         <scanres>5</scanres>
-        <IntrinsicFile>calibrationdata/out.xml</IntrinsicFile>
-        <ExtrinsicFile>calibrationdata/out_ex.xml</ExtrinsicFile>
-        <SCALE>0.25</SCALE>
+        <IntrinsicFile>camera_intrinsic.xml</IntrinsicFile>
+        <ExtrinsicFile>camera_extrinsic.xml</ExtrinsicFile>
+        <SCALE>1</SCALE>
       </Elt>
     </Vector>
   </Cameras>
