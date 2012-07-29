@@ -302,8 +302,6 @@ Check calibration results:
   rostopic echo /humanLocations
 
 = TODO
-
- - calibrate with own ros package, compare results
  
  - feed with live frames
 

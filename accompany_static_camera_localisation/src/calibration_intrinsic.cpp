@@ -89,17 +89,23 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 ////    double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,distCoeffs, rvecs, tvecs, flags|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);///*|CV_CALIB_FIX_K3*/|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
 
     // TODO set camera matrix assumption!!!
+    cout << "******************************************" << endl;
+    cout << "** WARNING!! CALIBRATE WITH ASSUMPTION  **" << endl;
+    cout << "** -----------------------------------  **" << endl;
+    cout << "**   CV_CALIB_USE_INTRINSIC_GUESS       **" << endl;
+    cout << "**   CV_CALIB_FIX_ASPECT_RATIO          **" << endl;
+    cout << "**   CV_CALIB_FIX_K4|CV_CALIB_FIX_K5    **" << endl;
+    cout << "******************************************" << endl;
     cameraMatrix.at<double>(0,0) = 697.191489362;
     cameraMatrix.at<double>(0,2) = 1024;
     cameraMatrix.at<double>(1,1) = 661.787234043;
     cameraMatrix.at<double>(1,2) = 972;
+    cout << cameraMatrix << endl;
     double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,distCoeffs, rvecs, tvecs, flags|         
     CV_CALIB_USE_INTRINSIC_GUESS|
-//    CV_CALIB_FIX_PRINCIPAL_POINT|
     CV_CALIB_FIX_ASPECT_RATIO|
     CV_CALIB_FIX_K4|CV_CALIB_FIX_K5
     );
-    // FIX CENTER AND FIX RATIO TODO
 
     printf("RMS error reported by calibrateCamera: %g\n", rms);
 
