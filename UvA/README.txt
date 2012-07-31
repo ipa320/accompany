@@ -1,13 +1,15 @@
 #                         #
 # UNIVERSITY OF AMSTERDAM #
+#    ACCOMPANT PROJECT    #
 #           2012          #
+#                         #
+
 
 # -------------------------
 # ---  Introduction
 # -------------------------
 
-This document describes how to build and use the UvA modules of the
-Accompany project. We assume installation on Ubuntu 11.10 (Oneiric).
+This document describes how to build and use the UvA modules (DoW T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
 
 We assume ACCOMPANY_PATH points to the root of the accompany
 directory.
@@ -80,62 +82,228 @@ publish stream in ros:
 
 
 
-# ----------------------------------------
-# --- Package StaticCameraLocalisation ---
-# ----------------------------------------
+# --------------------------------------------
+# ---  Package:
+# ---  accompany_static_camera_localisation
+# --------------------------------------------
 
-= OVERVIEW OF AVAILABLE NODES
+Nodes Overview:
   
-  - CameraLocalisation [main function to localize persons]
+  - camera_localisation [main function to localize persons]
   
-  - BuildBackgroundModel [build background model with PCA]
+  - build_background_model [build background model with PCA]
   
-  - CreatePrior [select a region on the groundplane]
+  - create_prior [select a region on the groundplane]
   
-  - CalibrationExtrinsic [calibrate extrinsic parameters of overhead camera]
+  - calibration_extrinsic [calibrate extrinsic parameters of overhead camera]
   
-  - CalibrationIntrinsic [calibrate intrinsic parameters of overhead camera]
+  - calibration_intrinsic [calibrate intrinsic parameters of overhead camera]
   
+  - create_calibration_list [create a list of images]
   
-= TEST ROUTINE
+  - annotate_image_points [annotate points on the image space]
+  
+# -------------------------
+# ---  Test Routine
+# -------------------------
 
- - Go to test folder:
-
-    cd [accompany folder]/accompany_static_camera_localisation/test
-
- - Create a image list containing chessboard patterns:
+Create a image list containing chessboard patterns:
+  
+  roscd /accompany_static_camera_localisation/test
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
     
-    rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+Intrinsic calibration:
+
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+  
+Extrinsic calibration:
+
+  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+  
+Create prior locations (select area that persons can walk on):
+
+  rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
+  
+Build background model:
+
+  rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
+  
+Camera Localization
+
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rostopic echo /humanLocations
+
+
+# -------------------------
+# ---  Preparation
+# -------------------------
+
+Required: A1 paper, (wooden or metal) board, black or gray tape (more than 10m), tape measure.
+
+Download checkerboard pattern from:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration?action=AttachFile&do=view&target=check-108.pdf
+  
+and print out checkerboard pattern on A1 paper, then attach the paper onto a board like:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
+  
+Use tape to make cross markers on the floor and also on the wall, with an interval of 1 meter. The markers represent the world coordinates frame. Write the coordinates of markers into a file, an example is:
+
+  points3D.txt
+  ------------
+  0,0,0
+  0,1000,0
+  3000,0,1000
+  ... 
+
+Check camera manual
+
+  focal length
+  image
+
+# -----------------------------------
+# ---  Intrinsic Calibration
+# -----------------------------------
+
+Open camera in FULL resolution
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0
+
+Record a few frames containing a checkerboard:
+
+  roscd accompany_static_camera_localisation/res/
+  mkdir calib_frames
+  cd calib_frames
+  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  
+Filter out non-informative calibration frames in the folder
+
+Create a image list:
+  
+  roscd  accompany_static_camera_localisation/res/
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml calib_frames/*.*g
     
- - Intrinsic calibration:
+Intrinsic calibration:
 
-    rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
-  
- - Extrinsic calibration:
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -i calib_list.xml -o camera_intrinsic.xml 
 
-    rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
-  
- - Create prior locations (select area that persons can walk on):
+# ------------------------------------------------
+# ---  Intrinsic Calibration (alternative)
+# ------------------------------------------------
 
-    rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
-  
- - Build background model:
+Set gscam to capture frames with FULL resolution and default frame rate:
 
-    rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0 
   
- - Camera Localization
+Run calibration:
 
-    roscore
+  rosrun camera_calibration cameracalibrator.py --size 9x6 --square 1 image:=/gscam/image_raw camera:=/gscam
   
-    *open another terminal*
+For calibration, refer to:
+
+  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
+
+Save calibrated display with extension ".ini":
+
+  roscd accompany_static_camera_localisation
+  mkdir res
+  cd res
+  gedit calib_intrinsic.ini
+  [copy diplayed messages] 
+
+Copy info in .ini to .xml, remove comma
   
-    rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt
+# -----------------------------------
+# ---  Camera Extrinsic Calibration
+# ----------------------------------- 
+
+Annotate marker locations in a full resolution frame:
+
+  roscd accompany_static_camera_localisation/res/
+  mkdir marker
+  cd marker
+  rosrun image_view image_view image:=/gscam/image_raw
   
-    *open another terminal*
+Right click to save a frame, make sure all markers are present
+
+Create a image list of the marker:
   
-    rostopic echo /humanLocations
+  rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
+
+Annotate corresponding 2D points on video frames:
+ 
+  roscd accompany_static_camera_localisation/res  
+  rosrun accompany_static_camera_localisation annotate_image_points marker/marker_list.txt points2D.txt
+  [NOTE: press ENTER to save ]
+
+Copy points3D.txt to res folder:
+ 
+  cp [location]/points3D.txt .
+
+Double check if points2D and points3D are correct
+
+Calibrate extrinsic parameters:
+
+  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+
+Modify param.xml and set SCALE according to the desired resolution
+
+# -----------------------------------
+# ---  Build background model
+# -----------------------------------
+
+Restart gscam and capture background images with REDUCED resolution:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486 , framerate=15/1 ! ffmpegcolorspace"
+  rosrun gscam gscam -s 0
+
+Capture a few background frames:
+
+  roscd accompany_static_camera_localisation/res
+  mkdir background
+  cd background
+  rosrun image_view image_view image:=/gscam/image_raw
+
+Right click to store a few background frames
+
+Create a background image list:
+  
+  rosrun accompany_static_camera_localisation create_background_list background_list.txt *.jpg
+  
+Build background model:
+  
+  roscd accompany_static_camera_localisation/res
+  rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml
+  
+# -----------------------------------
+# ---  Create Prior
+# -----------------------------------
+
+Select a walkable region:
+
+  rosrun accompany_static_camera_localisation create_prior -i background/background_list.txt -p params.xml -o prior.txt
+
+# -----------------------------------
+# ---  Checkpoint calibration
+# -----------------------------------
+
+Check calibration results:
+
+  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt
+
+# -----------------------------------
+# ---  Localization
+# -----------------------------------
+
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rostopic echo /humanLocations
 
 = TODO
+ 
+ - feed with live frames
 
  - Build a tracker
  

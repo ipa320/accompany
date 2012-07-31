@@ -39,8 +39,8 @@ CamCalib::CamCalib()
 
 void CamCalib::xmlPack(XmlFile &f) const
 {
-     string modelFile;
-     f.pack("ModelFile", modelFile);
+//     string modelFile; // TODO
+//     f.pack("ModelFile", modelFile);
      // f.pack("w", w);
      // f.pack("w2", w2);
      f.pack("sigma1", stdev1);
