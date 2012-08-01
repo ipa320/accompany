@@ -48,7 +48,7 @@ Clone cmn with (non-public, this requires ssh access to server!!)
 
 and install with
 
-  cd cmn
+  cd cmnGwenn
   mkdir build
   cd build
   cmake ../src
@@ -87,6 +87,7 @@ publish stream in ros:
 # ---  accompany_static_camera_localisation
 # --------------------------------------------
 
+
 Nodes Overview:
   
   - camera_localisation [main function to localize persons]
@@ -99,9 +100,15 @@ Nodes Overview:
   
   - calibration_intrinsic [calibrate intrinsic parameters of overhead camera]
   
-  - create_calibration_list [create a list of images]
+  - create_calibration_list [create a list of images for calibration]
+
+  - create_background_list [create a list of background images]
   
   - annotate_image_points [annotate points on the image space]
+
+  - image_saver [save a bunch of image frames]
+
+  - annotate_pos [visualize the calibration results]
   
 # -------------------------
 # ---  Test Routine
