@@ -59,7 +59,7 @@ Install gstreamer
 
   sudo apt-get install gstreamer-tools
 
-Install the gscam ROS package from file: dependencies/gscam.tar.gz
+Install the gscam ROS package in: UvA/dependencies/gscam
 This file has been slightly altered to drop old frames (sync=false)
 and so always provide the last frame.
 
