@@ -11,7 +11,7 @@
         <scanres>5</scanres>
         <IntrinsicFile>camera_intrinsic.xml</IntrinsicFile>
         <ExtrinsicFile>camera_extrinsic.xml</ExtrinsicFile>
-        <SCALE>1</SCALE>
+        <SCALE>0.25</SCALE>
       </Elt>
     </Vector>
   </Cameras>

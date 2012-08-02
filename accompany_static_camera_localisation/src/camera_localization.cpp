@@ -639,13 +639,13 @@ int main(int argc,char **argv)
   ros::Publisher humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
   ros::Publisher humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
 
-  cvNamedWindow("view");
-  cvStartWindowThread();
-  image_transport::ImageTransport it(n);
-  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
-  ros::spin(); // wait for Ctrl-C program termination
-  cvDestroyWindow("view");
-  exit(0); // program exits on ros::spin() return
+//////  cvNamedWindow("view");
+//////  cvStartWindowThread();
+//////  image_transport::ImageTransport it(n);
+//////  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
+//////  ros::spin(); // wait for Ctrl-C program termination
+//////  cvDestroyWindow("view");
+//////  exit(0); // program exits on ros::spin() return
 
   // generate dummy data
   int max=100;
@@ -677,7 +677,7 @@ int main(int argc,char **argv)
      logLocPrior.fill(-log(scanLocations.size()));
         
      // load the first image to get image size //TODO
-     IplImage* testImage = loadImage("marker/frame0000.jpg"); // TODO release after use
+     IplImage* testImage = loadImage("background/frame0000.jpg"); // TODO release after use
      vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
      image[0] = testImage;
 
@@ -774,7 +774,7 @@ int main(int argc,char **argv)
     
     // get new image //TODO
     // release image here // TODO
-    IplImage* testImage = loadImage("marker/frame0000.jpg"); //TODO
+    IplImage* testImage = loadImage("background/frame0000.jpg"); //TODO
     vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
     image[0] = testImage;
     src=image;
