@@ -19,17 +19,15 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 INCLUDE(FindPkgConfig)
 pkg_check_modules(XML2 REQUIRED libxml-2.0)
 SET( CMAKE_CXX_FLAGS ${XML2_CFLAGS})
-SET(HOME "/home/ninghang")
-SET( VXL_BASE_DIR /usr/include/vxl CACHE PATH "Location of the VXL library source code")
-SET( CMN_SRC_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn/src CACHE PATH "Location of the CMN library source code")
-SET( CMN_LIB_DIR ${HOME}/Software/PeopleDetectionGwenn/cmn_build CACHE PATH "Location of the CMN compiled library")
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_DIR}/core ${VXL_BASE_DIR} ${VXL_BASE_DIR}/vcl ${CMN_SRC_DIR})
+
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv)
 
 # now search for required headers in usual places instead of relying on set paths above
 
 # check cmn headers
 find_path(CMN_INCLUDE_DIR cmn/random.hh
-  HINTS  /usr/include/cmn /usr/local/include/cmn ${CMN_SRC_DIR}
+  HINTS  /usr/include/cmn /usr/local/include/cmn
   PATH_SUFFIXES cmn) 
 if (NOT CMN_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'cmn/random.hh', please install cmn from ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn.git or set CMN_SRC_DIR")
@@ -49,7 +47,7 @@ endif (NOT VNL_INCLUDE_DIR)
 
 # check vcl headers
 find_path(VCL_INCLUDE_DIR vcl/vcl_iosfwd.h
-  HINTS  /usr/include/vxl /usr/local/include/vxl ${VXL_BASE_DIR}
+  HINTS  /usr/include/vxl /usr/local/include/vxl
   PATH_SUFFIXES vcl) 
 if (NOT VCL_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'vcl/vcl_iosfwd.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
