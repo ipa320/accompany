@@ -29,6 +29,12 @@
 #include "CamCalib.hh"
 #include "fstream"
 
+// subscribe to ros images
+#include <image_transport/image_transport.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <cv_bridge/CvBridge.h>
+
 using namespace std;
 using namespace cv;
 //#include <boost/program_options.hpp>
@@ -586,6 +592,19 @@ void initStaticProbs() {
           logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
+void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+{
+  sensor_msgs::CvBridge bridge;
+  try
+  {
+    cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
+  }
+  catch (sensor_msgs::CvBridgeException& e)
+  {
+    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+  }
+}
+
 int main(int argc,char **argv)
 {
 //   options
@@ -619,6 +638,14 @@ int main(int argc,char **argv)
   ros::NodeHandle n;
   ros::Publisher humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
   ros::Publisher humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
+
+  cvNamedWindow("view");
+  cvStartWindowThread();
+  image_transport::ImageTransport it(n);
+  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
+  ros::spin(); // wait for Ctrl-C program termination
+  cvDestroyWindow("view");
+  exit(0); // program exits on ros::spin() return
 
   // generate dummy data
   int max=100;

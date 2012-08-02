@@ -57,7 +57,7 @@ and install with
 
 Install gstreamer
 
-  sudo apt-get install gstreamer-tools
+  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
 
 Install the gscam ROS package in: UvA/dependencies/gscam
 This file has been slightly altered to drop old frames (sync=false)
