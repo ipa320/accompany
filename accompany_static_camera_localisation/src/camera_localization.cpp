@@ -16,6 +16,7 @@
 #include <boost/thread/xtime.hpp>
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <opencv/cvwimage.h>
 #include <vector>
 #include <stdio.h>
 #include "cmn/FastMath.hh"
@@ -76,6 +77,24 @@ vector< vnl_vector<FLOAT> > logSumPixelFGProb;
 vector< vector< vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
 int waitTime = 20;
+
+
+
+ros::Publisher humanLocationsPub,humanLocationsParticlesPub;
+
+unsigned CAM_NUM = 1;   
+bool HAS_INIT = false;
+vector<IplImage*> src(CAM_NUM), cvt(CAM_NUM);
+vector< vnl_vector<FLOAT> > img(CAM_NUM),bg(CAM_NUM);
+vector< vnl_vector<FLOAT> > sumPixel(cam.size());
+
+//   options
+bool particles=false;
+int nrParticles = 10;
+// generate dummy data
+int max=100;
+int count=0;
+int direction=1;
 
 ImgProducer *producer;
 
@@ -594,22 +613,113 @@ void initStaticProbs() {
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-  sensor_msgs::CvBridge bridge;
-  try
-  {
-    cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
-  }
-  catch (sensor_msgs::CvBridgeException& e)
-  {
-    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-  }
+    cout << "callback function" << endl;
+    sensor_msgs::CvBridge bridge;
+    try
+    {
+        // load the first image to get image size
+//        src[0] = bridge.imgMsgToCv(msg, "bgr8"); // TODO release after use
+        src[0] = loadImage("frame0000.jpg");
+        
+        if (!HAS_INIT)
+        {
+        
+            for (unsigned c=0; c!=cam.size(); ++c) 
+            {
+                if (!src[c]) 
+                {
+                   ROS_ERROR("initialization failed: empty image");
+                }
+                cvt[c] = cvCreateImage(cvGetSize(src[c]),IPL_DEPTH_8U,3);
+            }
+            width    = src[0]->width;
+            height   = src[0]->height;
+            depth    = src[0]->depth;
+            channels = src[0]->nChannels;
+            halfresX = width/2;
+            halfresY = height/2;
+
+            initStaticProbs();
+            buildMasks();
+            HAS_INIT = true;
+        }
+        cout << "callback function1" << endl;
+        
+        vector<FLOAT> sum(cam.size());
+        
+        for (unsigned c=0; c!=cam.size(); ++c)
+        {
+            cvCvtColor(src[c],cvt[c],TO_INT_FMT);
+            img2vec(cvt[c],img[c]);
+                       
+            bgModel[c].getBackground(img[c],bg[c]);
+            /*
+        // publish human locations
+        accompany_human_tracker::HumanLocations humanLocations;
+        geometry_msgs::Vector3 v;
+        v.x=10+((direction<0)*max+count*direction)*0.1;
+        v.y=1;
+        v.z=0;
+        humanLocations.locations.push_back(v);
+        v.x=3;
+        v.y=10+((direction<0)*max+count*direction)*0.2;
+        v.z=0;
+        humanLocations.locations.push_back(v);
+        v.x=5+count*0.15;
+        v.y=5+count*0.15;
+        v.z=0;
+        humanLocations.locations.push_back(v);
+            */
+            
+            cout << "callback function1.5" << endl;
+            if (PRODUCER_BUILDS_BACKGROUND)
+                cam[c].computeBGProbDiff(img[c], bg[c], sumPixel[c],sum[c]);
+            
+            cout << "callback function1.6" << endl;
+        }
+        cout << "callback function2" << endl;
+        accompany_human_tracker::HumanLocations humanLocations;
+        humanLocations = findPerson(0, src, img, bg, sum, logSumPixelFGProb, sumPixel);
+        cout << "callback function3" << endl;
+//        if (++count>=max)
+//        {
+//            int count=0;
+//            direction*=-1;
+//        }
+        if (!particles)
+            humanLocationsPub.publish(humanLocations);
+        cout << "callback function4" << endl;
+        // publish human locations particles
+//        if (particles)
+//        {
+//            accompany_static_camera_localisation::HumanLocationsParticles humanLocationsParticles;
+//            for (int i=0;i<nrParticles;i++)
+//            {
+//            accompany_static_camera_localisation::HumanLocationsParticle humanLocationsParticle;
+//            int numberOfLocations=(rand()%humanLocations.locations.size())+1;
+//            for (int l=0;l<numberOfLocations;l++)
+//            {
+//              int randomLoc=(rand()%humanLocations.locations.size());// random location index
+//              geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
+//              humanLocationsParticle.locations.push_back(v);// add location to particle
+//            }
+//            humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
+//            humanLocationsParticles.particles.push_back(humanLocationsParticle);
+//          }
+//          humanLocationsParticlesPub.publish(humanLocationsParticles);
+//        }
+//        cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
+//        cvDestroyWindow("view");
+    }
+    
+    catch (sensor_msgs::CvBridgeException& e)
+    {
+        ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+    }
 }
 
 int main(int argc,char **argv)
 {
-//   options
-  bool particles=false;
-  int nrParticles = 10;
 //  // boost parameters parsing
 //  po::options_description optionsDescription("Allowed options");
 //  optionsDescription.add_options()
@@ -630,40 +740,26 @@ int main(int argc,char **argv)
 //    particles=true;
 
   // init ros
-  ros::init(argc, argv, "CameraLocalisation");
+  ros::init(argc, argv, "camera_localization");
 
   // read files
-
   // create publishers and subscribers
   ros::NodeHandle n;
   ros::Publisher humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
   ros::Publisher humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
 
-//////  cvNamedWindow("view");
-//////  cvStartWindowThread();
-//////  image_transport::ImageTransport it(n);
-//////  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
-//////  ros::spin(); // wait for Ctrl-C program termination
-//////  cvDestroyWindow("view");
-//////  exit(0); // program exits on ros::spin() return
-
-  // generate dummy data
-  int max=100;
-  int count=0;
-  int direction=1;
 
 
-  srand(time(0));// initialize random number generator
+//  srand(time(0));// initialize random number generator
 
 
 
 
-     if (argc != 4) {
-          cout << "Usage: threadtest <bg train|model> <calib> <prior>" << endl;
-          return 1;
-     }
+//     if (argc != 4) {
+//          cout << "Usage: threadtest <bg train|model> <calib> <prior>" << endl;
+//          return 1;
+//     }
 
-     unsigned CAM_NUM = 1;
 
      // INITIALIZATION
      getBackground(argv[1], bgModel);
@@ -672,124 +768,44 @@ int main(int argc,char **argv)
      assert_eq(bgModel.size(), CAM_NUM);
      assert_eq(cam.size(), bgModel.size());
      genScanLocations(priorHull,scanres, scanLocations);
-     
+
      logLocPrior.set_size(scanLocations.size());
      logLocPrior.fill(-log(scanLocations.size()));
-        
-     // load the first image to get image size //TODO
-     IplImage* testImage = loadImage("background/frame0000.jpg"); // TODO release after use
-     vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
-     image[0] = testImage;
-
-     width    = image[0]->width;
-     height   = image[0]->height;
-     depth    = image[0]->depth;
-     channels = image[0]->nChannels;
-     halfresX = width/2;
-     halfresY = height/2;
-
-     initStaticProbs();
-     buildMasks();
-
-     vector<IplImage*> src, cvt(CAM_NUM);
-     unsigned cnt = 0;
+    
+     
+//    cvNamedWindow("view");
+//    cvStartWindowThread();
 
      
-     src = image;
+//  ros::Rate loop_rate(2);
+//  while(ros::ok())
+//  {
+//    for (unsigned c=0; c!=cam.size(); ++c) {
+//        if (!src[c]) 
+//        {
+//            cout << "camera " << c << "is empty, exit" << endl;
+//            exit(0);
+//        }
+//    }
 
-     for (unsigned c=0; c!=cam.size(); ++c) {
-         if (!src[c]) exit(0);
-          cvt[c] = cvCreateImage(cvGetSize(src[c]),IPL_DEPTH_8U,3);
-     }
-     vector< vnl_vector<FLOAT> >
-          img(CAM_NUM),bg(CAM_NUM);
-     vector< vnl_vector<FLOAT> >
-          sumPixel(cam.size());
-     vector<FLOAT>
-          sum(cam.size());
-          
-     
-  ros::Rate loop_rate(2);
-  while(ros::ok())
-  {
-    accompany_human_tracker::HumanLocations humanLocations;
+  ros::Rate loop_rate(5);
+    
+  image_transport::ImageTransport it(n);
+  image_transport::Publisher pub2 = it.advertise("/gscam/image_raw", 1);
+  cv::WImageBuffer3_b image2( cvLoadImage("frame0000.jpg", CV_LOAD_IMAGE_COLOR) );
+  sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(image2.Ipl(), "bgr8");
   
-    for (unsigned c=0; c!=cam.size(); ++c)
-    {
-        cvCvtColor(src[c],cvt[c],TO_INT_FMT);
+  
+  loop_rate.sleep();
+  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
 
-        img2vec(cvt[c],img[c]);
-        bgModel[c].getBackground(img[c],bg[c]);
-
-        /*
-    // publish human locations
-    accompany_human_tracker::HumanLocations humanLocations;
-    geometry_msgs::Vector3 v;
-    v.x=10+((direction<0)*max+count*direction)*0.1;
-    v.y=1;
-    v.z=0;
-    humanLocations.locations.push_back(v);
-    v.x=3;
-    v.y=10+((direction<0)*max+count*direction)*0.2;
-    v.z=0;
-    humanLocations.locations.push_back(v);
-    v.x=5+count*0.15;
-    v.y=5+count*0.15;
-    v.z=0;
-    humanLocations.locations.push_back(v);
-        */
-
-        if (PRODUCER_BUILDS_BACKGROUND)
-            cam[c].computeBGProbDiff(img[c], bg[c], sumPixel[c],sum[c]);
-    }
-    humanLocations = findPerson(cnt++, src, img, bg, sum, logSumPixelFGProb, sumPixel);
-    
-    if (++count>=max)
-    {
-      count=0;
-      direction*=-1;
-    }
-    if (!particles)
-    humanLocationsPub.publish(humanLocations);
-
-    // publish human locations particles
-    if (particles)
-    {
-      accompany_static_camera_localisation::HumanLocationsParticles humanLocationsParticles;
-      for (int i=0;i<nrParticles;i++)
-      {
-        accompany_static_camera_localisation::HumanLocationsParticle humanLocationsParticle;
-        int numberOfLocations=(rand()%humanLocations.locations.size())+1;
-        for (int l=0;l<numberOfLocations;l++)
-        {
-          int randomLoc=(rand()%humanLocations.locations.size());// random location index
-          geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
-          humanLocationsParticle.locations.push_back(v);// add location to particle
-        }
-        humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
-        humanLocationsParticles.particles.push_back(humanLocationsParticle);
-      }
-      humanLocationsParticlesPub.publish(humanLocationsParticles);
-    }
-    
-    // get new image //TODO
-    // release image here // TODO
-    IplImage* testImage = loadImage("background/frame0000.jpg"); //TODO
-    vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
-    image[0] = testImage;
-    src=image;
-
-    for (unsigned c=0; c!=cam.size(); ++c) {
-        if (!src[c]) 
-        {
-            cout << "camera " << c << "is empty, exit" << endl;
-            exit(0);
-        }
-    }
-
+  
+  while (n.ok()) {
+    pub2.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
   }
+  
 
-  return 0;
+    return 0;
 }
