@@ -145,7 +145,7 @@ Camera Localization
 # ---  Preparation
 # -------------------------
 
-Required: A1 paper, (wooden or metal) board, black or gray tape (more than 10m), tape measure.
+Required: checkerboard with WHITE and LARGE boader, black or gray tape (more than 10m), tape measure.
 
 Download checkerboard pattern from:
 
