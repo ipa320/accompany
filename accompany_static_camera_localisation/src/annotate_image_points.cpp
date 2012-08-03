@@ -143,7 +143,7 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 		rdown = true;
 		cout << "Right button down at " << x << "," << y << endl;
 		CvPoint diff = p-locations[selected];
-		locations[selected].angle = atan2(diff.y,diff.x);
+		locations[selected].angle = atan2((double)diff.y,(double)diff.x);
 		// cout << "diff=" << diff << ", Angle is " << locations[selected].angle << endl;
 		refresh();
 	}
@@ -159,7 +159,7 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 		}
 		if (rdown) {
 			CvPoint diff = p-locations[selected];
-			locations[selected].angle = atan2(diff.y,diff.x);
+			locations[selected].angle = atan2((double)diff.y,(double)diff.x);
 			refresh();
 		}
 		break;

@@ -99,6 +99,7 @@ void ImgProducer::forward(unsigned frames)
 		break;
 	default:
 		cerr << "Case not implemented" << endl;
+		break;
 	}
 
 }
@@ -121,6 +122,7 @@ void ImgProducer::backward(unsigned frames)
 		break;
 	default:
 		cerr << "Case not implemented" << endl;
+		break;
 	}
 
 }

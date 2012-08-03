@@ -82,9 +82,8 @@ int main(int argc, char **argv) {
 			for (unsigned i=0; i!=trainset.size(); ++i) {
 				string filename = trainset[i][j];
 				cout << "Loading " << filename << endl;
-				IplImage
-				*src = cvLoadImage(filename.c_str()),
-				*img = cvCreateImage(cvGetSize(src),IPL_DEPTH_8U,3);
+				IplImage *src = cvLoadImage(filename.c_str());
+				IplImage *img = cvCreateImage(cvGetSize(src),IPL_DEPTH_8U,3);
 				//cvSmooth(src,src,CV_GAUSSIAN,2,2);
 				cvCvtColor(src,img,TO_INT_FMT);
 
@@ -120,9 +119,8 @@ int main(int argc, char **argv) {
 			for (unsigned i=0; i!=trainset.size(); ++i) {
 				string filename = trainset[rand_range(0,trainset.size()-1)][j];
 				cout << "Loading " << filename << endl;
-				IplImage
-				*src = loadImage(filename.c_str()),
-				*img = cvCreateImage(cvGetSize(src),IPL_DEPTH_8U,3);
+				IplImage *src = loadImage(filename.c_str());
+				IplImage *img = cvCreateImage(cvGetSize(src),IPL_DEPTH_8U,3);
 				cvCvtColor(src,img,TO_INT_FMT);
 				cvReleaseImage(&src);
 

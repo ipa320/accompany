@@ -64,6 +64,7 @@ static void calcChessboardCorners(Size boardSize, float squareSize, vector<Point
 
 	default:
 		CV_Error(CV_StsBadArg, "Unknown pattern type\n");
+		break;
 	}
 }
 
