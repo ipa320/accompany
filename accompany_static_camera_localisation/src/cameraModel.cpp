@@ -36,27 +36,27 @@ void CameraModel::init(string IntrinsicFile,string ExtrinsicFile,double SCALE) /
 {
 
 	/* Loading intrisic parameters */
-    cv::FileStorage fs(IntrinsicFile, cv::FileStorage::READ);
+	cv::FileStorage fs(IntrinsicFile, cv::FileStorage::READ);
 
-    fs["camera_matrix"] >> camera_matrix;
-    fs["distortion_coefficients"] >> distortion_coefficients;
+	fs["camera_matrix"] >> camera_matrix;
+	fs["distortion_coefficients"] >> distortion_coefficients;
 
-    camera_matrix = camera_matrix * SCALE;
-//    distortion_coefficients = distortion_coefficients * SCALE;
+	camera_matrix = camera_matrix * SCALE;
+	//    distortion_coefficients = distortion_coefficients * SCALE;
 
-    cv::FileStorage fs_extrin(ExtrinsicFile, cv::FileStorage::READ);
-    fs_extrin["rvec"] >> rvec;
-    fs_extrin["tvec"] >> tvec;
-    
-    cout << "rvec = " << rvec / 3.14 * 180 << " degree"<< endl;
-    cout << "tvec = " << tvec << endl;
-    
-    isInit = true;
+	cv::FileStorage fs_extrin(ExtrinsicFile, cv::FileStorage::READ);
+	fs_extrin["rvec"] >> rvec;
+	fs_extrin["tvec"] >> tvec;
+
+	cout << "rvec = " << rvec / 3.14 * 180 << " degree"<< endl;
+	cout << "tvec = " << tvec << endl;
+
+	isInit = true;
 }
 
 bool CameraModel::fromXml(string IntrinsicFile,string ExtrinsicFile,double SCALE) //TODO
 {
-    init(IntrinsicFile,ExtrinsicFile,SCALE);
+	init(IntrinsicFile,ExtrinsicFile,SCALE);
 	return isInit;
 }
 
@@ -69,7 +69,7 @@ bool CameraModel::imageToWorld(double Xi, double Yi, double Zw, double& Xw, doub
 	{
 		cv::Mat image_coordinates = (cv::Mat_<double>(1,2) << Xi,Yi);
 
-		 /* Distorted image coordinates -> Undistorted coordinates (homogenious) */
+		/* Distorted image coordinates -> Undistorted coordinates (homogenious) */
 		cv::Mat undistorted_points;
 		undistortPoints(image_coordinates.reshape(2),undistorted_points,camera_matrix,distortion_coefficients);
 
@@ -82,19 +82,19 @@ bool CameraModel::imageToWorld(double Xi, double Yi, double Zw, double& Xw, doub
 		cv::transpose(undistorted_points,undistorted_points); // (2xN mtx)
 		cv::Mat vec_ones = cv::Mat::ones(cv::Size(undistorted_points.cols,1),undistorted_points.type());
 		undistorted_points.push_back(vec_ones); // make it homogenius-add the third component to 1 (3xN mtx)
-		
-        cv::Mat camera_ic = cv::Mat::zeros(tvec.size(),tvec.type());
-        cv::Mat camera_wc = Rotation_mtx.inv() * (camera_ic - tvec);
-        cv::Mat homo_point = Rotation_mtx.inv() * (undistorted_points - tvec);
 
-        double Zc = camera_wc.at<double>(2);
-        double Zh = homo_point.at<double>(2);
-        double s = (Zc - Zw) / (Zc - Zh);
+		cv::Mat camera_ic = cv::Mat::zeros(tvec.size(),tvec.type());
+		cv::Mat camera_wc = Rotation_mtx.inv() * (camera_ic - tvec);
+		cv::Mat homo_point = Rotation_mtx.inv() * (undistorted_points - tvec);
 
-        cv::Mat Pts_wc = (homo_point - camera_wc) * s + camera_wc;
-//        cout << Pts_wc.rowRange(0,2) << endl;
-        Xw = Pts_wc.at<double>(0);
-        Yw = Pts_wc.at<double>(1);
+		double Zc = camera_wc.at<double>(2);
+		double Zh = homo_point.at<double>(2);
+		double s = (Zc - Zw) / (Zc - Zh);
+
+		cv::Mat Pts_wc = (homo_point - camera_wc) * s + camera_wc;
+		//        cout << Pts_wc.rowRange(0,2) << endl;
+		Xw = Pts_wc.at<double>(0);
+		Yw = Pts_wc.at<double>(1);
 
 		done = true;
 	}
@@ -129,7 +129,7 @@ bool CameraModel::imageToWorldMat(cv::Mat image_coordinates, cv::Mat& world_coor
 
 	if (isInit)
 	{
-		 /* Distorted image coordinates -> Undistorted coordinates (homogenious) */
+		/* Distorted image coordinates -> Undistorted coordinates (homogenious) */
 		cv::Mat undistorted_points;
 		cv::undistortPoints(image_coordinates.reshape(2),undistorted_points,camera_matrix,distortion_coefficients);
 

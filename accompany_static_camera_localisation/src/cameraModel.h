@@ -51,35 +51,35 @@ namespace Hu {
 //!  A root class handling camera model
 class CameraModel
 {
-    public:
+public:
 
-        /* PRIVATE */ // TODO
-		bool isInit;
-        cv::Mat camera_matrix, distortion_coefficients, rvec, tvec;
+	/* PRIVATE */ // TODO
+	bool isInit;
+	cv::Mat camera_matrix, distortion_coefficients, rvec, tvec;
 
-        void init(string IntrinsicFile,string ExtrinsicFile,double SCALE);
+	void init(string IntrinsicFile,string ExtrinsicFile,double SCALE);
 
-        //! Constructor
-        CameraModel();
-        //! Destructor
-        virtual ~CameraModel();
+	//! Constructor
+	CameraModel();
+	//! Destructor
+	virtual ~CameraModel();
 
-        //! from image coordinate to world coordinate (single points)
-        bool imageToWorld(double Xi, double Yi, double Zw, double& Xw, double &Yw);
+	//! from image coordinate to world coordinate (single points)
+	bool imageToWorld(double Xi, double Yi, double Zw, double& Xw, double &Yw);
 
-        //! from world coordinate to image coordinate (single points)
-        bool worldToImage(double Xw, double Yw, double Zw, double& Xi, double& Yi);
+	//! from world coordinate to image coordinate (single points)
+	bool worldToImage(double Xw, double Yw, double Zw, double& Xi, double& Yi);
 
-        //! from image coordinate to world coordinate (Matrix)
-        bool imageToWorldMat(cv::Mat image_coordinates, cv::Mat& world_coordinates);
+	//! from image coordinate to world coordinate (Matrix)
+	bool imageToWorldMat(cv::Mat image_coordinates, cv::Mat& world_coordinates);
 
-        //! from world coordinate to image coordinate (Matrix)
-        bool worldToImageMat(cv::Mat world_coordinates, cv::Mat& image_coordinates);
+	//! from world coordinate to image coordinate (Matrix)
+	bool worldToImageMat(cv::Mat world_coordinates, cv::Mat& image_coordinates);
 
-        //! Loading from an XML
-        virtual bool fromXml(string IntrinsicFile,string ExtrinsicFile,double SCALE);
+	//! Loading from an XML
+	virtual bool fromXml(string IntrinsicFile,string ExtrinsicFile,double SCALE);
 
-    };
+};
 };
 
 #endif

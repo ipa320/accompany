@@ -20,65 +20,61 @@
 
 namespace Hu {
 
-	//!  A function to handle libxml2 initialization
-	class UtilXml
-	{
-		public:
-		
-			static void	Init();
-			static void	Cleanup();
-			
-			static int ReadCallback(void * context, char * buffer, int length);
-			static int InputCloseCallback(void * context);
+//!  A function to handle libxml2 initialization
+class UtilXml
+{
+	public:
 
-			static int WriteCallback(void * context, const char * buffer, int length);
-			static int OutputCloseCallback(void * context);
-	};
+		static void	Init();
+		static void	Cleanup();
 
-	//!  mapping output from libxml2 to ostream
-	class XmlOutputHandler 
-	{
-		public:
-			
-			XmlOutputHandler(std::ostream& stream);
-			virtual ~XmlOutputHandler();
-			
+		static int ReadCallback(void * context, char * buffer, int length);
+		static int InputCloseCallback(void * context);
+
+		static int WriteCallback(void * context, const char * buffer, int length);
+		static int OutputCloseCallback(void * context);
+};
+
+//!  mapping output from libxml2 to ostream
+class XmlOutputHandler
+{
+	public:
+
+		XmlOutputHandler(std::ostream& stream);
+		virtual ~XmlOutputHandler();
+
 		int	write(const char* buffer, int length);
-		int close(); 
-		
-		inline const struct _xmlOutputBuffer* xmlOutputBuffer() const 
-			{ return mOutBuffer; }
-		inline struct _xmlOutputBuffer* xmlOutputBuffer() { return mOutBuffer; }
-		
-		private:
-			std::ostream					&mStream;
-			struct _xmlOutputBuffer			*mOutBuffer; 
-			
-			
-	};
+		int close();
 
-	//!  mapping intput from libxml2 from istream
-	class XmlInputHandler 
-	{
-		public:
-			
-			XmlInputHandler(std::istream& stream);
-			virtual ~XmlInputHandler();
-			
+		inline const struct _xmlOutputBuffer* xmlOutputBuffer() const
+		{ return mOutBuffer; }
+		inline struct _xmlOutputBuffer* xmlOutputBuffer() { return mOutBuffer; }
+
+	private:
+		std::ostream					&mStream;
+		struct _xmlOutputBuffer			*mOutBuffer;
+};
+
+//!  mapping intput from libxml2 from istream
+class XmlInputHandler
+{
+	public:
+
+		XmlInputHandler(std::istream& stream);
+		virtual ~XmlInputHandler();
+
 		int	read(char* buffer, int length);
-		int close(); 
-		
-		inline const struct _xmlParserInputBuffer* xmlInputBuffer() const 
-			{ return mInBuffer; }
+		int close();
+
+		inline const struct _xmlParserInputBuffer* xmlInputBuffer() const
+		{ return mInBuffer; }
 		inline struct _xmlParserInputBuffer* xmlInputBuffer() { return mInBuffer; }
-		
-		private:
-			std::istream					&mStream;
-			struct _xmlParserInputBuffer	*mInBuffer; 
-			
-			
-	};
-	
+
+	private:
+		std::istream					&mStream;
+		struct _xmlParserInputBuffer	*mInBuffer;
+};
+
 
 
 };
