@@ -308,6 +308,11 @@ Check calibration results:
   rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
   rostopic echo /humanLocations
 
+# -----------------------------------
+# ---  For Eclipse Users
+# -----------------------------------
+
+
 = TODO
  
  - feed with live frames
