@@ -47,7 +47,6 @@ unsigned MIN_TRACK_LEN = 20;
 unsigned MAX_TRACK_JMP = 1000;
 unsigned MAX_TRACK_AGE = 8;
 
-
 // struct Image_t {
 // };
 
@@ -549,7 +548,7 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
                cvCircle(src[c],cam[c].project(scanLocations[existing[i]]),1,CV_RGB(255,255,0),2);
           }
 
-//////          cvShowImage(bgwin[c], cvt); // TODO
+          cvShowImage(bgwin[c], cvt); // TODO
           cvReleaseImage(&bg);
           cvReleaseImage(&cvt);
           cvShowImage(win[c],src[c]); //<<--- // TODO
@@ -621,10 +620,15 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     try
     {
         // load the first image to get image size
-//        src[0] = bridge.imgMsgToCv(msg, "bgr8"); // TODO release after use
-        IplImage* testImage = loadImage("test_frame/frame0000.jpg"); // TODO release after use
+        IplImage* testImage = bridge.imgMsgToCv(msg, "bgr8"); // TODO release after use
+//        cvSaveImage("test1.png", testImage);
+//        
+//        IplImage* testImage2 = loadImage("test_frame/frame0000.jpg"); // TODO release after use
+//        cvSaveImage("test2.png", testImage2);
+
+        
         vector<IplImage *> image = vector<IplImage *>(CAM_NUM);
-        image[0] = testImage;
+        image[0] = cvCloneImage(testImage);
         
         src = image;
         
@@ -778,7 +782,6 @@ int main(int argc,char **argv)
     
 //    vector< vnl_vector<FLOAT> >  img(CAM_NUM),bg(CAM_NUM);
      
-//    cvNamedWindow("view");
 //    cvStartWindowThread();
 
      

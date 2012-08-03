@@ -319,3 +319,7 @@ Check calibration results:
  - Multiple camera tracking
  
  - Final testing on frame stream
+ 
+ - Need to release image in localization?
+ 
+ - check all pointers
