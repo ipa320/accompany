@@ -83,67 +83,10 @@ publish stream in ros:
 
 
 # --------------------------------------------
-# ---  Package:
 # ---  accompany_static_camera_localisation
 # --------------------------------------------
 
-
-Nodes Overview:
-  
-  - camera_localisation [main function to localize persons]
-  
-  - build_background_model [build background model with PCA]
-  
-  - create_prior [select a region on the groundplane]
-  
-  - calibration_extrinsic [calibrate extrinsic parameters of overhead camera]
-  
-  - calibration_intrinsic [calibrate intrinsic parameters of overhead camera]
-  
-  - create_calibration_list [create a list of images for calibration]
-
-  - create_background_list [create a list of background images]
-  
-  - annotate_image_points [annotate points on the image space]
-
-  - image_saver [save a bunch of image frames]
-
-  - annotate_pos [visualize the calibration results]
-  
-# -------------------------
-# ---  Test Routine
-# -------------------------
-
-Create a image list containing chessboard patterns:
-  
-  roscd /accompany_static_camera_localisation/test
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
-    
-Intrinsic calibration:
-
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
-  
-Extrinsic calibration:
-
-  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
-  
-Create prior locations (select area that persons can walk on):
-
-  rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
-  
-Build background model:
-
-  rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
-  
-Camera Localization
-
-  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
-  rostopic echo /humanLocations
-
-
-# -------------------------
-# ---  Preparation
-# -------------------------
+- Preparation -
 
 Required: checkerboard with WHITE and LARGE boader, black or gray tape (more than 10m), tape measure.
 
@@ -158,7 +101,7 @@ and print out checkerboard pattern on A1 paper, then attach the paper onto a boa
 Use tape to make cross markers on the floor and also on the wall, with an interval of 1 meter. The markers represent the world coordinates frame. Write the coordinates of markers into a file, an example is:
 
   points3D.txt
-  ------------
+  ----------
   0,0,0
   0,1000,0
   3000,0,1000
@@ -168,10 +111,14 @@ Check camera manual
 
   focal length
   image
+  
+To import project into Eclipse (optional), refer to:
+  
+  http://www.ros.org/wiki/IDEs
+  
+----------------------------------------
 
-# -----------------------------------
-# ---  Intrinsic Calibration
-# -----------------------------------
+= Intrinsic Calibration =
 
 Open camera in FULL resolution
 
@@ -196,9 +143,9 @@ Intrinsic calibration:
 
   rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -i calib_list.xml -o camera_intrinsic.xml 
 
-# ------------------------------------------------
-# ---  Intrinsic Calibration (alternative)
-# ------------------------------------------------
+----------------------------------------
+
+= Intrinsic Calibration using ROS (alternative) =
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
@@ -222,10 +169,10 @@ Save calibrated display with extension ".ini":
   [copy diplayed messages] 
 
 Copy info in .ini to .xml, remove comma
-  
-# -----------------------------------
-# ---  Camera Extrinsic Calibration
-# ----------------------------------- 
+    
+----------------------------------------
+
+= Camera Extrinsic Calibration =
 
 Annotate marker locations in a full resolution frame:
 
@@ -258,9 +205,9 @@ Calibrate extrinsic parameters:
 
 Modify param.xml and set SCALE according to the desired resolution
 
-# -----------------------------------
-# ---  Build background model
-# -----------------------------------
+----------------------------------------
+
+= Build background model =
 
 Restart gscam and capture background images with REDUCED resolution:
 
@@ -285,37 +232,60 @@ Build background model:
   roscd accompany_static_camera_localisation/res
   rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml
   
-# -----------------------------------
-# ---  Create Prior
-# -----------------------------------
+----------------------------------------
+
+= Create Prior =
 
 Select a walkable region:
 
   rosrun accompany_static_camera_localisation create_prior -i background/background_list.txt -p params.xml -o prior.txt
+  
+----------------------------------------
 
-# -----------------------------------
-# ---  Checkpoint calibration
-# -----------------------------------
-
-Check calibration results:
+= Checkpoint calibration =
 
   rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt
 
-# -----------------------------------
-# ---  Localization
-# -----------------------------------
+----------------------------------------
+
+= Localization =
 
   rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
   rostopic echo /humanLocations
 
-# -----------------------------------
-# ---  For Eclipse Users
-# -----------------------------------
+# -------------------------
+# ---  Test Routine
+# -------------------------
 
+Create a image list containing chessboard patterns:
+  
+  roscd /accompany_static_camera_localisation/test
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
+    
+Intrinsic calibration:
+
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
+  
+Extrinsic calibration:
+
+  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
+  
+Create prior locations (select area that persons can walk on):
+
+  rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
+  
+Build background model:
+
+  rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
+  
+Camera Localization
+
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rostopic echo /humanLocations
+
+----------------------------------------
 
 = TODO
- 
- - feed with live frames
 
  - Build a tracker
  
@@ -324,7 +294,3 @@ Check calibration results:
  - Multiple camera tracking
  
  - Final testing on frame stream
- 
- - Need to release image in localization?
- 
- - check all pointers
