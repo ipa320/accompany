@@ -60,7 +60,6 @@ vector<IplImage *> src_vec(CAM_NUM);
 // particle options
 bool particles=false;
 int nrParticles = 10;
-// generate dummy data
 int max=100;
 int count=0;
 int direction=1;
@@ -68,46 +67,8 @@ int direction=1;
 ImgProducer *producer;
 
 int waitTime = 30;
-const char *win[] = {
-		"fg_1","fg_2","fg_3","fg_4","fg_5","fg_6","fg_7","fg_8","fg_9","fg_10",
-		"fg_11","fg_12","fg_13","fg_14","fg_15","fg_16","fg_17","fg_18","fg_19","fg_20"
-};
-const char *bgwin[] = {
-		"bg_1","bg_2","bg_3","bg_4","bg_5","bg_6","bg_7","bg_8","bg_9","bg_10",
-		"bg_11","bg_12","bg_13","bg_14","bg_15","bg_16","bg_17","bg_18","bg_19","bg_20"
-};
-
-CvScalar trackCol [] = {
-		CV_RGB( 0, 0, 255 ),             // Blue    1
-		CV_RGB( 0, 255, 0 ),             // Green   2
-		CV_RGB( 255, 0, 0 ),             // Red     3
-		CV_RGB( 255, 255, 0 ),           // Cyan    4
-		CV_RGB( 255, 0, 255 ),           // magenta 5
-		CV_RGB( 0, 255, 255 ),           // Yellow  6
-		CV_RGB( 0, 128, 255 ),           // Orange  7
-		// CV_RGB( 255, 255, 255 ),         // White   8
-		CV_RGB( 128, 0, 0 ),             // Blue    9
-		CV_RGB( 0, 128, 0 ),             // Green   10
-		CV_RGB( 0, 0, 128 ),             // Red     11
-		CV_RGB( 128, 128, 0 ),           // Cyan    12
-		CV_RGB( 128, 0, 128 ),           // magenta 13
-		CV_RGB( 0, 128, 128 ),           // Yellow  14
-		CV_RGB( 0, 64, 128 ),            // Orange  15
-		CV_RGB( 128, 128, 128 ),         // Grey    16
-		CV_RGB( 128, 0, 0 ),             //
-		CV_RGB( 0, 128, 0 ),
-		CV_RGB( 0, 0, 128 )
-};
-
-struct track_t {
-	vector<WorldPoint> positions;
-	vector<unsigned> imgID;
-
-	FLOAT sumR, sumG, sumB;
-	FLOAT sumR2, sumG2, sumB2;
-	FLOAT sumPix;
-};
-vector<track_t> tracks;
+const char* win = "foreground";
+const char* bgwin = "background";
 
 void buildMasks()
 {
@@ -252,10 +213,6 @@ void scanRest(vector<unsigned> &existing,
 		FLOAT
 		logNP = logNumPrior[1];
 
-
-		////////          std::ofstream f2;
-		////////          f2.open("lpp.txt",std::fstream::app);
-
 		for (unsigned p=0; p!=scanLocations.size(); ++p)
 		{
 			// if (logLocPrior(p) < -5000) --> Not part of scanLocations anymore
@@ -263,13 +220,11 @@ void scanRest(vector<unsigned> &existing,
 
 			logPosProbCache[p] = logLocPrior(p);
 			for (unsigned c=0; c!=cam.size(); ++c) {
-				// cout << "Camera " << c << endl;
 				logPosProbCache[p] +=
 						logMaskProb(logSumPixelFGProb[c], logSumPixelBGProb[c], lSum[c], masks[c][p]);  // already includes lSum
 			}
 			lpp(p) = logPosProbCache[p] + logNP;
 
-			//////////               f2 << lpp(p) << ",";
 			logPosProbCache[p] -= logNumPrior[0];
 			for (unsigned c=0; c!=cam.size(); ++c)
 			{
@@ -281,8 +236,6 @@ void scanRest(vector<unsigned> &existing,
 				bestIdx = p;
 			}
 		}
-		//////////          f2 << endl;
-		//////////          f2.close();
 
 	}
 	// cout << "bestIdx=" << bestIdx << ", bestLogProb=" << bestLogProb << endl;
@@ -305,101 +258,11 @@ CvPoint cvPoint(unsigned pos)
 	return cvPoint(pos%width,pos/width);
 }
 
-/**
- * \brief Distance between two points in the ground plane
- * \param p1
- * \param p2
- * \return
- *
- * that is, ignore the z component.
- *
- * 2010/11/08: GWENN - First version
- *
- **/
-FLOAT dist(const WorldPoint &p1, const WorldPoint &p2)
-{
-	double
-	x1 = p1.x,
-	y1 = p1.y,
-	x2 = p2.x,
-	y2 = p2.y,
-	d1 = x1-x2,
-	d2 = y1-y2;
-	return sqrt(d1*d1 + d2*d2);
-}
-
 void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
 {
 	hull.push_back(hull.front());
 	for (unsigned i=1; i<hull.size(); ++i)
 		cvLine(img, cam[c].project(hull[i-1]),cam[c].project(hull[i]),CV_RGB(255,0,0),2);
-}
-
-void plotTrack(vector<IplImage *> &img,const track_t &t, CvScalar colour, unsigned w)
-{
-	for (unsigned c=0; c!=img.size(); ++c) {
-		for (unsigned j=1; j<t.positions.size(); ++j) {
-			cvCircle (img[c],cam[c].project(t.positions[j-1]),3,colour,w);
-			cvLine(img[c],cam[c].project(t.positions[j-1]),cam[c].project(t.positions[j]),colour,w);
-		}
-		cvCircle (img[c],cam[c].project(t.positions.back()),3,colour,w);
-		// plotTemplate2(img[c],cam[c].project(t.positions.back()),persHeight,camHeight,colour);
-	}
-}
-
-void updateTracks(unsigned imgNum, const vector<unsigned> &positions)
-{
-	vnl_matrix<float>
-	distances(tracks.size(),positions.size());
-	for (unsigned i=0; i!=tracks.size(); ++i)
-		for (unsigned j=0; j!=positions.size(); ++j)
-			distances(i,j) = dist(tracks[i].positions.back(),scanLocations[positions[j]]);
-	vector<bool>
-	trackAssigned(tracks.size(),false),
-	obsAssigned(positions.size(),false);
-	bool
-	foundAssignment = true;
-	while(foundAssignment) {
-		foundAssignment = false;
-
-		float
-		bestDist = MAX_TRACK_JMP;
-		unsigned
-		bestTrack = 9999999, bestObs=88888888;
-		for (unsigned i=0; i!=tracks.size(); ++i)
-			for (unsigned j=0; j!=positions.size(); ++j)
-				if (distances(i,j) < bestDist && !trackAssigned[i] && !obsAssigned[j]) {
-					foundAssignment = true;
-					bestDist = distances(i,j);
-					bestTrack = i;
-					bestObs = j;
-				}
-		if (foundAssignment) {
-			trackAssigned[bestTrack] = true;
-			obsAssigned[bestObs] = true;
-			tracks[bestTrack].positions.push_back(scanLocations[positions[bestObs]]);
-			tracks[bestTrack].imgID.push_back(imgNum);
-		}
-	}
-
-	for (unsigned i=0; i!=obsAssigned.size(); ++i) {
-		if (!obsAssigned[i]) {
-			track_t t;
-			t.positions.push_back(scanLocations[positions[i]]);
-			t.imgID.push_back(imgNum);
-			tracks.push_back(t);
-		}
-	}
-
-	vector<track_t>::iterator i=tracks.begin();
-	while (i!=tracks.end()) {
-		if (imgNum - i->imgID.back() > MAX_TRACK_AGE) {
-			// Person left FOV
-			tracks.erase(i);
-			i = tracks.begin();
-		} else
-			++i;
-	}
 }
 
 accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
@@ -436,25 +299,12 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
 	scanRest(existing, mask, logSumPixelFGProb, logSumPixelBGProb, logNumPrior,
 			/*logLocPrior, */logPosProb, marginal, logBGProb);
 
-	// write detection results
-	////////     ofstream f1;
-	////////     f1.open("detectionResults.txt",std::fstream::app);
-	////////     for (unsigned i=0; i!=existing.size(); ++i)
-	////////     {
-	//////////          cout << existing[i] << endl;
-	////////          f1 << " " << scanLocations[existing[i]];
-	////////     }
-	////////     f1 << endl;
-	////////     f1.close();
-
-
-	// REPORTING LOCATIONS
+	// report locations
 	cout << "locations found are" << endl;
 	accompany_human_tracker::HumanLocations humanLocations;
 	geometry_msgs::Vector3 v;
 	for (unsigned i=0; i!=existing.size(); ++i)
 	{
-		//          cout << existing[i] << endl;
 		WorldPoint wp = scanLocations[existing[i]];
 		cout << " " << scanLocations[existing[i]];
 		v.x=wp.x;
@@ -479,22 +329,6 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
 		}
 	}
 
-//	updateTracks(imgNum, existing);
-
-	// for (unsigned i=0; i!=tracks.size(); ++i) {
-	//      if (tracks[i].imgID.size() > MIN_TRACK_LEN)
-	//           if (imgNum- tracks[i].imgID.back() < 2)
-	//                // plotTrack(src, tracks[i], CV_RGB(0,255,0),1);
-	//                plotTrack(src, tracks[i], trackCol[i],2);
-	// }
-
-	// cout << " ";
-	// stoc();
-	// cout << endl;
-
-	// for (unsigned i=2; i<bgVec.size(); i+=3)
-	//      bgVec(i) = 255;
-
 	static int number = 0;
 	number++;
 	static char buffer[1024];
@@ -517,14 +351,15 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
 			cvCircle(src[c],cam[c].project(scanLocations[existing[i]]),1,CV_RGB(255,255,0),2);
 		}
 
-//		cvShowImage(bgwin[c], cvt);
+//		cvShowImage(bgwin, cvt);
 		cvReleaseImage(&bg);
 		cvReleaseImage(&cvt);
-		cvShowImage(win[c],src[c]);
-		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
+		cvShowImage(win,src[c]);
+
 
 		cvWaitKey(waitTime);
-		////////           cvSaveImage(buffer, src[c]);
+//		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
+//		cvSaveImage(buffer, src[c]);
 	}
 	/* End of Visualization */
 
