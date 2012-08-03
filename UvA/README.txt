@@ -81,12 +81,31 @@ publish stream in ros:
 ----------------------------------------
 
 
+# ---------------------------------------------------
+# ---  PACKAGE accompany_static_camera_localisation
+# ---------------------------------------------------
 
-# --------------------------------------------
-# ---  accompany_static_camera_localisation
-# --------------------------------------------
+#-- Test Routine --#
 
-- Preparation -
+Download testing resource from:
+
+  http://basterwijn.nl/ninghang/test_res/
+
+We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
+
+  rosrun accompany_static_camera_localisation video_publisher -s 0.3 -i wcam_20120112_vid4.avi 
+
+Start localization:
+
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt 
+  
+Show locations: 
+  rostopic echo /humanLocations
+  
+----------------------------------------
+  
+  
+#-- Preparation --#
 
 Required: checkerboard with WHITE and LARGE boader, black or gray tape (more than 10m), tape measure.
 
@@ -117,8 +136,7 @@ To import project into Eclipse (optional), refer to:
   http://www.ros.org/wiki/IDEs
   
 ----------------------------------------
-
-= Intrinsic Calibration =
+#-- Intrinsic Calibration --#
 
 Open camera in FULL resolution
 
@@ -145,7 +163,8 @@ Intrinsic calibration:
 
 ----------------------------------------
 
-= Intrinsic Calibration using ROS (alternative) =
+
+#-- Intrinsic Calibration using ROS (alternative) --#
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
@@ -172,7 +191,8 @@ Copy info in .ini to .xml, remove comma
     
 ----------------------------------------
 
-= Camera Extrinsic Calibration =
+
+#-- Camera Extrinsic Calibration --#
 
 Annotate marker locations in a full resolution frame:
 
@@ -207,7 +227,8 @@ Modify param.xml and set SCALE according to the desired resolution
 
 ----------------------------------------
 
-= Build background model =
+
+#-- Build background model --#
 
 Restart gscam and capture background images with REDUCED resolution:
 
@@ -234,7 +255,8 @@ Build background model:
   
 ----------------------------------------
 
-= Create Prior =
+
+#-- Create Prior --#
 
 Select a walkable region:
 
@@ -242,45 +264,14 @@ Select a walkable region:
   
 ----------------------------------------
 
-= Checkpoint calibration =
+
+#-- Checkpoint calibration --#
 
   rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt
 
 ----------------------------------------
 
-= Localization =
-
-  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
-  rostopic echo /humanLocations
-
-# -------------------------
-# ---  Test Routine
-# -------------------------
-
-
-
-Create a image list containing chessboard patterns:
-  
-  roscd /accompany_static_camera_localisation/test
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml pattern_test/left*.jpg
-    
-Intrinsic calibration:
-
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -o left_intrinsic.xml -i calib_list.xml
-  
-Extrinsic calibration:
-
-  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
-  
-Create prior locations (select area that persons can walk on):
-
-  rosrun accompany_static_camera_localisation create_prior -i imagelist_background.txt -p params.xml -o prior.txt
-  
-Build background model:
-
-  rosrun accompany_static_camera_localisation build_background_model -i imagelist_background.txt -o bgmodel.xml
-  
-Camera Localization
+#-- Localization --#
 
   rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
   rostopic echo /humanLocations
@@ -294,5 +285,3 @@ Camera Localization
  - Adaptive background model
  
  - Multiple camera tracking
- 
- - Final testing on frame stream
