@@ -257,6 +257,8 @@ Select a walkable region:
 # ---  Test Routine
 # -------------------------
 
+
+
 Create a image list containing chessboard patterns:
   
   roscd /accompany_static_camera_localisation/test
