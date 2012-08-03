@@ -475,6 +475,19 @@ tests/fast:
 	$(MAKE) -f CMakeFiles/tests.dir/build.make CMakeFiles/tests.dir/build
 .PHONY : tests/fast
 
+#=============================================================================
+# Target rules for targets named video_publisher
+
+# Build rule for target.
+video_publisher: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 video_publisher
+.PHONY : video_publisher
+
+# fast build rule for target.
+video_publisher/fast:
+	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/build
+.PHONY : video_publisher/fast
+
 # target to build an object file
 src/Background.o:
 	$(MAKE) -f CMakeFiles/helpers.dir/build.make CMakeFiles/helpers.dir/src/Background.o
@@ -701,6 +714,21 @@ src/image_saver.s:
 .PHONY : src/image_saver.s
 
 # target to build an object file
+src/video_publisher.o:
+	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/src/video_publisher.o
+.PHONY : src/video_publisher.o
+
+# target to preprocess a source file
+src/video_publisher.i:
+	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/src/video_publisher.i
+.PHONY : src/video_publisher.i
+
+# target to generate assembly for a file
+src/video_publisher.s:
+	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/src/video_publisher.s
+.PHONY : src/video_publisher.s
+
+# target to build an object file
 src/xmlUtil.o:
 	$(MAKE) -f CMakeFiles/calib.dir/build.make CMakeFiles/calib.dir/src/xmlUtil.o
 .PHONY : src/xmlUtil.o
@@ -752,6 +780,7 @@ help:
 	@echo "... test-results"
 	@echo "... test-results-run"
 	@echo "... tests"
+	@echo "... video_publisher"
 	@echo "... src/Background.o"
 	@echo "... src/Background.i"
 	@echo "... src/Background.s"
@@ -797,6 +826,9 @@ help:
 	@echo "... src/image_saver.o"
 	@echo "... src/image_saver.i"
 	@echo "... src/image_saver.s"
+	@echo "... src/video_publisher.o"
+	@echo "... src/video_publisher.i"
+	@echo "... src/video_publisher.s"
 	@echo "... src/xmlUtil.o"
 	@echo "... src/xmlUtil.i"
 	@echo "... src/xmlUtil.s"

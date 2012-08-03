@@ -120,3 +120,6 @@ target_link_libraries( annotate_pos helpers calib opencv_calib3d opencv_highgui 
 
 rosbuild_add_executable(image_saver src/image_saver.cpp)
 target_link_libraries(image_saver opencv_highgui opencv_core opencv_imgproc)
+
+rosbuild_add_executable(video_publisher src/video_publisher.cpp)
+target_link_libraries(video_publisher opencv_highgui opencv_core opencv_imgproc)

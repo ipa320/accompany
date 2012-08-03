@@ -485,17 +485,10 @@ int main(int argc,char **argv)
 	ros::NodeHandle n;
 	ros::Rate loop_rate(5);
 	image_transport::ImageTransport it(n);
-	humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10); humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
+	humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
+//	humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
 	image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
 
-	cv::WImageBuffer3_b image2( cvLoadImage("test_frame/frame0000.jpg", CV_LOAD_IMAGE_COLOR) ); // TODO: To be removed
-	sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(image2.Ipl(), "bgr8");
-	image_transport::Publisher pub2 = it.advertise("/gscam/image_raw", 1);
-	while (n.ok()) {
-		pub2.publish(msg);
-		ros::spinOnce();
-		loop_rate.sleep();
-	}
-
+	ros::spin();
 	return 0;
 }
