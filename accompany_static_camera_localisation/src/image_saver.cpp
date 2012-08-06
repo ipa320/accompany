@@ -11,11 +11,14 @@ sensor_msgs::CvBridge g_bridge;
 int g_count = 0;
 boost::format g_format;
 
-void callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& info)
+void callback(const sensor_msgs::ImageConstPtr& image,
+    const sensor_msgs::CameraInfoConstPtr& info)
 {
-  if (g_bridge.fromImage(*image, "bgr8")) {
+  if (g_bridge.fromImage(*image, "bgr8"))
+  {
     IplImage *image = g_bridge.toIpl();
-    if (image) {
+    if (image)
+    {
       std::string filename = (g_format % g_count % "jpg").str();
       cvSaveImage(filename.c_str(), image);
       ROS_INFO("Saved image %s", filename.c_str());
@@ -23,7 +26,9 @@ void callback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::Camera
       //      camera_calibration_parsers::writeCalibration(filename, "camera", *info);
 
       g_count++;
-    } else {
+    }
+    else
+    {
       ROS_WARN("Couldn't save image, no data!");
     }
   }
@@ -38,7 +43,8 @@ int main(int argc, char** argv)
   g_format.parse("%04i.%s");
   image_transport::ImageTransport it(nh);
   std::string topic = nh.resolveName("image");
-  image_transport::CameraSubscriber sub = it.subscribeCamera(topic, 1, &callback);
+  image_transport::CameraSubscriber sub = it.subscribeCamera(topic, 1,
+      &callback);
 
   ros::spin();
 }

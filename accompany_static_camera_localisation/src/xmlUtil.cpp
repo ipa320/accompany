@@ -12,12 +12,10 @@
 
 using namespace Hu;
 
-
 void UtilXml::Init()
 {
-  LIBXML_TEST_VERSION
-  xmlKeepBlanksDefault(0);
-  xmlSetExternalEntityLoader(xmlNoNetExternalEntityLoader);
+  LIBXML_TEST_VERSION xmlKeepBlanksDefault(0);
+  xmlSetExternalEntityLoader (xmlNoNetExternalEntityLoader);
 }
 
 void UtilXml::Cleanup()
@@ -34,21 +32,21 @@ void UtilXml::Cleanup()
 
 int UtilXml::WriteCallback(void * context, const char * buffer, int length)
 {
-  XmlOutputHandler* handler = (XmlOutputHandler*)context;
-  return handler->write(buffer,length);
+  XmlOutputHandler* handler = (XmlOutputHandler*) context;
+  return handler->write(buffer, length);
 }
 
 int UtilXml::OutputCloseCallback(void * obj)
 {
-  XmlOutputHandler* handler = (XmlOutputHandler*)obj;
+  XmlOutputHandler* handler = (XmlOutputHandler*) obj;
   return handler->close();
 }
 
-XmlOutputHandler::XmlOutputHandler(std::ostream& stream): mStream(stream)
+XmlOutputHandler::XmlOutputHandler(std::ostream& stream) :
+    mStream(stream)
 {
   mOutBuffer = xmlOutputBufferCreateIO(UtilXml::WriteCallback,
-      UtilXml::OutputCloseCallback,
-      this, NULL);
+      UtilXml::OutputCloseCallback, this, NULL);
 }
 
 XmlOutputHandler::~XmlOutputHandler()
@@ -59,7 +57,7 @@ XmlOutputHandler::~XmlOutputHandler()
 
 int XmlOutputHandler::write(const char* buffer, int length)
 {
-  mStream.write(buffer,length);
+  mStream.write(buffer, length);
   return length;
 }
 
@@ -77,10 +75,10 @@ int XmlOutputHandler::close()
 
 int UtilXml::ReadCallback(void * context, char * buffer, int length)
 {
-  std::istream * is = (std::istream *)context;
+  std::istream * is = (std::istream *) context;
 
-  is->read(buffer,length);
-  int size= is->gcount();
+  is->read(buffer, length);
+  int size = is->gcount();
   if (size < length)
     buffer[size] = '\0';
 
@@ -89,16 +87,15 @@ int UtilXml::ReadCallback(void * context, char * buffer, int length)
 
 int UtilXml::InputCloseCallback(void * obj)
 {
-  XmlInputHandler* handler = (XmlInputHandler*)obj;
+  XmlInputHandler* handler = (XmlInputHandler*) obj;
   return handler->close();
 }
 
-
-XmlInputHandler::XmlInputHandler(std::istream& stream) : mStream(stream)
+XmlInputHandler::XmlInputHandler(std::istream& stream) :
+    mStream(stream)
 {
   mInBuffer = xmlParserInputBufferCreateIO(UtilXml::ReadCallback,
-      UtilXml::InputCloseCallback,
-      this, XML_CHAR_ENCODING_NONE);
+      UtilXml::InputCloseCallback, this, XML_CHAR_ENCODING_NONE);
 }
 
 XmlInputHandler::~XmlInputHandler()
@@ -109,7 +106,7 @@ XmlInputHandler::~XmlInputHandler()
 
 int XmlInputHandler::read(char* buffer, int length)
 {
-  mStream.read(buffer,length);
+  mStream.read(buffer, length);
   return length;
 }
 
@@ -117,6 +114,4 @@ int XmlInputHandler::close()
 {
   return 0;
 }
-
-
 

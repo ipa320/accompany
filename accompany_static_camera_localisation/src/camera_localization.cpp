@@ -41,28 +41,28 @@ unsigned MAX_TRACK_JMP = 1000;
 unsigned MAX_TRACK_AGE = 8;
 
 extern unsigned w2;
-vector<Background> bgModel(0,0);
+vector<Background> bgModel(0, 0);
 vector<FLOAT> logNumPrior;
 vnl_vector<FLOAT> logLocPrior;
-vector< WorldPoint > priorHull;
-vector< vnl_vector<FLOAT> > logSumPixelFGProb;
-vector< vector< vector<scanline_t> > > masks; // camera, id, lines
+vector<WorldPoint> priorHull;
+vector<vnl_vector<FLOAT> > logSumPixelFGProb;
+vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
 
-ros::Publisher humanLocationsPub,humanLocationsParticlesPub;
+ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 sensor_msgs::CvBridge bridge;
-unsigned CAM_NUM = 1;   
+unsigned CAM_NUM = 1;
 bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
-vector< vnl_vector<FLOAT> > img_vec(CAM_NUM),bg_vec(CAM_NUM);
+vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
 vector<IplImage *> src_vec(CAM_NUM);
 
 // particle options
-bool particles=false;
+bool particles = false;
 int nrParticles = 10;
-int max=100;
-int count=0;
-int direction=1;
+int max = 100;
+int count = 0;
+int direction = 1;
 
 ImgProducer *producer;
 
@@ -72,27 +72,33 @@ const char* bgwin = "background";
 
 void buildMasks()
 {
-  masks = vector< vector< vector<scanline_t> > > (cam.size(), vector< vector<scanline_t> >(scanLocations.size()));
+  masks = vector<vector<vector<scanline_t> > >(cam.size(),
+      vector<vector<scanline_t> >(scanLocations.size()));
 
-  for (unsigned n=0; n!=cam.size(); ++n)
-    for (unsigned i=0; i!=scanLocations.size(); ++i) {
+  for (unsigned n = 0; n != cam.size(); ++n)
+    for (unsigned i = 0; i != scanLocations.size(); ++i)
+    {
       vector<CvPoint> tpl;
-      cam[n].genTemplate(scanLocations[i],tpl);
-      getMask(tpl,masks[n][i]);
+      cam[n].genTemplate(scanLocations[i], tpl);
+      getMask(tpl, masks[n][i]);
     }
 }
 
 FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
-    const vnl_vector<FLOAT> &logSumPixelBGProb, FLOAT bgSum, const vector<scanline_t> &mask)
+    const vnl_vector<FLOAT> &logSumPixelBGProb, FLOAT bgSum,
+    const vector<scanline_t> &mask)
 {
   // cerr << "logSumPixelFGProb.size()=" << logSumPixelFGProb.size() << ", logSumPixelBGProb.size()="
   //      << logSumPixelBGProb.size() << ", mask.size()=" << mask.size() << endl;
   // cerr << "logSumPixelFGProb.size()=" << logSumPixelFGProb.size() << endl;
   FLOAT res = bgSum;
-  for (vector<scanline_t>::const_iterator i=mask.begin(); i!=mask.end(); ++i) {
-    unsigned offset = i->line * (width+1) + 1; // if start=0, offset-1 == 0
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
+      ++i)
+  {
+    unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     //cout << "offset=" << offset << ", start=" << i->start << ", end=" << i->end << ", size=" << logSumPixelBGProb.size() << endl;
-    res -= (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
+    res -= (logSumPixelBGProb(offset + i->end)
+        - logSumPixelBGProb(offset + i->start - 1));
     // res += (logSumPixelFGProb(offset + i->end) - logSumPixelFGProb(offset + i->start - 1))
     //      - (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
   }
@@ -104,14 +110,16 @@ FLOAT logMaskProbDiff(const vnl_vector<FLOAT> &logSumPixelFGProb,
     const vnl_vector<FLOAT> &logSumPixelBGProb, const vector<scanline_t> &mask)
 {
   FLOAT res = 0;
-  for (vector<scanline_t>::const_iterator i=mask.begin(); i!=mask.end(); ++i) {
-    unsigned offset = i->line * (width+1) + 1; // if start=0, offset-1 == 0
-    res -= (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
+      ++i)
+  {
+    unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
+    res -= (logSumPixelBGProb(offset + i->end)
+        - logSumPixelBGProb(offset + i->start - 1));
   }
 
   return res;
 }
-
 
 /**
  * \brief Do ground planes overlap?
@@ -122,19 +130,18 @@ FLOAT logMaskProbDiff(const vnl_vector<FLOAT> &logSumPixelFGProb,
  *
  * 2010/06/11: GWENN - First version
  *
- **/
-bool overlap(const vector<unsigned> &existing, unsigned pos)
+ **/bool overlap(const vector<unsigned> &existing, unsigned pos)
 {
   WorldPoint &p2 = scanLocations[pos];
-  for (unsigned i=0; i!=existing.size(); ++i) {
+  for (unsigned i = 0; i != existing.size(); ++i)
+  {
     WorldPoint &pt = scanLocations[existing[i]];
-    if (p2.x >= pt.x - w2 && p2.x <= pt.x + w2 &&
-        p2.y >= pt.y - w2 && p2.y <= pt.y + w2)
+    if (p2.x >= pt.x - w2 && p2.x <= pt.x + w2 && p2.y >= pt.y - w2
+        && p2.y <= pt.y + w2)
       return true;
   }
   return false;
 }
-
 
 /**
  * \brief Recursively scan the image for a number of people
@@ -150,27 +157,21 @@ bool overlap(const vector<unsigned> &existing, unsigned pos)
  *
  **/
 void scanRest(vector<unsigned> &existing,
-    vector< vector<scanline_t> > &existingMask,
-    const vector< vnl_vector<FLOAT> > &logSumPixelFGProb,
-    const vector< vnl_vector<FLOAT> > &logSumPixelBGProb,
+    vector<vector<scanline_t> > &existingMask,
+    const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
+    const vector<vnl_vector<FLOAT> > &logSumPixelBGProb,
     const vector<FLOAT> &logNumPrior,
     //              const vnl_vector<FLOAT> &logLocPrior, // remove?
-    vector< vnl_vector<FLOAT> > &logPosProb,
-    vector< FLOAT > &marginal,
+    vector<vnl_vector<FLOAT> > &logPosProb, vector<FLOAT > &marginal,
     const vector<FLOAT> &lSum)
 {
-  unsigned
-  bestIdx = 0;
-  FLOAT
-  bestLogProb = -INFINITY,
-  marginalLogProb = -INFINITY;
+  unsigned bestIdx = 0;
+  FLOAT bestLogProb = -INFINITY, marginalLogProb = -INFINITY;
 
-  logPosProb.push_back(vnl_vector<FLOAT>(scanLocations.size(),-INFINITY));
-  vnl_vector<FLOAT>
-  &lpp = logPosProb.back();
+  logPosProb.push_back(vnl_vector<FLOAT>(scanLocations.size(), -INFINITY));
+  vnl_vector<FLOAT> &lpp = logPosProb.back();
 
-  static vector<FLOAT>
-  logPosProbCache(scanLocations.size(),-INFINITY);
+  static vector<FLOAT> logPosProbCache(scanLocations.size(), -INFINITY);
 
   // cout << "marginal=[ ";
   // for (unsigned i=0; i!=marginal.size(); ++i)
@@ -179,59 +180,61 @@ void scanRest(vector<unsigned> &existing,
   if (existing.size())
   {
     unsigned &hereIdx = existing.back();
-    for (unsigned c=0; c!=cam.size(); ++c)
-      mergeMasks(existingMask[c],masks[c][hereIdx]);
+    for (unsigned c = 0; c != cam.size(); ++c)
+      mergeMasks(existingMask[c], masks[c][hereIdx]);
 
-    FLOAT
-    logNP = logNumPrior[existing.size()+1];
+    FLOAT logNP = logNumPrior[existing.size() + 1];
 
-    for (unsigned p=0; p!=scanLocations.size(); ++p)
+    for (unsigned p = 0; p != scanLocations.size(); ++p)
     {
 
-      if (!overlap(existing, p)  && logPosProbCache[p]>0)
+      if (!overlap(existing, p) && logPosProbCache[p] > 0)
       {
         // cout << "Considering position " << p << ": (" << scanLocations[p].x << "," << scanLocations[p].y << ")" <<endl;
         // if (logLocPrior(p) < -5000)  --> Not part of scanLocations anymore
         //      continue;
         lpp(p) = logLocPrior(p) + logNP;
-        for (unsigned c=0; c!=cam.size(); ++c) {
-          vector<scanline_t>
-          mask = existingMask[c];
-          mergeMasks(mask,masks[c][p]);
+        for (unsigned c = 0; c != cam.size(); ++c)
+        {
+          vector<scanline_t> mask = existingMask[c];
+          mergeMasks(mask, masks[c][p]);
           lpp(p) += logMaskProb(logSumPixelFGProb[c], logSumPixelBGProb[c],
               lSum[c], mask);
         }
-        marginalLogProb = log_sum_exp(marginalLogProb,lpp(p));
-        if (lpp(p) > bestLogProb) {
+        marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
+        if (lpp(p) > bestLogProb)
+        {
           bestLogProb = lpp(p);
           bestIdx = p;
         }
       }
     }
   }
-  else {
-    FLOAT
-    logNP = logNumPrior[1];
+  else
+  {
+    FLOAT logNP = logNumPrior[1];
 
-    for (unsigned p=0; p!=scanLocations.size(); ++p)
+    for (unsigned p = 0; p != scanLocations.size(); ++p)
     {
       // if (logLocPrior(p) < -5000) --> Not part of scanLocations anymore
       //      continue;
 
       logPosProbCache[p] = logLocPrior(p);
-      for (unsigned c=0; c!=cam.size(); ++c) {
-        logPosProbCache[p] +=
-            logMaskProb(logSumPixelFGProb[c], logSumPixelBGProb[c], lSum[c], masks[c][p]);  // already includes lSum
+      for (unsigned c = 0; c != cam.size(); ++c)
+      {
+        logPosProbCache[p] += logMaskProb(logSumPixelFGProb[c],
+            logSumPixelBGProb[c], lSum[c], masks[c][p]); // already includes lSum
       }
       lpp(p) = logPosProbCache[p] + logNP;
 
       logPosProbCache[p] -= logNumPrior[0];
-      for (unsigned c=0; c!=cam.size(); ++c)
+      for (unsigned c = 0; c != cam.size(); ++c)
       {
         logPosProbCache[p] -= lSum[c]; // hack -> if pos, increases lik; if neg, doesn't
       }
-      marginalLogProb = log_sum_exp(marginalLogProb,lpp(p));
-      if (lpp(p) > bestLogProb) {
+      marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
+      if (lpp(p) > bestLogProb)
+      {
         bestLogProb = lpp(p);
         bestIdx = p;
       }
@@ -240,7 +243,8 @@ void scanRest(vector<unsigned> &existing,
   }
   // cout << "bestIdx=" << bestIdx << ", bestLogProb=" << bestLogProb << endl;
   //      if (marginalLogProb > marginal.back()) {
-  if (bestLogProb > marginal.back()) {
+  if (bestLogProb > marginal.back())
+  {
     existing.push_back(bestIdx);
     // marginal.push_back(marginalLogProb);
     marginal.push_back(bestLogProb);
@@ -255,75 +259,68 @@ void scanRest(vector<unsigned> &existing,
 
 CvPoint cvPoint(unsigned pos)
 {
-  return cvPoint(pos%width,pos/width);
+  return cvPoint(pos % width, pos / width);
 }
 
 void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
 {
   hull.push_back(hull.front());
-  for (unsigned i=1; i<hull.size(); ++i)
-    cvLine(img, cam[c].project(hull[i-1]),cam[c].project(hull[i]),CV_RGB(255,0,0),2);
+  for (unsigned i = 1; i < hull.size(); ++i)
+    cvLine(img, cam[c].project(hull[i - 1]), cam[c].project(hull[i]),
+        CV_RGB(255,0,0), 2);
 }
 
 accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
-    vector<IplImage *>src,
-    const vector< vnl_vector<FLOAT> > &imgVec,
-    vector< vnl_vector<FLOAT> > &bgVec,
-    const vector<FLOAT> logBGProb,
-    const vector< vnl_vector<FLOAT> > &logSumPixelFGProb,
-    const vector< vnl_vector<FLOAT> > &logSumPixelBGProb)
+    vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
+    vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
+    const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
+    const vector<vnl_vector<FLOAT> > &logSumPixelBGProb)
 {
   // stic();
 
-  vector<FLOAT>
-  marginal;
-  FLOAT
-  lNone = logNumPrior[0];
+  vector<FLOAT> marginal;
+  FLOAT lNone = logNumPrior[0];
 
-  for (unsigned c=0; c!=cam.size(); ++c)
+  for (unsigned c = 0; c != cam.size(); ++c)
     lNone += logBGProb[c];
-  FLOAT
-  lSum = -INFINITY;
+  FLOAT lSum = -INFINITY;
 
-  vector<unsigned>
-  existing;
-  vector< vnl_vector<FLOAT> >
-  logPosProb;
-  vector< vector<scanline_t> >
-  mask(cam.size());
-
+  vector<unsigned> existing;
+  vector<vnl_vector<FLOAT> > logPosProb;
+  vector<vector<scanline_t> > mask(cam.size());
 
   marginal.push_back(lNone);
   logPosProb.push_back(vnl_vector<FLOAT>());
   // cout << "Marginal[0]=" << marginal.back() << endl;
   scanRest(existing, mask, logSumPixelFGProb, logSumPixelBGProb, logNumPrior,
-      /*logLocPrior, */logPosProb, marginal, logBGProb);
+  /*logLocPrior, */logPosProb, marginal, logBGProb);
 
   // report locations
   cout << "locations found are" << endl;
   accompany_human_tracker::HumanLocations humanLocations;
   geometry_msgs::Vector3 v;
-  for (unsigned i=0; i!=existing.size(); ++i)
+  for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];
     cout << " " << scanLocations[existing[i]];
-    v.x=wp.x;
-    v.y=wp.y;
-    v.z=0;
+    v.x = wp.x;
+    v.y = wp.y;
+    v.z = 0;
     humanLocations.locations.push_back(v);
   }
   cout << endl << "===========" << endl;
 
-  for (unsigned i=0; i!=marginal.size(); ++i)
-    lSum = log_sum_exp(lSum,marginal[i]);
-  unsigned mlnp = 0;             // most likely number of people
-  FLOAT
-  mlprob = -INFINITY;
-  for (unsigned i=0; i!=marginal.size(); ++i) {
+  for (unsigned i = 0; i != marginal.size(); ++i)
+    lSum = log_sum_exp(lSum, marginal[i]);
+  unsigned mlnp = 0; // most likely number of people
+  FLOAT mlprob = -INFINITY;
+  for (unsigned i = 0; i != marginal.size(); ++i)
+  {
     // cout << "p(n=" << i << ") = " << exp(marginal[i]-lSum)
     //      << " (log = " << marginal[i] << ")"
     //      << endl;
-    if (marginal[i] > mlprob) {
+    if (marginal[i] > mlprob)
+    {
       mlnp = i;
       mlprob = marginal[i];
     }
@@ -334,28 +331,29 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   static char buffer[1024];
 
   /* Visualize tracks */
-  for (unsigned c=0; c!=cam.size(); ++c) {
+  for (unsigned c = 0; c != cam.size(); ++c)
+  {
     IplImage *bg = vec2img((/*imgVec[c]-*/bgVec[c]).apply(fabs));
-    IplImage *cvt = cvCreateImage(cvGetSize(bg),IPL_DEPTH_8U,3);
-    cvCvtColor(bg,cvt,TO_IMG_FMT);
+    IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
+    cvCvtColor(bg, cvt, TO_IMG_FMT);
 
-    plotHull(src[c],priorHull,c);
-    plotHull(cvt,priorHull,c);
+    plotHull(src[c], priorHull, c);
+    plotHull(cvt, priorHull, c);
     // For comparison:
-    for (unsigned i=0; i!=existing.size(); ++i) {
-      vector<CvPoint>
-      tplt;
-      cam[c].genTemplate(scanLocations[existing[i]],tplt);
-      plotTemplate(cvt,tplt,CV_RGB(255,255,255));
-      plotTemplate(src[c],tplt,CV_RGB(0,255,255));
-      cvCircle(src[c],cam[c].project(scanLocations[existing[i]]),1,CV_RGB(255,255,0),2);
+    for (unsigned i = 0; i != existing.size(); ++i)
+    {
+      vector<CvPoint> tplt;
+      cam[c].genTemplate(scanLocations[existing[i]], tplt);
+      plotTemplate(cvt, tplt, CV_RGB(255,255,255));
+      plotTemplate(src[c], tplt, CV_RGB(0,255,255));
+      cvCircle(src[c], cam[c].project(scanLocations[existing[i]]), 1,
+          CV_RGB(255,255,0), 2);
     }
 
     //		cvShowImage(bgwin, cvt);
     cvReleaseImage(&bg);
     cvReleaseImage(&cvt);
-    cvShowImage(win,src[c]);
-
+    cvShowImage(win, src[c]);
 
     cvWaitKey(waitTime);
     //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
@@ -366,31 +364,32 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   return humanLocations;
 }
 
-void initStaticProbs() {
-  unsigned
-  maxN = 50;
-  logNumPrior = vector<FLOAT>(maxN, -log((FLOAT)maxN));
+void initStaticProbs()
+{
+  unsigned maxN = 50;
+  logNumPrior = vector<FLOAT>(maxN, -log((FLOAT) maxN));
 
   logNumPrior.push_back(-INFINITY); // p(#=LAST)
 
-  unsigned wp1 = width+1;
+  unsigned wp1 = width + 1;
   logSumPixelFGProb.resize(cam.size());
-  logSumPixelFGProb[0] = vnl_vector<FLOAT>((wp1)*height);
+  logSumPixelFGProb[0] = vnl_vector<FLOAT>((wp1) * height);
   FLOAT U = -3.0 * log(256.0);
-  for (unsigned i=0; i!=logSumPixelFGProb[0].size(); ++i) {
+  for (unsigned i = 0; i != logSumPixelFGProb[0].size(); ++i)
+  {
     //      if (i%(width+1) == 0)
     //           logSumPixelFGProb(i) = 0;
     //      else
     //           logSumPixelFGProb(i) = logSumPixelFGProb(i-1) + U;
-    logSumPixelFGProb[0](i) = (i%(wp1)) * U;
+    logSumPixelFGProb[0](i) = (i % (wp1)) * U;
   }
-  for (unsigned c=1; c!=cam.size(); ++c)
+  for (unsigned c = 1; c != cam.size(); ++c)
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-  vector< vnl_vector<FLOAT> > sumPixel(cam.size());
+  vector<vnl_vector<FLOAT> > sumPixel(cam.size());
   vector<FLOAT> sum_g(cam.size());
 
   try
@@ -401,38 +400,39 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     if (!HAS_INIT)
     {
-      width    = src_vec[0]->width;
-      height   = src_vec[0]->height;
-      depth    = src_vec[0]->depth;
+      width = src_vec[0]->width;
+      height = src_vec[0]->height;
+      depth = src_vec[0]->depth;
       channels = src_vec[0]->nChannels;
-      halfresX = width/2;
-      halfresY = height/2;
+      halfresX = width / 2;
+      halfresY = height / 2;
 
       initStaticProbs();
       buildMasks();
 
-      for (unsigned c=0; c!=cam.size(); ++c) {
+      for (unsigned c = 0; c != cam.size(); ++c)
+      {
         if (!src_vec[c])
         {
           ROS_ERROR("empty image frame");
         }
-        cvt_vec[c] = cvCreateImage(cvGetSize(src_vec[c]),IPL_DEPTH_8U,3);
+        cvt_vec[c] = cvCreateImage(cvGetSize(src_vec[c]), IPL_DEPTH_8U, 3);
       }
       HAS_INIT = true;
     }
 
-
     accompany_human_tracker::HumanLocations humanLocations;
-    for (unsigned c=0; c!=cam.size(); ++c)
+    for (unsigned c = 0; c != cam.size(); ++c)
     {
-      cvCvtColor(src_vec[c],cvt_vec[c],TO_INT_FMT);
-      img2vec(cvt_vec[c],img_vec[c]);
-      bgModel[c].getBackground(img_vec[c],bg_vec[c]);
-      cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c],sum_g[c]);
+      cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
+      img2vec(cvt_vec[c], img_vec[c]);
+      bgModel[c].getBackground(img_vec[c], bg_vec[c]);
+      cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c], sum_g[c]);
     }
 
-    humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
-    cvReleaseImage(& src_vec[0]);
+    humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,
+        logSumPixelFGProb, sumPixel);
+    cvReleaseImage(&src_vec[0]);
 
     if (!particles)
       humanLocationsPub.publish(humanLocations);
@@ -467,7 +467,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 
-int main(int argc,char **argv)
+int main(int argc, char **argv)
 {
   // Initialize localization module
   getBackground(argv[1], bgModel);
@@ -475,7 +475,7 @@ int main(int argc,char **argv)
   loadWorldPriorHull(argv[3], priorHull);
   assert_eq(bgModel.size(), CAM_NUM);
   assert_eq(cam.size(), bgModel.size());
-  genScanLocations(priorHull,scanres, scanLocations);
+  genScanLocations(priorHull, scanres, scanLocations);
 
   logLocPrior.set_size(scanLocations.size());
   logLocPrior.fill(-log(scanLocations.size()));
@@ -485,9 +485,11 @@ int main(int argc,char **argv)
   ros::NodeHandle n;
   ros::Rate loop_rate(5);
   image_transport::ImageTransport it(n);
-  humanLocationsPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
+  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(
+      "/humanLocations", 10);
   //	humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
-  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1, imageCallback);
+  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1,
+      imageCallback);
 
   ros::spin();
   return 0;

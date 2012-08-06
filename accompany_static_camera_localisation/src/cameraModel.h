@@ -20,7 +20,6 @@ using namespace std;
 #define XML_TAG_CAMERA			BAD_CAST"Camera"
 #define XML_TAG_NAME			BAD_CAST"name"
 
-
 #define XML_TAG_GEOMETRY		BAD_CAST"Geometry"
 #define XML_TAG_WIDTH			BAD_CAST"width"
 #define XML_TAG_HEIGHT			BAD_CAST"height"
@@ -46,7 +45,8 @@ using namespace std;
 #define XML_TAG_RY				BAD_CAST"ry" 
 #define XML_TAG_RZ				BAD_CAST"rz" 
 
-namespace Hu {
+namespace Hu
+{
 
   //!  A root class handling camera model
   class CameraModel
@@ -57,7 +57,7 @@ namespace Hu {
       bool isInit;
       cv::Mat camera_matrix, distortion_coefficients, rvec, tvec;
 
-      void init(string IntrinsicFile,string ExtrinsicFile,double SCALE);
+      void init(string IntrinsicFile, string ExtrinsicFile, double SCALE);
 
       //! Constructor
       CameraModel();
@@ -65,22 +65,28 @@ namespace Hu {
       virtual ~CameraModel();
 
       //! from image coordinate to world coordinate (single points)
-      bool imageToWorld(double Xi, double Yi, double Zw, double& Xw, double &Yw);
+      bool imageToWorld(double Xi, double Yi, double Zw, double& Xw,
+          double &Yw);
 
       //! from world coordinate to image coordinate (single points)
-      bool worldToImage(double Xw, double Yw, double Zw, double& Xi, double& Yi);
+      bool worldToImage(double Xw, double Yw, double Zw, double& Xi,
+          double& Yi);
 
       //! from image coordinate to world coordinate (Matrix)
-      bool imageToWorldMat(cv::Mat image_coordinates, cv::Mat& world_coordinates);
+      bool imageToWorldMat(cv::Mat image_coordinates,
+          cv::Mat& world_coordinates);
 
       //! from world coordinate to image coordinate (Matrix)
-      bool worldToImageMat(cv::Mat world_coordinates, cv::Mat& image_coordinates);
+      bool worldToImageMat(cv::Mat world_coordinates,
+          cv::Mat& image_coordinates);
 
       //! Loading from an XML
-      virtual bool fromXml(string IntrinsicFile,string ExtrinsicFile,double SCALE);
+      virtual bool fromXml(string IntrinsicFile, string ExtrinsicFile,
+          double SCALE);
 
   };
-};
+}
+;
 
 #endif
 

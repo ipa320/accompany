@@ -19,21 +19,22 @@ int main(int argc, char **argv)
 
   // handling arguments
   po::options_description optionsDescription("Allowed options\n");
-  optionsDescription.add_options()
-		    ("scale,s", po::value<double>(&scale)->required(),"resize scale\n")
-		    ("input_video,i", po::value<string>(&input_video)->required(),"input video\n");
+  optionsDescription.add_options()("scale,s",
+      po::value<double>(&scale)->required(), "resize scale\n")("input_video,i",
+      po::value<string>(&input_video)->required(), "input video\n");
   try
   {
     po::variables_map variablesMap;
-    po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+    po::store(po::parse_command_line(argc, argv, optionsDescription),
+        variablesMap);
     po::notify(variablesMap);
   }
-  catch( const std::exception& e)
+  catch (const std::exception& e)
   {
     std::cout << "--------------------" << std::endl;
-    std::cout <<  optionsDescription << std::endl;
+    std::cout << optionsDescription << std::endl;
     std::cout << "--------------------" << std::endl;
-    std::cerr << "- "<<e.what() << std::endl;
+    std::cerr << "- " << e.what() << std::endl;
     return 1;
   }
 
@@ -44,20 +45,22 @@ int main(int argc, char **argv)
 
   cv::VideoCapture cap;
   cap.open(input_video);
-  if(!cap.isOpened())  // check if we succeeded
+  if (!cap.isOpened()) // check if we succeeded
   {
     ROS_ERROR("video capture failed");
   }
 
-  cv::Mat frame,sframe;
+  cv::Mat frame, sframe;
   ros::Rate loop_rate(5);
   while (n.ok())
   {
     cap >> frame;
-    cv::resize(frame,sframe,cv::Size((int) (frame.cols*scale),(int) (frame.rows*scale)));
+    cv::resize(frame, sframe,
+        cv::Size((int) (frame.cols * scale), (int) (frame.rows * scale)));
     IplImage ipl_im = sframe;
     IplImage* ipl_ptr = &ipl_im;
-    sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(ipl_ptr, "bgr8");
+    sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(ipl_ptr,
+        "bgr8");
     pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
