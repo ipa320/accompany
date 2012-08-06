@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- publish prerecorded data -->
+  <node pkg="accompany_static_camera_localisation" type="video_publisher" name="video_publisher" args="-s 0.3 -i $(find accompany_static_camera_localisation)/../UvA/testData/wcam_20120112_vid4.avi" />
+
+  <!-- localise humans using image data -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization" 
+   args="$(find accompany_static_camera_localisation)/../UvA/testData/bgmodel.xml 
+         $(find accompany_static_camera_localisation)/../UvA/testData/params.xml 
+         $(find accompany_static_camera_localisation)/../UvA/testData/prior.txt" />
+
+</launch>

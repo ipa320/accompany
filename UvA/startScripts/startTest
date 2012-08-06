@@ -1,0 +1,8 @@
+
+./downloadTestData
+
+ln -fs $PWD/../testData/camera_intrinsic.xml ~/.ros/
+ln -fs $PWD/../testData/camera_external.xml ~/.ros/
+
+roslaunch ./launch/test.launch
+
