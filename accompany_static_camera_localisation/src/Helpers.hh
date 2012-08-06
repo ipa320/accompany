@@ -29,20 +29,20 @@ void connectedComponentsFH(std::vector<int> &v);
 void convexHull(const std::vector<CvPoint> &pt, std::vector<CvPoint> &hull);
 void plotHull(IplImage *img, const std::vector<CvPoint> &tpl);
 void genTemplate(const CvPoint &pt, float persHeight, float camHeight,
-		std::vector<CvPoint> &points);
+    std::vector<CvPoint> &points);
 void plotTemplate(IplImage *img, const CvPoint &pt,
-		float persHeight, float camHeight, const CvScalar &colour = CV_RGB(255,255,255));
+    float persHeight, float camHeight, const CvScalar &colour = CV_RGB(255,255,255));
 void genTemplate2(const CvPoint &pt, float persHeight, float camHeight,
-		std::vector<CvPoint> &points);
+    std::vector<CvPoint> &points);
 void plotTemplate2(IplImage *img, const CvPoint &pt,
-		float persHeight, float camHeight, const CvScalar &colour = CV_RGB(255,255,255));
+    float persHeight, float camHeight, const CvScalar &colour = CV_RGB(255,255,255));
 CvPoint project(float x, float y, float z, float camHeight);
 
 void getMask(const CvPoint &pos, float persHeight, float camHeight, std::vector<int> &mask);
 void getMask(const CvPoint &pos, float persHeight, float camHeight, std::set<unsigned> &mask);
 
 struct scanline_t {
-	unsigned line, start, end;
+    unsigned line, start, end;
 };
 std::ostream &operator<<(std::ostream &os, const scanline_t &l);
 void getMask(const CvPoint &pos, float persHeight, float camHeight, std::vector<scanline_t> &mask);
