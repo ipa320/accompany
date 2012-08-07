@@ -16,12 +16,12 @@ using namespace std;
 
 // globals
 ros::Publisher trackedHumansPub;
+ros::Time prevNow;
 
 #if TRACKER == MY_TRACKER
 MyTracker myTracker;
 #elif TRACKER == TIM_TRACKER
 Tracker tracker;
-ros::Time prevNow=ros::Time::now();;
 #endif
 
 void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
@@ -53,9 +53,11 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   ros::Duration duration=now-prevNow;
   deltaTime=duration.toSec();
   prevNow=now;
+  cout<<"trackPoints.size(): "<<trackPoints.size()<<endl;
   tracker.update(trackPoints, deltaTime);
 
   accompany_human_tracker::TrackedHumans trackedHumans;
+  cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
   {
     cv::Mat mat=it->filter.getState();
@@ -63,6 +65,8 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
     trackedHuman.location.x=mat.at<float>(0,0);
     trackedHuman.location.y=mat.at<float>(1,1);
     trackedHuman.location.z=0;
+    trackedHuman.id=it->id;
+    trackedHumans.trackedHumans.push_back(trackedHuman);
   }
   trackedHumansPub.publish(trackedHumans);
 #endif
@@ -74,6 +78,7 @@ int main(int argc,char **argv)
 
   // create publisher and subscribers
   ros::NodeHandle n;
+  prevNow=ros::Time::now();
   trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
   ros::spin();

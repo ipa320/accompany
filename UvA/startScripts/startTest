@@ -5,7 +5,7 @@
 # ---------
 # --- test video
 #
-#export GSCAM_CONFIG="filesrc location=$PWD/../testData/testVideo.flv ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=620, height=580, framerate=50/1 ! ffmpegcolorspace"
+export GSCAM_CONFIG="filesrc location=$PWD/../testData/testVideo.flv ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=50/1 ! ffmpegcolorspace"
 
 
 # ---------
