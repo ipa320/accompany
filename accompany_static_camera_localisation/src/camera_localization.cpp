@@ -305,8 +305,8 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   {
     WorldPoint wp = scanLocations[existing[i]];
     cout << " " << scanLocations[existing[i]];
-    v.x = wp.x;
-    v.y = wp.y;
+    v.x = wp.x/1000; // millimeters to meters
+    v.y = wp.y/1000;
     v.z = 0;
     humanLocations.locations.push_back(v);
   }
