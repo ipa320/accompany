@@ -9,7 +9,9 @@
 #include "Helpers.hh"
 #include "CamCalib.hh"
 #include <cmn/GnuPlot.hh>
+#include <boost/program_options.hpp>
 
+namespace po = boost::program_options;
 using namespace std;
 
 // meaningless comment.
@@ -188,19 +190,44 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv)
 {
-  if (argc != 7)
-    errx(2, "usage: annotatepos <filelist> <calib> <prior.txt> <annotation.txt> <intrinsic.xml> <extrinsic.xml>");
+  string imagelist_file, params_file, prior_file, intrinsic_file, extrinsic_file,annotated_file;
 
-  vector< vector<string> >
-  imgs;
-  listImages(argv[1],imgs);
+  // handling arguments
+  po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
+  optionsDescription.add_options()
+        		        ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
+        		        ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
+        		        ("prior,r", po::value<string>(&prior_file)->required(),"the prior\n")
+        		        ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
+        		        ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
+        		        ("annotated,a", po::value<string>(&annotated_file)->required(),"file to store annotated positions\n")
+        		        ;
+
+  po::variables_map variablesMap;
+
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+    po::notify(variablesMap);
+  }
+  catch( const std::exception& e)
+  {
+    std::cout << "--------------------" << std::endl;
+    std::cerr << "- "<<e.what() << std::endl;
+    std::cout << "--------------------" << std::endl;
+    std::cout <<  optionsDescription << std::endl;
+    return 1;
+  }
+
+  vector<vector<string> > imgs;
+  listImages(imagelist_file.c_str(), imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage*>(imgs[0].size());
 
-  unsigned
-  index = 0;
+  unsigned index = 0;
 
-  for (unsigned i=0; i!=imgs[index].size(); ++i) {
+  for (unsigned i = 0; i != imgs[index].size(); ++i)
+  {
     cout << "Loading " << imgs[index][i] << endl;
     img[i] = loadImage(imgs[index][i].c_str());
 
@@ -212,37 +239,40 @@ int main(int argc, char **argv)
   height = img[0]->height;
   depth = img[0]->depth;
   channels = img[0]->nChannels;
-  halfresX = width/2;
-  halfresY = height/2;
+  halfresX = width / 2;
+  halfresY = height / 2;
 
-  loadCalibrations(argv[2],argv[5],argv[6]);
+  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
+      extrinsic_file.c_str());
   index++;
 
-  loadWorldPriorHull(argv[3], priorHull);
+  loadWorldPriorHull(prior_file.c_str(), priorHull);
 
-  ofstream
-  ofs(argv[4]);
+  ofstream ofs(annotated_file.c_str());
   if (!ofs)
-    errx(1,"Cannot open file %s", argv[4]);
+    errx(1, "Cannot open file %s", argv[4]);
 
   int key = 0;
-  while ((char)key != 'q' && index < imgs.size()) {
+  while ((char) key != 'q' && index < imgs.size())
+  {
     key = cvWaitKey(0);
-    switch ((char)key) {
+    switch ((char) key)
+    {
       case 10:
-        ofs << imgs[index][0].substr(imgs[index][0].rfind("/")+1) << " ";
-        for (unsigned i=0; i!=locations.size(); ++i)
-          ofs << "(" << locations[i].x << ","<< locations[i].y << ") ";
+        ofs << imgs[index][0].substr(imgs[index][0].rfind("/") + 1) << " ";
+        for (unsigned i = 0; i != locations.size(); ++i)
+          ofs << "(" << locations[i].x << "," << locations[i].y << ") ";
         ofs << endl;
 
         locations.clear();
-        for (unsigned i=0; i!=imgs[index].size(); ++i) {
+        for (unsigned i = 0; i != imgs[index].size(); ++i)
+        {
           cvReleaseImage(&img[i]);
           img[i] = loadImage(imgs[index][i].c_str());
           showScaledImg(i, img[i]);
         }
         index++;
-        if (index==imgs.size())
+        if (index == imgs.size())
           goto stop;
         break;
       case '-':
@@ -266,8 +296,7 @@ int main(int argc, char **argv)
     }
   }
 
-  stop:
-  for (unsigned i=0; i!=img.size(); ++i)
+  stop: for (unsigned i = 0; i != img.size(); ++i)
     cvReleaseImage(&img[i]);
   return 0;
 }

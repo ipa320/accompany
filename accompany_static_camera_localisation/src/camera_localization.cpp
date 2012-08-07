@@ -12,6 +12,7 @@
 #include <boost/thread/xtime.hpp>
 #include <boost/thread.hpp>
 #include <boost/version.hpp>
+#include <boost/program_options.hpp>
 #if BOOST_VERSION < 103500
 #include <boost/thread/detail/lock.hpp>
 #endif
@@ -33,6 +34,7 @@
 #include "ImgProducer.hh"
 #include "CamCalib.hh"
 
+namespace po = boost::program_options;
 using namespace std;
 using namespace cv;
 
@@ -328,7 +330,7 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
 
   static int number = 0;
   number++;
-  static char buffer[1024];
+//  static char buffer[1024];
 
   /* Visualize tracks */
   for (unsigned c = 0; c != cam.size(); ++c)
@@ -469,10 +471,43 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 int main(int argc, char **argv)
 {
+  string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file;
+
+  // handling arguments
+  po::options_description optionsDescription(
+      "Human Detection main function\nAllowed options\n");
+  optionsDescription.add_options()
+      ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
+          "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n");
+
+  po::variables_map variablesMap;
+
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, optionsDescription),
+        variablesMap);
+    po::notify(variablesMap);
+  }
+  catch (const std::exception& e)
+  {
+    std::cout << "--------------------" << std::endl;
+    std::cerr << "- " << e.what() << std::endl;
+    std::cout << "--------------------" << std::endl;
+    std::cout << optionsDescription << std::endl;
+    return 1;
+  }
+
+  bgmodel_file = path + "/" + "bgmodel.xml";
+  params_file = path + "/" + "params.xml";
+  prior_file = path + "/" + "prior.txt";
+  intrinsic_file = path + "/" + "camera_intrinsic.xml";
+  extrinsic_file = path + "/" + "camera_extrinsic.xml";
+
   // Initialize localization module
-  getBackground(argv[1], bgModel);
-  loadCalibrations(argv[2],argv[4],argv[5]);
-  loadWorldPriorHull(argv[3], priorHull);
+  getBackground(bgmodel_file.c_str(), bgModel);
+  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
+      extrinsic_file.c_str());
+  loadWorldPriorHull(prior_file.c_str(), priorHull);
   assert_eq(bgModel.size(), CAM_NUM);
   assert_eq(cam.size(), bgModel.size());
   genScanLocations(priorHull, scanres, scanLocations);
