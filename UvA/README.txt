@@ -267,13 +267,13 @@ Select a walkable region:
 
 #-- Checkpoint calibration --#
 
-  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt intrinsic.xml extrinsic.xml
+  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt camera_intrinsic.xml camera_extrinsic.xml
 
 ----------------------------------------
 
 #-- Localization --#
 
-  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt  
+  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt camera_intrinsic.xml camera_extrinsic.xml
   rostopic echo /humanLocations
 
 ----------------------------------------
