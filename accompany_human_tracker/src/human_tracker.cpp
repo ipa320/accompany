@@ -9,12 +9,20 @@
 #include <iostream>
 using namespace std;
 
+
+#define MY_TRACKER	1
+#define TIM_TRACKER	2
+#define TRACKER TIM_TRACKER // select on of the trackers above
+
 // globals
 ros::Publisher trackedHumansPub;
-MyTracker myTracker;
 
+#if TRACKER == MY_TRACKER
+MyTracker myTracker;
+#elif TRACKER == TIM_TRACKER
 Tracker tracker;
-ros::Time prevNow;
+ros::Time prevNow=ros::Time::now();;
+#endif
 
 void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
 {
@@ -25,11 +33,11 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
     cout<<"humanLocations["<<i<<"].z="<<humanLocations->locations[i].z<<endl;
   }
   */
-
+#if TRACKER == MY_TRACKER
   // using simple MyTracker
   //myTracker.trackHumans(humanLocations);
   //trackedHumansPub.publish(myTracker.getTrackedHumans());
-
+#elif TRACKER == TIM_TRACKER
   // using TimTracker
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
@@ -47,25 +55,28 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   prevNow=now;
   tracker.update(trackPoints, deltaTime);
 
+  accompany_human_tracker::TrackedHumans trackedHumans;
+  for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
+  {
+    cv::Mat mat=it->filter.getState();
+    accompany_human_tracker::TrackedHuman trackedHuman;
+    trackedHuman.location.x=mat.at<float>(0,0);
+    trackedHuman.location.y=mat.at<float>(1,1);
+    trackedHuman.location.z=0;
+  }
+  trackedHumansPub.publish(trackedHumans);
+#endif
 }
 
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "HumanTracker");
-  prevNow=ros::Time::now();
 
   // create publisher and subscribers
   ros::NodeHandle n;
   trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
-  
-  // read human indentities
-
-  // do tracking
-
-  // publish tracked humans
-
-  ros::spin(); // wait for shutdown
+  ros::spin();
 
   return 0;
 }

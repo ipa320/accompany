@@ -32,7 +32,7 @@ rosbuild_genmsg()
 # check for libs
 find_library(TIM_TRACKER TimTracker)
 if(NOT TIM_TRACKER)
-  message(FATAL_ERROR "Could not find 'TimTracker' library, please git clone 'git://basterwijn.nl/home/bterwijn/git/TimTracker.git' and install")
+  message(FATAL_ERROR "Could not find 'TimTracker' library, please git clone 'git://basterwijn.nl/home/bterwijn/git/TimTracker.git' and make install")
 endif(NOT TIM_TRACKER)
 
 find_package( OpenCV REQUIRED )
