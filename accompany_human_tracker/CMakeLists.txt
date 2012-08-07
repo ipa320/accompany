@@ -29,5 +29,14 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+# check for libs
+find_library(TIM_TRACKER TimTracker)
+if(NOT TIM_TRACKER)
+  message(FATAL_ERROR "Could not find 'TimTracker' library, please git clone 'git://basterwijn.nl/home/bterwijn/git/TimTracker.git' and install")
+endif(NOT TIM_TRACKER)
+
+find_package( OpenCV REQUIRED )
+
 include_directories ("${PROJECT_SOURCE_DIR}/src")
 rosbuild_add_executable(human_tracker src/human_tracker.cpp src/MyTracker.cpp)
+target_link_libraries(human_tracker ${TIM_TRACKER} ${OpenCV_LIBS})
