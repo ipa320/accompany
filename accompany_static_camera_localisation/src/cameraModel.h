@@ -79,11 +79,6 @@ namespace Hu
       //! from world coordinate to image coordinate (Matrix)
       bool worldToImageMat(cv::Mat world_coordinates,
           cv::Mat& image_coordinates);
-
-      //! Loading from an XML
-      virtual bool fromXml(string IntrinsicFile, string ExtrinsicFile,
-          double SCALE);
-
   };
 }
 ;

@@ -260,14 +260,14 @@ Build background model:
 
 Select a walkable region:
 
-  rosrun accompany_static_camera_localisation create_prior -i background/background_list.txt -p params.xml -o prior.txt
+  rosrun accompany_static_camera_localisation create_prior -l background/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
   
 ----------------------------------------
 
 
 #-- Checkpoint calibration --#
 
-  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt
+  rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt  params.xml prior.txt x.txt intrinsic.xml extrinsic.xml
 
 ----------------------------------------
 

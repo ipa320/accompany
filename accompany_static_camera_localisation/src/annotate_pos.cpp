@@ -188,8 +188,8 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv)
 {
-  if (argc != 5)
-    errx(2, "usage: annotatepos <filelist> <calib> <prior.txt> <annotation.txt>");
+  if (argc != 7)
+    errx(2, "usage: annotatepos <filelist> <calib> <prior.txt> <annotation.txt> <intrinsic.xml> <extrinsic.xml>");
 
   vector< vector<string> >
   imgs;
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
   halfresX = width/2;
   halfresY = height/2;
 
-  loadCalibrations(argv[2]);
+  loadCalibrations(argv[2],argv[5],argv[6]);
   index++;
 
   loadWorldPriorHull(argv[3], priorHull);

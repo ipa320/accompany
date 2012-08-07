@@ -91,7 +91,7 @@ extern double personHeight, wg, wm, wt;
 
 void plotTemplate(IplImage *img, const std::vector<CvPoint> &points,
     const CvScalar &colour, unsigned lw = 1);
-void loadCalibrations(const char *filename);
+void loadCalibrations(const char *filename, const char* intrinsic, const char* extrinsic);
 bool inside(const WorldPoint &p, const std::vector<WorldPoint> &prior);
 float loadWorldPriorHull(const char *file, std::vector<WorldPoint> &polygon);
 void genScanLocations(const std::vector<WorldPoint> &prior, double scanRes,
