@@ -104,14 +104,16 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv) {
 
-  string imagelist_file, params_file, outputPrior_file;
+  string imagelist_file, params_file, outputPrior_file, intrinsic_file, extrinsic_file;
 
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
   optionsDescription.add_options()
-        		    ("imagelist,i", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
+        		    ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
         		    ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
         		    ("outputPrior,o", po::value<string>(&outputPrior_file)->required(),"the output filename of the prior\n")
+        		    ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
+        		    ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
         		    ;
 
   po::variables_map variablesMap;
@@ -130,12 +132,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  const char* arg_imagelist_file = imagelist_file.c_str();
-  const char* arg_params_file = params_file.c_str();
-
   vector< vector<string> >
   imgs;
-  listImages(arg_imagelist_file,imgs);
+  listImages(imagelist_file.c_str(),imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage *>(imgs[0].size());
 
@@ -156,7 +155,7 @@ int main(int argc, char **argv) {
   halfresX = width/2;
   halfresY = height/2;
 
-  loadCalibrations(arg_params_file);
+  loadCalibrations(params_file.c_str(),intrinsic_file.c_str(),extrinsic_file.c_str());
 
   //     if (argc == 4) {
   //          loadWorldPriorHull(argv[3],priorHull);

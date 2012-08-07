@@ -14,6 +14,7 @@ using namespace std;
 std::vector<CamCalib> cam;
 double personHeight = 0, wg = 0, wm = 0, wt = 0, midRatio = 0;
 double minX, maxX, minY, maxY;
+string ExtrinsicFile, IntrinsicFile;
 
 #define OCTAGON 1
 
@@ -49,10 +50,7 @@ void CamCalib::xmlPack(XmlFile &f) const
 
 void CamCalib::xmlUnpack(XmlFile &f)
 {
-  string ExtrinsicFile, IntrinsicFile;
   double scale;
-  f.unpack("ExtrinsicFile", ExtrinsicFile);
-  f.unpack("IntrinsicFile", IntrinsicFile);
   f.unpack("SCALE", scale);
 
   ifstream ifs(ExtrinsicFile.c_str());
@@ -61,7 +59,9 @@ void CamCalib::xmlUnpack(XmlFile &f)
     cerr << "Could not load file " << ExtrinsicFile << endl;
     exit(1);
   }
-  model.fromXml(IntrinsicFile, ExtrinsicFile, scale);
+  
+  // initialize camera model 
+  model.init(IntrinsicFile, ExtrinsicFile, scale);
   // f.unpack("w", w);
   // f.unpack("w2", w2);
   f.unpack("sigma1", stdev1);
@@ -450,8 +450,11 @@ void plotTemplate(IplImage *img, const vector<CvPoint> &points,
 }
 #endif
 
-void loadCalibrations(const char *filename)
+void loadCalibrations(const char *filename,const char* intrinsic,const char* extrinsic)
 {
+  ExtrinsicFile = extrinsic;
+  IntrinsicFile = intrinsic;
+
   XmlReader rd(filename);
 
   rd.unpack("PersonHeight", personHeight);

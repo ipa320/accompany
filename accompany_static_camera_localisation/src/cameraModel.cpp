@@ -52,13 +52,6 @@ void CameraModel::init(string IntrinsicFile, string ExtrinsicFile, double SCALE)
   isInit = true;
 }
 
-bool CameraModel::fromXml(string IntrinsicFile, string ExtrinsicFile,
-    double SCALE) //TODO
-{
-  init(IntrinsicFile, ExtrinsicFile, SCALE);
-  return isInit;
-}
-
 //! Coordinate manipulation
 //! from image coordinate to world coordinate (single points)
 bool CameraModel::imageToWorld(double Xi, double Yi, double Zw, double& Xw,

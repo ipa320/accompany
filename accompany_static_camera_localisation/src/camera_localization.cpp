@@ -471,7 +471,7 @@ int main(int argc, char **argv)
 {
   // Initialize localization module
   getBackground(argv[1], bgModel);
-  loadCalibrations(argv[2]);
+  loadCalibrations(argv[2],argv[4],argv[5]);
   loadWorldPriorHull(argv[3], priorHull);
   assert_eq(bgModel.size(), CAM_NUM);
   assert_eq(cam.size(), bgModel.size());
