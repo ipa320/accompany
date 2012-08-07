@@ -40,3 +40,5 @@ find_package( OpenCV REQUIRED )
 include_directories ("${PROJECT_SOURCE_DIR}/src")
 rosbuild_add_executable(human_tracker src/human_tracker.cpp src/MyTracker.cpp)
 target_link_libraries(human_tracker ${TIM_TRACKER} ${OpenCV_LIBS})
+
+rosbuild_add_executable(view_tracks src/view_tracks.cpp)

@@ -9,10 +9,11 @@
 #include <iostream>
 using namespace std;
 
-
 #define MY_TRACKER	1
 #define TIM_TRACKER	2
-#define TRACKER TIM_TRACKER // select on of the trackers above
+#ifndef TRACKER
+  #define TRACKER TIM_TRACKER // select one of the trackers above
+#endif
 
 // globals
 ros::Publisher trackedHumansPub;
@@ -26,19 +27,15 @@ Tracker tracker;
 
 void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
 {
-  /*for (unsigned int i=0;i<humanLocations->locations.size();i++)
-  {
-    cout<<"humanLocations["<<i<<"].x="<<humanLocations->locations[i].x<<endl;
-    cout<<"humanLocations["<<i<<"].y="<<humanLocations->locations[i].y<<endl;
-    cout<<"humanLocations["<<i<<"].z="<<humanLocations->locations[i].z<<endl;
-  }
-  */
-#if TRACKER == MY_TRACKER
-  // using simple MyTracker
-  //myTracker.trackHumans(humanLocations);
-  //trackedHumansPub.publish(myTracker.getTrackedHumans());
-#elif TRACKER == TIM_TRACKER
-  // using TimTracker
+accompany_human_tracker::TrackedHumans trackedHumans;
+
+#if TRACKER == MY_TRACKER // using simple MyTracker
+ 
+  myTracker.trackHumans(humanLocations);
+  trackedHumans=myTracker.getTrackedHumans();
+
+#elif TRACKER == TIM_TRACKER // using TimTracker
+  
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
@@ -55,8 +52,6 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   prevNow=now;
   cout<<"trackPoints.size(): "<<trackPoints.size()<<endl;
   tracker.update(trackPoints, deltaTime);
-
-  accompany_human_tracker::TrackedHumans trackedHumans;
   cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
   {
@@ -68,13 +63,14 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
     trackedHuman.id=it->id;
     trackedHumans.trackedHumans.push_back(trackedHuman);
   }
-  trackedHumansPub.publish(trackedHumans);
+
 #endif
+trackedHumansPub.publish(trackedHumans);
 }
 
 int main(int argc,char **argv)
 {
-  ros::init(argc, argv, "HumanTracker");
+  ros::init(argc, argv, "human_tracker");
 
   // create publisher and subscribers
   ros::NodeHandle n;
