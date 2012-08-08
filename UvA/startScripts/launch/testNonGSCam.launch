@@ -10,4 +10,7 @@
   <!-- track humans using localisation data -->
   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"/>
 
+  <!-- visualize tracks -->
+  <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/>
+
 </launch>
