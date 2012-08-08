@@ -24,8 +24,11 @@ double scale;
 double midX;
 double midY;
 
+// drawing
 double viewMin=0;
 double viewMax=8;
+CvFont font;
+
 
 void initView()
 {
@@ -103,11 +106,16 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
   cvCircle(img, scaledCvPoint(viewMin,viewMax), scaledLength(0.1), cvScalar(255,0,0), 1);
   cvCircle(img, scaledCvPoint(viewMax,viewMin), scaledLength(0.1), cvScalar(255,0,0), 1);
 
+  
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
     double x=trackedHumans->trackedHumans[i].location.x;
     double y=trackedHumans->trackedHumans[i].location.y;
+    int id=trackedHumans->trackedHumans[i].id;
+    stringstream ss;ss<<id;
+    string name=ss.str();
     cvCircle(img, scaledCvPoint(x,y), scaledLength(0.1), cvScalar(0,255,0), 1);
+    cvPutText(img,name.c_str(),scaledCvPoint(x,y),&font,cvScalar(0,255,0));
   }
 
   
@@ -124,6 +132,7 @@ int main(int argc,char **argv)
   cvSetZero(img);
   cvShowImage("view_tracks",img);
   cvWaitKey(waitTime);
+  cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX,1,1);
 
   // create publisher and subscribers
   ros::NodeHandle n;
