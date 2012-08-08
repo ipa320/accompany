@@ -58,7 +58,7 @@ accompany_human_tracker::TrackedHumans trackedHumans;
     cv::Mat mat=it->filter.getState();
     accompany_human_tracker::TrackedHuman trackedHuman;
     trackedHuman.location.x=mat.at<float>(0,0);
-    trackedHuman.location.y=mat.at<float>(1,1);
+    trackedHuman.location.y=mat.at<float>(1,0);
     trackedHuman.location.z=0;
     trackedHuman.id=it->id;
     trackedHumans.trackedHumans.push_back(trackedHuman);
