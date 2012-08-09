@@ -152,7 +152,7 @@ Filter out non-informative calibration frames in the folder, and then download t
 
   ./run_calib
 
-Open Matlab and extract corners using `run.m`.
+Open MATLAB and extract corners using `run.m`, corner points will be saved in `X.csv` and `Y.csv`
 
 Create a image list:
   

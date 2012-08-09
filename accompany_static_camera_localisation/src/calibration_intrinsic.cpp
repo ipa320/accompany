@@ -295,17 +295,19 @@ bool runAndSave(const string& outputFilename,
 int main( int argc, char** argv )
 {
 
-    CvMLData csvData1;
-    csvData1.read_csv("X.csv");
+    CvMLData csvData1, csvData2;
+    if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
+    {
+        cout << "ERROR: " << "Cornerpoints not found." << endl;
+        cout << "Check if current folder has both X.csv and Y.csv." << endl;
+        cout << "X.csv and Y.csv are generated from Matlab function run.m" << endl;
+        exit(1);
+    }    
+    
     const CvMat* X_cvmat = csvData1.get_values();
     Mat X(X_cvmat);
-    cout << X << endl;
-    
-    CvMLData csvData2;
-    csvData2.read_csv("Y.csv");
     const CvMat* Y_cvmat = csvData2.get_values();
     Mat Y(Y_cvmat);
-    cout << Y << endl;
 
 	Size boardSize, imageSize;
 	float squareSize = 1.f, aspectRatio = 1.f;
@@ -426,10 +428,13 @@ int main( int argc, char** argv )
 
 	if( inputFilename )
 	{
-		if( !videofile && readStringList(inputFilename, imageList) )
+		if( readStringList(inputFilename, imageList) )
 			mode = CAPTURING;
 		else
-			capture.open(inputFilename);
+		{
+		    cout << "ERROR: " << "image list not found" << endl;
+		    exit(1);
+		}	
 	}
 	else
 		capture.open(cameraId);
