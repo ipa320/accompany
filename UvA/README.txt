@@ -145,21 +145,22 @@ Open camera in FULL resolution
 
 Record a few frames containing a checkerboard:
 
-  roscd accompany_static_camera_localisation/res/
-  mkdir calib_frames
-  cd calib_frames
+  roscd accompany_static_camera_localisation/res/calib_frames
   rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
   
-Filter out non-informative calibration frames in the folder
+Filter out non-informative calibration frames in the folder, and then download the corner extracor:
+
+  ./run_calib
+
+Open Matlab and use the corner extracor to generate a set of corners.
 
 Create a image list:
   
-  roscd  accompany_static_camera_localisation/res/
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml calib_frames/*.*g
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -u 1 -d 500 -i calib_list.xml -o camera_intrinsic.xml 
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -o ../camera_intrinsic.xml -su calib_list.xml
 
 ----------------------------------------
 
