@@ -296,16 +296,16 @@ int main( int argc, char** argv )
 {
 
     CvMLData csvData1;
-    csvData1.read_csv("../X.csv");
+    csvData1.read_csv("X.csv");
     const CvMat* X_cvmat = csvData1.get_values();
     Mat X(X_cvmat);
-//    cout << X << endl;
+    cout << X << endl;
     
     CvMLData csvData2;
-    csvData2.read_csv("../Y.csv");
+    csvData2.read_csv("Y.csv");
     const CvMat* Y_cvmat = csvData2.get_values();
     Mat Y(Y_cvmat);
-//    cout << Y << endl;
+    cout << Y << endl;
 
 	Size boardSize, imageSize;
 	float squareSize = 1.f, aspectRatio = 1.f;

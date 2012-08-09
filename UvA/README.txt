@@ -152,11 +152,11 @@ Filter out non-informative calibration frames in the folder, and then download t
 
   ./run_calib
 
-Open Matlab and use the corner extracor to generate a set of corners.
+Open Matlab and extract corners using `run.m`.
 
 Create a image list:
   
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml frame*.jpg
     
 Intrinsic calibration:
 
@@ -165,7 +165,7 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- Intrinsic Calibration using ROS (alternative) --#
+#-- Intrinsic Calibration using ROS (low accuracy-deprecated) --#
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
@@ -280,8 +280,6 @@ Select a walkable region:
 ----------------------------------------
 
 = TODO
-
- - Build a tracker
  
  - Adaptive background model
  
