@@ -26,7 +26,7 @@ double midY;
 
 // drawing
 double viewMin=0;
-double viewMax=8;
+double viewMax=7;
 CvFont font;
 
 
@@ -70,7 +70,7 @@ double scaledLength(double l)
 
 CvPoint scaledCvPoint(double x,double y)
 {
-  double sx=imgWidth/2+(midX-x)*scale;
+  double sx=imgWidth/2+(x-midX)*scale;
   double sy=imgHeight/2+(midY-y)*scale;
   CvPoint point=cvPoint(sx,sy);
   return point;
@@ -78,34 +78,22 @@ CvPoint scaledCvPoint(double x,double y)
 
 void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
 {
- 
   cvSetZero(img);
   initView();
   updateMinMax(viewMin,viewMin);
   updateMinMax(viewMax,viewMax);
 
-  /*
-  accompany_human_tracker::TrackedHuman trackedHuman;
-  trackedHuman.location.x=0;
-  trackedHuman.location.y=0;
-  trackedHuman.location.z=0;
-  trackedHumans.push_back(trackedHuman);
-  */
-
-  /*
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
     double x=trackedHumans->trackedHumans[i].location.x;
     double y=trackedHumans->trackedHumans[i].location.y;
     updateMinMax(x,y);
   }
-  */
 
   cvCircle(img, scaledCvPoint(viewMin,viewMin), scaledLength(0.1), cvScalar(255,0,0), 1);
-  cvCircle(img, scaledCvPoint(viewMax,viewMax), scaledLength(0.1), cvScalar(255,0,0), 1);
-  cvCircle(img, scaledCvPoint(viewMin,viewMax), scaledLength(0.1), cvScalar(255,0,0), 1);
-  cvCircle(img, scaledCvPoint(viewMax,viewMin), scaledLength(0.1), cvScalar(255,0,0), 1);
-
+  cvCircle(img, scaledCvPoint(viewMin,viewMax), scaledLength(0.2), cvScalar(255,0,0), 1);
+  cvCircle(img, scaledCvPoint(viewMax,viewMin), scaledLength(0.3), cvScalar(255,0,0), 1);
+  cvCircle(img, scaledCvPoint(viewMax,viewMax), scaledLength(0.4), cvScalar(255,0,0), 1);
   
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
@@ -118,7 +106,6 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
     cvPutText(img,name.c_str(),scaledCvPoint(x,y),&font,cvScalar(0,255,0));
   }
 
-  
   cvShowImage("view_tracks",img);
   cvWaitKey(waitTime);
 }
