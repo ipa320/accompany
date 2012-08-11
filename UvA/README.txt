@@ -138,7 +138,7 @@ To import project into Eclipse (optional), refer to:
 ----------------------------------------
 #-- Intrinsic Calibration --#
 
-Open camera in FULL resolution
+Open camera in FULL resolution (HALF?)
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
@@ -156,7 +156,8 @@ Open MATLAB and extract corners using `run.m`, corner points will be saved in `X
 
 Create a image list:
   
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml frame*.jpg
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
+  cat calib_list.xml
     
 Intrinsic calibration:
 
@@ -165,7 +166,7 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- Intrinsic Calibration using ROS (low accuracy-deprecated) --#
+#-- Intrinsic Calibration using ROS (low accuracy-DEPRECATED) --#
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
