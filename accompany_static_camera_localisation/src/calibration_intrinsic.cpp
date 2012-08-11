@@ -152,8 +152,10 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	objectPoints.resize(imagePoints.size(),objectPoints[0]);
 
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-			distCoeffs, rvecs, tvecs, flags|CV_CALIB_FIX_K4/*|CV_CALIB_FIX_K5*/);
-	///*|CV_CALIB_FIX_K3*/|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+			distCoeffs, rvecs, tvecs, flags
+//			|CV_CALIB_FIX_K3
+//			|CV_CALIB_FIX_K4
+			|CV_CALIB_FIX_K5);
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
 	bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
