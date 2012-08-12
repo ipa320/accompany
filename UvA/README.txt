@@ -89,7 +89,8 @@ publish stream in ros:
 
 Download testing resource from:
 
-  http://basterwijn.nl/ninghang/test_res/
+  wget -nc basterwijn.nl/ninghang/test_res/list.txt
+  wget -i list.txt
 
 We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
 
@@ -97,7 +98,7 @@ We assume you are now in the same folder as the files you just downloaded. Load 
 
 Start localization:
 
-  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt 
+  rosrun accompany_static_camera_localisation camera_localization -p.
   
 Show locations: 
   rostopic echo /humanLocations
