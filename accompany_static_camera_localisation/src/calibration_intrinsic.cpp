@@ -154,7 +154,7 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
 			distCoeffs, rvecs, tvecs, flags
 //			|CV_CALIB_FIX_K3
-//			|CV_CALIB_FIX_K4
+			|CV_CALIB_FIX_K4
 			|CV_CALIB_FIX_K5);
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
@@ -297,6 +297,7 @@ bool runAndSave(const string& outputFilename,
 int main( int argc, char** argv )
 {
 
+    // csv reader
     CvMLData csvData1, csvData2;
     if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
     {

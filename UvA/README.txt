@@ -196,7 +196,7 @@ Copy info in .ini to .xml, remove comma
 
 #-- Camera Extrinsic Calibration --#
 
-Annotate marker locations in a full resolution frame:
+Annotate marker locations in a HALF resolution frame:
 
   roscd accompany_static_camera_localisation/res/
   mkdir marker
