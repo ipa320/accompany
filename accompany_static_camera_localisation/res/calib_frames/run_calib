@@ -1,6 +1,6 @@
 wget -nc http://basterwijn.nl/ninghang/cornerExtractor.tar.gz
 
-tar -xzvf cornerExtractor.tar.gz -C ../calib_frames
+tar -xzvf cornerExtractor.tar.gz
 
 mv cornerExtractor/* .
 

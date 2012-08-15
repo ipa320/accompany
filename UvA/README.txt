@@ -89,7 +89,8 @@ publish stream in ros:
 
 Download testing resource from:
 
-  http://basterwijn.nl/ninghang/test_res/
+  wget -nc basterwijn.nl/ninghang/test_res/list.txt
+  wget -i list.txt
 
 We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
 
@@ -97,7 +98,7 @@ We assume you are now in the same folder as the files you just downloaded. Load 
 
 Start localization:
 
-  rosrun accompany_static_camera_localisation camera_localization bgmodel.xml params.xml prior.txt 
+  rosrun accompany_static_camera_localisation camera_localization -p.
   
 Show locations: 
   rostopic echo /humanLocations
@@ -138,7 +139,7 @@ To import project into Eclipse (optional), refer to:
 ----------------------------------------
 #-- Intrinsic Calibration --#
 
-Open camera in FULL resolution
+Open camera in FULL resolution (HALF?)
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
@@ -156,7 +157,8 @@ Open MATLAB and extract corners using `run.m`, corner points will be saved in `X
 
 Create a image list:
   
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml frame*.jpg
+  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
+  cat calib_list.xml
     
 Intrinsic calibration:
 
@@ -165,7 +167,7 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- Intrinsic Calibration using ROS (low accuracy-deprecated) --#
+#-- Intrinsic Calibration using ROS (low accuracy-DEPRECATED) --#
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
@@ -195,7 +197,7 @@ Copy info in .ini to .xml, remove comma
 
 #-- Camera Extrinsic Calibration --#
 
-Annotate marker locations in a full resolution frame:
+Annotate marker locations in a HALF resolution frame:
 
   roscd accompany_static_camera_localisation/res/
   mkdir marker

@@ -152,8 +152,10 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	objectPoints.resize(imagePoints.size(),objectPoints[0]);
 
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-			distCoeffs, rvecs, tvecs, flags|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
-	///*|CV_CALIB_FIX_K3*/|CV_CALIB_FIX_K4|CV_CALIB_FIX_K5);
+			distCoeffs, rvecs, tvecs, flags
+//			|CV_CALIB_FIX_K3
+			|CV_CALIB_FIX_K4
+			|CV_CALIB_FIX_K5);
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
 	bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
@@ -295,6 +297,7 @@ bool runAndSave(const string& outputFilename,
 int main( int argc, char** argv )
 {
 
+    // csv reader
     CvMLData csvData1, csvData2;
     if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
     {
@@ -448,8 +451,7 @@ int main( int argc, char** argv )
 	if( capture.isOpened() )
 		printf( "%s", liveCaptureHelp );
 
-	namedWindow( "Image View", CV_WINDOW_NORMAL );
-
+	namedWindow( "original image", CV_WINDOW_NORMAL );
 	for(i = 0;;i++)
 	{
 		Mat view, viewGray;
@@ -494,7 +496,10 @@ int main( int argc, char** argv )
                 pointbuf.push_back(Point2f(X.at<float>(i,kk),Y.at<float>(i,kk)));
             }
             found = true;
-            
+//            
+//            if (i < 10)
+//              found = false;
+                
 //			found = findChessboardCorners( view, boardSize, pointbuf,
 //					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 			break;
@@ -509,9 +514,9 @@ int main( int argc, char** argv )
 			return fprintf( stderr, "Unknown pattern type\n" ), -1;
 		}
 
-		// improve the found corners' coordinate accuracy
-		if( pattern == CHESSBOARD && found) cornerSubPix( viewGray, pointbuf, Size(11,11),
-				Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+//		// improve the found corners' coordinate accuracy
+//		if( pattern == CHESSBOARD && found) cornerSubPix( viewGray, pointbuf, Size(11,11),
+//				Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
 
 		if( mode == CAPTURING && found &&
 				(!capture.isOpened() || clock() - prevTimestamp > delay*1e-3*CLOCKS_PER_SEC) )
@@ -545,13 +550,13 @@ int main( int argc, char** argv )
 			bitwise_not(view, view);
 
 		if( mode == CALIBRATED && undistortImage )
-		{
+		{ 
 			Mat temp = view.clone();
 			undistort(temp, view, cameraMatrix, distCoeffs);
 		}
 
-		imshow("Image View", view);
-		waitKey(30);
+		imshow("original image", view);
+//		waitKey(0);
 		
 		int key = 0xff & waitKey(capture.isOpened() ? 50 : 500);
 
@@ -580,19 +585,25 @@ int main( int argc, char** argv )
 				break;
 		}
 	}
+    
+    namedWindow( "undistorted image", CV_WINDOW_NORMAL );
 
 	if( !capture.isOpened() && showUndistorted )
 	{
-		Mat view, rview;
+		Mat view, rview, map1, map2;
+        initUndistortRectifyMap(cameraMatrix, distCoeffs, Mat(),
+                                getOptimalNewCameraMatrix(cameraMatrix, distCoeffs, imageSize, 1, imageSize, 0),
+                                imageSize, CV_16SC2, map1, map2);
 		for( i = 0; i < (int)imageList.size(); i++ )
 		{
 			view = imread(imageList[i], 1);
 			if(!view.data)
 				continue;
-		    imshow("Image View1", view);
+//		    remap(view, rview, map1, map2, INTER_LINEAR);
+		    imshow("original image", view);
 			undistort( view, rview, cameraMatrix, distCoeffs);
-			imshow("Image View", rview);
-			waitKey(1000);
+			imshow("undistorted image", rview);
+			waitKey(0);
 		}
 	}
 
