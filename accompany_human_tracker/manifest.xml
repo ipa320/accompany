@@ -10,6 +10,8 @@
   <url>http://ros.org/wiki/accompany_human_tracker</url>
   <depend package="roscpp"/>
   <depend package="geometry_msgs"/>
+  <depend package="cob_people_detection_msgs"/>
+  <depend package="tf"/>
 
 </package>
 
