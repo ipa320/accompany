@@ -1,0 +1,6 @@
+http://www.basterwijn.nl/ninghang/test_res/camera_intrinsic.xml
+http://www.basterwijn.nl/ninghang/test_res/camera_extrinsic.xml
+http://www.basterwijn.nl/ninghang/test_res/bgmodel.xml
+http://www.basterwijn.nl/ninghang/test_res/params.xml
+http://www.basterwijn.nl/ninghang/test_res/prior.txt
+http://www.basterwijn.nl/ninghang/test_res/wcam_20120112_vid4.avi

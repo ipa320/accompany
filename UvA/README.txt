@@ -38,8 +38,10 @@ and install using:
 
   unzip vxl-1.17.0.zip
   cd vxl-1.17.0/
+  mkdir build
+  cd build
   cmake .. -DBUILD_BRL=OFF
-  make
+  make -j 4
   sudo make install
 
 Clone cmn with (non-public, this requires ssh access to server!!)
@@ -89,7 +91,7 @@ publish stream in ros:
 
 Download testing resource from:
 
-  wget -nc basterwijn.nl/ninghang/test_res/list.txt
+  roscd accompany_static_camera_localisation/res/test
   wget -i list.txt
 
 We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
