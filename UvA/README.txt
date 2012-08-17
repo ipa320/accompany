@@ -61,6 +61,20 @@ and install with
   make
   sudo make install
 
+Clone TimTracker:
+
+  git clone git://basterwijn.nl/home/bterwijn/git/TimTracker.git
+
+and install with
+
+  cd TimTracker
+  mkdir build
+  cd build
+  cmake ../src
+  make
+  sudo make install
+  sudo updatedb
+
 Install gstreamer
 
   sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
@@ -104,6 +118,7 @@ We assume you are now in the same folder as the files you just downloaded. Load 
 
 Start localization:
 
+  roscd accompany_static_camera_localisation/res/test
   rosrun accompany_static_camera_localisation camera_localization -p.
   
 Show locations: 
@@ -143,6 +158,7 @@ To import project into Eclipse (optional), refer to:
   http://www.ros.org/wiki/IDEs
   
 ----------------------------------------
+
 #-- Intrinsic Calibration --#
 
 Open camera in FULL resolution (HALF?)
@@ -241,7 +257,7 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Restart gscam and capture background images with REDUCED resolution:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486 , framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=***, height=*** , framerate=15/1 ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
