@@ -30,6 +30,10 @@ Install CMAKE
 
   sudo apt-get install cmake
 
+Install gstreamer tools
+
+  sudo apt-get install gstreamer-tools
+
 Download vxl-1.17.0 from
 
   http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
