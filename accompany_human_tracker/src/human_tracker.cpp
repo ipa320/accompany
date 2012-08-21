@@ -2,8 +2,8 @@
 #include <ros/ros.h>
 #include <accompany_human_tracker/HumanLocations.h>
 #include <accompany_human_tracker/TrackedHumans.h>
-#include <cob_people_detection_msgs/PeopleDetection.h>
-#include <cob_people_detection_msgs/PeopleDetectionArray.h>
+#include <cob_people_detection_msgs/Detection.h>
+#include <cob_people_detection_msgs/DetectionArray.h>
 #include <tf/transform_listener.h>
 
 #include <MyTracker.h>
@@ -123,7 +123,7 @@ public:
 };
 
 // compute the distance matrix of every track to every identified human
-void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifiedHumans)
+void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHumans)
 {
   unsigned int nrTracks=trackedHumans.trackedHumans.size();
   unsigned int nrIdentities=transformedIdentifiedHumans.detections.size();
@@ -133,7 +133,7 @@ void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifie
     accompany_human_tracker::TrackedHuman trackedHuman=trackedHumans.trackedHumans[i];
     for (unsigned int j=0;j<nrIdentities;j++)
     {
-      cob_people_detection_msgs::PeopleDetection identity=transformedIdentifiedHumans.detections[j];
+      cob_people_detection_msgs::Detection identity=transformedIdentifiedHumans.detections[j];
 
       double dx=trackedHuman.location.x-identity.pose.pose.position.x;
       double dy=trackedHuman.location.y-identity.pose.pose.position.y;
@@ -147,9 +147,9 @@ void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifie
 }
 
 // receive identities and transform them to the camera's coordinate system
-void identityReceived(const cob_people_detection_msgs::PeopleDetectionArray::ConstPtr& identifiedHumans)
+void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& identifiedHumans)
 {
-  cob_people_detection_msgs::PeopleDetectionArray transformedIdentifiedHumans=*identifiedHumans;
+  cob_people_detection_msgs::DetectionArray transformedIdentifiedHumans=*identifiedHumans;
   for (unsigned int i=0;i<identifiedHumans->detections.size();i++)
   {
     string identity=identifiedHumans->detections[i].label;
@@ -180,7 +180,7 @@ int main(int argc,char **argv)
 
   trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
-  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::PeopleDetectionArray>("/identity",10,identityReceived);
+  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/identity",10,identityReceived);
   ros::spin();
 
   return 0;
