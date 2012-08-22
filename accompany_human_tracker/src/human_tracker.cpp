@@ -74,7 +74,7 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   trackedHumansPub.publish(trackedHumans);
 }
 
-
+// tries all possible matches between identities and tracks an remember the best one
 class MakeMatch
 {
 public:
@@ -84,40 +84,52 @@ public:
     bestSumDist=numeric_limits<double>::max();
   }
 
-  void match(double *dist,int nrTracks,int nrIdentities,vector<int> *assigned,double sumDist)
+  void match(double *dist,int nrIdentities,vector<int> &assigned,set<int> &availableTracks,double sumDist)
   {
-    if (assigned->size()==(unsigned)nrIdentities)
+    if (assigned.size()==(unsigned)nrIdentities)
     {
-      if (sumDist<bestSumDist)
-      {
-        bestSumDist=sumDist;
-        bestAssigned=*assigned;
-      }
+      bestSumDist=sumDist;
+      bestAssigned=assigned;
     }
     else
     {
-      int iden=assigned->size();// identity to assign
-      for (int i=0;i<nrTracks;i++)
+      int iden=assigned.size();// identity to assign
+      for (set<int>::iterator it=availableTracks.begin();it!=availableTracks.end();)
       {
-        vector<int> newAssigned=*assigned;
-        newAssigned.push_back(i);
-        double newSumDist=sumDist+dist[i*nrIdentities+iden];
-        match(dist,nrTracks,nrIdentities,&newAssigned,newSumDist);
+        int track=*it;// track to assign
+        double newSumDist=sumDist+dist[track*nrIdentities+iden];
+        if (newSumDist<bestSumDist)
+        {
+          set<int>::iterator itnew=it;itnew++;
+          availableTracks.erase(it);// remove track
+          it=itnew;
+          assigned.push_back(track);
+          match(dist,nrIdentities,assigned,availableTracks,newSumDist);
+          
+          // undo changes to assigned and availableTracks for next assignment
+          assigned.pop_back();
+          availableTracks.insert(track);
+        }
       }
     }
+    
   }
 
   void match(double *dist,int nrTracks,int nrIdentities)
   {
-    vector<int> assigned;
-    match(dist,nrTracks,nrIdentities,&assigned,0);
+    vector<int> assigned;// empty list of assigned identities
+    set<int> availableTracks;
+    for (int i=0;i<nrTracks;i++)
+      availableTracks.insert(i); // all tracks to assign to
+    match(dist,nrIdentities,assigned,availableTracks,0);
   }
 
-  vector<int> *getBestAssigned()
+  vector<int> &getBestAssigned()
   {
-    return &bestAssigned;
+    return bestAssigned;
   }
 
+private:
   vector<int> bestAssigned;
   double bestSumDist;
 };
