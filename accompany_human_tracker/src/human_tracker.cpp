@@ -23,6 +23,8 @@ using namespace std;
 ros::Publisher trackedHumansPub;
 ros::Time prevNow;
 tf::TransformListener *listener=NULL;
+map<string,int> identityToID; // map of identities to id's
+map<int,string> idToIdentity; // map of id's to identities
 
 accompany_human_tracker::TrackedHumans trackedHumans;// array of tracked humans
 #if TRACKER == MY_TRACKER
@@ -59,6 +61,7 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   cout<<"trackPoints.size(): "<<trackPoints.size()<<endl;
   tracker.update(trackPoints, deltaTime);
   cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
+  trackedHumans.trackedHumans.clear();
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
   {
     cv::Mat mat=it->filter.getState();
@@ -67,6 +70,9 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
     trackedHuman.location.y=mat.at<float>(1,0);
     trackedHuman.location.z=0;
     trackedHuman.id=it->id;
+    map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
+    if (it!=idToIdentity.end())
+      trackedHuman.identity=it->second;
     trackedHumans.trackedHumans.push_back(trackedHuman);
   }
 #endif
@@ -113,16 +119,16 @@ public:
     match(dist,nrTracks,nrIdentities,&assigned,0);
   }
 
-  vector<int> *getBestAssigned()
+  vector<int> &getBestAssigned()
   {
-    return &bestAssigned;
+    return bestAssigned;
   }
 
   vector<int> bestAssigned;
   double bestSumDist;
 };
 
-// compute the distance matrix of every track to every identified human
+// compute the distance matrix of every track to every identified human and match using MakeMatch class
 void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifiedHumans)
 {
   unsigned int nrTracks=trackedHumans.trackedHumans.size();
@@ -141,14 +147,30 @@ void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifie
       dist[i*nrIdentities+j]=dx*dx+dy*dy+dz*dz;
     }
   }
+  
   MakeMatch makeMatch;
   makeMatch.match(dist,nrTracks,nrIdentities);
-  
+  vector<int> assigned=makeMatch.getBestAssigned(); // best assignment
+  cerr<<"assigned: ";
+  int i=0;
+  for (vector<int>::iterator it=assigned.begin();it!=assigned.end();it++)
+  {
+    identityToID[transformedIdentifiedHumans.detections[i++].label]=*it;
+    cerr<<*it<<" ";
+  }
+  cerr<<endl;
+  idToIdentity.clear(); //map of id's to identities
+  for (map<string,int>::iterator it=identityToID.begin();it!=identityToID.end();it++)
+  {
+    cerr<<it->first<<"="<<it->second<<endl;
+    idToIdentity[it->second]=it->first;
+  }
 }
 
 // receive identities and transform them to the camera's coordinate system
 void identityReceived(const cob_people_detection_msgs::PeopleDetectionArray::ConstPtr& identifiedHumans)
 {
+  
   cob_people_detection_msgs::PeopleDetectionArray transformedIdentifiedHumans=*identifiedHumans;
   for (unsigned int i=0;i<identifiedHumans->detections.size();i++)
   {
@@ -156,15 +178,26 @@ void identityReceived(const cob_people_detection_msgs::PeopleDetectionArray::Con
     const geometry_msgs::PoseStamped pose=identifiedHumans->detections[i].pose;
 
     // transform to camera coordinate system
-    geometry_msgs::PoseStamped transPose;
-    listener->transformPose("/cam1",pose,transPose);
-    geometry_msgs::Point pos=transPose.pose.position;
+    
+    try
+    {
+      geometry_msgs::PoseStamped transPose;
+      
 
-    cout<<"identified '"<<identity<<"' at ("<<pos.x<<","<<pos.y<<","<<pos.z<<")"<<endl;
-    transformedIdentifiedHumans.detections[i].pose=transPose;
+      listener->transformPose("/overhead1",
+                              pose,
+                              transPose);
+      geometry_msgs::Point pos=transPose.pose.position;
+      cerr<<"identified '"<<identity<<"' at ("<<pos.x<<","<<pos.y<<","<<pos.z<<")"<<endl;
+      transformedIdentifiedHumans.detections[i].pose=transPose;
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"error while tranforming human identity to overhead camera frame: "<<e.what()<<endl;
+      break;
+    }
   }
   match(transformedIdentifiedHumans);
-  
 }
 
 int main(int argc,char **argv)
@@ -180,7 +213,7 @@ int main(int argc,char **argv)
 
   trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
-  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::PeopleDetectionArray>("/identity",10,identityReceived);
+  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::PeopleDetectionArray>("/face_recognitions",10,identityReceived);
   ros::spin();
 
   return 0;

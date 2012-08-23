@@ -43,3 +43,5 @@ target_link_libraries(human_tracker ${TIM_TRACKER} ${OpenCV_LIBS})
 
 rosbuild_add_executable(view_tracks src/view_tracks.cpp)
 target_link_libraries(view_tracks ${OpenCV_LIBS})
+
+rosbuild_add_executable(tracker_test_data src/tracker_test_data.cpp)

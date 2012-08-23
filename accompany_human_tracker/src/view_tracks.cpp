@@ -78,7 +78,8 @@ CvPoint scaledCvPoint(double x,double y)
 
 void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
 {
-  cvSetZero(img);
+  //cvSetZero(img);
+  cvSet(img, cvScalar(0,0,0));
   initView();
   updateMinMax(viewMin,viewMin);
   updateMinMax(viewMax,viewMax);
@@ -100,7 +101,10 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
     double x=trackedHumans->trackedHumans[i].location.x;
     double y=trackedHumans->trackedHumans[i].location.y;
     int id=trackedHumans->trackedHumans[i].id;
+    string identity=trackedHumans->trackedHumans[i].identity;
     stringstream ss;ss<<id;
+    if (identity.length()>0)
+      ss<<","<<identity;
     string name=ss.str();
     cvCircle(img, scaledCvPoint(x,y), scaledLength(0.1), cvScalar(0,255,0), 1);
     cvPutText(img,name.c_str(),scaledCvPoint(x,y),&font,cvScalar(0,255,0));
@@ -124,6 +128,7 @@ int main(int argc,char **argv)
   // create publisher and subscribers
   ros::NodeHandle n;
   ros::Subscriber trackedHumansSub=n.subscribe<accompany_human_tracker::TrackedHumans>("/trackedHumans",10,trackedHumansReceived);
+  
   ros::spin();
   cvReleaseImage(&img);
 
