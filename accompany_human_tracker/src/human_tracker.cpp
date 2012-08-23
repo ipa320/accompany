@@ -92,25 +92,26 @@ public:
 
   void match(double *dist,int nrIdentities,vector<int> &assigned,set<int> &availableTracks,double sumDist)
   {
-    if (assigned.size()==(unsigned)nrIdentities)
+    int iden=assigned.size();// identity to assign
+    if (iden==(unsigned)nrIdentities)
     {
       bestSumDist=sumDist;
       bestAssigned=assigned;
     }
     else
     {
-      int iden=assigned.size();// identity to assign
       for (set<int>::iterator it=availableTracks.begin();it!=availableTracks.end();)
       {
         int track=*it;// track to assign
+        set<int>::iterator itold=it;it++;
         double newSumDist=sumDist+dist[track*nrIdentities+iden];
         if (newSumDist<bestSumDist)
         {
-          set<int>::iterator itnew=it;itnew++;
-          availableTracks.erase(it);// remove track
-          it=itnew;
+          availableTracks.erase(itold);// remove track
           assigned.push_back(track);
-          match(dist,nrIdentities,assigned,availableTracks,newSumDist);
+          // copy set to avoid current iterator invalidation with future erase
+          set<int> new_availableTracks=availableTracks;
+          match(dist,nrIdentities,assigned,new_availableTracks,newSumDist);
           
           // undo changes to assigned and availableTracks for next assignment
           assigned.pop_back();
@@ -118,7 +119,6 @@ public:
         }
       }
     }
-    
   }
 
   void match(double *dist,int nrTracks,int nrIdentities)
@@ -130,9 +130,9 @@ public:
     match(dist,nrIdentities,assigned,availableTracks,0);
   }
 
-  vector<int> &getBestAssigned()
+  vector<int> *getBestAssigned()
   {
-    return bestAssigned;
+    return &bestAssigned;
   }
 
 private:
@@ -162,21 +162,32 @@ void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHuman
   
   MakeMatch makeMatch;
   makeMatch.match(dist,nrTracks,nrIdentities);
-  vector<int> assigned=makeMatch.getBestAssigned(); // best assignment
-  cerr<<"assigned: ";
+  vector<int> *assigned=makeMatch.getBestAssigned(); // best assignment
   int i=0;
-  for (vector<int>::iterator it=assigned.begin();it!=assigned.end();it++)
+  for (vector<int>::iterator it=assigned->begin();it!=assigned->end();it++)
   {
-    identityToID[transformedIdentifiedHumans.detections[i++].label]=*it;
-    cerr<<*it<<" ";
+    int id=*it;
+    string indentity=transformedIdentifiedHumans.detections[i++].label;
+    identityToID[indentity]=id;
   }
-  cerr<<endl;
-  idToIdentity.clear(); //map of id's to identities
+  idToIdentity.clear(); //new map of id's to identities
+  for (map<string,int>::iterator it=identityToID.begin();it!=identityToID.end();it++)
+    idToIdentity[it->second]=it->first;
+
+
   for (map<string,int>::iterator it=identityToID.begin();it!=identityToID.end();it++)
   {
-    cerr<<it->first<<"="<<it->second<<endl;
-    idToIdentity[it->second]=it->first;
+    cerr<<it->first<<"="<<it->second<<" ";
   }
+  cerr<<endl;
+  for (map<int,string>::iterator it=idToIdentity.begin();it!=idToIdentity.end();it++)
+  {
+    cerr<<it->first<<"="<<it->second<<" ";
+  }
+  cerr<<endl;
+
+  //if (idToIdentity.size()!=3 || identityToID.size()!=3)
+  //exit(1);
 }
 
 // receive identities and transform them to the camera's coordinate system
