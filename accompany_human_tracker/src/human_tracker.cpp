@@ -2,8 +2,8 @@
 #include <ros/ros.h>
 #include <accompany_human_tracker/HumanLocations.h>
 #include <accompany_human_tracker/TrackedHumans.h>
-#include <cob_people_detection_msgs/PeopleDetection.h>
-#include <cob_people_detection_msgs/PeopleDetectionArray.h>
+#include <cob_people_detection_msgs/Detection.h>
+#include <cob_people_detection_msgs/DetectionArray.h>
 #include <tf/transform_listener.h>
 
 #include <MyTracker.h>
@@ -80,7 +80,7 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   trackedHumansPub.publish(trackedHumans);
 }
 
-
+// tries all possible matches between identities and tracks an remember the best one
 class MakeMatch
 {
 public:
@@ -90,33 +90,44 @@ public:
     bestSumDist=numeric_limits<double>::max();
   }
 
-  void match(double *dist,int nrTracks,int nrIdentities,vector<int> *assigned,double sumDist)
+  void match(double *dist,int nrIdentities,vector<int> &assigned,set<int> &availableTracks,double sumDist)
   {
-    if (assigned->size()==(unsigned)nrIdentities)
+    if (assigned.size()==(unsigned)nrIdentities)
     {
-      if (sumDist<bestSumDist)
-      {
-        bestSumDist=sumDist;
-        bestAssigned=*assigned;
-      }
+      bestSumDist=sumDist;
+      bestAssigned=assigned;
     }
     else
     {
-      int iden=assigned->size();// identity to assign
-      for (int i=0;i<nrTracks;i++)
+      int iden=assigned.size();// identity to assign
+      for (set<int>::iterator it=availableTracks.begin();it!=availableTracks.end();)
       {
-        vector<int> newAssigned=*assigned;
-        newAssigned.push_back(i);
-        double newSumDist=sumDist+dist[i*nrIdentities+iden];
-        match(dist,nrTracks,nrIdentities,&newAssigned,newSumDist);
+        int track=*it;// track to assign
+        double newSumDist=sumDist+dist[track*nrIdentities+iden];
+        if (newSumDist<bestSumDist)
+        {
+          set<int>::iterator itnew=it;itnew++;
+          availableTracks.erase(it);// remove track
+          it=itnew;
+          assigned.push_back(track);
+          match(dist,nrIdentities,assigned,availableTracks,newSumDist);
+          
+          // undo changes to assigned and availableTracks for next assignment
+          assigned.pop_back();
+          availableTracks.insert(track);
+        }
       }
     }
+    
   }
 
   void match(double *dist,int nrTracks,int nrIdentities)
   {
-    vector<int> assigned;
-    match(dist,nrTracks,nrIdentities,&assigned,0);
+    vector<int> assigned;// empty list of assigned identities
+    set<int> availableTracks;
+    for (int i=0;i<nrTracks;i++)
+      availableTracks.insert(i); // all tracks to assign to
+    match(dist,nrIdentities,assigned,availableTracks,0);
   }
 
   vector<int> &getBestAssigned()
@@ -124,12 +135,13 @@ public:
     return bestAssigned;
   }
 
+private:
   vector<int> bestAssigned;
   double bestSumDist;
 };
 
 // compute the distance matrix of every track to every identified human and match using MakeMatch class
-void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifiedHumans)
+void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHumans)
 {
   unsigned int nrTracks=trackedHumans.trackedHumans.size();
   unsigned int nrIdentities=transformedIdentifiedHumans.detections.size();
@@ -139,7 +151,7 @@ void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifie
     accompany_human_tracker::TrackedHuman trackedHuman=trackedHumans.trackedHumans[i];
     for (unsigned int j=0;j<nrIdentities;j++)
     {
-      cob_people_detection_msgs::PeopleDetection identity=transformedIdentifiedHumans.detections[j];
+      cob_people_detection_msgs::Detection identity=transformedIdentifiedHumans.detections[j];
 
       double dx=trackedHuman.location.x-identity.pose.pose.position.x;
       double dy=trackedHuman.location.y-identity.pose.pose.position.y;
@@ -168,10 +180,9 @@ void match(cob_people_detection_msgs::PeopleDetectionArray &transformedIdentifie
 }
 
 // receive identities and transform them to the camera's coordinate system
-void identityReceived(const cob_people_detection_msgs::PeopleDetectionArray::ConstPtr& identifiedHumans)
+void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& identifiedHumans)
 {
-  
-  cob_people_detection_msgs::PeopleDetectionArray transformedIdentifiedHumans=*identifiedHumans;
+  cob_people_detection_msgs::DetectionArray transformedIdentifiedHumans=*identifiedHumans;
   for (unsigned int i=0;i<identifiedHumans->detections.size();i++)
   {
     string identity=identifiedHumans->detections[i].label;
@@ -213,7 +224,7 @@ int main(int argc,char **argv)
 
   trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
-  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::PeopleDetectionArray>("/face_recognitions",10,identityReceived);
+  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
   ros::spin();
 
   return 0;

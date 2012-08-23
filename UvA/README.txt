@@ -30,6 +30,10 @@ Install CMAKE
 
   sudo apt-get install cmake
 
+Install gstreamer tools
+
+  sudo apt-get install gstreamer-tools
+
 Download vxl-1.17.0 from
 
   http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
@@ -38,8 +42,10 @@ and install using:
 
   unzip vxl-1.17.0.zip
   cd vxl-1.17.0/
+  mkdir build
+  cd build
   cmake .. -DBUILD_BRL=OFF
-  make
+  make -j 4
   sudo make install
 
 Clone cmn with (non-public, this requires ssh access to server!!)
@@ -54,6 +60,20 @@ and install with
   cmake ../src
   make
   sudo make install
+
+Clone TimTracker:
+
+  git clone git://basterwijn.nl/home/bterwijn/git/TimTracker.git
+
+and install with
+
+  cd TimTracker
+  mkdir build
+  cd build
+  cmake ../src
+  make
+  sudo make install
+  sudo updatedb
 
 Install gstreamer
 
@@ -89,7 +109,7 @@ publish stream in ros:
 
 Download testing resource from:
 
-  wget -nc basterwijn.nl/ninghang/test_res/list.txt
+  roscd accompany_static_camera_localisation/res/test
   wget -i list.txt
 
 We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
@@ -98,6 +118,7 @@ We assume you are now in the same folder as the files you just downloaded. Load 
 
 Start localization:
 
+  roscd accompany_static_camera_localisation/res/test
   rosrun accompany_static_camera_localisation camera_localization -p.
   
 Show locations: 
@@ -137,6 +158,7 @@ To import project into Eclipse (optional), refer to:
   http://www.ros.org/wiki/IDEs
   
 ----------------------------------------
+
 #-- Intrinsic Calibration --#
 
 Open camera in FULL resolution (HALF?)
@@ -235,7 +257,7 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Restart gscam and capture background images with REDUCED resolution:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486 , framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=***, height=*** , framerate=15/1 ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
