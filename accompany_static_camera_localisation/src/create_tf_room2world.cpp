@@ -49,7 +49,9 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
       {
         locations.push_back(p);
         if (locations.size() >= 3)
-          cout << "Clicking finished, Press ENTER to continue or 'z' to redo last point" << endl;
+          cout
+              << "Clicking finished, Press ENTER to continue or 'z' to redo last point"
+              << endl;
       }
       showScaledImg();
       break;
@@ -69,13 +71,14 @@ void printUsage()
 
 int main(int argc, char **argv)
 {
-  string imFile;
+  string imFile, mapParamFile;
 
   // handling arguments
   po::options_description optionsDescription(
       "Find tf from room coordinates to world coordinates\nAllowed options\n");
-  optionsDescription.add_options()("map_world,m",
-      po::value<string>(&imFile)->required(), "the world map\n");
+  optionsDescription.add_options()("map,m",
+      po::value<string>(&imFile)->required(), "the world map\n")("param,p",
+      po::value<string>(&mapParamFile)->required(), "parameters of the map\n");
 
   po::variables_map variablesMap;
 
@@ -93,6 +96,15 @@ int main(int argc, char **argv)
     std::cout << optionsDescription << std::endl;
     return 1;
   }
+
+  float resolution;
+  vector<float> origin;
+  cv::FileStorage fsParam(mapParamFile, cv::FileStorage::READ);
+  FileNode fn = fsParam["origin"];
+  fsParam["resolution"] >> resolution;
+  fn >> origin;
+  cout << origin[0] << origin[1] << origin[2] << endl;
+  cout << resolution << endl;
 
   img = imread(imFile);
   namedWindow("image");
@@ -157,8 +169,8 @@ int main(int argc, char **argv)
   Mat src_points = Mat::zeros(Size(2, 3), CV_32F);
   for (unsigned int i = 0; i < locations.size(); ++i)
   {
-    src_points.at<float>(i, 0) = locations[i].x;
-    src_points.at<float>(i, 1) = locations[i].y;
+    src_points.at<float>(i, 0) = locations[i].x * resolution;
+    src_points.at<float>(i, 1) = (img.rows - locations[i].y) * resolution;
   }
 
   cout << "src_points are: " << src_points << endl;
@@ -179,8 +191,8 @@ int main(int argc, char **argv)
   cout << "src_points: " << endl << src_points << endl;
   cout << "dst_points: " << endl << dst_points << endl;
   cout << "transform matrix: " << endl << tform << endl;
-  cout << "How it works: " << endl << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
+  cout << "How it works: " << endl
+      << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
   return 0;
 }
-
