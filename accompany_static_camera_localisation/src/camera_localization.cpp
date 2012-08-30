@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/CvBridge.h>
+#include <std_msgs/Header.h>
 
 #include <vector>
 #include <stdio.h>
@@ -51,6 +52,7 @@ vector<vnl_vector<FLOAT> > logSumPixelFGProb;
 vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
 
+std_msgs::Header header;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 sensor_msgs::CvBridge bridge;
 unsigned CAM_NUM = 1;
@@ -300,7 +302,9 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   // report locations
   cout << "locations found are" << endl;
   accompany_human_tracker::HumanLocations humanLocations;
+  header.stamp=ros::Time::now();
   geometry_msgs::Vector3Stamped v;
+  v.header=header;// set current time and frame
   for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];
@@ -472,13 +476,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 int main(int argc, char **argv)
 {
   string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file;
-
+  
   // handling arguments
   po::options_description optionsDescription(
       "Human Detection main function\nAllowed options\n");
   optionsDescription.add_options()
-      ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
-          "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n");
+    ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
+     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
+    ("frame_id,f", po::value<string>(&(header.frame_id))->required(),"name of the coordinate frame of this camera\n");
 
   po::variables_map variablesMap;
 
