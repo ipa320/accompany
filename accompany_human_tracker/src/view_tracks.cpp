@@ -86,8 +86,8 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
 
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
-    double x=trackedHumans->trackedHumans[i].location.x;
-    double y=trackedHumans->trackedHumans[i].location.y;
+    double x=trackedHumans->trackedHumans[i].location.vector.x;
+    double y=trackedHumans->trackedHumans[i].location.vector.y;
     updateMinMax(x,y);
   }
 
@@ -98,8 +98,8 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
   
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
-    double x=trackedHumans->trackedHumans[i].location.x;
-    double y=trackedHumans->trackedHumans[i].location.y;
+    double x=trackedHumans->trackedHumans[i].location.vector.x;
+    double y=trackedHumans->trackedHumans[i].location.vector.y;
     int id=trackedHumans->trackedHumans[i].id;
     string identity=trackedHumans->trackedHumans[i].identity;
     stringstream ss;ss<<id;

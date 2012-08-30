@@ -300,14 +300,14 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   // report locations
   cout << "locations found are" << endl;
   accompany_human_tracker::HumanLocations humanLocations;
-  geometry_msgs::Vector3 v;
+  geometry_msgs::Vector3Stamped v;
   for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];
     cout << " " << scanLocations[existing[i]];
-    v.x = wp.x/1000; // millimeters to meters
-    v.y = wp.y/1000;
-    v.z = 0;
+    v.vector.x = wp.x/1000; // millimeters to meters
+    v.vector.y = wp.y/1000;
+    v.vector.z = 0;
     humanLocations.locations.push_back(v);
   }
   cout << endl << "===========" << endl;
@@ -450,7 +450,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //            for (int l=0;l<numberOfLocations;l++)
     //            {
     //              int randomLoc=(rand()%humanLocations.locations.size());// random location index
-    //              geometry_msgs::Vector3 v=humanLocations.locations[randomLoc];// random location vector
+    //              geometry_msgs::Vector3Stamped v=humanLocations.locations[randomLoc];// random location vector
     //              humanLocationsParticle.locations.push_back(v);// add location to particle
     //            }
     //            humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight

@@ -47,8 +47,8 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
-    Tracker::TrackPoint point = {humanLocations->locations[i].x,
-                                 humanLocations->locations[i].y,
+    Tracker::TrackPoint point = {humanLocations->locations[i].vector.x,
+                                 humanLocations->locations[i].vector.y,
                                  0.01,
                                  0.01};
     trackPoints.push_back(point);
@@ -66,9 +66,9 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   {
     cv::Mat mat=it->filter.getState();
     accompany_human_tracker::TrackedHuman trackedHuman;
-    trackedHuman.location.x=mat.at<float>(0,0);
-    trackedHuman.location.y=mat.at<float>(1,0);
-    trackedHuman.location.z=0;
+    trackedHuman.location.vector.x=mat.at<float>(0,0);
+    trackedHuman.location.vector.y=mat.at<float>(1,0);
+    trackedHuman.location.vector.z=0;
     trackedHuman.id=it->id;
     map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
     if (it!=idToIdentity.end())
@@ -153,9 +153,9 @@ void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHuman
     {
       cob_people_detection_msgs::Detection identity=transformedIdentifiedHumans.detections[j];
 
-      double dx=trackedHuman.location.x-identity.pose.pose.position.x;
-      double dy=trackedHuman.location.y-identity.pose.pose.position.y;
-      double dz=trackedHuman.location.y-identity.pose.pose.position.z;
+      double dx=trackedHuman.location.vector.x-identity.pose.pose.position.x;
+      double dy=trackedHuman.location.vector.y-identity.pose.pose.position.y;
+      double dz=trackedHuman.location.vector.y-identity.pose.pose.position.z;
       dist[i*nrIdentities+j]=dx*dx+dy*dy+dz*dz;
     }
   }

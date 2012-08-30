@@ -21,24 +21,24 @@ double rand(int min,int max)
   return ((rand()/(double)RAND_MAX)*range)+min;
 }
 
-void move(accompany_human_tracker::HumanLocations &humanLocations,vector<geometry_msgs::Vector3> &speeds)
+void move(accompany_human_tracker::HumanLocations &humanLocations,vector<geometry_msgs::Vector3Stamped> &speeds)
 {
-  vector<geometry_msgs::Vector3>::iterator lit=humanLocations.locations.begin();
-  vector<geometry_msgs::Vector3>::iterator sit=speeds.begin();
+  vector<geometry_msgs::Vector3Stamped>::iterator lit=humanLocations.locations.begin();
+  vector<geometry_msgs::Vector3Stamped>::iterator sit=speeds.begin();
   while (lit!=humanLocations.locations.end() || sit!=speeds.end())
   {
     // move
-    lit->x+=sit->x;
-    lit->y+=sit->y;
-    lit->z+=sit->z;
+    lit->vector.x+=sit->vector.x;
+    lit->vector.y+=sit->vector.y;
+    lit->vector.z+=sit->vector.z;
     
     // check borders
-    if (lit->x<MIN_X || lit->x>MAX_X)
-      sit->x*=-1;
-    if (lit->y<MIN_Y || lit->y>MAX_Y)
-      sit->y*=-1;
-    if (lit->z<MIN_Z || lit->z>MAX_Z)
-      sit->z*=-1;
+    if (lit->vector.x<MIN_X || lit->vector.x>MAX_X)
+      sit->vector.x*=-1;
+    if (lit->vector.y<MIN_Y || lit->vector.y>MAX_Y)
+      sit->vector.y*=-1;
+    if (lit->vector.z<MIN_Z || lit->vector.z>MAX_Z)
+      sit->vector.z*=-1;
 
     // next
     lit++;
@@ -46,24 +46,24 @@ void move(accompany_human_tracker::HumanLocations &humanLocations,vector<geometr
   }
 }
 
-void move(cob_people_detection_msgs::DetectionArray &detectionArray,vector<geometry_msgs::Vector3> &speeds)
+void move(cob_people_detection_msgs::DetectionArray &detectionArray,vector<geometry_msgs::Vector3Stamped> &speeds)
 {
   vector<cob_people_detection_msgs::Detection>::iterator lit=detectionArray.detections.begin();
-  vector<geometry_msgs::Vector3>::iterator sit=speeds.begin();
+  vector<geometry_msgs::Vector3Stamped>::iterator sit=speeds.begin();
   while (lit!=detectionArray.detections.end() || sit!=speeds.end())
   {
     // move
-    lit->pose.pose.position.x+=sit->x;
-    lit->pose.pose.position.y+=sit->y;
-    lit->pose.pose.position.z+=sit->z;
+    lit->pose.pose.position.x+=sit->vector.x;
+    lit->pose.pose.position.y+=sit->vector.y;
+    lit->pose.pose.position.z+=sit->vector.z;
 
     // check borders
     if (lit->pose.pose.position.x<MIN_X || lit->pose.pose.position.x>MAX_X)
-      sit->x*=-1;
+      sit->vector.x*=-1;
     if (lit->pose.pose.position.y<MIN_Y || lit->pose.pose.position.y>MAX_Y)
-      sit->y*=-1;
+      sit->vector.y*=-1;
     if (lit->pose.pose.position.z<MIN_Z || lit->pose.pose.position.z>MAX_Z)
-      sit->z*=-1;
+      sit->vector.z*=-1;
 
     // next
     lit++;
@@ -83,25 +83,25 @@ int main(int argc,char **argv)
   // init humans
   int nrHumans=6;
   accompany_human_tracker::HumanLocations humanLocations;
-  vector<geometry_msgs::Vector3> humanSpeeds;
+  vector<geometry_msgs::Vector3Stamped> humanSpeeds;
   for (int i=0;i<nrHumans;i++)
   {
-    geometry_msgs::Vector3 location;
-    location.x=rand(0,MAX_X);
-    location.y=rand(0,MAX_Y);
-    location.z=rand(0,MAX_Z);
+    geometry_msgs::Vector3Stamped location;
+    location.vector.x=rand(0,MAX_X);
+    location.vector.y=rand(0,MAX_Y);
+    location.vector.z=rand(0,MAX_Z);
     humanLocations.locations.push_back(location);
-    geometry_msgs::Vector3 speed;
-    speed.x=rand(-MAX_X,MAX_X)/100;
-    speed.y=rand(-MAX_Y,MAX_Y)/100;
-    speed.z=rand(-MAX_Z,MAX_Z)/100;
+    geometry_msgs::Vector3Stamped speed;
+    speed.vector.x=rand(-MAX_X,MAX_X)/100;
+    speed.vector.y=rand(-MAX_Y,MAX_Y)/100;
+    speed.vector.z=rand(-MAX_Z,MAX_Z)/100;
     humanSpeeds.push_back(speed);
   }
   
   // init identities
   int nrIdentities=3;
   cob_people_detection_msgs::DetectionArray detectionArray;
-  vector<geometry_msgs::Vector3> identitySpeeds;
+  vector<geometry_msgs::Vector3Stamped> identitySpeeds;
   for (int i=0;i<nrIdentities;i++)
   {
     cob_people_detection_msgs::Detection detection;
@@ -118,10 +118,10 @@ int main(int argc,char **argv)
     detection.pose.pose.orientation.z=0;
     detection.pose.pose.orientation.w=1;
     detectionArray.detections.push_back(detection);
-    geometry_msgs::Vector3 speed;
-    speed.x=rand(-MAX_X,MAX_X)/100;
-    speed.y=rand(-MAX_Y,MAX_Y)/100;
-    speed.z=rand(-MAX_Z,MAX_Z)/100;
+    geometry_msgs::Vector3Stamped speed;
+    speed.vector.x=rand(-MAX_X,MAX_X)/100;
+    speed.vector.y=rand(-MAX_Y,MAX_Y)/100;
+    speed.vector.z=rand(-MAX_Z,MAX_Z)/100;
     identitySpeeds.push_back(speed);
   }
   

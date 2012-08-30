@@ -1,2 +1,2 @@
-geometry_msgs/Vector3[] locations
+geometry_msgs/Vector3Stamped[] locations
 float32 weight
