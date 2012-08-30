@@ -1,7 +1,8 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <cv_bridge/CvBridge.h>
-#include <std_msgs/Header.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <tf/transform_broadcaster.h>
 
 #include <vector>
 #include <stdio.h>
@@ -22,9 +23,11 @@
 #include <opencv/highgui.h>
 #include <opencv/cvwimage.h>
 
+#include <accompany_uva_utils/uva_utils.h>
 #include <accompany_human_tracker/HumanLocations.h>
 #include <accompany_static_camera_localisation/HumanLocationsParticle.h>
 #include <accompany_static_camera_localisation/HumanLocationsParticles.h>
+
 #include "cmn/FastMath.hh"
 #include "cmn/random.hh"
 #include "tools/utils.hh"
@@ -52,7 +55,8 @@ vector<vnl_vector<FLOAT> > logSumPixelFGProb;
 vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
 
-std_msgs::Header header;
+geometry_msgs::TransformStamped frame;
+tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 sensor_msgs::CvBridge bridge;
 unsigned CAM_NUM = 1;
@@ -302,9 +306,12 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
   // report locations
   cout << "locations found are" << endl;
   accompany_human_tracker::HumanLocations humanLocations;
-  header.stamp=ros::Time::now();
+  
   geometry_msgs::Vector3Stamped v;
-  v.header=header;// set current time and frame
+  std_msgs::Header header;
+  header.stamp=ros::Time::now();
+  header.frame_id=frame.child_frame_id;
+  v.header=header;// set current time and frame name to the vector
   for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];
@@ -473,17 +480,22 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 
+void timerCallback(const ros::TimerEvent& timerEvent)
+{
+  frame.header.stamp=ros::Time::now();
+  transformBroadcasterPtr->sendTransform(frame);
+}
+
 int main(int argc, char **argv)
 {
-  string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file;
+  string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file, frame_file;
   
   // handling arguments
   po::options_description optionsDescription(
       "Human Detection main function\nAllowed options\n");
   optionsDescription.add_options()
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
-     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
-    ("frame_id,f", po::value<string>(&(header.frame_id))->required(),"name of the coordinate frame of this camera\n");
+     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n");
 
   po::variables_map variablesMap;
 
@@ -507,6 +519,14 @@ int main(int argc, char **argv)
   prior_file = path + "/" + "prior.txt";
   intrinsic_file = path + "/" + "camera_intrinsic.xml";
   extrinsic_file = path + "/" + "camera_extrinsic.xml";
+  frame_file = path + "/" + "frame.dat";
+
+  // load coordinate frame of camera
+  if (!load_msg(frame,frame_file))
+  {
+    std::cerr<<"Failed to load the coordinate frame from file '"<<frame_file<<"'. Use program 'create_frame' to create the file."<<endl;
+    exit(1);
+  }
 
   // Initialize localization module
   getBackground(bgmodel_file.c_str(), bgModel);
@@ -523,14 +543,14 @@ int main(int argc, char **argv)
   // ROS nodes, subscribers and publishers
   ros::init(argc, argv, "camera_localization");
   ros::NodeHandle n;
-  ros::Rate loop_rate(5);
+  tf::TransformBroadcaster transformBroadcaster;
+  transformBroadcasterPtr=&transformBroadcaster;
+  ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
   image_transport::ImageTransport it(n);
-  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(
-      "/humanLocations", 10);
-  //	humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
-  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1,
-      imageCallback);
-
+  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations", 10);
+  //humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
+  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1,imageCallback);
   ros::spin();
+
   return 0;
 }
