@@ -17,17 +17,23 @@ template<class T> void save_msg(T &t,std::string filename)
   file.close();
 }
 
-template<class T> void load_msg(T &t,std::string filename)
+template<class T> bool load_msg(T &t,std::string filename)
 {
+  bool ret=false;
   std::ifstream file(filename.c_str(),std::ios::in|std::ios::binary);
-  file.seekg (0, std::ios::end);
-  int length = file.tellg();// get length of file
-  file.seekg (0, std::ios::beg);
-  unsigned char *buf=new unsigned char[length];
-  file.readsome((char *)buf,length);// read hole file
-  file.close();
-  boost::shared_array<uint8_t> buffer(buf);
-  uint32_t size=ros::serialization::serializationLength(t);
-  ros::serialization::IStream istream(buffer.get(),length/sizeof(uint8_t));
-  ros::serialization::deserialize(istream,t);
+  if(!file.fail())
+  {
+    file.seekg (0, std::ios::end);
+    int length = file.tellg();// get length of file
+    file.seekg (0, std::ios::beg);
+    unsigned char *buf=new unsigned char[length];
+    file.readsome((char *)buf,length);// read hole file
+    file.close();
+    boost::shared_array<uint8_t> buffer(buf);
+    uint32_t size=ros::serialization::serializationLength(t);
+    ros::serialization::IStream istream(buffer.get(),length/sizeof(uint8_t));
+    ros::serialization::deserialize(istream,t);
+    ret=true;
+  }
+  return ret;
 }
