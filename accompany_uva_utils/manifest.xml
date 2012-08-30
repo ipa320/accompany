@@ -9,6 +9,8 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/accompany_uva_utils</url>
 
+  <export>
+    <cpp cflags="-I${prefix}/include"/>
+  </export>
+
 </package>
-
-
