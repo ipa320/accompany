@@ -8,4 +8,4 @@ wget -nc http://basterwijn.nl/ninghang/test_res/params.xml
 wget -nc http://basterwijn.nl/ninghang/test_res/camera_intrinsic.xml
 wget -nc http://basterwijn.nl/ninghang/test_res/camera_extrinsic.xml
 wget -nc http://basterwijn.nl/ninghang/test_res/bgmodel.xml
-
+wget -nc http://basterwijn.nl/ninghang/test_res/frane.dat
