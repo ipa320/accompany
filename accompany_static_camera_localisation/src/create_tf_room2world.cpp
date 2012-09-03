@@ -2,6 +2,11 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
+#include <ros/ros.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf/transform_datatypes.h>
+#include <accompany_uva_utils/uva_utils.h>
+
 namespace po = boost::program_options;
 using namespace std;
 using namespace cv;
@@ -194,10 +199,15 @@ int main(int argc, char **argv)
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
-  tf::Transform tr = tf::Transform(btMatrix3x3(tform<float>(0,0),tform<float>(0,1),0,
-                                               tform<float>(1,0),tform<float>(1,1),0,
+  tf::Transform tr = tf::Transform(btMatrix3x3(tform.at<float>(0,0),tform.at<float>(0,1),0,
+                                               tform.at<float>(1,0),tform.at<float>(1,1),0,
                                                0,0,1),  
-                                   btVector3(tform<float>(0,2),tform<float>(1,2),0));
-  
+                                   btVector3(tform.at<float>(0,2),tform.at<float>(1,2),0));
+//  geometry_msgs::TransformStamped msg;
+//  tf::StampedTransform tr_stamped(tr,);
+//  tf::transformStampedTFToMsg(tr_stamped, msg);
+//  cout << tr << endl;
+//    tf::Transform tr = tf::Transform(btMatrix3x3(tform<float>(0,0),2,3,4,5,6,7,8,9),  
+//                                   btVector3(1,2,3));
   return 0;
 }
