@@ -47,11 +47,23 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
-    Tracker::TrackPoint point = {humanLocations->locations[i].vector.x,
-                                 humanLocations->locations[i].vector.y,
-                                 0.01,
-                                 0.01};
-    trackPoints.push_back(point);
+    try// transform to map coordinate system
+    {
+      geometry_msgs::Vector3Stamped transVec;
+      listener->transformVector("/map",
+                                humanLocations->locations[i],
+                                transVec);
+      Tracker::TrackPoint point = {transVec.vector.x,
+                                   transVec.vector.y,
+                                   0.01,
+                                   0.01};
+      trackPoints.push_back(point);
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      break;
+    }
   }
   double deltaTime=0;
   ros::Time now=ros::Time::now();
@@ -62,10 +74,13 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   tracker.update(trackPoints, deltaTime);
   cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
   trackedHumans.trackedHumans.clear();
+  
+  accompany_human_tracker::TrackedHuman trackedHuman;
+  trackedHuman.location.header.stamp=ros::Time::now();
+  trackedHuman.location.header.frame_id="/map";
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
   {
     cv::Mat mat=it->filter.getState();
-    accompany_human_tracker::TrackedHuman trackedHuman;
     trackedHuman.location.vector.x=mat.at<float>(0,0);
     trackedHuman.location.vector.y=mat.at<float>(1,0);
     trackedHuman.location.vector.z=0;
@@ -198,15 +213,11 @@ void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr&
   {
     string identity=identifiedHumans->detections[i].label;
     const geometry_msgs::PoseStamped pose=identifiedHumans->detections[i].pose;
-
-    // transform to camera coordinate system
     
-    try
+    try// transform to map coordinate system
     {
       geometry_msgs::PoseStamped transPose;
-      
-
-      listener->transformPose("/overhead1",
+      listener->transformPose("/map",
                               pose,
                               transPose);
       geometry_msgs::Point pos=transPose.pose.position;
@@ -215,7 +226,7 @@ void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr&
     }
     catch (tf::TransformException e)
     {
-      cerr<<"error while tranforming human identity to overhead camera frame: "<<e.what()<<endl;
+      cerr<<"error while tranforming human identity: "<<e.what()<<endl;
       break;
     }
   }

@@ -2,9 +2,9 @@
 <launch>
 
   <!-- transforms for kinect,base_link,and overhead1 -->
-  <node pkg="tf" type="static_transform_publisher" name="head_cam3d_link_frame" args="0 0 0 0 0 0 base_link head_cam3d_link 100"/>
-  <node pkg="tf" type="static_transform_publisher" name="base_link_frame"       args="0 0 0 0 0 0 map base_link 100"/>
-  <node pkg="tf" type="static_transform_publisher" name="overhead1_frame"       args="0 0 0 0 0 0 map overhead1 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="head_cam3d_link_frame" args="0 0 0 0 0 0 /base_link /head_cam3d_link 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="base_link_frame"       args="0 0 0 0 0 0 /map /base_link 100"/>
+  <node pkg="tf" type="static_transform_publisher" name="overhead1_frame"       args="0 0 0 0 0 0 /map /overhead1 100"/>
 
   <!-- track humans using localisation data -->
   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"/>
@@ -16,4 +16,3 @@
   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/>
 
 </launch>
-
