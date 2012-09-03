@@ -194,5 +194,10 @@ int main(int argc, char **argv)
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
+  tf::Transform tr = tf::Transform(btMatrix3x3(tform<float>(0,0),tform<float>(0,1),0,
+                                               tform<float>(1,0),tform<float>(1,1),0,
+                                               0,0,1),  
+                                   btVector3(tform<float>(0,2),tform<float>(1,2),0));
+  
   return 0;
 }
