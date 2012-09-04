@@ -482,7 +482,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void timerCallback(const ros::TimerEvent& timerEvent)
 {
-  frame.header.stamp=ros::Time::now();
+  frame.header.stamp=ros::Time::now()+ros::Duration(.5);// date transform in the future
   transformBroadcasterPtr->sendTransform(frame);
 }
 

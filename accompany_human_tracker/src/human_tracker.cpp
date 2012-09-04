@@ -88,6 +88,8 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
     map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
     if (it!=idToIdentity.end())
       trackedHuman.identity=it->second;
+    else
+      trackedHuman.identity="";
     trackedHumans.trackedHumans.push_back(trackedHuman);
   }
 #endif
@@ -170,7 +172,7 @@ void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHuman
 
       double dx=trackedHuman.location.vector.x-identity.pose.pose.position.x;
       double dy=trackedHuman.location.vector.y-identity.pose.pose.position.y;
-      double dz=trackedHuman.location.vector.y-identity.pose.pose.position.z;
+      double dz=trackedHuman.location.vector.z-identity.pose.pose.position.z;
       dist[i*nrIdentities+j]=dx*dx+dy*dy+dz*dz;
     }
   }
