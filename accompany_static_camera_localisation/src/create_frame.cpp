@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "create_frame");
   
-  char *filename="frame.dat";
+  string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
 
