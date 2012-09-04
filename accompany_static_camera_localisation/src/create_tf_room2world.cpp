@@ -47,16 +47,22 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
       p *= 1 / scale;
       cout << "Left button down at " << p.x << "," << p.y << endl;
       if (locations.size() >= 3)
-        cout
-            << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point"
-            << endl;
+        cout << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point" << endl;
       else
       {
         locations.push_back(p);
-        if (locations.size() >= 3)
-          cout
-              << "Clicking finished, Press 'q' to continue or 'z' to redo last point"
-              << endl;
+        if (locations.size() == 2)
+        {
+          Point p0 = locations[0];
+          Point p1 = locations[1];
+          Point v1 = p1 - p0;
+          Point v2;
+          v2.x = v1.y;
+          v2.y = v1.x * (-1);
+          Point p2 = p0 + v2;
+          locations.push_back(p2);
+          cout << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point" << endl;
+        }
       }
       showScaledImg();
       break;
