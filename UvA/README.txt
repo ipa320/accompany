@@ -48,9 +48,9 @@ and install using:
   make -j 4
   sudo make install
 
-Clone cmn with (non-public, this requires ssh access to server!!)
+Clone cmn with
 
-  git clone ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn 
+  git clone git://basterwijn.nl/home/bterwijn/git/cmnGwenn.git 
 
 and install with
 
@@ -73,7 +73,6 @@ and install with
   cmake ../src
   make
   sudo make install
-  sudo updatedb
 
 Install gstreamer
 
