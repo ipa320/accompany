@@ -78,10 +78,6 @@ Install gstreamer
 
   sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
 
-Install the gscam ROS package in: UvA/dependencies/gscam
-This file has been slightly altered to drop old frames (sync=false)
-and so always provide the last frame.
-
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
 
@@ -98,6 +94,55 @@ publish stream in ros:
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! ffmpegcolorspace"
   rosrun gscam gscam --sync false
 ----------------------------------------
+
+Install the gscam ROS package in: UvA/dependencies/gscam
+This file has been slightly altered to drop old frames (sync=false)
+and so always provide the last frame.
+
+Clone ros package cob_perception_common:
+
+  git clone git://github.com/ipa320/cob_perception_common.git
+
+and install with:
+
+  rosdep install cob_perception_common
+  rosmake cob_perception_common
+
+Clone ros package cob_people_perception:
+
+  git clone https://github.com/ipa320/cob_people_perception.git
+
+and install with:
+
+  first remove these lines from cob_people_detection/manifest.xml:
+  <depend package="tinyxml"/> 
+  <depend package="dynamic_reconfigure"/>
+  
+  add these lines to cob_people_detection/CMakeLists.txt:
+  target_link_libraries(face_recognizer_node boost_filesystem boost_system)
+  target_link_libraries(detection_tracker_node boost_signals)
+  target_link_libraries(people_detection_display_node boost_signals)
+  target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
+
+  rosdep install cob_people_detection
+  rosmake cob_people_detection
+
+Clone the accompany software (ros packages) using:
+
+  git clone git://basterwijn.nl/home/bterwijn/git/accompany.git
+  
+  rosdep install accompany_static_camera_localisation
+  rosmake accompany_static_camera_localisation
+
+Run some tests:
+
+  # downloads prerecorded video and does detection and tracking
+  roscd accompany/UvA/startScripts/
+  ./startTestNonGSCam
+
+  # tracks humans and identities using artificial data
+  roslaunch accompany_human_tracker testTracker.launch
+
 
 
 # ---------------------------------------------------
