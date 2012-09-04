@@ -30,7 +30,6 @@ template<class T> bool load_msg(T &t,std::string filename)
     file.readsome((char *)buf,length);// read hole file
     file.close();
     boost::shared_array<uint8_t> buffer(buf);
-    uint32_t size=ros::serialization::serializationLength(t);
     ros::serialization::IStream istream(buffer.get(),length/sizeof(uint8_t));
     ros::serialization::deserialize(istream,t);
     ret=true;
