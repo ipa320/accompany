@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
   double a=0;
   tf::Transform transform=tf::Transform(btMatrix3x3( cos(a),sin(a),0, // rotation matrix
-                                                    -sin(a),sin(a),0,
+                                                    -sin(a),cos(a),0,
                                                     0,0,1),  
                                         btVector3(0,0,0)); // translation vector
   tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
