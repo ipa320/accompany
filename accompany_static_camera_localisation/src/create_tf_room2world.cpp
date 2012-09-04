@@ -2,6 +2,11 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
+#include <ros/ros.h>
+#include <geometry_msgs/TransformStamped.h>
+#include <tf/transform_datatypes.h>
+#include <accompany_uva_utils/uva_utils.h>
+
 namespace po = boost::program_options;
 using namespace std;
 using namespace cv;
@@ -43,14 +48,14 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
       cout << "Left button down at " << p.x << "," << p.y << endl;
       if (locations.size() >= 3)
         cout
-            << "You have clicked 3 points already. Press ENTER to continue or 'z' to redo last point"
+            << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point"
             << endl;
       else
       {
         locations.push_back(p);
         if (locations.size() >= 3)
           cout
-              << "Clicking finished, Press ENTER to continue or 'z' to redo last point"
+              << "Clicking finished, Press 'q' to continue or 'z' to redo last point"
               << endl;
       }
       showScaledImg();
@@ -66,7 +71,7 @@ void printUsage()
   cout << "  " << "+" << "      " << "zoom in" << endl;
   cout << "  " << "-" << "      " << "zoom out" << endl;
   cout << "  " << "z" << "      " << "step back" << endl;
-  cout << "  " << "ENTER" << "  " << "save&quit" << endl;
+  cout << "  " << "q" << "  " << "save&quit" << endl;
 }
 
 int main(int argc, char **argv)
@@ -122,17 +127,11 @@ int main(int argc, char **argv)
     {
       printUsage();
     }
+    
     key = waitKey(0);
-    if ((char) key == 10)
-    {
-      if (locations.size() == 3)
-      {
-        cout << "Press ENTER to continue" << endl;
-        break;
-      }
-      else
-        cout << "Expected 3 points, get " << "locations.size()" << endl;
-    }
+    
+    if ((char) key == 'q' && locations.size() == 3) // exit
+      break;
 
     switch ((char) key)
     {
@@ -155,9 +154,6 @@ int main(int argc, char **argv)
         if (locations.size())
           locations.pop_back();
         showScaledImg();
-        break;
-
-      case 10:
         break;
 
       default:
@@ -194,5 +190,28 @@ int main(int argc, char **argv)
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
+
+  char *filename="frame.dat";
+  cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
+  geometry_msgs::TransformStamped transformStamped;
+  tf::Transform transform = tf::Transform(
+                  btMatrix3x3(tform.at<float>(0,0),tform.at<float>(0,1),0,// rotation matrix
+                              tform.at<float>(1,0),tform.at<float>(1,1),0,
+                              0,0,1), 
+                  btVector3(tform.at<float>(0,2),tform.at<float>(1,2),0));// translation vector
+  tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
+                                                             ros::Time(0),  // time, not used here
+                                                             "/map",        // parent coordinate frame
+                                                             "/overhead1"); // child coordinate frame
+  tf::transformStampedTFToMsg(stampedTransform,transformStamped);
+  save_msg(transformStamped,filename); // write to file
+ 
+
+  cout<<"read from file '"<<filename<<"' and print, just a test:"<<endl;
+  geometry_msgs::TransformStamped transformStamped2;
+  load_msg(transformStamped2,filename);
+  cout << transformStamped2;
+  
+  waitKey(0);
   return 0;
 }
