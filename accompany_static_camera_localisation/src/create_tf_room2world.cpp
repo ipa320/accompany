@@ -198,7 +198,7 @@ int main(int argc, char **argv)
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
 
-  char *filename="frame.dat";
+  string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
