@@ -11,9 +11,6 @@
 
 This document describes how to build and use the UvA modules (DoW T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
 
-We assume ACCOMPANY_PATH points to the root of the accompany
-directory.
-
 # -------------------------
 # ---  Dependencies
 # -------------------------
@@ -30,15 +27,11 @@ Install CMAKE
 
   sudo apt-get install cmake
 
-Install gstreamer tools
-
-  sudo apt-get install gstreamer-tools
-
 Download vxl-1.17.0 from
 
   http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
 
-and install using:
+and install using (this will take some time):
 
   unzip vxl-1.17.0.zip
   cd vxl-1.17.0/
@@ -76,7 +69,7 @@ and install with
 
 Install gstreamer
 
-  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
+  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools
 
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
@@ -127,9 +120,7 @@ and install with:
   rosdep install cob_people_detection
   rosmake cob_people_detection
 
-Clone the accompany software (ros packages) using:
-
-  git clone git://basterwijn.nl/home/bterwijn/git/accompany.git
+Build the UvA ros packages of the accompany software using:
   
   rosdep install accompany_static_camera_localisation
   rosmake accompany_static_camera_localisation
