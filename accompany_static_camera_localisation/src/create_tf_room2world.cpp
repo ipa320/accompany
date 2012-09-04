@@ -184,7 +184,8 @@ int main(int argc, char **argv)
   cout << "input the world coordinates of 'X', separate with SPACE" << endl;
   cin >> dst_points.at<float>(1, 0) >> dst_points.at<float>(1, 1);
   cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
-  cin >> dst_points.at<float>(2, 0) >> dst_points.at<float>(2, 1);
+  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
+  dst_points.at<float>(2, 1) = dst_points.at<float>(1, 0);
   cout << "dst_points are: " << dst_points << endl;
   cout << "-------------------------------------" << endl;
 
