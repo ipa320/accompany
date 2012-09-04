@@ -87,6 +87,7 @@ int main(int argc,char **argv)
   for (int i=0;i<nrHumans;i++)
   {
     geometry_msgs::Vector3Stamped location;
+    location.header.frame_id="/overhead1";
     location.vector.x=rand(0,MAX_X);
     location.vector.y=rand(0,MAX_Y);
     location.vector.z=rand(0,MAX_Z);
@@ -109,7 +110,7 @@ int main(int argc,char **argv)
     ss<<"person";
     ss<<(char)(65+i);
     detection.label=ss.str();
-    detection.pose.header.frame_id="head_cam3d_link";
+    detection.pose.header.frame_id="/head_cam3d_link";
     detection.pose.pose.position.x=rand(0,MAX_X);
     detection.pose.pose.position.y=rand(0,MAX_Y);
     detection.pose.pose.position.z=rand(0,MAX_Z);

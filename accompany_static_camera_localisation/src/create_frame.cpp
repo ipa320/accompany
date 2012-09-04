@@ -20,7 +20,7 @@ int main(int argc, char **argv)
                                                     0,0,1),  
                                         btVector3(0,0,0)); // translation vector
   tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
-                                                             ros::Time(0),  // time, not used 
+                                                             ros::Time(0),  // time, not used here
                                                              "/map",        // parent coordinate frame
                                                              "/overhead1"); // child coordinate frame
   tf::transformStampedTFToMsg(stampedTransform,transformStamped);
