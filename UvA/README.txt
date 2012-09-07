@@ -63,7 +63,7 @@ and install with
   cd TimTracker
   mkdir build
   cd build
-  cmake ../src
+  cmake ..
   make
   sudo make install
 
