@@ -212,7 +212,7 @@ Record a few frames containing a checkerboard:
   
 Filter out non-informative calibration frames in the folder, and then download the corner extracor:
 
-  ./run_calib
+  ./Matlab_calibpkg
 
 Open MATLAB and extract corners using `run.m`, corner points will be saved in `X.csv` and `Y.csv`
 
