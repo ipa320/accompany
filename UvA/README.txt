@@ -63,7 +63,7 @@ and install with
   cd TimTracker
   mkdir build
   cd build
-  cmake ../src
+  cmake ..
   make
   sudo make install
 
@@ -101,6 +101,10 @@ and install with:
   rosdep install cob_perception_common
   rosmake cob_perception_common
 
+Install openni for ROS Electric
+
+  sudo apt-get ros-electric-openni-kinect
+
 Clone ros package cob_people_perception:
 
   git clone https://github.com/ipa320/cob_people_perception.git
@@ -117,7 +121,7 @@ and install with:
   target_link_libraries(people_detection_display_node boost_signals)
   target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
 
-  rosdep install cob_people_detection
+  rosdep install cob_people_perception
   rosmake cob_people_detection
 
 Build the UvA ros packages of the accompany software using:
