@@ -1,6 +1,6 @@
-wget -nc http://basterwijn.nl/ninghang/cornerExtractor.tar.gz
+wget -nc http://basterwijn.nl/ninghang/cornerExtractor.zip	
 
-tar -xzvf cornerExtractor.tar.gz
+unzip cornerExtractor.zip
 
 mv cornerExtractor/* .
 
