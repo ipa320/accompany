@@ -69,7 +69,7 @@ and install with
 
 Install gstreamer
 
-  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools
+  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools ubuntu-restricted-extras
 
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
@@ -146,18 +146,11 @@ Run some tests:
 
 #-- Test Routine --#
 
-Download testing resource from:
-
-  roscd accompany_static_camera_localisation/res/test
-  wget -i list.txt
-
-We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
-
+  roscd accompany/UvA/testData
   rosrun accompany_static_camera_localisation video_publisher -s 0.3 -i wcam_20120112_vid4.avi 
 
 Start localization:
 
-  roscd accompany_static_camera_localisation/res/test
   rosrun accompany_static_camera_localisation camera_localization -p.
   
 Show locations: 
