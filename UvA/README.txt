@@ -120,11 +120,7 @@ FISH-EYE
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
   roscd accompany_static_camera_localisation/res/calib_frames
-  
-  rosrun gscam gscam -s 0
-  roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun image_view image_view image:=/gscam/image_raw
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  ../../scripts/fisheye_color_saver.sh
 
 Create a image list:
   
