@@ -221,35 +221,32 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- KINECT Intrinsic Calibration using ROS --#
+#-- KINECT Intrinsic Calibration (using ROS) --#
 
-Set gscam to capture frames with FULL resolution and default frame rate:
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
-  rosrun gscam gscam -s 0 
-  
 Run calibration:
 
+  roscd accompany_static_camera_localisation/res/
   rosrun camera_calibration cameracalibrator.py image:=/cara/rgb/image_raw camera:=/camera/rgb --size 6x8 --square 0.0245
 
-For calibration, refer to:
+More information refers to refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
 
-Save calibrated display with extension ".ini":
+Open the intrinsic sample:
 
-  roscd accompany_static_camera_localisation/res
-  gedit calib_intrinsic.ini
-  [copy diplayed messages] 
+  gedit camera_intrinsic.xml &
 
-Copy info in .ini to .xml, remove comma
-    
+Copy the calibration info from the command line to the file:
 
-g++ -o undistortion undistortion.cpp -L/use/lib -I/usr/include/opencv-2.3.1 -lopencv_highgui -lopencv_core -lopencv_calib3d -lopencv_imgproc
+Capture a new frame:
 
-CAMERA CALIBRATION KINECT
-UNDISTORTION Documents
-compile undistortion
+  rosrun openni_camera openni_node
+  rosrun image_view image_view image:=/camera/rgb/image_color
+  [RIGHT CLICK on the image]
+
+Test the undistorted image
+
+  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
 
 ----------------------------------------
 
