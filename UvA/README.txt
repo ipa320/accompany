@@ -221,7 +221,7 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- Intrinsic Calibration using ROS (low accuracy-DEPRECATED) --#
+#-- KINECT Intrinsic Calibration using ROS --#
 
 Set gscam to capture frames with FULL resolution and default frame rate:
 
@@ -230,22 +230,27 @@ Set gscam to capture frames with FULL resolution and default frame rate:
   
 Run calibration:
 
-  rosrun camera_calibration cameracalibrator.py --size 9x6 --square 1 image:=/gscam/image_raw camera:=/gscam
-  
+  rosrun camera_calibration cameracalibrator.py image:=/cara/rgb/image_raw camera:=/camera/rgb --size 6x8 --square 0.0245
+
 For calibration, refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
 
 Save calibrated display with extension ".ini":
 
-  roscd accompany_static_camera_localisation
-  mkdir res
-  cd res
+  roscd accompany_static_camera_localisation/res
   gedit calib_intrinsic.ini
   [copy diplayed messages] 
 
 Copy info in .ini to .xml, remove comma
     
+
+g++ -o undistortion undistortion.cpp -L/use/lib -I/usr/include/opencv-2.3.1 -lopencv_highgui -lopencv_core -lopencv_calib3d -lopencv_imgproc
+
+CAMERA CALIBRATION KINECT
+UNDISTORTION Documents
+compile undistortion
+
 ----------------------------------------
 
 
