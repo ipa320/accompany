@@ -1,11 +1,4 @@
-echo "install ros electric"
-
-echo "install vxl-1.17.0"
-#wget http://downloads.sourceforge.net/project/vxl/vxl/1.17/vxl-1.17.0.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fvxl%2Ffiles%2Fvxl%2F1.17%2Fvxl-1.17.0.zip%2Fdownload&ts=1348135175&use_mirror=ignum
-
-sudo apt-get -y install ubuntu-restricted-extras
-
-sudo apt-get -y install aptitude emacs git libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x ros-electric-openni-kinect
+sudo apt-get -y install aptitude emacs git gitk libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x ros-electric-openni-kinect
 
 cd
 mkdir -p ros
@@ -18,7 +11,7 @@ cd ros
 # accompany
 git clone git://basterwijn.nl/home/bterwijn/git/accompany.git
 
-cd ~/
+cd ~
 mkdir -p programs
 
 

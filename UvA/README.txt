@@ -19,14 +19,6 @@ Install ROS 'ros-electric-desktop-full' using instructions here:
 
   http://www.ros.org/wiki/electric/Installation
 
-Install OpenCV
-
-  sudo apt-get install libopencv2.3-dev
-
-Install CMAKE
-
-  sudo apt-get install cmake
-
 Download vxl-1.17.0 from
 
   http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
@@ -41,35 +33,13 @@ and install using (this will take some time):
   make -j 4
   sudo make install
 
-Clone cmn with
+Install ubuntu-restricted-extras
 
-  git clone git://basterwijn.nl/home/bterwijn/git/cmnGwenn.git 
+  sudo apt-get -y install ubuntu-restricted-extras
 
-and install with
+Install other software requirements and test:
 
-  cd cmnGwenn
-  mkdir build
-  cd build
-  cmake ../src
-  make
-  sudo make install
-
-Clone TimTracker:
-
-  git clone git://basterwijn.nl/home/bterwijn/git/TimTracker.git
-
-and install with
-
-  cd TimTracker
-  mkdir build
-  cd build
-  cmake ..
-  make
-  sudo make install
-
-Install gstreamer
-
-  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools ubuntu-restricted-extras
+  ./installUvA.sh
 
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
@@ -88,58 +58,6 @@ publish stream in ros:
   rosrun gscam gscam --sync false
 ----------------------------------------
 
-Install the gscam ROS package in: UvA/dependencies/gscam
-This file has been slightly altered to drop old frames (sync=false)
-and so always provide the last frame.
-
-Clone ros package cob_perception_common:
-
-  git clone git://github.com/ipa320/cob_perception_common.git
-
-and install with:
-
-  rosdep install cob_perception_common
-  rosmake cob_perception_common
-
-Install openni for ROS Electric
-
-  sudo apt-get ros-electric-openni-kinect
-
-Clone ros package cob_people_perception:
-
-  git clone https://github.com/ipa320/cob_people_perception.git
-
-and install with:
-
-  first remove these lines from cob_people_detection/manifest.xml:
-  <depend package="tinyxml"/> 
-  <depend package="dynamic_reconfigure"/>
-  
-  add these lines to cob_people_detection/CMakeLists.txt:
-  target_link_libraries(face_recognizer_node boost_filesystem boost_system)
-  target_link_libraries(detection_tracker_node boost_signals)
-  target_link_libraries(people_detection_display_node boost_signals)
-  target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
-
-  rosdep install cob_people_perception
-  rosmake cob_people_detection
-
-Build the UvA ros packages of the accompany software using:
-  
-  rosdep install accompany_static_camera_localisation
-  rosmake accompany_static_camera_localisation
-
-Run some tests:
-
-  # downloads prerecorded video and does detection and tracking
-  roscd accompany/UvA/startScripts/
-  ./startTestNonGSCam
-
-  # tracks humans and identities using artificial data
-  roslaunch accompany_human_tracker testTracker.launch
-
-
-
 # ---------------------------------------------------
 # ---  PACKAGE accompany_static_camera_localisation
 # ---------------------------------------------------
@@ -153,7 +71,7 @@ Start localization:
 
   rosrun accompany_static_camera_localisation camera_localization -p.
   
-Show locations: 
+Show locations:
   rostopic echo /humanLocations
   
 ----------------------------------------
@@ -161,7 +79,7 @@ Show locations:
   
 #-- Preparation --#
 
-Required: checkerboard with WHITE and LARGE boader, black or gray tape (more than 10m), tape measure.
+Required: checkerboard with WHITE and LARGE boader, black or gray tape (> 10m), tape measure.
 
 Download checkerboard pattern from:
 
