@@ -118,7 +118,7 @@ KINECT
   
 FISH-EYE
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@10.0.1.222:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
   roscd accompany_static_camera_localisation/res/calib_frames
   
   rosrun gscam gscam -s 0
@@ -137,7 +137,7 @@ Intrinsic calibration:
 
 Test:
 
-  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml [image name]
+  rosrun accompany_static_camera_localisation undistortion ../camera_intrinsic.xml [image name]
 
 ----------------------------------------
 
@@ -212,7 +212,8 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Restart gscam and capture background images with REDUCED resolution:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=***, height=*** , framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  roscd accompany_static_camera_localisation/res/calib_frames
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
