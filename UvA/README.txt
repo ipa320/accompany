@@ -113,7 +113,14 @@ To import project into Eclipse (optional), refer to:
 
 Open camera in FULL resolution (HALF?)
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
+KINECT
+
+  roscd accompany_static_camera_localisation/res/calib_frames
+  ../../scripts/kinect_color_saver.sh
+  
+FISH-EYE
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
   rosrun gscam gscam -s 0
 
 Record a few frames containing a checkerboard:

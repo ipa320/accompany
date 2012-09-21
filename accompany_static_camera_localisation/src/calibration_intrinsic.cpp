@@ -298,19 +298,19 @@ int main( int argc, char** argv )
 {
 
     // csv reader
-    CvMLData csvData1, csvData2;
-    if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
-    {
-        cout << "ERROR: " << "Cornerpoints not found." << endl;
-        cout << "Check if current folder has both X.csv and Y.csv." << endl;
-        cout << "X.csv and Y.csv are generated from Matlab function run.m" << endl;
-        exit(1);
-    }    
+//    CvMLData csvData1, csvData2;
+//    if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
+//    {
+//        cout << "ERROR: " << "Cornerpoints not found." << endl;
+//        cout << "Check if current folder has both X.csv and Y.csv." << endl;
+//        cout << "X.csv and Y.csv are generated from Matlab function run.m" << endl;
+//        exit(1);
+//    }    
     
-    const CvMat* X_cvmat = csvData1.get_values();
-    Mat X(X_cvmat);
-    const CvMat* Y_cvmat = csvData2.get_values();
-    Mat Y(Y_cvmat);
+//    const CvMat* X_cvmat = csvData1.get_values();
+//    Mat X(X_cvmat);
+//    const CvMat* Y_cvmat = csvData2.get_values();
+//    Mat Y(Y_cvmat);
 
 	Size boardSize, imageSize;
 	float squareSize = 1.f, aspectRatio = 1.f;
@@ -491,17 +491,17 @@ int main( int argc, char** argv )
 		{
 		case CHESSBOARD:           
         {    
-            for (unsigned int kk = 0;kk<X.cols;kk++)
-            {
-                pointbuf.push_back(Point2f(X.at<float>(i,kk),Y.at<float>(i,kk)));
-            }
-            found = true;
-//            
-//            if (i < 10)
-//              found = false;
+//            for (unsigned int kk = 0;kk<X.cols;kk++)
+//            {
+//                pointbuf.push_back(Point2f(X.at<float>(i,kk),Y.at<float>(i,kk)));
+//            }
+//            found = true;
+            
+            if (i < 10)
+              found = false;
                 
-//			found = findChessboardCorners( view, boardSize, pointbuf,
-//					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+			found = findChessboardCorners( view, boardSize, pointbuf,
+					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 			break;
 		}
 		case CIRCLES_GRID:

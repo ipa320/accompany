@@ -18,13 +18,15 @@ void callback(const sensor_msgs::ImageConstPtr& image,
   {
     IplImage *image = g_bridge.toIpl();
     if (image)
-    {
-      std::string filename = (g_format % g_count % "jpg").str();
-      cvSaveImage(filename.c_str(), image);
-      ROS_INFO("Saved image %s", filename.c_str());
+    { 
+      if ((g_count % 10) == 0)
+      {
+        std::string filename = (g_format % g_count % "jpg").str();
+        cvSaveImage(filename.c_str(), image);
+        ROS_INFO("Saved image %s", filename.c_str());
       //      filename = (g_format % g_count % "ini").str();
       //      camera_calibration_parsers::writeCalibration(filename, "camera", *info);
-
+      }
       g_count++;
     }
     else
