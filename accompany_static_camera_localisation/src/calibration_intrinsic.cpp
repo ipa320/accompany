@@ -150,7 +150,8 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	calcChessboardCorners(boardSize, squareSize, objectPoints[0], patternType);
 
 	objectPoints.resize(imagePoints.size(),objectPoints[0]);
-
+	
+	cout << "= start calibration =" << endl;
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
 			distCoeffs, rvecs, tvecs, flags
 //			|CV_CALIB_FIX_K3
@@ -497,10 +498,10 @@ int main( int argc, char** argv )
 //            }
 //            found = true;
             
-            if (i < 10)
+            if (true)
               found = false;
                 
-			found = findChessboardCorners( view, boardSize, pointbuf,
+		found = findChessboardCorners( view, boardSize, pointbuf,
 					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 			break;
 		}

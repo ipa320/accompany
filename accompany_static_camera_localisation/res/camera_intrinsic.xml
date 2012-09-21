@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <opencv_storage>
-<calibration_time>"Mon 21 May 2012 12:18:43 AM CEST"</calibration_time>
-<image_width>614</image_width>
-<image_height>583</image_height>
-<board_width>9</board_width>
-<board_height>6</board_height>
+<calibration_time>"Fri 21 Sep 2012 16:02:16 BST"</calibration_time>
+<image_width>640</image_width>
+<image_height>480</image_height>
+<board_width>6</board_width>
+<board_height>8</board_height>
 <square_size>1.</square_size>
 <flags>0</flags>
 <camera_matrix type_id="opencv-matrix">
@@ -12,13 +12,15 @@
   <cols>3</cols>
   <dt>d</dt>
   <data>
-    338.051724 0.000000 319.157238 0.000000 338.520038 249.561400 0.000000 0.000000 1.000000
-</data></camera_matrix>
+    3.3143905945795188e+02 0. 3.1723624187596192e+02 0.
+    3.3226821035616052e+02 2.5244450480610897e+02 0. 0. 1.</data></camera_matrix>
 <distortion_coefficients type_id="opencv-matrix">
   <rows>5</rows>
   <cols>1</cols>
   <dt>d</dt>
   <data>
-    -0.167210 0.014719 -0.002319 0.001853 0.000000</data></distortion_coefficients>
-<avg_reprojection_error>3.4498887774979710e+00</avg_reprojection_error>
+    -1.3713223350144857e-01 -3.2529902911423089e-02
+    -4.7113825419240083e-03 2.3154997807583854e-03
+    2.1663255790300151e-02</data></distortion_coefficients>
+<avg_reprojection_error>1.4188493541187268e+00</avg_reprojection_error>
 </opencv_storage>

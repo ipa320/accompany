@@ -141,7 +141,11 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -o ../camera_intrinsic.xml -su calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -o ../camera_intrinsic.xml -su calib_list.xml
+
+Test:
+
+  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
 
 ----------------------------------------
 
