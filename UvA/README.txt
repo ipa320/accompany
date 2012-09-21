@@ -158,7 +158,8 @@ Copy the calibration info from the command line to the file:
 
 Capture a new frame:
 
-  roslaunch accompany_static_camera_localisation kinect_color.launch
+  rosrun openni_camera openni_node
+  rosrun image_view image_view image:=/camera/rgb/image_color
   [RIGHT CLICK on the image]
 
 Test the undistorted image
