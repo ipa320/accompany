@@ -144,7 +144,7 @@ Intrinsic calibration:
 Run calibration:
 
   roscd accompany_static_camera_localisation/res/
-  rosrun camera_calibration cameracalibrator.py --size 6x8 --square 0.5 image:=/camera/rgb/image_color camera_info:=/camera
+  roslaunch accompany_static_camera_localisation kinect_calibration.launch
 
 More information refers to refer to:
 
@@ -158,8 +158,7 @@ Copy the calibration info from the command line to the file:
 
 Capture a new frame:
 
-  rosrun openni_camera openni_node
-  rosrun image_view image_view image:=/camera/rgb/image_color
+  roslaunch accompany_static_camera_localisation kinect_color.launch
   [RIGHT CLICK on the image]
 
 Test the undistorted image
