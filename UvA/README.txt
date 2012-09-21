@@ -245,7 +245,7 @@ Select a walkable region:
 ----------------------------------------
 
 
-#-- Checkpoint calibration --#
+#-- Check calibration --#
 
   rosrun accompany_static_camera_localisation annotate_pos background/background_list.txt params.xml prior.txt x.txt camera_intrinsic.xml camera_extrinsic.xml
 
