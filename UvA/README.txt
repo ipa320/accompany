@@ -111,8 +111,6 @@ To import project into Eclipse (optional), refer to:
 
 #-- Intrinsic Calibration --#
 
-Open camera in FULL resolution (HALF?)
-
 KINECT
 
   roscd accompany_static_camera_localisation/res/calib_frames
@@ -120,19 +118,13 @@ KINECT
   
 FISH-EYE
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
-  rosrun gscam gscam -s 0
-
-Record a few frames containing a checkerboard:
-
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@10.0.1.222:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
   roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
   
-Filter out non-informative calibration frames in the folder, and then download the corner extracor:
-
-  ./run_calib
-
-Open MATLAB and extract corners using `run.m`, corner points will be saved in `X.csv` and `Y.csv`
+  rosrun gscam gscam -s 0
+  roscd accompany_static_camera_localisation/res/calib_frames
+  rosrun image_view image_view image:=/gscam/image_raw
+  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
 
 Create a image list:
   
@@ -145,7 +137,7 @@ Intrinsic calibration:
 
 Test:
 
-  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
+  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml [image name]
 
 ----------------------------------------
 
