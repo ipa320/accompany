@@ -139,12 +139,12 @@ Intrinsic calibration:
 ----------------------------------------
 
 
-#-- KINECT Intrinsic Calibration (using ROS) --#
+#-- [DEPRECATED_LOW ACCURACY]KINECT Intrinsic Calibration (using ROS) --#
 
 Run calibration:
 
   roscd accompany_static_camera_localisation/res/
-  roslaunch accompany_static_camera_localisation kinect_calibration.launch
+  ../scripts/kinect_calibration.sh
 
 More information refers to refer to:
 
@@ -158,8 +158,8 @@ Copy the calibration info from the command line to the file:
 
 Capture a new frame:
 
-  rosrun openni_camera openni_node
-  rosrun image_view image_view image:=/camera/rgb/image_color
+  roscd accompany_static_camera_localisation/res/
+  ../scripts/kinect_color.sh
   [RIGHT CLICK on the image]
 
 Test the undistorted image
