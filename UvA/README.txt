@@ -144,7 +144,7 @@ Intrinsic calibration:
 Run calibration:
 
   roscd accompany_static_camera_localisation/res/
-  rosrun camera_calibration cameracalibrator.py image:=/cara/rgb/image_raw camera:=/camera/rgb --size 6x8 --square 0.0245
+  rosrun camera_calibration cameracalibrator.py --size 6x8 --square 0.5 image:=/camera/rgb/image_color camera_info:=/camera
 
 More information refers to refer to:
 
