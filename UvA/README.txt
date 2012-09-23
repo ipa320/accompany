@@ -19,14 +19,6 @@ Install ROS 'ros-electric-desktop-full' using instructions here:
 
   http://www.ros.org/wiki/electric/Installation
 
-Install OpenCV
-
-  sudo apt-get install libopencv2.3-dev
-
-Install CMAKE
-
-  sudo apt-get install cmake
-
 Download vxl-1.17.0 from
 
   http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
@@ -41,35 +33,13 @@ and install using (this will take some time):
   make -j 4
   sudo make install
 
-Clone cmn with
+Install ubuntu-restricted-extras
 
-  git clone git://basterwijn.nl/home/bterwijn/git/cmnGwenn.git 
+  sudo apt-get -y install ubuntu-restricted-extras
 
-and install with
+Install other software requirements and test:
 
-  cd cmnGwenn
-  mkdir build
-  cd build
-  cmake ../src
-  make
-  sudo make install
-
-Clone TimTracker:
-
-  git clone git://basterwijn.nl/home/bterwijn/git/TimTracker.git
-
-and install with
-
-  cd TimTracker
-  mkdir build
-  cd build
-  cmake ..
-  make
-  sudo make install
-
-Install gstreamer
-
-  sudo apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools
+  ./installUvA.sh
 
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
@@ -88,79 +58,20 @@ publish stream in ros:
   rosrun gscam gscam --sync false
 ----------------------------------------
 
-Install the gscam ROS package in: UvA/dependencies/gscam
-This file has been slightly altered to drop old frames (sync=false)
-and so always provide the last frame.
-
-Clone ros package cob_perception_common:
-
-  git clone git://github.com/ipa320/cob_perception_common.git
-
-and install with:
-
-  rosdep install cob_perception_common
-  rosmake cob_perception_common
-
-Install openni for ROS Electric
-
-  sudo apt-get ros-electric-openni-kinect
-
-Clone ros package cob_people_perception:
-
-  git clone https://github.com/ipa320/cob_people_perception.git
-
-and install with:
-
-  first remove these lines from cob_people_detection/manifest.xml:
-  <depend package="tinyxml"/> 
-  <depend package="dynamic_reconfigure"/>
-  
-  add these lines to cob_people_detection/CMakeLists.txt:
-  target_link_libraries(face_recognizer_node boost_filesystem boost_system)
-  target_link_libraries(detection_tracker_node boost_signals)
-  target_link_libraries(people_detection_display_node boost_signals)
-  target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
-
-  rosdep install cob_people_perception
-  rosmake cob_people_detection
-
-Build the UvA ros packages of the accompany software using:
-  
-  rosdep install accompany_static_camera_localisation
-  rosmake accompany_static_camera_localisation
-
-Run some tests:
-
-  # downloads prerecorded video and does detection and tracking
-  roscd accompany/UvA/startScripts/
-  ./startTestNonGSCam
-
-  # tracks humans and identities using artificial data
-  roslaunch accompany_human_tracker testTracker.launch
-
-
-
 # ---------------------------------------------------
 # ---  PACKAGE accompany_static_camera_localisation
 # ---------------------------------------------------
 
 #-- Test Routine --#
 
-Download testing resource from:
-
-  roscd accompany_static_camera_localisation/res/test
-  ./downloadRes
-
-We assume you are now in the same folder as the files you just downloaded. Load test video streams to ROS:
-
+  roscd accompany/UvA/testData
   rosrun accompany_static_camera_localisation video_publisher -s 0.3 -i wcam_20120112_vid4.avi 
 
 Start localization:
 
-  roscd accompany_static_camera_localisation/res/test
   rosrun accompany_static_camera_localisation camera_localization -p.
   
-Show locations: 
+Show locations:
   rostopic echo /humanLocations
   
 ----------------------------------------
@@ -168,7 +79,7 @@ Show locations:
   
 #-- Preparation --#
 
-Required: checkerboard with WHITE and LARGE boader, black or gray tape (more than 10m), tape measure.
+Required: checkerboard with WHITE and LARGE boader, black or gray tape (> 10m), tape measure.
 
 Download checkerboard pattern from:
 
@@ -200,21 +111,20 @@ To import project into Eclipse (optional), refer to:
 
 #-- Intrinsic Calibration --#
 
-Open camera in FULL resolution (HALF?)
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
-  rosrun gscam gscam -s 0
-
-Record a few frames containing a checkerboard:
+KINECT
 
   roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  ../../scripts/kinect_color_saver.sh
   
-Filter out non-informative calibration frames in the folder, and then download the corner extracor:
+FISH-EYE
 
-  ./Matlab_calibpkg
-
-Open MATLAB and extract corners using `run.m`, corner points will be saved in `X.csv` and `Y.csv`
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  roscd accompany_static_camera_localisation/res/calib_frames
+  
+  rosrun gscam gscam -s 0
+  roscd accompany_static_camera_localisation/res/calib_frames
+  rosrun image_view image_view image:=/gscam/image_raw
+  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
 
 Create a image list:
   
@@ -223,36 +133,42 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 9 -o ../camera_intrinsic.xml -su calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -o ../camera_intrinsic.xml -su calib_list.xml
+
+Test:
+
+  rosrun accompany_static_camera_localisation undistortion ../camera_intrinsic.xml [image name]
 
 ----------------------------------------
 
 
-#-- Intrinsic Calibration using ROS (low accuracy-DEPRECATED) --#
+#-- [DEPRECATED_LOW ACCURACY]KINECT Intrinsic Calibration (using ROS) --#
 
-Set gscam to capture frames with FULL resolution and default frame rate:
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! ffmpegcolorspace"
-  rosrun gscam gscam -s 0 
-  
 Run calibration:
 
-  rosrun camera_calibration cameracalibrator.py --size 9x6 --square 1 image:=/gscam/image_raw camera:=/gscam
-  
-For calibration, refer to:
+  roscd accompany_static_camera_localisation/res/
+  ../scripts/kinect_calibration.sh
+
+More information refers to refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
 
-Save calibrated display with extension ".ini":
+Open the intrinsic sample:
 
-  roscd accompany_static_camera_localisation
-  mkdir res
-  cd res
-  gedit calib_intrinsic.ini
-  [copy diplayed messages] 
+  gedit camera_intrinsic.xml &
 
-Copy info in .ini to .xml, remove comma
-    
+Copy the calibration info from the command line to the file:
+
+Capture a new frame:
+
+  roscd accompany_static_camera_localisation/res/
+  ../scripts/kinect_color.sh
+  [RIGHT CLICK on the image]
+
+Test the undistorted image
+
+  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
+
 ----------------------------------------
 
 
@@ -296,7 +212,8 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Restart gscam and capture background images with REDUCED resolution:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=***, height=*** , framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  roscd accompany_static_camera_localisation/res/calib_frames
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
