@@ -212,18 +212,22 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Restart gscam and capture background images with REDUCED resolution:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=768, height=729, framerate=15/1 ! ffmpegcolorspace"
   roscd accompany_static_camera_localisation/res/calib_frames
   rosrun gscam gscam -s 0
 
 Capture a few background frames:
 
   roscd accompany_static_camera_localisation/res
-  mkdir background
-  cd background
+  mkdir background_images
+  cd background_images
   rosrun image_view image_view image:=/gscam/image_raw
 
 Right click to store a few background frames
+
+Check images
+
+Process imaegs
 
 Create a background image list:
   
