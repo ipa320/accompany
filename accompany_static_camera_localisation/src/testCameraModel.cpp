@@ -1,69 +1,63 @@
 #include "cameraModel.h"
-
+#include <fstream>
+#include <string>
+#include <opencv2/opencv.hpp>
 using namespace std;
+
+cv::Mat loadTxtData(string file)
+{
+
+  // pre-load data to get matrix dimension
+  ifstream inFile;
+  inFile.open(file.c_str(), ifstream::in);
+
+  if (!inFile)
+  {
+    cout << "Error: \"" << file << "\" not found " << endl;
+    exit(0);
+  }
+
+  string line;
+  int number_of_lines = 0, num_of_column = 0;
+  while (std::getline(inFile, line))
+  {
+    ++number_of_lines;
+    if (number_of_lines <= 1)
+    {
+      istringstream linestream(line);
+      string item;
+      while (getline(linestream, item, ','))
+      {
+        num_of_column++;
+      }
+    }
+  }
+  inFile.close();
+
+  // load data to matrix
+  inFile.open(file.c_str(), ifstream::in);
+  cv::Mat outMat(number_of_lines, num_of_column, CV_64F);
+  int linenum = 0;
+  while (getline(inFile, line))
+  {
+    istringstream linestream(line);
+    string item;
+    int itemnum = 0;
+    while (getline(linestream, item, ','))
+    {
+      double item_data = atoi(item.c_str());
+      outMat.at<double>(linenum, itemnum) = item_data;
+      itemnum++;
+    }
+    linenum++;
+  }
+  inFile.close();
+  return outMat;
+}
 
 int main()
 {
 
-	string calib_file = "/home/ninghang/workspace/CameraCalib/camera.xml";
-	string pnts_3D_file = "/home/ninghang/Software/PeopleDetectionGwenn/src_build/dots_on_earth.txt";
-	string pnts_2D_file = "/home/ninghang/Software/PeopleDetectionGwenn/src_build/dots_on_floor.txt";
-
-	Hu::CameraModel cam;
-
-	cam.init();
-
-
-	cv::Mat wc, ic, wc2, ic2;
-	double xwc, ywc, xic, yic;
-	ic = cam.loadTxtData(pnts_2D_file);
-	wc = cam.loadTxtData(pnts_3D_file);
-
-	cout << "ic" << ic << endl;
-	cout << "wc" << wc << endl;
-
-    cout << "= ImageToWorld =" << endl;
-    for (int i = 0;i < ic.rows;i++)
-	{
-	    cam.imageToWorld(ic.at<double>(i,0),ic.at<double>(i,1),wc.at<double>(i,2),xwc,ywc);
-	    cout << xwc << "," << ywc << endl;
-    }    
-
-    cout << "= WorldToImage =" << endl;
-    for (int i = 0;i < wc.rows;i++)
-    {
-    	cam.worldToImage(wc.at<double>(i,0),wc.at<double>(i,1),wc.at<double>(i,2),xic,yic);
-	    cout << xic << "," << yic << endl;
-	}
-	
-	cv::Mat wc1000;
-	wc1000 = wc.clone();
-	cout << endl;
-	wc1000.col(2) += 1000;
-	cout << wc1000 << endl;
-    for (int i = 0;i < wc.rows;i++)
-    {
-    	cam.worldToImage(wc1000.at<double>(i,0),wc1000.at<double>(i,1),wc1000.at<double>(i,2),xic,yic);
-	    cout << xic << "," << yic << endl;
-	}
-	
-	cout << "plotting boxes" << endl;
-	cam.worldToImage(2950,950,0,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(2950,1050,0,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(3050,950,0,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(3050,1050,0,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(2950,950,1760,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(2950,1050,1760,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(3050,950,1760,xic,yic);
-    cout << xic << "," << yic << endl;
-	cam.worldToImage(3050,1050,1760,xic,yic);
-    cout << xic << "," << yic << endl;
 	
 //    
 //	cout << wc1000 < endl;

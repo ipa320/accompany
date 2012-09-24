@@ -138,7 +138,7 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *param)
         showScaledImg(i,tmp);
         cvReleaseImage(&tmp);
       }
-      gp << "plot " << GPBinary(h) << " with boxes\n";
+//      gp << "plot " << GPBinary(h) << " with boxes\n";
       break;
     case CV_EVENT_MOUSEMOVE:
       if (down)
@@ -155,7 +155,7 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *param)
 
           showScaledImg(i,tmp);
           cvReleaseImage(&tmp);
-          gp << "plot " << GPBinary(h) << " with boxes\n";
+//          gp << "plot " << GPBinary(h) << " with boxes\n";
         }
       break;
     case CV_EVENT_LBUTTONUP:

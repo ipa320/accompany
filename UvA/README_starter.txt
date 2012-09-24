@@ -214,9 +214,9 @@ Modify param.xml and set SCALE according to the desired resolution
 
   roscd accompany_static_camera_localisation/scripts
   
-  ./capture_background_images.sh
+  ../scripts/capture_background_images.sh
 
-  ./create_background_model.sh
+  ../scripts/create_background_model.sh
   
 ----------------------------------------
 
@@ -237,7 +237,7 @@ Select a walkable region:
 
 #-- Localization --#
 
-  rosrun accompany_static_camera_localisation camera_localization -p [path]
+  ../scripts/localization.sh
   rostopic echo /humanLocations
 
 ----------------------------------------

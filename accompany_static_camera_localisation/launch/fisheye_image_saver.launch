@@ -3,7 +3,6 @@
   <!-- Fisheye_image_saver -->
 
   <!-- start camera node -->
-  rosrun uvc_camera camera_node
   <node pkg="gscam" type="gscam" name="gscam" args="-s 0" />
 
   <!-- intrinsic calibration -->

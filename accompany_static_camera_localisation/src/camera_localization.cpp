@@ -257,8 +257,8 @@ void scanRest(vector<unsigned> &existing,
     // marginal.push_back(marginalLogProb);
     marginal.push_back(bestLogProb);
 
-    if (existing.size() > 2) // TODO
-      return;
+//    if (existing.size() > 2) // TODO
+ //     return;
 
     scanRest(existing, existingMask, logSumPixelFGProb, logSumPixelBGProb,
         logNumPrior, /*logLocPrior, */logPosProb, marginal, lSum);

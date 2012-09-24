@@ -134,4 +134,4 @@ rosbuild_add_executable(undistortion src/undistortion.cpp)
 target_link_libraries(undistortion opencv_highgui opencv_core opencv_imgproc opencv_calib3d)
 
 rosbuild_add_executable(testCameraModel src/testCameraModel.cpp)
-target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc opencv_calib3d)
+target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc opencv_calib3d helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
