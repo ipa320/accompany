@@ -132,3 +132,6 @@ target_link_libraries(create_tf_room2world opencv_highgui opencv_core opencv_img
 
 rosbuild_add_executable(undistortion src/undistortion.cpp)
 target_link_libraries(undistortion opencv_highgui opencv_core opencv_imgproc opencv_calib3d)
+
+rosbuild_add_executable(testCameraModel src/testCameraModel.cpp)
+target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc opencv_calib3d)
