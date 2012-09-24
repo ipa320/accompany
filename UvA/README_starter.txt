@@ -119,8 +119,7 @@ Calibrate Fish-eye camera in half resolution, Kinect in full resolution
 
 Start KINECT
 
-  roscd accompany_static_camera_localisation/res/calib_frames
-  ../../scripts/kinect_color_saver.sh
+  roslaunch accompany_static_camera_localisation kinect_image_viewer.launch
   
 Start FISH-EYE
 
@@ -175,10 +174,15 @@ Test the undistorted image
 
 #-- Camera Extrinsic Calibration --#
 
-Annotate marker locations in a HALF resolution frame:
+FISH-EYE: Annotate marker locations in a HALF resolution frame:
 
   roscd accompany_static_camera_localisation/scripts
-  ./capture_marker_images.sh
+  ./fisheye_marker_images.sh
+
+KINECT:
+
+  roscd accompany_static_camera_localisation/scripts
+  ./kinect_marker_images.sh
 
 Right click to save a frame
 
@@ -211,9 +215,14 @@ Modify param.xml and set SCALE according to the desired resolution
 #-- Build background model --#
 
   roscd accompany_static_camera_localisation/scripts
-  
-  ../scripts/capture_background_images.sh
 
+FISHEYE:
+  ../scripts/fisheye_capture_background_images.sh
+
+KINECT:
+  ../scripts/fisheye_capture_background_images.sh
+
+Both:
   ../scripts/create_background_model.sh
   
 ----------------------------------------
@@ -222,6 +231,7 @@ Modify param.xml and set SCALE according to the desired resolution
 
 Select a walkable region:
 
+  roscd accompany_static_camera_localisation/res
   rosrun accompany_static_camera_localisation create_prior -l background_images/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
   
 ----------------------------------------
@@ -236,7 +246,15 @@ Select a walkable region:
 #-- Localization --#
   
   roscd accompany_static_camera_localisation/scripts
-  ./localization.sh
+
+FISHEYE
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  roslaunch accompany_static_camera_localisation fisheye_localization.launch
+
+KINECT
+   
+  roslaunch accompany_static_camera_localisation kinect_localization.launch
+
   rostopic echo /humanLocations
 
 ----------------------------------------

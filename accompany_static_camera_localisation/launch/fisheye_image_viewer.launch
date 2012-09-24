@@ -2,10 +2,10 @@
 
   <!-- Fisheye_image_saver -->
 
-  <!-- start camera node -->
+  <!-- start camera nodes -->
   <node pkg="gscam" type="gscam" name="gscam" args="-s 0" />
 
-  <!-- intrinsic calibration -->
+  <!-- visualize fisheye frame -->
   <node pkg="image_view" type="image_view" name="image_view" args="image:=/gscam/image_raw" />
 
 </launch>
