@@ -21,7 +21,7 @@ using namespace std;
 // int depth=0, channels=0;
 // unsigned halfresX = 0, halfresY = 0;
 CvScalar BLUE = CV_RGB(0,0,255), RED = CV_RGB(255,0,0), CLR = CV_RGB(0,255,0);
-double scale = 1.5;
+double scale = 1; // TODO
 
 vector<IplImage *> img;
 vector< WorldPoint > priorHull;

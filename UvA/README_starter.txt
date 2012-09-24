@@ -115,6 +115,8 @@ To import project into Eclipse (optional), refer to:
 
 #-- Intrinsic Calibration --#
 
+Half resolution
+
 KINECT
 
   roscd accompany_static_camera_localisation/res/calib_frames
@@ -175,16 +177,12 @@ Test the undistorted image
 
 ----------------------------------------
 
-
 #-- Camera Extrinsic Calibration --#
 
 Annotate marker locations in a HALF resolution frame:
 
-  roscd accompany_static_camera_localisation/res/
-  mkdir marker
-  cd marker
-  rosrun image_view image_view image:=/gscam/image_raw
-  
+  ./capture_marker_iamges.sh
+
 Right click to save a frame, make sure all markers are present
 
 Create a image list of the marker:
@@ -233,7 +231,7 @@ Select a walkable region:
 
 #-- Check calibration --#
 
-  rosrun accompany_static_camera_localisation annotate_pos background_images/background_list.txt params.xml prior.txt x.txt camera_intrinsic.xml camera_extrinsic.xml
+  rosrun accompany_static_camera_localisation annotate_pos -l background_images/background_list.txt -p params.xml -r prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml -a temp.txt
 
 ----------------------------------------
 

@@ -97,6 +97,9 @@ int main(int argc, char** argv)
   cv::Mat world_coordinates = loadTxtData(points3dFile); // Nx3
   cv::Mat image_coordinates = loadTxtData(points2dFile); // Nx2
 
+  cout << world_coordinates << endl;
+  cout << image_coordinates << endl;
+
   // Load Intrinsic Parameters
   cv::FileStorage fs(intrinsicFile, cv::FileStorage::READ);
   fs["camera_matrix"] >> camera_matrix;
