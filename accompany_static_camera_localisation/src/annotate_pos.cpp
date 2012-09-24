@@ -128,8 +128,11 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *param)
         cam[i].genTemplate(pt,tplt);
         cout << "Camera " << i << endl;
         for (unsigned j=0; j!=tplt.size(); ++j)
+	{
+	  cout << "camera" << endl;
           cout << tplt[j] << endl;
-        plotTemplate(tmp,tplt,RED);
+	}        
+	plotTemplate(tmp,tplt,RED);
         // histogram(tplt, tmp, h);
         // plotHull(tmp,tplt);
         showScaledImg(i,tmp);

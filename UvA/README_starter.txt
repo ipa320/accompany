@@ -181,7 +181,7 @@ Test the undistorted image
 
 Annotate marker locations in a HALF resolution frame:
 
-  ./capture_marker_iamges.sh
+  ./capture_marker_images.sh
 
 Right click to save a frame, make sure all markers are present
 
