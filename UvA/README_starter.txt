@@ -115,25 +115,21 @@ To import project into Eclipse (optional), refer to:
 
 #-- Intrinsic Calibration --#
 
-Half resolution
+Calibrate Fish-eye camera in half resolution, Kinect in full resolution
 
-KINECT
+Start KINECT
 
   roscd accompany_static_camera_localisation/res/calib_frames
   ../../scripts/kinect_color_saver.sh
   
-FISH-EYE
+Start FISH-EYE
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
-  roscd accompany_static_camera_localisation/res/calib_frames
-  
-  rosrun gscam gscam -s 0
-  roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun image_view image_view image:=/gscam/image_raw
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  roslaunch accompany_static_camera_localisation fisheye_image_viewer.launch
 
 Create a image list:
   
+  roscd accompany_static_camera_localisation
   rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
   cat calib_list.xml
     
@@ -181,12 +177,14 @@ Test the undistorted image
 
 Annotate marker locations in a HALF resolution frame:
 
+  roscd accompany_static_camera_localisation/scripts
   ./capture_marker_images.sh
 
-Right click to save a frame, make sure all markers are present
+Right click to save a frame
 
 Create a image list of the marker:
   
+  roscd accompany_static_camera_localisation/res/marker/
   rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
 
 Annotate corresponding 2D points on video frames:
@@ -236,8 +234,9 @@ Select a walkable region:
 ----------------------------------------
 
 #-- Localization --#
-
-  ../scripts/localization.sh
+  
+  roscd accompany_static_camera_localisation/scripts
+  ./localization.sh
   rostopic echo /humanLocations
 
 ----------------------------------------
