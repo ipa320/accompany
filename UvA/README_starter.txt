@@ -211,19 +211,19 @@ Modify param.xml and set SCALE according to the desired resolution
 
 ----------------------------------------
 
-
 #-- Build background model --#
 
-  roscd accompany_static_camera_localisation/scripts
-
 FISHEYE:
-  ../scripts/fisheye_capture_background_images.sh
+
+  ./fisheye_capture_background_images.sh
 
 KINECT:
-  ../scripts/fisheye_capture_background_images.sh
+
+  ./kinect_capture_background_images.sh
 
 Both:
-  ../scripts/create_background_model.sh
+
+  ./create_background_model.sh
   
 ----------------------------------------
 
@@ -232,28 +232,32 @@ Both:
 Select a walkable region:
 
   roscd accompany_static_camera_localisation/res
+
   rosrun accompany_static_camera_localisation create_prior -l background_images/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
   
 ----------------------------------------
 
-
 #-- Check calibration --#
+
+  roscd accompany_static_camera_localisation/res
 
   rosrun accompany_static_camera_localisation annotate_pos -l background_images/background_list.txt -p params.xml -r prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml -a temp.txt
 
 ----------------------------------------
 
 #-- Localization --#
-  
-  roscd accompany_static_camera_localisation/scripts
 
-FISHEYE
+FISHEYE:
+
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+
   roslaunch accompany_static_camera_localisation fisheye_localization.launch
 
-KINECT
+KINECT:
    
   roslaunch accompany_static_camera_localisation kinect_localization.launch
+
+Echo human localizations:
 
   rostopic echo /humanLocations
 
