@@ -213,7 +213,11 @@ Modify param.xml and set SCALE according to the desired resolution
 
 #-- Build background model --#
 
+roscd accompany_static_camera_localisation/scripts/ 
+
 FISHEYE:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 
   ./fisheye_capture_background_images.sh
 
@@ -238,6 +242,8 @@ Select a walkable region:
 ----------------------------------------
 
 #-- Check calibration --#
+
+Check the calibration results:
 
   roscd accompany_static_camera_localisation/res
 
