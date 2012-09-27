@@ -9,211 +9,17 @@
 # ---  Introduction
 # -------------------------
 
-This document describes how to build and use the UvA modules (DoW T4.1) of the ACCOMPANY project. We assume installation on Ubuntu 11.10 (Oneiric).
-
-# -------------------------
-# ---  Dependencies
-# -------------------------
-
-Install ROS 'ros-electric-desktop-full' using instructions here:
-
-  http://www.ros.org/wiki/electric/Installation
-
-Download vxl-1.17.0 from
-
-  http://sourceforge.net/projects/vxl/files/vxl/1.17/vxl-1.17.0.zip/download
-
-and install using (this will take some time):
-
-  unzip vxl-1.17.0.zip
-  cd vxl-1.17.0/
-  mkdir build
-  cd build
-  cmake .. -DBUILD_BRL=OFF
-  make -j 4
-  sudo make install
-
-Install ubuntu-restricted-extras
-
-  sudo apt-get -y install ubuntu-restricted-extras
-
-Install other software requirements and test:
-
-  ./installUvA.sh
-
-# -------------------------
-# ---  Camera positions
-# -------------------------
-
-----------------------------------------
-Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
-
-display stream:
-
-  gst-launch rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! xvimagesink sync=false
-
-save stream to file:
-
-  gst-launch rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! jpegenc ! avimux ! filesink location=video.avi
-
-publish stream in ros:
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.0.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=640, height=480, framerate=15/1 ! ffmpegcolorspace"
-  rosrun gscam gscam --sync false
-----------------------------------------
-
-# ---------------------------------------------------
-# ---  PACKAGE accompany_static_camera_localisation
-# ---------------------------------------------------
-
-#-- Test Routine --#
-
-  roscd accompany/UvA/testData
-  rosrun accompany_static_camera_localisation video_publisher -s 0.3 -i wcam_20120112_vid4.avi 
-
-Start localization:
-
-  rosrun accompany_static_camera_localisation camera_localization -p.
-  
-Show locations:
-  rostopic echo /humanLocations
-  
-----------------------------------------
-  
-  
-#-- Preparation --#
-
-Required: checkerboard with WHITE and LARGE boader, black or gray tape (> 10m), tape measure.
-
-Download checkerboard pattern from:
-
-  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration?action=AttachFile&do=view&target=check-108.pdf
-  
-and print out checkerboard pattern on A1 paper, then attach the paper onto a board like:
-
-  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
-  
-Use tape to make cross markers on the floor and also on the wall, with an interval of 1 meter. The markers represent the world coordinates frame. Write the coordinates of markers into a file, an example is:
-
-  points3D.txt
-  ----------
-  0,0,0
-  0,1000,0
-  3000,0,1000
-  ... 
-
-Check camera manual
-
-  focal length
-  image
-  
-To import project into Eclipse (optional), refer to:
-  
-  http://www.ros.org/wiki/IDEs
-  
-----------------------------------------
-
-#-- Intrinsic Calibration --#
-
-Calibrate Fish-eye camera in half resolution, Kinect in full resolution
-
-Start KINECT
-
-  roslaunch accompany_static_camera_localisation kinect_image_viewer.launch
-  
-Start FISH-EYE
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
-  roslaunch accompany_static_camera_localisation fisheye_image_viewer.launch
-
-Create a image list:
-  
-  roscd accompany_static_camera_localisation
-  rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
-  cat calib_list.xml
-    
-Intrinsic calibration:
-
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -o ../camera_intrinsic.xml -su calib_list.xml
-
-Test:
-
-  rosrun accompany_static_camera_localisation undistortion ../camera_intrinsic.xml [image name]
+This document is a manual of using the UvA modules (DoW T4.1) of the ACCOMPANY project. We assume using the operation system of Ubuntu 11.10 (Oneiric) in the Robot House (UH).
 
 ----------------------------------------
 
+#-- Capture new background images --#
 
-#-- [DEPRECATED_LOW ACCURACY]KINECT Intrinsic Calibration (using ROS) --#
+The software contrains a training process of the background model. To make the background model more robust to the changes, the lighting conditions for example, the background images are recommanded to be captured everytime before starting the localization. 
 
-Run calibration:
+First go to the folder, which contains scripts to capture background images:
 
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_calibration.sh
-
-More information refers to refer to:
-
-  http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
-
-Open the intrinsic sample:
-
-  gedit camera_intrinsic.xml &
-
-Copy the calibration info from the command line to the file:
-
-Capture a new frame:
-
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_color.sh
-  [RIGHT CLICK on the image]
-
-Test the undistorted image
-
-  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
-
-----------------------------------------
-
-#-- Camera Extrinsic Calibration --#
-
-FISH-EYE: Annotate marker locations in a HALF resolution frame:
-
-  roscd accompany_static_camera_localisation/scripts
-  ./fisheye_marker_images.sh
-
-KINECT:
-
-  roscd accompany_static_camera_localisation/scripts
-  ./kinect_marker_images.sh
-
-Right click to save a frame
-
-Create a image list of the marker:
-  
-  roscd accompany_static_camera_localisation/res/marker/
-  rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
-
-Annotate corresponding 2D points on video frames:
- 
-  roscd accompany_static_camera_localisation/res  
-  rosrun accompany_static_camera_localisation annotate_image_points marker/marker_list.txt points2D.txt
-  [NOTE: press ENTER to save ]
-
-Copy points3D.txt to res folder:
- 
-  cp [location]/points3D.txt .
-
-Double check if points2D and points3D are correct
-
-Calibrate extrinsic parameters:
-
-  rosrun accompany_static_camera_localisation calibration_extrinsic -i camera_intrinsic.xml -o camera_extrinsic.xml -p points2D.txt -q points3D.txt
-
-Modify param.xml and set SCALE according to the desired resolution
-
-----------------------------------------
-
-#-- Build background model --#
-
-roscd accompany_static_camera_localisation/scripts/ 
+  roscd accompany_static_camera_localisation/scripts/ 
 
 FISHEYE:
 
@@ -225,9 +31,63 @@ KINECT:
 
   ./kinect_capture_background_images.sh
 
-Both:
+Right click the image a few times whenever you think it is showing the background and there is no person appears in the frame. Each time that you click will copy the clicked frame to "accompany_static_camera_localisation/res/new_background_images".
 
+You can view or remove the background images that are stored by going to:
+
+  roscd accompany_static_camera_localisation/res/new_background_images
+
+Next, these frames will be copied to "accompany_static_camera_localisation/res/background_images" and trained to generate a new background model.
+
+If some frames containing foreground objects are added by mistake, you can remove them in:
+
+  accompany_static_camera_localisation/res/background_images
+
+----------------------------------------
+
+#-- Build the background model --#
+
+After checking all the background images are correct, you can invoke the script to build the background model:
+
+  roscd accompany_static_camera_localisation/scripts/ 
   ./create_background_model.sh
+
+Wait until the module is finished cleanly ("clean exit" is displayed in the command line). 
+
+----------------------------------------
+
+#-- Localization --#
+
+FISHEYE:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+
+  roslaunch accompany_static_camera_localisation fisheye_localization.launch
+
+KINECT:
+   
+  roslaunch accompany_static_camera_localisation kinect_localization.launch
+
+Echo human localizations:
+
+  rostopic echo /humanLocations
+  
+----------------------------------------
+
+#-- Tuning parameters of template--# 
+
+We use a Polyhedron template to model the person in a 3D space. Therefore if the default template does not fit the person (either too big or too small), you can change the template parameters:
+
+  gedit accompany_static_camera_localisation/res/params.xml
+  
+You can change the following:
+
+  <personHeight>1800</personHeight>:  height of the person
+  <wg>400</wg>                     :  distance between the feet
+  <wm>300</wm>                     :  width of the shoulders
+  <wt>100</wt>                     :  width of the head
+  <midRatio>.8</midRatio>          :  height of shoulders, in the percentage of the person's height
+  <persDist>500</persDist>         :  the minimal distance between two persons
   
 ----------------------------------------
 
@@ -248,29 +108,3 @@ Check the calibration results:
   roscd accompany_static_camera_localisation/res
 
   rosrun accompany_static_camera_localisation annotate_pos -l background_images/background_list.txt -p params.xml -r prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml -a temp.txt
-
-----------------------------------------
-
-#-- Localization --#
-
-FISHEYE:
-
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
-
-  roslaunch accompany_static_camera_localisation fisheye_localization.launch
-
-KINECT:
-   
-  roslaunch accompany_static_camera_localisation kinect_localization.launch
-
-Echo human localizations:
-
-  rostopic echo /humanLocations
-
-----------------------------------------
-
-= TODO
- 
- - Adaptive background model
- 
- - Multiple camera tracking

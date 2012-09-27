@@ -41,6 +41,10 @@ Install other software requirements and test:
 
   ./installUvA.sh
 
+# -------------------------
+# ---  Camera positions
+# -------------------------
+
 ----------------------------------------
 Some examples of using gstreamer on a GeoVision GV-FE421 IP camera at 192.168.0.10:
 
@@ -111,19 +115,20 @@ To import project into Eclipse (optional), refer to:
 
 #-- Intrinsic Calibration --#
 
-KINECT
+Calibrate Fish-eye camera in half resolution, Kinect in full resolution
 
-  roscd accompany_static_camera_localisation/res/calib_frames
-  ../../scripts/kinect_color_saver.sh
+Start KINECT
+
+  roslaunch accompany_static_camera_localisation kinect_image_viewer.launch
   
-FISH-EYE
+Start FISH-EYE
 
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
-  roscd accompany_static_camera_localisation/res/calib_frames
-  ../../scripts/fisheye_color_saver.sh
+  roslaunch accompany_static_camera_localisation fisheye_image_viewer.launch
 
 Create a image list:
   
+  roscd accompany_static_camera_localisation
   rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
   cat calib_list.xml
     
@@ -167,20 +172,23 @@ Test the undistorted image
 
 ----------------------------------------
 
-
 #-- Camera Extrinsic Calibration --#
 
-Annotate marker locations in a HALF resolution frame:
+FISH-EYE: Annotate marker locations in a HALF resolution frame:
 
-  roscd accompany_static_camera_localisation/res/
-  mkdir marker
-  cd marker
-  rosrun image_view image_view image:=/gscam/image_raw
-  
-Right click to save a frame, make sure all markers are present
+  roscd accompany_static_camera_localisation/scripts
+  ./fisheye_marker_images.sh
+
+KINECT:
+
+  roscd accompany_static_camera_localisation/scripts
+  ./kinect_marker_images.sh
+
+Right click to save a frame
 
 Create a image list of the marker:
   
+  roscd accompany_static_camera_localisation/res/marker/
   rosrun accompany_static_camera_localisation create_background_list marker_list.txt *.jpg
 
 Annotate corresponding 2D points on video frames:
@@ -203,58 +211,60 @@ Modify param.xml and set SCALE according to the desired resolution
 
 ----------------------------------------
 
-
 #-- Build background model --#
 
-Restart gscam and capture background images with REDUCED resolution:
+roscd accompany_static_camera_localisation/scripts/ 
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=768, height=729, framerate=15/1 ! ffmpegcolorspace"
-  roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun gscam gscam -s 0
+FISHEYE:
 
-Capture a few background frames:
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 
-  roscd accompany_static_camera_localisation/res
-  mkdir background_images
-  cd background_images
-  rosrun image_view image_view image:=/gscam/image_raw
+  ./fisheye_capture_background_images.sh
 
-Right click to store a few background frames
+KINECT:
 
-Check images
+  ./kinect_capture_background_images.sh
 
-Process imaegs
+Both:
 
-Create a background image list:
-  
-  rosrun accompany_static_camera_localisation create_background_list background_list.txt *.jpg
-  
-Build background model:
-  
-  roscd accompany_static_camera_localisation/res
-  rosrun accompany_static_camera_localisation build_background_model -i background/background_list.txt -o bgmodel.xml
+  ./create_background_model.sh
   
 ----------------------------------------
-
 
 #-- Create Prior --#
 
 Select a walkable region:
 
+  roscd accompany_static_camera_localisation/res
+
   rosrun accompany_static_camera_localisation create_prior -l background_images/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
   
 ----------------------------------------
 
-
 #-- Check calibration --#
 
-  rosrun accompany_static_camera_localisation annotate_pos background_images/background_list.txt params.xml prior.txt x.txt camera_intrinsic.xml camera_extrinsic.xml
+Check the calibration results:
+
+  roscd accompany_static_camera_localisation/res
+
+  rosrun accompany_static_camera_localisation annotate_pos -l background_images/background_list.txt -p params.xml -r prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml -a temp.txt
 
 ----------------------------------------
 
 #-- Localization --#
 
-  rosrun accompany_static_camera_localisation camera_localization -p [path]
+FISHEYE:
+
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+
+  roslaunch accompany_static_camera_localisation fisheye_localization.launch
+
+KINECT:
+   
+  roslaunch accompany_static_camera_localisation kinect_localization.launch
+
+Echo human localizations:
+
   rostopic echo /humanLocations
 
 ----------------------------------------
