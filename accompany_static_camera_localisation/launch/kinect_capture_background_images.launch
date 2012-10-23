@@ -1,0 +1,9 @@
+<launch>
+
+  <!-- start camera node -->
+  <node pkg="openni_camera" type="openni_node" name="openni_node" />
+
+  <!-- intrinsic calibration -->
+  <node pkg="image_view" type="image_view" name="image_view" args="image:=/camera/rgb/image_color _filename_format:='$(find accompany_static_camera_localisation)/res/new_background_images/%04i.jpg'" />
+
+</launch>
