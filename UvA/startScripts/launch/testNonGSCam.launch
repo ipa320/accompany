@@ -1,11 +1,11 @@
 <launch>
 
   <!-- publish prerecorded data -->
-  <node pkg="accompany_static_camera_localisation" type="video_publisher" name="video_publisher" args="-s 0.3 -i $(find accompany_static_camera_localisation)/../UvA/testData/wcam_20120112_vid4.avi" />
+  <node pkg="accompany_static_camera_localisation" type="video_publisher" name="video_publisher" args="-s 0.3 -i $(find accompany_static_camera_localisation)/../UvA/testData/testUvA/wcam_20120112_vid4.avi" />
 
   <!-- localise humans using image data -->
   <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization" 
-   args="-p $(find accompany_static_camera_localisation)/../UvA/testData/" />
+   args="-p $(find accompany_static_camera_localisation)/../UvA/testData/testUvA" />
 
   <!-- track humans using localisation data -->
   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"/>

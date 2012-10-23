@@ -2,6 +2,8 @@
 cd ../
 mkdir -p testData
 cd testData
+mkdir -p testUvA
+cd testUvA
 wget -nc http://basterwijn.nl/ninghang/test_res/wcam_20120112_vid4.avi
 wget -nc http://basterwijn.nl/ninghang/test_res/prior.txt
 wget -nc http://basterwijn.nl/ninghang/test_res/params.xml
