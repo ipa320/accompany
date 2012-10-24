@@ -1,0 +1,41 @@
+<launch>
+
+  <node pkg="rosbag" type="play" name="playBags"
+   args="-l -d 1 
+     $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera1/retopic.bag 
+     $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera3/retopic.bag
+     "/>
+
+
+  <!-- decode and view camera1 -->
+  <node pkg="image_transport" type="republish" name="republishCamera1"
+   args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
+
+  <node pkg="image_view" type="image_view" name="image_viewCamera1"
+   args="image:=/camera1/gscam/image_raw"/>
+
+
+
+  <!-- decode and view camera3 -->
+  <node pkg="image_transport" type="republish" name="republishCamera3"
+   args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
+
+  <node pkg="image_view" type="image_view" name="image_viewCamera3"
+   args="image:=/camera3/gscam/image_raw"/>
+
+
+
+   <!-- localise camera1 -->
+    <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
+    args="-p /home/bterwijn/projects/ros/accompany/UvA/testData/testRobotHouse/camera1 
+          image:=/camera1/gscam/image_raw"/>
+
+   
+
+   <!-- localise camera3 -->
+    <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3"
+    args="-p /home/bterwijn/projects/ros/accompany/UvA/testData/testRobotHouse/camera3 
+          image:=/camera3/gscam/image_raw"/>
+
+
+</launch>
