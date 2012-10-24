@@ -82,14 +82,15 @@ void printUsage()
 
 int main(int argc, char **argv)
 {
-  string imFile, mapParamFile;
+  string imFile, mapParamFile, name;
 
   // handling arguments
   po::options_description optionsDescription(
       "Find tf from room coordinates to world coordinates\nAllowed options\n");
-  optionsDescription.add_options()("map,m",
-      po::value<string>(&imFile)->required(), "the world map\n")("param,p",
-      po::value<string>(&mapParamFile)->required(), "parameters of the map\n");
+  optionsDescription.add_options()
+    ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
+    ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n");
+    ("name,n",po::value<string>(&name)->required(), "name of the coordinate frame\n");
 
   po::variables_map variablesMap;
 
@@ -209,7 +210,7 @@ int main(int argc, char **argv)
   tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
                                                              ros::Time(0),  // time, not used here
                                                              "/map",        // parent coordinate frame
-                                                             "/overhead1"); // child coordinate frame
+                                                             name); // child coordinate frame
   tf::transformStampedTFToMsg(stampedTransform,transformStamped);
   save_msg(transformStamped,filename); // write to file
  
