@@ -43,7 +43,7 @@ if [ "$res_path" != "" ]
 then
     arguments="$arguments res_path:=$res_path"
     #echo "mkdir -p $res_path/background_images"
-    #mkdir -p $res_path/background_images
+    mkdir -p $res_path/background_images
 fi
 echo "roslaunch accompany_static_camera_localisation capture_background_images.launch $arguments"
 roslaunch accompany_static_camera_localisation capture_background_images.launch $arguments
