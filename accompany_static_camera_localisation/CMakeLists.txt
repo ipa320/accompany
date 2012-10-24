@@ -122,7 +122,7 @@ rosbuild_add_executable( annotate_pos src/annotate_pos.cpp )
 target_link_libraries( annotate_pos helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
 rosbuild_add_executable(image_saver src/image_saver.cpp)
-target_link_libraries(image_saver opencv_highgui opencv_core opencv_imgproc)
+target_link_libraries(image_saver opencv_highgui opencv_core opencv_imgproc boost_program_options)
 
 rosbuild_add_executable(video_publisher src/video_publisher.cpp)
 target_link_libraries(video_publisher opencv_highgui opencv_core opencv_imgproc boost_program_options)
