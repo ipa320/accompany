@@ -492,7 +492,12 @@ int main(int argc, char **argv)
   
   // handling arguments
   po::options_description optionsDescription(
-      "Human Detection main function\nAllowed options\n");
+      "Human Detection main function\n"
+      "Available remappings:\n"
+      "  image:=<image-topic>\n"
+      "  humanLocation:=<humanLocation-topic>\n"
+      "\n"
+      "Allowed options");
   optionsDescription.add_options()
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n");
