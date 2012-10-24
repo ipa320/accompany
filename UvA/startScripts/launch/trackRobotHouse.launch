@@ -7,21 +7,13 @@
      "/>
 
 
-  <!-- decode and view camera1 -->
+  <!-- decode  camera1 -->
   <node pkg="image_transport" type="republish" name="republishCamera1"
    args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
 
-  <node pkg="image_view" type="image_view" name="image_viewCamera1"
-   args="image:=/camera1/gscam/image_raw"/>
-
-
-
-  <!-- decode and view camera3 -->
+  <!-- decode  camera3 -->
   <node pkg="image_transport" type="republish" name="republishCamera3"
    args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
-
-  <node pkg="image_view" type="image_view" name="image_viewCamera3"
-   args="image:=/camera3/gscam/image_raw"/>
 
 
 
