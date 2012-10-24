@@ -96,5 +96,5 @@ int main(int argc, char** argv)
 
   ros::spin();
   backgroundList.close();
-  return 1;
+  return 0;
 }
