@@ -543,13 +543,18 @@ int main(int argc, char **argv)
   // ROS nodes, subscribers and publishers
   ros::init(argc, argv, "camera_localization");
   ros::NodeHandle n;
+  std::string resolved_image=n.resolveName("image");
+  std::string resolved_humanLocation=n.resolveName("humanLocation");
+  cout<<"subscribe to image topic: "<<resolved_image<<endl;
+  cout<<"publish to location topic: "<<resolved_humanLocation<<endl;
+
   tf::TransformBroadcaster transformBroadcaster;
   transformBroadcasterPtr=&transformBroadcaster;
   ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
   image_transport::ImageTransport it(n);
-  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations", 10);
+  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(resolved_humanLocation, 10);
   //humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
-  image_transport::Subscriber sub = it.subscribe("/gscam/image_raw", 1,imageCallback);
+  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
   ros::spin();
 
   return 0;
