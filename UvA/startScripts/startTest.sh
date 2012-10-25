@@ -1,6 +1,6 @@
 
-./downloadTestData
-./reencodeTestVideo
+./downloadTestData.sh
+./reencodeTestVideo.sh
 
 # ---------
 # --- test video
