@@ -1,6 +1,6 @@
 
-./downloadTestData
-./reencodeTestVideo
+./downloadTestData.sh
+./reencodeTestVideo.sh
 
 # ---------
 # --- test video
@@ -15,4 +15,3 @@ export GSCAM_CONFIG="filesrc location=$PWD/../testData/testVideo.flv ! decodebin
 
 
 roslaunch ./launch/test.launch
-

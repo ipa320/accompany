@@ -482,7 +482,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void timerCallback(const ros::TimerEvent& timerEvent)
 {
-  frame.header.stamp=ros::Time::now()+ros::Duration(.5);// date transform in the future
+  // date transform in the future so that tf alwas has a 'current' transform
+  frame.header.stamp=ros::Time::now()+ros::Duration(2);
   transformBroadcasterPtr->sendTransform(frame);
 }
 
@@ -495,7 +496,7 @@ int main(int argc, char **argv)
       "Human Detection main function\n"
       "Available remappings:\n"
       "  image:=<image-topic>\n"
-      "  humanLocation:=<humanLocation-topic>\n"
+      "  humanLocations:=<humanLocations-topic>\n"
       "\n"
       "Allowed options");
   optionsDescription.add_options()
@@ -549,15 +550,15 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "camera_localization");
   ros::NodeHandle n;
   std::string resolved_image=n.resolveName("image");
-  std::string resolved_humanLocation=n.resolveName("humanLocation");
+  std::string resolved_humanLocations=n.resolveName("humanLocations");
   cout<<"subscribe to image topic: "<<resolved_image<<endl;
-  cout<<"publish to location topic: "<<resolved_humanLocation<<endl;
+  cout<<"publish to location topic: "<<resolved_humanLocations<<endl;
 
   tf::TransformBroadcaster transformBroadcaster;
   transformBroadcasterPtr=&transformBroadcaster;
   ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
   image_transport::ImageTransport it(n);
-  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(resolved_humanLocation, 10);
+  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(resolved_humanLocations, 10);
   //humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
   image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
   ros::spin();

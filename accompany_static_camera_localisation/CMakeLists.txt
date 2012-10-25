@@ -128,7 +128,7 @@ rosbuild_add_executable(video_publisher src/video_publisher.cpp)
 target_link_libraries(video_publisher opencv_highgui opencv_core opencv_imgproc boost_program_options)
 
 rosbuild_add_executable(create_frame src/create_frame.cpp)
-target_link_libraries(create_frame )
+target_link_libraries(create_frame boost_program_options)
 
 rosbuild_add_executable(create_tf_room2world src/create_tf_room2world.cpp)
 target_link_libraries(create_tf_room2world opencv_highgui opencv_core opencv_imgproc boost_program_options yaml-cpp)
