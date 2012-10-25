@@ -14,8 +14,9 @@ using namespace cv;
 
 Scalar BLUE = CV_RGB(0,0,255), GREEN = CV_RGB(0,255,0), RED = CV_RGB(255,0,0);
 vector<Scalar> COLORS;
-string text = "OXY";
+string text = "123";
 float scale = 1;
+const unsigned int NUM_PNTS = 3;
 vector<Point> locations;
 Mat img;
 
@@ -41,33 +42,12 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
 {
 
   Point p = Point(x, y);
-  switch (event)
+  if (event == CV_EVENT_LBUTTONDOWN && locations.size() < NUM_PNTS)
   {
-    case CV_EVENT_LBUTTONDOWN:
-    {
       p *= 1 / scale;
       cout << "Left button down at " << p.x << "," << p.y << endl;
-      if (locations.size() >= 3)
-        cout << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point" << endl;
-      else
-      {
-        locations.push_back(p);
-        if (locations.size() == 2)
-        {
-          Point p0 = locations[0];
-          Point p1 = locations[1];
-          Point v1 = p1 - p0;
-          Point v2;
-          v2.x = v1.y;
-          v2.y = v1.x * (-1);
-          Point p2 = p0 + v2;
-          locations.push_back(p2);
-          cout << "You have clicked 3 points already. Press 'q' to continue or 'z' to redo last point" << endl;
-        }
-      }
+      locations.push_back(p);
       showScaledImg();
-      break;
-    }
   }
 }
 
@@ -91,7 +71,7 @@ int main(int argc, char **argv)
   optionsDescription.add_options()
     ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
     ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n")
-    ("name,n",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
+    ("name,o",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
 
   po::variables_map variablesMap;
 
@@ -118,10 +98,8 @@ int main(int argc, char **argv)
   origin.push_back(originNode[1].as<float>());
   origin.push_back(originNode[2].as<float>());
   
-  cout << origin[0] << origin[1] << origin[2] << endl;
-  cout << resolution << endl;
-
-  return 1;
+  cout << "origin is: " << origin[0] << ", " << origin[1] << ", "  << origin[2] << endl;
+  cout << "resolution is: " << resolution << endl;
 
   img = imread(imFile);
   namedWindow("image");
@@ -139,11 +117,10 @@ int main(int argc, char **argv)
     {
       printUsage();
     }
+    if (locations.size() == NUM_PNTS) // exit
+      break;
     
     key = waitKey(0);
-    
-    if ((char) key == 'q' && locations.size() == 3) // exit
-      break;
 
     switch ((char) key)
     {
@@ -177,25 +154,27 @@ int main(int argc, char **argv)
   Mat src_points = Mat::zeros(Size(2, 3), CV_32F);
   for (unsigned int i = 0; i < locations.size(); ++i)
   {
-    src_points.at<float>(i, 0) = locations[i].x * resolution;
-    src_points.at<float>(i, 1) = (img.rows - locations[i].y) * resolution;
+    src_points.at<float>(i, 0) = locations[i].x * resolution + origin[0];
+    src_points.at<float>(i, 1) = (img.rows - locations[i].y) * resolution + origin[1];
   }
 
   cout << "src_points are: " << src_points << endl;
   cout << "-------------------------------------" << endl;
 
   Mat dst_points = Mat::zeros(Size(2, 3), CV_32F);
-  cout << "input the world coordinates of 'O', separate with SPACE" << endl;
+  cout << "input the world coordinates of point " << text[0] << ", separate with SPACE" << endl;
   cin >> dst_points.at<float>(0, 0) >> dst_points.at<float>(0, 1);
-  cout << "input the world coordinates of 'X', separate with SPACE" << endl;
+  cout << "input the world coordinates of point " << text[1] << ", separate with SPACE" << endl;
   cin >> dst_points.at<float>(1, 0) >> dst_points.at<float>(1, 1);
-  cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
-  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
-  dst_points.at<float>(2, 1) = dst_points.at<float>(1, 0);
+    cout << "input the world coordinates of point " << text[2] << ", separate with SPACE" << endl;
+  cin >> dst_points.at<float>(2, 0) >> dst_points.at<float>(2, 1);
+//  cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
+//  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
+//  dst_points.at<float>(2, 1) = dst_points.at<float>(1, 0);
   cout << "dst_points are: " << dst_points << endl;
   cout << "-------------------------------------" << endl;
 
-  Mat tform;
+  Mat tform( 2, 3, CV_32FC1 );;
   tform = getAffineTransform(src_points, dst_points);
   cout << "src_points: " << endl << src_points << endl;
   cout << "dst_points: " << endl << dst_points << endl;
@@ -203,19 +182,25 @@ int main(int argc, char **argv)
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
-
   string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
-                  btMatrix3x3(tform.at<float>(0,0),tform.at<float>(0,1),0,// rotation matrix
-                              tform.at<float>(1,0),tform.at<float>(1,1),0,
-                              0,0,1), 
-                  btVector3(tform.at<float>(0,2),tform.at<float>(1,2),0));// translation vector
-  tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
-                                                             ros::Time(0),  // time, not used here
-                                                             "/map",        // parent coordinate frame
-                                                             name); // child coordinate frame
+        btMatrix3x3(tform.at<double>(0,0),tform.at<double>(0,1),0,// rotation matrix
+                  tform.at<double>(1,0),tform.at<double>(1,1),0,
+                  0,0,1), 
+        btVector3(tform.at<double>(0,2),tform.at<double>(1,2),0));// translation vector
+  
+  tf::Matrix3x3 ma = transform.getBasis();
+  cout << ma.getRow(0)[0] << "," << ma.getRow(0)[1] << "," << ma.getRow(0)[2] << endl;
+  cout << ma.getRow(1)[0] << "," << ma.getRow(1)[1] << "," << ma.getRow(1)[2] << endl;
+  cout << ma.getRow(2)[0] << "," << ma.getRow(2)[1] << "," << ma.getRow(2)[2] << endl;
+  
+  tf::StampedTransform stampedTransform=tf::StampedTransform(
+        transform,     // the transform
+        ros::Time(0),  // time, not used here
+        "/map",        // parent coordinate frame
+        name); // child coordinate frame
   tf::transformStampedTFToMsg(stampedTransform,transformStamped);
   save_msg(transformStamped,filename); // write to file
  
