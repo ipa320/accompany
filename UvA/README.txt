@@ -35,11 +35,12 @@ and install using (this will take some time):
   
 and install yaml-cpp:
 
-  hg clone https://code.google.com/p/yaml-cpp.new-api/
+  hg clone https://code.google.com/p/yaml-cpp.new-api yaml-cpp
+  cd yaml-cpp
   mkdir build
   cd build
   cmake ../
-  make
+  make -j 4
   sudo make install
 
 Install ubuntu-restricted-extras
