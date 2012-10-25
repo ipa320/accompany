@@ -1,6 +1,7 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <yaml-cpp/yaml.h>
 
 #include <ros/ros.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -89,8 +90,8 @@ int main(int argc, char **argv)
       "Find tf from room coordinates to world coordinates\nAllowed options\n");
   optionsDescription.add_options()
     ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
-    ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n");
-    ("name,n",po::value<string>(&name)->required(), "name of the coordinate frame\n");
+    ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n")
+    ("name,n",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
 
   po::variables_map variablesMap;
 
@@ -109,14 +110,18 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  float resolution;
-  vector<float> origin;
-  cv::FileStorage fsParam(mapParamFile, cv::FileStorage::READ);
-  FileNode fn = fsParam["origin"];
-  fsParam["resolution"] >> resolution;
-  fn >> origin;
+  YAML::Node mapNode = YAML::LoadFile(mapParamFile);
+  float resolution = mapNode["resolution"].as<float>();
+  vector<float> origin; 
+  YAML::Node originNode = mapNode["origin"];
+  origin.push_back(originNode[0].as<float>());
+  origin.push_back(originNode[1].as<float>());
+  origin.push_back(originNode[2].as<float>());
+  
   cout << origin[0] << origin[1] << origin[2] << endl;
   cout << resolution << endl;
+
+  return 1;
 
   img = imread(imFile);
   namedWindow("image");

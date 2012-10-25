@@ -32,6 +32,15 @@ and install using (this will take some time):
   cmake .. -DBUILD_BRL=OFF
   make -j 4
   sudo make install
+  
+and install yaml-cpp:
+
+  hg clone https://code.google.com/p/yaml-cpp.new-api/
+  mkdir build
+  cd build
+  cmake ../
+  make
+  sudo make install
 
 Install ubuntu-restricted-extras
 
