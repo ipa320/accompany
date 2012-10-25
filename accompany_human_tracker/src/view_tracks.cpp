@@ -198,6 +198,8 @@ void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr&
   }
 }
 
+
+
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "view_tracks");
