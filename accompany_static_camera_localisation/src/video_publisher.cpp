@@ -18,10 +18,12 @@ int main(int argc, char **argv)
   string input_video;
 
   // handling arguments
-  po::options_description optionsDescription("Allowed options\n");
-  optionsDescription.add_options()("scale,s",
-      po::value<double>(&scale)->required(), "resize scale\n")("input_video,i",
-      po::value<string>(&input_video)->required(), "input video\n");
+  po::options_description optionsDescription("Allowed options\n"
+					     "Available remappings:\n"
+					     "  image:=<image-topic>\n\n");
+  optionsDescription.add_options()
+    ("scale,s",po::value<double>(&scale)->required(), "resize scale\n")
+    ("input_video,i",po::value<string>(&input_video)->required(), "input video\n");
   try
   {
     po::variables_map variablesMap;
@@ -40,8 +42,9 @@ int main(int argc, char **argv)
 
   ros::init(argc, argv, "video_publisher");
   ros::NodeHandle n;
+  std::string resolved_image=n.resolveName("image");
   image_transport::ImageTransport it(n);
-  image_transport::Publisher pub = it.advertise("/gscam/image_raw", 1);
+  image_transport::Publisher pub = it.advertise(resolved_image, 1);
 
   cv::VideoCapture cap;
   cap.open(input_video);
@@ -55,12 +58,10 @@ int main(int argc, char **argv)
   while (n.ok())
   {
     cap >> frame;
-    cv::resize(frame, sframe,
-        cv::Size((int) (frame.cols * scale), (int) (frame.rows * scale)));
+    cv::resize(frame, sframe,cv::Size((int) (frame.cols * scale), (int) (frame.rows * scale)));
     IplImage ipl_im = sframe;
     IplImage* ipl_ptr = &ipl_im;
-    sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(ipl_ptr,
-        "bgr8");
+    sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(ipl_ptr,"bgr8");
     pub.publish(msg);
     ros::spinOnce();
     loop_rate.sleep();
