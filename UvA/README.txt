@@ -35,6 +35,7 @@ and install using (this will take some time):
   
 and install yaml-cpp:
 
+  sudo apt-get install mercurial
   hg clone https://code.google.com/p/yaml-cpp.new-api yaml-cpp
   cd yaml-cpp
   mkdir build
