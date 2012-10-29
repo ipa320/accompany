@@ -1,4 +1,4 @@
-sudo apt-get -y install aptitude emacs git gitk libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x ros-electric-openni-kinect
+sudo apt-get -y install aptitude emacs git gitk libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x gtk2-engines-pixbuf ros-electric-openni-kinect
 
 cd
 mkdir -p ros

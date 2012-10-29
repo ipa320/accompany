@@ -1,0 +1,36 @@
+= NINGHANG =
+*change the template parameters in param.xml to fit sitting and standing 
+*change the prior as smaller region 
+change the resolution of the frame 
+change the scale in param.xml
+improve the camera calibration -> contact geovision
+
+*install yaml-cpp on Robot House computer 
+*changes param.xml there 
+record some videos in the Kitchen
+calibrate the kinect in the living room
+change with Mick if the care-o-bot get problems
+
+-check frame.dat if it is correct 
+reviewers standing in safe zone -> send to UH
+
+
+= BAS =
+scripts to start UvA module in all computers
+only one roscore in UvA module, change topic names in UH
+*tracker
+-dynamic background
+resize the current rosbags for testing
+demo video for UvA detection and tracking module
+
+= TEST EVERTHING =
+update git in the Robot House 
+rosmake
+
+robot detected as human 
+
+= DEMO NOTES =
+keeps curtains close, make sure lighting condition are stable
+not moving around objects
+
+=  =
