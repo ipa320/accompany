@@ -527,6 +527,7 @@ int main(int argc, char **argv)
   extrinsic_file = path + "/" + "camera_extrinsic.xml";
   frame_file = path + "/" + "frame.dat";
 
+  cout<<"loading '"<<frame_file<<"'"<<endl;
   // load coordinate frame of camera
   if (!load_msg(frame,frame_file))
   {
@@ -534,10 +535,14 @@ int main(int argc, char **argv)
     exit(1);
   }
 
+  cout<<"loading '"<<bgmodel_file<<"'"<<endl;
   // Initialize localization module
   getBackground(bgmodel_file.c_str(), bgModel);
+  cout<<"loading '"<<intrinsic_file<<"'"<<endl;
+  cout<<"loading '"<<extrinsic_file<<"'"<<endl;
   loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
       extrinsic_file.c_str());
+  cout<<"loading '"<<prior_file<<"'"<<endl;
   loadWorldPriorHull(prior_file.c_str(), priorHull);
   assert_eq(bgModel.size(), CAM_NUM);
   assert_eq(cam.size(), bgModel.size());
@@ -545,6 +550,7 @@ int main(int argc, char **argv)
 
   logLocPrior.set_size(scanLocations.size());
   logLocPrior.fill(-log(scanLocations.size()));
+  cout<<"loading done"<<endl;
 
   // ROS nodes, subscribers and publishers
   ros::init(argc, argv, "camera_localization");
