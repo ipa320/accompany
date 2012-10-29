@@ -3,6 +3,7 @@
 *change the prior as smaller region 
 change the resolution of the frame 
 change the scale in param.xml
+improve the camera calibration -> contact geovision
 
 *install yaml-cpp on Robot House computer 
 *changes param.xml there 
