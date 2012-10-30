@@ -59,7 +59,8 @@ geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 sensor_msgs::CvBridge bridge;
-unsigned CAM_NUM = 1;
+unsigned int CAM_NUM = 1;
+int NUM_PERSONS;
 bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
@@ -257,8 +258,8 @@ void scanRest(vector<unsigned> &existing,
     // marginal.push_back(marginalLogProb);
     marginal.push_back(bestLogProb);
 
-//    if (existing.size() > 2) // TODO
- //     return;
+    if (existing.size() > NUM_PERSONS - 1 && NUM_PERSONS > 0) // TODO
+      return;
 
     scanRest(existing, existingMask, logSumPixelFGProb, logSumPixelBGProb,
         logNumPrior, /*logLocPrior, */logPosProb, marginal, lSum);
@@ -501,7 +502,8 @@ int main(int argc, char **argv)
       "Allowed options");
   optionsDescription.add_options()
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
-     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n");
+     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
+    ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1));
 
   po::variables_map variablesMap;
 
