@@ -79,6 +79,9 @@ int waitTime = 30;
 const char* win = "foreground";
 const char* bgwin = "background";
 
+string saveImagesPath;
+string imagePostfix;
+
 void buildMasks()
 {
   masks = vector<vector<vector<scanline_t> > >(cam.size(),
@@ -368,6 +371,15 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
     cvReleaseImage(&bg);
     cvReleaseImage(&cvt);
     cvShowImage(win, src[c]);
+    
+    if (saveImagesPath!="")
+    {
+      ros::Time begin = ros::Time::now();
+      stringstream ss;
+      ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
+        <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
+      cvSaveImage(ss.str().c_str(),src[c]);
+    }
 
     cvWaitKey(waitTime);
     //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
@@ -503,7 +515,9 @@ int main(int argc, char **argv)
   optionsDescription.add_options()
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
-    ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1));
+    ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1))
+    ("saveImagePath,s", po::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
+    ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n");
 
   po::variables_map variablesMap;
 
