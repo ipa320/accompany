@@ -99,7 +99,7 @@ vector<Tracker::TrackPoint> fuseTrackPoints(double sqaureDistance)
 // update tracker with fused trackPoints
 void updateTracks(accompany_human_tracker::TrackedHumans &trackedHumans)
 {
-  vector<Tracker::TrackPoint> trackPoints=fuseTrackPoints(1);
+  vector<Tracker::TrackPoint> trackPoints=fuseTrackPoints(2);
   double deltaTime=0;
   ros::Time now=ros::Time::now();
   ros::Duration duration=now-prevNow;
