@@ -22,7 +22,7 @@
         args="-p $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera1 
               image:=/camera1/gscam/image_raw
               -s $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse
-              -i cam1"/>
+              -i cam1 -n 2" />
 
 
   <!-- localise camera3 -->
@@ -30,7 +30,7 @@
         args="-p $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera3 
               image:=/camera3/gscam/image_raw
               -s $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse
-              -i cam3"/>
+              -i cam3 -n 2" />
 
 
   <!-- track humans using localisation data -->
