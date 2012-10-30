@@ -11,15 +11,21 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include <boost/program_options.hpp>
+
 #include <limits>
 #include <iostream>
 using namespace std;
+using namespace boost;
 
 //globals
 IplImage* img;
 int imgWidth=640;
 int imgHeight=480;
-int waitTime = 30;
+int waitTime=30;
+
+string saveImagesPath;
+string imagePostfix;
 
 class Viewport
 {
@@ -117,6 +123,14 @@ tf::TransformListener *listener=NULL;
 
 void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
 {
+  if (saveImagesPath!="")
+    {
+      ros::Time begin = ros::Time::now();
+      stringstream ss;
+      ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
+        <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
+      cvSaveImage(ss.str().c_str(),img);
+    }
   cvShowImage("view_tracks",img);
   cvWaitKey(waitTime);
   cvSet(img, cvScalar(0,0,0));
@@ -205,10 +219,29 @@ int main(int argc,char **argv)
   ros::init(argc, argv, "view_tracks");
   cout<<"view_tracks"<<endl;
 
+  // handling arguments
+  program_options::options_description optionsDescription(
+      "view_track views human detections and tracks humans");
+  optionsDescription.add_options()
+    ("saveImagePath,s", program_options::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
+    ("imagePostfix,i", program_options::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n");
+
+  program_options::variables_map variablesMap;
+
+  try
+  {
+    program_options::store(program_options::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    program_options::notify(variablesMap);
+  }
+  catch (const std::exception& e)
+  {
+    cerr<<""<<e.what()<<endl;    
+    return 1;
+  }
+
+
   img=cvCreateImage(cvSize(imgWidth,imgHeight),IPL_DEPTH_8U,3);
   cvSetZero(img);
-  cvShowImage("view_tracks",img);
-  cvWaitKey(waitTime);
   cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX,1,1);
 
   // create publisher and subscribers
