@@ -59,7 +59,7 @@ do
     done
 
     echo "$i_cam1 $i_cam3 $i_track"
-    time=`expr $time + 500000000`
+    time=`expr $time + 333333333` # 30 fps
 
 
     if [ $i_cam1 -eq ${#cam1Time[@]} ] 
@@ -90,5 +90,5 @@ do
 done
 
 # make video with montage images
-avconv -qscale 1 -r 20 -b 960000 -i composite%07d.png humanTracking.mp4
+avconv -i composite%07d.ppm -qscale 1 -r 30 humanTracking.mp4
 
