@@ -111,6 +111,7 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *param)
   x /= scale;
   y /= scale;
   WorldPoint pt = cam[idx].getGroundPos(cvPoint(x,y));
+  cout << "3D points" << pt.x << "," << pt.y << "," << pt.z << endl;
 
   static bool down=false;
 
