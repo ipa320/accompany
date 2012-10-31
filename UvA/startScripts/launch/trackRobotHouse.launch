@@ -31,11 +31,11 @@
 
 
    <!-- track humans using localisation data -->
-   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"/>
-
+   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
+         args="-t 5"/>
 
    <!-- visualize tracks -->
-   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/>
+   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/> 
 
 
 </launch>
