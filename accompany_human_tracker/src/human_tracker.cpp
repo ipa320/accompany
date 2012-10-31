@@ -9,6 +9,7 @@
 #include <MyTracker.h>
 #include <TimTracker/Tracker.h>
 
+#include <boost/program_options.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/foreach.hpp>
 
@@ -313,6 +314,26 @@ void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr&
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "human_tracker");
+
+  // handling arguments
+  program_options::options_description optionsDescription(
+      "view_track views human detections and tracks humans");
+  optionsDescription.add_options()
+    ("help,h","show help message")
+    ("graceTime,t", program_options::value<double>(&Tracker::graceTime)->default_value(1.0),"time to keep a track alive after no more obervations are received");
+
+  program_options::variables_map variablesMap;
+  try
+  {
+    program_options::store(program_options::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
+    program_options::notify(variablesMap);
+  }
+  catch (const std::exception& e)
+  {
+    cerr<<""<<e.what()<<endl;    
+    return 1;
+  }
 
   // create publisher and subscribers
   ros::NodeHandle n;
