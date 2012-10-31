@@ -32,5 +32,4 @@ robot detected as human
 = DEMO NOTES =
 keeps curtains close, make sure lighting condition are stable
 not moving around objects
-
-=  =
+reviewers stay in restricted zone
