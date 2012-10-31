@@ -20,12 +20,15 @@ using namespace boost;
 
 //globals
 IplImage* img;
-int imgWidth=640;
-int imgHeight=480;
+int imgWidth=380;
+int imgHeight=380;
 int waitTime=30;
 
+// params
 string saveImagesPath;
 string imagePostfix;
+string mapFile;
+IplImage* mapImage=NULL;
 
 class Viewport
 {
@@ -112,11 +115,19 @@ private:
   Viewport viewports[2];
 };
 
+void myCvPutText(CvArr* img, const char* text, CvPoint org, const CvFont* font, CvScalar color)
+{
+  cvPutText(img,text,org,font,color);
+  cvPutText(img,text,cvPoint(org.x+1,org.y),font,color);
+  cvPutText(img,text,cvPoint(org.x,org.y+1),font,color);
+  cvPutText(img,text,cvPoint(org.x+1,org.y+1),font,color);
+}
+
 Viewports viewports;
 
 // drawing
-float viewMin=0;
-float viewMax=7;
+float viewMin=-2;
+float viewMax=8;
 CvFont font;
 
 tf::TransformListener *listener=NULL;
@@ -133,7 +144,12 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
     }
   cvShowImage("view_tracks",img);
   cvWaitKey(waitTime);
-  cvSet(img, cvScalar(0,0,0));
+  if (mapImage==NULL)
+    cvSet(img, cvScalar(0,0,0));
+  else
+  {
+    cvCopy( mapImage, img, NULL );
+  }
   viewports.next();
 
   cvCircle(img, viewports.scaledCvPoint(viewMin,viewMin), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
@@ -157,8 +173,8 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
       if (identity.length()>0)
         ss<<","<<identity;
       string name=ss.str();
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.1), cvScalar(0,255,0), 1);
-      cvPutText(img,name.c_str(),viewports.scaledCvPoint(x,y),&font,cvScalar(0,255,0));
+      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.15), cvScalar(0,0,255),2);
+      myCvPutText(img,name.c_str(),viewports.scaledCvPoint(x,y),&font,cvScalar(0,0,255));
     }
     catch (tf::TransformException e)
     {
@@ -179,7 +195,7 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
                                 transVec);
       float x=transVec.vector.x;
       float y=transVec.vector.y;
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.05), cvScalar(255,255,0),1);
+      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.08), cvScalar(100,100,0),1);
     }
     catch (tf::TransformException e)
     {
@@ -223,14 +239,17 @@ int main(int argc,char **argv)
   program_options::options_description optionsDescription(
       "view_track views human detections and tracks humans");
   optionsDescription.add_options()
+    ("help,h","show help message")
     ("saveImagePath,s", program_options::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
-    ("imagePostfix,i", program_options::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n");
+    ("imagePostfix,i", program_options::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n")
+    ("mapFile,m", program_options::value<string>(&mapFile)->default_value(""),"map to be used as background\n");
 
   program_options::variables_map variablesMap;
 
   try
   {
     program_options::store(program_options::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     program_options::notify(variablesMap);
   }
   catch (const std::exception& e)
@@ -239,9 +258,16 @@ int main(int argc,char **argv)
     return 1;
   }
 
-
-  img=cvCreateImage(cvSize(imgWidth,imgHeight),IPL_DEPTH_8U,3);
-  cvSetZero(img);
+  if (mapFile!="")
+  {
+    img=cvLoadImage(mapFile.c_str());
+    mapImage=cvLoadImage(mapFile.c_str());
+    cvCopy(mapImage, img, NULL );
+    cvShowImage("view_tracks",img);
+    cvWaitKey(waitTime);
+  }
+  else
+    img=cvCreateImage(cvSize(imgWidth,imgHeight),IPL_DEPTH_8U,3);
   cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX,1,1);
 
   // create publisher and subscribers
