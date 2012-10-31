@@ -69,6 +69,7 @@ int main(int argc, char **argv)
   po::options_description optionsDescription(
       "Find tf from room coordinates to world coordinates\nAllowed options\n");
   optionsDescription.add_options()
+    ("help,h","show help message")
     ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
     ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n")
     ("name,o",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
@@ -77,8 +78,8 @@ int main(int argc, char **argv)
 
   try
   {
-    po::store(po::parse_command_line(argc, argv, optionsDescription),
-        variablesMap);
+    po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch (const std::exception& e)

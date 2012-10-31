@@ -513,6 +513,7 @@ int main(int argc, char **argv)
       "\n"
       "Allowed options");
   optionsDescription.add_options()
+    ("help,h","show help message")
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
     ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1))
@@ -523,8 +524,8 @@ int main(int argc, char **argv)
 
   try
   {
-    po::store(po::parse_command_line(argc, argv, optionsDescription),
-        variablesMap);
+    po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch (const std::exception& e)

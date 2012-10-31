@@ -198,19 +198,21 @@ int main(int argc, char **argv)
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
   optionsDescription.add_options()
-        		        ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
-        		        ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
-        		        ("prior,r", po::value<string>(&prior_file)->required(),"the prior\n")
-        		        ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
-        		        ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
-        		        ("annotated,a", po::value<string>(&annotated_file)->required(),"file to store annotated positions\n")
-        		        ;
+    ("help,h","show help message")
+    ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
+    ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
+    ("prior,r", po::value<string>(&prior_file)->required(),"the prior\n")
+    ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
+    ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
+    ("annotated,a", po::value<string>(&annotated_file)->required(),"file to store annotated positions\n")
+    ;
 
   po::variables_map variablesMap;
 
   try
   {
     po::store(po::parse_command_line(argc, argv, optionsDescription), variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch( const std::exception& e)
