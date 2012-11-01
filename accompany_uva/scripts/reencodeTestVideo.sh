@@ -1,5 +1,5 @@
 
-cd ../testData
+cd ../res
 
 if [ ! -f testVideo.flv ];
 then
