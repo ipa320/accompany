@@ -7,7 +7,7 @@
   <!-- arguments -->
   <arg name="res_path" default="$(find accompany_static_camera_localisation)/res" />
   
-  <node machine="$(arg machine)" pkg="accompany_static_camera_localisation" type="build_background_model" name="$(arg machine)_build_background_model"
+  <node machine="$(arg machine)" pkg="accompany_static_camera_localisation" type="build_background_model" name="$(anon build_background_model)"
         args="-i $(arg res_path)/background_list.txt -o $(arg res_path)/bgmodel.xml" />
 
 </launch>

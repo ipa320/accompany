@@ -18,7 +18,7 @@ happen.
 setup file (/opt/ros/.../setup.sh) in contrast to a user file
 (~/.bashrc).
 
-Then add hosts to the '*All.launch' scripts below.
+Then add your hosts to the '*All.launch' scripts below.
 --------------------------------------------------------
 
 
@@ -46,7 +46,7 @@ Commands:
 
 -Start tracking humans on current host:
 
-  roslaunch accompany_uva startTrack.launch
+  roslaunch accompany_uva startTrack.launch [machine:=<hostname>]
 
 
 -View tracked humans on current host:

@@ -320,7 +320,7 @@ int main(int argc,char **argv)
       "view_track views human detections and tracks humans");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("graceTime,t", program_options::value<double>(&Tracker::graceTime)->default_value(1.0),"time to keep a track alive after no more obervations are received");
+    ("graceTime,t", program_options::value<double>(&Tracker::graceTime)->default_value(1.0),"time in seconds to keep a track alive after no more obervations are received");
 
   program_options::variables_map variablesMap;
   try
