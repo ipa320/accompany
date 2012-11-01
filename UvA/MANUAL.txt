@@ -18,7 +18,7 @@ happen.
 setup file (/opt/ros/.../setup.sh) in contrast to a user file
 (~/.bashrc).
 
-Then add hosts to the '*All.luanch' scripts below.
+Then add hosts to the '*All.launch' scripts below.
 --------------------------------------------------------
 
 
