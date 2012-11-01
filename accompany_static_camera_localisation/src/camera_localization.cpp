@@ -539,7 +539,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  visualize=variablesMap.count("visualize"); // are we visaulizing the frames and detection
+  visualize=variablesMap.count("visualize"); // are we visualizing the frames and detections?
 
   bgmodel_file = path + "/" + "bgmodel.xml";
   params_file = path + "/" + "params.xml";
