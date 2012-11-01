@@ -1,7 +1,7 @@
 <launch>
 
   <node pkg="rosbag" type="play" name="playBags"
-        args="-d 1 -r 0.2
+        args="-d 1 -r 0.1
               $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera1/retopic.bag 
               $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera3/retopic.bag
               "/>
@@ -35,7 +35,7 @@
 
   <!-- track humans using localisation data -->
   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
-         args="-t 5"/>
+         args="-t 8"/>
 
 
   <!-- visualize tracks  -->
