@@ -81,6 +81,7 @@ const char* bgwin = "background";
 
 string saveImagesPath;
 string imagePostfix;
+int visualize;
 
 void buildMasks()
 {
@@ -370,7 +371,7 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
     //		cvShowImage(bgwin, cvt);
     cvReleaseImage(&bg);
     cvReleaseImage(&cvt);
-    cvShowImage(win, src[c]);
+    if (visualize) cvShowImage(win, src[c]);
     
     if (saveImagesPath!="")
     {
@@ -381,7 +382,7 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
       cvSaveImage(ss.str().c_str(),src[c]);
     }
 
-    cvWaitKey(waitTime);
+    if (visualize) cvWaitKey(waitTime);
     //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
     //		cvSaveImage(buffer, src[c]);
   }
@@ -518,7 +519,8 @@ int main(int argc, char **argv)
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
     ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1))
     ("saveImagePath,s", po::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
-    ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n");
+    ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n")
+    ("visualize,v","visualize detection\n");
 
   po::variables_map variablesMap;
 
@@ -536,6 +538,8 @@ int main(int argc, char **argv)
     std::cout << optionsDescription << std::endl;
     return 1;
   }
+
+  visualize=variablesMap.count("visualize"); // are we visaulizing the frames and detection
 
   bgmodel_file = path + "/" + "bgmodel.xml";
   params_file = path + "/" + "params.xml";
