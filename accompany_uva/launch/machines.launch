@@ -1,0 +1,6 @@
+<launch>
+  <machine name="localhost" address="localhost"/>
+  <machine name="ThinkpadX200" address="ThinkpadX200"/>
+  <machine name="bterwijnDesktop" address="bterwijn-desktop"/>
+  
+</launch>
