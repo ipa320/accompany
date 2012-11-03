@@ -8,6 +8,7 @@
 
 #include <MyTracker.h>
 #include <TimTracker/Tracker.h>
+#include <DataAssociation.h>
 
 #include <boost/program_options.hpp>
 #include <boost/unordered_map.hpp>
@@ -17,6 +18,8 @@
 #include <iostream>
 using namespace std;
 using namespace boost;
+
+#define FUSE_HUMAN_DETECTION_DISTANCE 2 // meters
 
 #define MY_TRACKER	1
 #define TIM_TRACKER	2
@@ -42,75 +45,102 @@ Tracker tracker;
 typedef std::map<string,vector<Tracker::TrackPoint> > TrackPointsMap;
 TrackPointsMap trackPointsMap;
 
-void printTrackPoint(Tracker::TrackPoint &trackPoint)
+struct TrackPointsTraits // used to access all elements 
 {
-  cout<<" x:"<<trackPoint.x<<" y:"<<trackPoint.y<<" xVariance:"<<trackPoint.xVariance<<" yVariance:"<<trackPoint.yVariance;
-}
-
-// test if trackPoint is within sqaureDistance of any of the points of trackPoints
-bool testTrackPoints(vector<Tracker::TrackPoint> &trackPoints,Tracker::TrackPoint &trackPoint,double sqaureDistance)
-{
-  bool match=false;
-  for (vector<Tracker::TrackPoint>::iterator it=trackPoints.begin();it!=trackPoints.end();it++)
+  static unsigned int getSize(const vector<Tracker::TrackPoint> &t)
   {
-    double dx=it->x-trackPoint.x;
-    double dy=it->y-trackPoint.y;
-    double dist=dx*dx+dy*dy;
-    if (dist<sqaureDistance)
-    {
-      match=true;
-      break;
-    }
+    return t.size();
   }
-  return match;
-}
 
-// fuse trackpoints by not ignoring points that are within sqaureDistance of points of earlier observations
-vector<Tracker::TrackPoint> fuseTrackPoints(double sqaureDistance)
+  static const Tracker::TrackPoint &getElement(const vector<Tracker::TrackPoint> &t,int i)
+  {
+    return t[i];
+  }
+
+};
+
+struct DistanceTrackPoint // computes distance between elements
+{
+  static double squareDistance(const Tracker::TrackPoint &t1,
+                               const Tracker::TrackPoint &t2)
+  {
+    double dx=t1.x-t2.x;
+    double dy=t1.y-t2.y;
+    return dx*dx+dy*dy;
+  }
+};
+
+DataAssociation<vector<Tracker::TrackPoint>,TrackPointsTraits,
+                vector<Tracker::TrackPoint>,TrackPointsTraits,
+                DistanceTrackPoint> trackPointsDataAssociation;
+
+
+vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
 {
   vector<Tracker::TrackPoint> trackPoints;
-  
-  BOOST_FOREACH(TrackPointsMap::value_type &i, trackPointsMap) 
+  for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
-    cout<<"observations from "<<i.first<<endl;
-    vector<Tracker::TrackPoint> points=i.second;
-    vector<Tracker::TrackPoint> temp;
-    // fill temp with points that don't match any in trackPoints
-    for (vector<Tracker::TrackPoint>::iterator it=points.begin();it!=points.end();it++)
+    try// transform to map coordinate system
     {
-      cout<<" test";printTrackPoint(*it);
-      if (!testTrackPoints(trackPoints,*it,sqaureDistance)) // if not match schedule for addition
-      {
-        cout<<"  no match"<<endl;
-        temp.push_back(*it);
-      }
-      else
-        cout<<"  ignore because of match"<<endl;
+      geometry_msgs::Vector3Stamped transVec;
+      listener->transformVector("/map",
+                                humanLocations->locations[i],
+                                transVec);
+      Tracker::TrackPoint point = {transVec.vector.x,
+                                   transVec.vector.y,
+                                   0.01,
+                                   0.01};
+      trackPoints.push_back(point);
     }
-    // add temp to trackPoints
-    for (vector<Tracker::TrackPoint>::iterator it=temp.begin();it!=temp.end();it++)
+    catch (tf::TransformException e)
     {
-      cout<<"add ";printTrackPoint(*it);cout<<endl;
-      trackPoints.push_back(*it);
+      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      break;
     }
   }
   return trackPoints;
 }
 
-// update tracker with fused trackPoints
-void updateTracks(accompany_human_tracker::TrackedHumans &trackedHumans)
+void fuseTracks(vector<Tracker::TrackPoint> &trackPoints,TrackPointsMap trackPointsMap)
 {
-  vector<Tracker::TrackPoint> trackPoints=fuseTrackPoints(2);
-  double deltaTime=0;
-  ros::Time now=ros::Time::now();
-  ros::Duration duration=now-prevNow;
-  deltaTime=duration.toSec();
-  prevNow=now;
-  cout<<"trackPoints.size(): "<<trackPoints.size()<<endl;
-  tracker.update(trackPoints, deltaTime);
-  cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
-  trackedHumans.trackedHumans.clear();
+  bool first=true;
+  BOOST_FOREACH(TrackPointsMap::value_type &it, trackPointsMap) 
+  {
+    cout<<"observations from "<<it.first<<endl;
+    if (first)
+    {
+      first=false;
+      trackPoints=it.second;
+    }
+    else
+    {
+      set<int> indices;
+      for (unsigned int i=0;i<it.second.size();i++) // get all indices
+        indices.insert(i);
+      trackPointsDataAssociation.buildDistanceMatrix(trackPoints,it.second);
+      double distance;
+      int index1,index2;
+      while (trackPointsDataAssociation.bestMatch(distance,index1,index2))
+      {
+        if (distance>FUSE_HUMAN_DETECTION_DISTANCE)
+          break;
+        indices.erase(index2); // match so remote index
+        cout<<"  fuse: "<<index2<<endl;
+        trackPoints[index1].x=(trackPoints[index1].x+it.second[index2].x)/2;
+        trackPoints[index1].y=(trackPoints[index1].y+it.second[index2].y)/2;
+      }
+      for (unsigned int i=0;i<indices.size();i++) //  add remaining indices to trackPoints
+      {
+        trackPoints.push_back(it.second[i]);
+        cout<<"  add: "<<i<<endl;
+      }
+    }
+  }
+}
 
+void updateTrackedHumans()
+{
+  trackedHumans.trackedHumans.clear();
   accompany_human_tracker::TrackedHuman trackedHuman;
   trackedHuman.location.header.stamp=ros::Time::now();
   trackedHuman.location.header.frame_id="/map";
@@ -143,30 +173,19 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   if (humanLocations->locations.size()>0)
   {
     string frameName=humanLocations->locations[0].header.frame_id;
-    vector<Tracker::TrackPoint> trackPoints;
-    for (unsigned int i=0;i<humanLocations->locations.size();i++)
-    {
-      try// transform to map coordinate system
-      {
-        geometry_msgs::Vector3Stamped transVec;
-        listener->transformVector("/map",
-                                  humanLocations->locations[i],
-                                  transVec);
-        Tracker::TrackPoint point = {transVec.vector.x,
-                                     transVec.vector.y,
-                                     0.01,
-                                     0.01};
-        trackPoints.push_back(point);
-      }
-      catch (tf::TransformException e)
-      {
-        cerr<<"error while tranforming human location: "<<e.what()<<endl;
-        break;
-      }
-    }
-    trackPointsMap[frameName]=trackPoints;
-    updateTracks(trackedHumans);
-
+    trackPointsMap[frameName]=humanLocationsToTrackpoints(humanLocations);
+    vector<Tracker::TrackPoint> fusedTrackPoints;
+    fuseTracks(fusedTrackPoints,trackPointsMap);
+    
+    double deltaTime=0;
+    ros::Time now=ros::Time::now();
+    ros::Duration duration=now-prevNow;
+    deltaTime=duration.toSec();
+    prevNow=now;
+    cout<<"trackPoints.size(): "<<fusedTrackPoints.size()<<endl;
+    tracker.update(fusedTrackPoints, deltaTime);
+    cout<<"tracks.size(): "<<tracker.tracks.size()<<endl;
+    updateTrackedHumans();
   }
 #endif
 
