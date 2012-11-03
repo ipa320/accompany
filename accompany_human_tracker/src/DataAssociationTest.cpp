@@ -7,8 +7,8 @@
 using namespace std;
 
 #define size1 3
-#define size2 2
-#define dim 1
+#define size2 4
+#define dim 3
 
 struct VectorTraits 
 {
