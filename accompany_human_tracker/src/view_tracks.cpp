@@ -30,6 +30,12 @@ string imagePostfix;
 string mapFile;
 IplImage* mapImage=NULL;
 
+#define nrColors 5
+CvScalar colors[nrColors];
+
+vector<cob_people_detection_msgs::DetectionArray> identifiedHumansStore;
+map<string,accompany_human_tracker::HumanLocations> humanLocationStore;
+
 class Viewport
 {
 public:
@@ -132,31 +138,8 @@ CvFont font;
 
 tf::TransformListener *listener=NULL;
 
-void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
+void drawTrackedHumans(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
 {
-  if (saveImagesPath!="")
-    {
-      ros::Time begin = ros::Time::now();
-      stringstream ss;
-      ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
-        <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
-      cvSaveImage(ss.str().c_str(),img);
-    }
-  cvShowImage("view_tracks",img);
-  cvWaitKey(waitTime);
-  if (mapImage==NULL)
-    cvSet(img, cvScalar(0,0,0));
-  else
-  {
-    cvCopy( mapImage, img, NULL );
-  }
-  viewports.next();
-
-  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMin), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMax), viewports.scaledLength(0.2), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMin), viewports.scaledLength(0.3), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMax), viewports.scaledLength(0.4), cvScalar(255,0,0), 1);
-  
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
     try// transform to map coordinate system
@@ -173,7 +156,7 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
       if (identity.length()>0)
         ss<<","<<identity;
       string name=ss.str();
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.15), cvScalar(0,0,255),2);
+      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.25), cvScalar(0,0,255),2);
       myCvPutText(img,name.c_str(),viewports.scaledCvPoint(x,y),&font,cvScalar(0,0,255));
     }
     catch (tf::TransformException e)
@@ -183,43 +166,22 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
   }
 }
 
-void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+void drawIdentifiedHumans(const cob_people_detection_msgs::DetectionArray& identifiedHumans,int color)
 {
-  for (unsigned int i=0;i<humanLocations->locations.size();i++)
+  for (unsigned int i=0;i<identifiedHumans.detections.size();i++)
   {
+    const geometry_msgs::PoseStamped pose=identifiedHumans.detections[i].pose;    
     try// transform to map coordinate system
     {
-      geometry_msgs::Vector3Stamped transVec;
-      listener->transformVector("/map",
-                                humanLocations->locations[i],
-                                transVec);
-      float x=transVec.vector.x;
-      float y=transVec.vector.y;
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.08), cvScalar(100,100,0),1);
-    }
-    catch (tf::TransformException e)
-    {
-      cerr<<"failed to transform humanLocations: "<<e.what()<<endl;
-    }
-  }
-}
-
-void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& identifiedHumans)
-{
-  for (unsigned int i=0;i<identifiedHumans->detections.size();i++)
-  {
-    const geometry_msgs::PoseStamped pose=identifiedHumans->detections[i].pose;    
-    try// transform to map coordinate system
-    {
-      string identity=identifiedHumans->detections[i].label;
+      string identity=identifiedHumans.detections[i].label;
       geometry_msgs::PoseStamped transPose;
       listener->transformPose("/map",
                               pose,
                               transPose);
       float x=transPose.pose.position.x;
       float y=transPose.pose.position.y;
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.2), cvScalar(0,0,255),2);
-      cvPutText(img,identity.c_str(),viewports.scaledCvPoint(x,y),&font,cvScalar(0,0,255));
+      cvCircle(img,viewports.scaledCvPoint(x,y),viewports.scaledLength(0.2),colors[color%nrColors],2);
+      cvPutText(img,identity.c_str(),viewports.scaledCvPoint(x,y),&font,colors[color%nrColors]);
     }
     catch (tf::TransformException e)
     {
@@ -228,7 +190,91 @@ void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr&
   }
 }
 
+void drawHumanLocations(const accompany_human_tracker::HumanLocations& humanLocations,int color)
+{
+  for (unsigned int i=0;i<humanLocations.locations.size();i++)
+  {
+    try// transform to map coordinate system
+    {
+      geometry_msgs::Vector3Stamped transVec;
+      listener->transformVector("/map",
+                                humanLocations.locations[i],
+                                transVec);
+      float x=transVec.vector.x;
+      float y=transVec.vector.y;
+      cvCircle(img,viewports.scaledCvPoint(x,y),viewports.scaledLength(0.08),colors[color%nrColors],2);
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"failed to transform humanLocations: "<<e.what()<<endl;
+    }
+  }
+}
 
+void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
+{
+  if (mapImage==NULL)
+    cvSet(img, cvScalar(0,0,0));
+  else
+  {
+    cvCopy( mapImage, img, NULL );
+  }
+
+  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMin), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMax), viewports.scaledLength(0.2), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMin), viewports.scaledLength(0.3), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMax), viewports.scaledLength(0.4), cvScalar(255,0,0), 1);
+  
+  
+  drawTrackedHumans(trackedHumans); // draw tracked humans
+  
+  for (unsigned int i=0;i<identifiedHumansStore.size();i++) // draw last identified humans
+    drawIdentifiedHumans(identifiedHumansStore[i],i);
+  identifiedHumansStore.clear();
+
+  int c=0;
+  for (map<string,accompany_human_tracker::HumanLocations>::iterator it=humanLocationStore.begin(); // draw last identified humans
+       it!=humanLocationStore.end();it++)
+  {
+    drawHumanLocations(it->second,c);
+    c++;
+  } 
+
+  if (saveImagesPath!="")
+  {
+    ros::Time begin = ros::Time::now();
+    stringstream ss;
+    ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
+      <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
+    cvSaveImage(ss.str().c_str(),img);
+  }
+  cvShowImage("view_tracks",img);
+  cvWaitKey(waitTime);
+  viewports.next();
+}
+
+void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+{
+  if (humanLocations->locations.size()>0)
+  {
+    string frame=humanLocations->locations[0].header.frame_id;
+    humanLocationStore[frame]=*humanLocations;
+  }
+}
+
+void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& identifiedHumans)
+{
+  identifiedHumansStore.push_back(*identifiedHumans);
+}
+
+void initColor()
+{
+  colors[0]=cvScalar(255,0,0);
+  colors[1]=cvScalar(0,255,0);
+  colors[2]=cvScalar(255,255,0);
+  colors[3]=cvScalar(0,255,255);
+  colors[4]=cvScalar(255,0,255);
+}
 
 int main(int argc,char **argv)
 {
@@ -258,6 +304,7 @@ int main(int argc,char **argv)
     return 1;
   }
 
+  initColor();
   if (mapFile!="")
   {
     img=cvLoadImage(mapFile.c_str());
