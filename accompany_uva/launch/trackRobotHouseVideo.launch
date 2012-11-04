@@ -42,7 +42,7 @@
   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"
         args="-s $(find accompany_uva)/res/testRobotHouse
               -i track
-              -m $(find accompany_uva/scripts/final.png"/>
+              -m $(find accompany_uva)/scripts/final.png"/>
   <!-- use accompany_uva/scripts/makeMapImage.sh to make 'final.png' -->
 
 </launch>
