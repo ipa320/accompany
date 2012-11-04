@@ -19,7 +19,7 @@
 using namespace std;
 using namespace boost;
 
-#define FUSE_HUMAN_DETECTION_DISTANCE 2 // meters
+#define FUSE_HUMAN_DETECTION_DISTANCE 3 // meters
 
 #define MY_TRACKER	1
 #define TIM_TRACKER	2
