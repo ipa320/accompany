@@ -192,114 +192,64 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
   trackedHumansPub.publish(trackedHumans);
 }
 
-// tries all possible matches between identities and tracks an remember the best one
-class MakeMatch
+struct TrackedHumansTraits // used to access all elements 
 {
-public:
-
-  MakeMatch()
+  static unsigned int getSize(const accompany_human_tracker::TrackedHumans &t)
   {
-    bestSumDist=numeric_limits<double>::max();
+    return t.trackedHumans.size();
   }
 
-  void match(double *dist,int nrIdentities,vector<int> &assigned,set<int> &availableTracks,double sumDist)
+  static const geometry_msgs::Vector3 &getElement(const accompany_human_tracker::TrackedHumans &t,int i)
   {
-    int iden=assigned.size();// identity to assign
-    if (iden==(unsigned)nrIdentities)
-    {
-      bestSumDist=sumDist;
-      bestAssigned=assigned;
-    }
-    else
-    {
-      for (set<int>::iterator it=availableTracks.begin();it!=availableTracks.end();)
-      {
-        int track=*it;// track to assign
-        set<int>::iterator itold=it;it++;
-        double newSumDist=sumDist+dist[track*nrIdentities+iden];
-        if (newSumDist<bestSumDist)
-        {
-          availableTracks.erase(itold);// remove track
-          assigned.push_back(track);
-          // copy set to avoid current iterator invalidation with future erase
-          set<int> new_availableTracks=availableTracks;
-          match(dist,nrIdentities,assigned,new_availableTracks,newSumDist);
-
-          // undo changes to assigned and availableTracks for next assignment
-          assigned.pop_back();
-          availableTracks.insert(track);
-        }
-      }
-    }
+    return t.trackedHumans[i].location.vector;
   }
 
-  void match(double *dist,int nrTracks,int nrIdentities)
-  {
-    vector<int> assigned;// empty list of assigned identities
-    set<int> availableTracks;
-    for (int i=0;i<nrTracks;i++)
-      availableTracks.insert(i); // all tracks to assign to
-    match(dist,nrIdentities,assigned,availableTracks,0);
-  }
-
-  vector<int> *getBestAssigned()
-  {
-    return &bestAssigned;
-  }
-
-private:
-  vector<int> bestAssigned;
-  double bestSumDist;
 };
+
+struct DetectionArrayTraits // used to access all elements 
+{
+  static unsigned int getSize(const cob_people_detection_msgs::DetectionArray &t)
+  {
+    return t.detections.size();
+  }
+
+  static const geometry_msgs::Point &getElement(const cob_people_detection_msgs::DetectionArray &t,int i)
+  {
+    return t.detections[i].pose.pose.position;
+  }
+
+};
+
+struct DistanceVector3Point // computes distance between elements
+{
+  static double squareDistance(const geometry_msgs::Vector3 &t1,
+                               const geometry_msgs::Point &t2)
+  {
+    double dx=t1.x-t2.x;
+    double dy=t1.y-t2.y;
+    return dx*dx+dy*dy;
+  }
+};
+
+DataAssociation<accompany_human_tracker::TrackedHumans,TrackedHumansTraits,
+                cob_people_detection_msgs::DetectionArray,DetectionArrayTraits,
+                DistanceVector3Point> identityDataAssociation;
 
 // compute the distance matrix of every track to every identified human and match using MakeMatch class
 void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHumans)
 {
-  unsigned int nrTracks=trackedHumans.trackedHumans.size();
-  unsigned int nrIdentities=transformedIdentifiedHumans.detections.size();
-  double dist[nrTracks*nrIdentities];
-  for (unsigned int i=0;i<nrTracks;i++)
+  identityDataAssociation.buildDistanceMatrix(trackedHumans,transformedIdentifiedHumans);
+  double sumDistance;
+  vector<std::pair<int,int> > indices=identityDataAssociation.globalBestMatches(sumDistance);
+  for (unsigned int i=0;i<indices.size();i++)
   {
-    accompany_human_tracker::TrackedHuman trackedHuman=trackedHumans.trackedHumans[i];
-    for (unsigned int j=0;j<nrIdentities;j++)
-    {
-      cob_people_detection_msgs::Detection identity=transformedIdentifiedHumans.detections[j];
-
-      double dx=trackedHuman.location.vector.x-identity.pose.pose.position.x;
-      double dy=trackedHuman.location.vector.y-identity.pose.pose.position.y;
-      double dz=trackedHuman.location.vector.z-identity.pose.pose.position.z;
-      dist[i*nrIdentities+j]=dx*dx+dy*dy+dz*dz;
-    }
-  }
-
-  MakeMatch makeMatch;
-  makeMatch.match(dist,nrTracks,nrIdentities);
-  vector<int> *assigned=makeMatch.getBestAssigned(); // best assignment
-  int i=0;
-  for (vector<int>::iterator it=assigned->begin();it!=assigned->end();it++)
-  {
-    int id=*it;
-    string indentity=transformedIdentifiedHumans.detections[i++].label;
-    identityToID[indentity]=id;
+    cout<<indices[i].first<<" - "<<indices[i].second<<endl;
+    string indentity=transformedIdentifiedHumans.detections[indices[i].second].label;
+    identityToID[indentity]=trackedHumans.trackedHumans[indices[i].first].id;
   }
   idToIdentity.clear(); //new map of id's to identities
   for (map<string,int>::iterator it=identityToID.begin();it!=identityToID.end();it++)
     idToIdentity[it->second]=it->first;
-
-
-  for (map<string,int>::iterator it=identityToID.begin();it!=identityToID.end();it++)
-  {
-    cerr<<it->first<<"="<<it->second<<" ";
-  }
-  cerr<<endl;
-  for (map<int,string>::iterator it=idToIdentity.begin();it!=idToIdentity.end();it++)
-  {
-    cerr<<it->first<<"="<<it->second<<" ";
-  }
-  cerr<<endl;
-
-  //if (idToIdentity.size()!=3 || identityToID.size()!=3)
-  //exit(1);
 }
 
 // receive identities and transform them to the camera's coordinate system
