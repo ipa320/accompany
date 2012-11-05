@@ -8,7 +8,7 @@
 
 
   <!-- start gstreamer based ros module gscam -->
-  <node pkg="gscam" type="gscam" name="gscam" args="-s 0">
+  <node pkg="gscam" type="gscam" name="$(anon gscam)" args="-s 0">
     <env name="GSCAM_CONFIG" value="$(arg gscam_config)" />
   </node>
 
