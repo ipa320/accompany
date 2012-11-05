@@ -16,12 +16,13 @@ reviewers standing in safe zone -> send to UH
 
 
 = BAS =
-scripts to start UvA module in all computers
-only one roscore in UvA module, change topic names in UH
+*scripts to start UvA module in all computers
+*only one roscore in UvA module, change topic names in UH
 *tracker
 -dynamic background
 resize the current rosbags for testing
-demo video for UvA detection and tracking module
+*demo video for UvA detection and tracking module
+
 
 = TEST EVERTHING =
 update git in the Robot House 
