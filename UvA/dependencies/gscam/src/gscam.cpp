@@ -19,7 +19,7 @@ extern "C"{
 #include <sys/shm.h>
 
 //forward declarations
-static gboolean processData(GstPad *pad, GstBuffer *buffer, gpointer u_data);
+//static gboolean processData(GstPad *pad, GstBuffer *buffer, gpointer u_data);
 bool setCameraInfo(sensor_msgs::SetCameraInfo::Request &req, sensor_msgs::SetCameraInfo::Response &rsp);
 
 //globals
@@ -149,9 +149,13 @@ int main(int argc, char** argv) {
 	}
 
 	image_transport::ImageTransport it(nh);
-	image_transport::CameraPublisher pub = it.advertiseCamera("gscam/image_raw", 1);
+	
 
-	ros::ServiceServer set_camera_info = nh.advertiseService("gscam/set_camera_info", setCameraInfo);
+	std::string resolved_gscam=nh.resolveName("gscam");// allows users to rename topics
+	std::cout<<"publishing to topic name: '"<<resolved_gscam<<"'"<<std::endl;
+	
+	image_transport::CameraPublisher pub = it.advertiseCamera(resolved_gscam+"/image_raw", 1);
+	ros::ServiceServer set_camera_info = nh.advertiseService(resolved_gscam+"/set_camera_info", setCameraInfo);
 
 	std::cout << "Processing..." << std::endl;
 
