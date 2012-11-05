@@ -191,8 +191,13 @@ int main(int argc, char **argv)
                   tform.at<double>(1,0),tform.at<double>(1,1),0,
                   0,0,1), 
         btVector3(tform.at<double>(0,2),tform.at<double>(1,2),0));// translation vector
-  
-  tf::Matrix3x3 ma = transform.getBasis();
+
+#if ROS_VERSION_MINIMUM(1,8,0)
+  tf::Matrix3x3 ma= transform.getBasis();      
+#else
+  btMatrix3x3 ma= transform.getBasis();
+#endif  
+
   cout << ma.getRow(0)[0] << "," << ma.getRow(0)[1] << "," << ma.getRow(0)[2] << endl;
   cout << ma.getRow(1)[0] << "," << ma.getRow(1)[1] << "," << ma.getRow(1)[2] << endl;
   cout << ma.getRow(2)[0] << "," << ma.getRow(2)[1] << "," << ma.getRow(2)[2] << endl;
