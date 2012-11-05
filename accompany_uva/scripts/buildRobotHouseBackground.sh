@@ -1,8 +1,8 @@
 #!/bin/bash
 
-camera1Path=`readlink -f ../testData/testRobotHouse/camera1/`
-camera2Path=`readlink -f ../testData/testRobotHouse/camera2/`
-camera3Path=`readlink -f ../testData/testRobotHouse/camera3/`
+camera1Path=`readlink -f ../res/testRobotHouse/camera1/`
+camera2Path=`readlink -f ../res/testRobotHouse/camera2/`
+camera3Path=`readlink -f ../res/testRobotHouse/camera3/`
 
 
 mkdir -p $camera1Path/background_images

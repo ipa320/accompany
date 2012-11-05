@@ -2,8 +2,8 @@
 
   <node pkg="rosbag" type="play" name="playBags"
    args="-l -d 1 -r 0.2
-     $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera1/retopic.bag 
-     $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera3/retopic.bag
+     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag 
+     $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
      "/>
 
 
@@ -19,23 +19,23 @@
 
    <!-- localise camera1 -->
     <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
-    args="-p $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera1 -n 2
+    args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 2 -v
           image:=/camera1/gscam/image_raw"/>
 
    
 
    <!-- localise camera3 -->
     <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3"
-    args="-p $(find accompany_static_camera_localisation)/../UvA/testData/testRobotHouse/camera3 -n 2
+    args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 2 -v
           image:=/camera3/gscam/image_raw"/>
 
 
    <!-- track humans using localisation data -->
-   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"/>
-
+   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
+         args="-t 5"/>
 
    <!-- visualize tracks -->
-   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/>
+   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/> 
 
 
 </launch>

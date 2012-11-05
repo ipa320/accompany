@@ -1,0 +1,8 @@
+<launch>
+
+  <!-- all machines, use user="username" to add username -->
+  <machine name="localhost" address="localhost" />
+  <machine name="ThinkpadX200" address="ThinkpadX200" />
+  <machine name="bterwijnDesktop" address="bterwijn-desktop" />
+  
+</launch>

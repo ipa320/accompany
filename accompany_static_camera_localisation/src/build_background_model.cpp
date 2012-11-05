@@ -33,22 +33,19 @@ int main(int argc, char **argv)
   // handling arguments
   po::options_description optionsDescription(
       "Build the eigen-background model for background subtraction\nAllowed options\n");
-  optionsDescription.add_options()("imagelist_training,i",
-      po::value<string>(&imagelist_training)->required(),
-      "the input image list for training\n")("output_background_model,o",
-      po::value<string>(&output_background_model)->required(),
-      "the output background model\n")("num_components,c",
-      po::value<int>(&num_components)->default_value(3),
-      "the number of components\n")("num_frames,f",
-      po::value<int>(&num_frames)->default_value(0),
-      "the number of components\n");
+  optionsDescription.add_options()
+    ("help,h","show help message")
+    ("imagelist_training,i",po::value<string>(&imagelist_training)->required(),"the input image list for training\n")
+    ("output_background_model,o",po::value<string>(&output_background_model)->required(),"the output background model\n")
+    ("num_components,c",po::value<int>(&num_components)->default_value(3),"the number of components\n")
+    ("num_frames,f",po::value<int>(&num_frames)->default_value(0),"the number of components\n");
 
   po::variables_map variablesMap;
 
   try
   {
-    po::store(po::parse_command_line(argc, argv, optionsDescription),
-        variablesMap);
+    po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch (const std::exception& e)

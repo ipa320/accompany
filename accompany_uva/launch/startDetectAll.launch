@@ -1,0 +1,15 @@
+<launch>
+
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="bterwijnDesktop" />
+     <arg name="image_topic" value="camera1/gscam/image_raw" />
+     <arg name="res_path" value="$(find accompany_uva)/res/testRobotHouse/camera1" />
+  </include>
+  
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="ThinkpadX200" />
+     <arg name="image_topic" value="camera1/gscam/image_raw" />
+     <arg name="res_path" value="$(find accompany_uva)/res/testRobotHouse/camera1" />
+  </include>
+
+</launch>

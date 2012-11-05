@@ -22,6 +22,7 @@ int main(int argc, char **argv)
       "Create a coordinate frame relative to a parent\n"
       "Allowed options");
   optionsDescription.add_options()
+    ("help,h","show help message")
     ("frame-name,f", value<string>(&frameName)->required(),"name of the new frame")
     ("parent,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
     ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane")
@@ -30,11 +31,10 @@ int main(int argc, char **argv)
     ("zpos,z", value<double>(&z)->default_value(0.0),"z position");
   
   variables_map variablesMap;
-
   try
   {
-    store(parse_command_line(argc, argv, optionsDescription),
-        variablesMap);
+    store(parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     notify(variablesMap);
   }
   catch (const std::exception& e)

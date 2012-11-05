@@ -81,22 +81,41 @@ int main(int argc,char **argv)
   ros::Publisher humanIdentityPub=n.advertise<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10);
   
   // init humans
-  int nrHumans=6;
-  accompany_human_tracker::HumanLocations humanLocations;
-  vector<geometry_msgs::Vector3Stamped> humanSpeeds;
-  for (int i=0;i<nrHumans;i++)
+  int nrHumans1=4;
+  accompany_human_tracker::HumanLocations humanLocations1;
+  vector<geometry_msgs::Vector3Stamped> humanSpeeds1;
+  for (int i=0;i<nrHumans1;i++)
   {
     geometry_msgs::Vector3Stamped location;
     location.header.frame_id="/overhead1";
     location.vector.x=rand(0,MAX_X);
     location.vector.y=rand(0,MAX_Y);
     location.vector.z=rand(0,MAX_Z);
-    humanLocations.locations.push_back(location);
+    humanLocations1.locations.push_back(location);
     geometry_msgs::Vector3Stamped speed;
     speed.vector.x=rand(-MAX_X,MAX_X)/100;
     speed.vector.y=rand(-MAX_Y,MAX_Y)/100;
     speed.vector.z=rand(-MAX_Z,MAX_Z)/100;
-    humanSpeeds.push_back(speed);
+    humanSpeeds1.push_back(speed);
+  }
+
+  // init humans
+  int nrHumans2=4;
+  accompany_human_tracker::HumanLocations humanLocations2;
+  vector<geometry_msgs::Vector3Stamped> humanSpeeds2;
+  for (int i=0;i<nrHumans2;i++)
+  {
+    geometry_msgs::Vector3Stamped location;
+    location.header.frame_id="/overhead2";
+    location.vector.x=rand(0,MAX_X);
+    location.vector.y=rand(0,MAX_Y);
+    location.vector.z=rand(0,MAX_Z);
+    humanLocations2.locations.push_back(location);
+    geometry_msgs::Vector3Stamped speed;
+    speed.vector.x=rand(-MAX_X,MAX_X)/100;
+    speed.vector.y=rand(-MAX_Y,MAX_Y)/100;
+    speed.vector.z=rand(-MAX_Z,MAX_Z)/100;
+    humanSpeeds2.push_back(speed);
   }
   
   // init identities
@@ -129,8 +148,11 @@ int main(int argc,char **argv)
   ros::Rate loop_rate(10);
   while (ros::ok())
   {
-    move(humanLocations,humanSpeeds);
-    humanLocationPub.publish(humanLocations);
+    move(humanLocations1,humanSpeeds1);
+    humanLocationPub.publish(humanLocations1);
+
+    move(humanLocations2,humanSpeeds2);
+    humanLocationPub.publish(humanLocations2);
 
     move(detectionArray,identitySpeeds);
     cob_people_detection_msgs::DetectionArray sendDetectionArray;

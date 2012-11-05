@@ -1,0 +1,13 @@
+<launch>
+
+  <include file="$(find accompany_uva)/launch/recordBackground.launch">
+     <arg name="machine" value="bterwijnDesktop" />
+     <arg name="image_topic" default="camera1/gscam/image_raw" />
+  </include>
+  
+  <include file="$(find accompany_uva)/launch/recordBackground.launch">
+     <arg name="machine" value="ThinkpadX200" />
+     <arg name="image_topic" default="camera1/gscam/image_raw" />
+  </include>
+
+</launch>

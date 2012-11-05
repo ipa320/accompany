@@ -22,13 +22,14 @@ int main(int argc, char **argv)
 					     "Available remappings:\n"
 					     "  image:=<image-topic>\n\n");
   optionsDescription.add_options()
+    ("help,h", "produce help message")
     ("scale,s",po::value<double>(&scale)->required(), "resize scale\n")
     ("input_video,i",po::value<string>(&input_video)->required(), "input video\n");
+  po::variables_map variablesMap;
   try
   {
-    po::variables_map variablesMap;
-    po::store(po::parse_command_line(argc, argv, optionsDescription),
-        variablesMap);
+    po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch (const std::exception& e)

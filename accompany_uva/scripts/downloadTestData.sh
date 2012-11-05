@@ -1,7 +1,7 @@
 
 cd ../
-mkdir -p testData
-cd testData
+mkdir -p res
+cd res
 mkdir -p testUvA
 cd testUvA
 wget -nc http://basterwijn.nl/ninghang/test_res/wcam_20120112_vid4.avi

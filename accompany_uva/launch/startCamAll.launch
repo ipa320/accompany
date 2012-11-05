@@ -1,0 +1,11 @@
+<launch>
+
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="bterwijnDesktop" />
+  </include>
+  
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="ThinkpadX200" />
+  </include>
+
+</launch>

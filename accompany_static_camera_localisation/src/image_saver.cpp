@@ -64,6 +64,7 @@ int main(int argc, char** argv)
   try
   {
     po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {cout<<optionsDescription<<endl; return 0;}
     po::notify(variablesMap);
   }
   catch (const exception& e)
