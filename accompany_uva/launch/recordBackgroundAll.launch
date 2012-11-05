@@ -14,12 +14,14 @@
   <!-- machines in robot house in Cornwall -->
   <include file="$(find accompany_uva)/launch/recordBackground.launch">
      <arg name="machine" value="omni_cam1_pc" />
-     <arg name="image_topic" default="cam1/image_raw" />
+     <arg name="image_topic" value="cam1/image_raw" />
+     <arg name="res_path" value="/home/camera1/ros/accompany/accompany_static_camera_localisation/res" />
   </include>
 
   <include file="$(find accompany_uva)/launch/recordBackground.launch">
      <arg name="machine" value="omni_cam2_pc" />
-     <arg name="image_topic" default="cam2/image_raw" />
+     <arg name="image_topic" value="cam2/image_raw" />
+     <arg name="res_path" value="/home/camera3/ros/accompany/accompany_static_camera_localisation/res" />
   </include>
 
 
