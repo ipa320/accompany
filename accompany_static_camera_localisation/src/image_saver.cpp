@@ -89,7 +89,7 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "image_saver", ros::init_options::AnonymousName);
   ros::NodeHandle nh;
   string resolved_image=nh.resolveName("image");
-  cout<<"subscribe to image topic: "<<resolved_image<<endl;
+  cout<<"subscribe to image topic: '"<<resolved_image<<"'"<<endl;
 
   g_format.parse("%04i.%s");
   image_transport::ImageTransport it(nh);  
