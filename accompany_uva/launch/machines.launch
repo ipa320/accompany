@@ -5,8 +5,8 @@
   <machine name="ThinkpadX200" address="ThinkpadX200" />
   <machine name="bterwijnDesktop" address="bterwijn-desktop" />
 
-  <machine user="camera1" name="omni-cam1-pc" address="omni-cam1-pc" />
-  <machine user="camera3" name="omni-cam2-pc" address="omni-cam2-pc" />  
+  <machine user="camera1" name="omni_cam1_pc" address="omni-cam1-pc" />
+  <machine user="camera3" name="omni_cam2_pc" address="omni-cam2-pc" />  
   <machine user="camera2" name="kinect-pc" address="kinect-pc" />
 
 </launch>
