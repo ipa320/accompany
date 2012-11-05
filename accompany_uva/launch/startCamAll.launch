@@ -1,11 +1,28 @@
 <launch>
 
-  <include file="$(find accompany_uva)/launch/startCam.launch">
+  <!-- machines in Amsterdam
+  <include file="$(find accompany_uva)/launch/startPlayVideo.launch">
      <arg name="machine" value="bterwijnDesktop" />
   </include>
   
-  <include file="$(find accompany_uva)/launch/startCam.launch">
+  <include file="$(find accompany_uva)/launch/startPlayVideo.launch">
      <arg name="machine" value="ThinkpadX200" />
   </include>
+  -->
+
+  <!-- machines in robot house in Cornwall -->
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="omni-cam1-pc" />
+  </include>
+
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="omni-cam2-pc" />
+  </include>
+
+  <!--
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="omni-cam2-pc" />
+  </include>
+  -->	
 
 </launch>

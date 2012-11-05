@@ -4,13 +4,9 @@
   <arg name="machine" default="localhost" />
   <include file="$(find accompany_uva)/launch/machines.launch"/>
 
-  <!-- play rosbag -->
-  <node machine="$(arg machine)" pkg="rosbag" type="play" name="$(anon rosplay)"
-        args="-l -d 2 
-              $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag"/>
+  <!-- start gstreamer based ros module gscam -->
+  <node pkg="gscam" type="gscam" name="gscam" args="-s 0">
+    <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace" />
+  </node>
 
-  <!-- decode and view camera1 -->
-  <node machine="$(arg machine)" pkg="image_transport" type="republish" name="$(anon republish)"
-   args="theora in:=camera1/gscam/image_raw _image_transport:=theora raw out:=camera1/gscam/image_raw"/>
-  
 </launch>
