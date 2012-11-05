@@ -4,9 +4,12 @@
   <arg name="machine" default="localhost" />
   <include file="$(find accompany_uva)/launch/machines.launch"/>
 
+  <arg name="gscam_config"/>
+
+
   <!-- start gstreamer based ros module gscam -->
   <node pkg="gscam" type="gscam" name="gscam" args="-s 0">
-    <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace" />
+    <env name="GSCAM_CONFIG" value="$(arg gscam_config)" />
   </node>
 
 </launch>
