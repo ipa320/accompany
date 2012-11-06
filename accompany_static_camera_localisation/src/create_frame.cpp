@@ -72,8 +72,14 @@ int main(int argc, char **argv)
 
   // load frame and print
   cout<<"read from file '"<<filename<<"' and print, just a test:"<<endl;
-  geometry_msgs::TransformStamped transformStamped2;
-  load_msg(transformStamped2,filename);
-  cout<<transformStamped2;
-  
+  geometry_msgs::TransformStamped transformStamped;
+  load_msg(transformStamped,filename);
+  cout<<transformStamped;
+ 
+  geometry_msgs::Quaternion rot=transformStamped.transform.rotation;
+  btMatrix3x3 mat(btQuaternion(rot.x,rot.y,rot.z,rot.w));
+  cout<<"conversion to 3x3 rotation matrix:"<<endl;
+  for (int i=0;i<3;i++)    
+    cout<<"|"<<setw(12)<<mat[i].x()<<" "<<setw(12)<<mat[i].y()<<" "<<setw(12)<<mat[i].z()<<"|"<<endl;
+ 
 }
