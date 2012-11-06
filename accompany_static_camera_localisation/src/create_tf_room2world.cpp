@@ -7,6 +7,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <tf/transform_datatypes.h>
 #include <accompany_uva_utils/uva_utils.h>
+#include <math.h>
 
 namespace po = boost::program_options;
 using namespace std;
@@ -49,6 +50,25 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
       locations.push_back(p);
       showScaledImg();
   }
+}
+
+Mat correct_2x2rot_mtx(const Mat& rot_mtx)
+{
+
+  double meanx = (rot_mtx.at<double>(0,0) + rot_mtx.at<double>(0,1)) / 2;
+  double meany = (rot_mtx.at<double>(1,0) + rot_mtx.at<double>(1,1)) / 2;
+  double angle = atan2(meany,meanx);
+
+  double angle_x = angle - CV_PI/4;
+  double angle_y = angle + CV_PI/4;
+
+  Mat m = rot_mtx.clone();
+
+  m.at<double>(0,0) = cos(angle_x);
+  m.at<double>(0,1) = cos(angle_y);
+  m.at<double>(1,0) = sin(angle_x);
+  m.at<double>(1,1) = sin(angle_y);
+  return m;
 }
 
 void printUsage()
@@ -198,12 +218,15 @@ int main(int argc, char **argv)
   cout << "translation" << translation_matrix << endl;
   cout << "new_translation" << new_transation_matrix << endl;
   
+  Mat rot_corrected = correct_2x2rot_mtx(rotation_matrix); 
+  cout << "rotation corrected: " << rot_corrected << endl;
+  
   string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
-        btMatrix3x3(rotation_matrix.at<double>(0,0),rotation_matrix.at<double>(0,1),0,// rotation matrix
-                  rotation_matrix.at<double>(1,0),rotation_matrix.at<double>(1,1),0,
+        btMatrix3x3(rot_corrected.at<double>(0,0),rot_corrected.at<double>(0,1),0,// rotation matrix
+                  rot_corrected.at<double>(1,0),rot_corrected.at<double>(1,1),0,
                   0,0,1), 
         btVector3(translation_matrix.at<double>(0,0),translation_matrix.at<double>(1,0),0));// translation vector
 
