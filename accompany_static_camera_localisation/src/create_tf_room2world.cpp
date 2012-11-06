@@ -172,25 +172,42 @@ int main(int argc, char **argv)
 //  cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
 //  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
 //  dst_points.at<float>(2, 1) = dst_points.at<float>(1, 0);
-  cout << "dst_points are: " << dst_points << endl;
+
+//  src_points.at<float>(0,0) = 3;
+//  src_points.at<float>(0,1) = 4;
+//  src_points.at<float>(1,0) = 3;
+//  src_points.at<float>(1,1) = 2;
+//  src_points.at<float>(2,0) = 2;
+//  src_points.at<float>(2,1) = 3;
+  
   cout << "-------------------------------------" << endl;
 
   Mat tform( 2, 3, CV_32FC1 );;
-  tform = getAffineTransform(src_points, dst_points);
+  tform = getAffineTransform(src_points,dst_points);
   cout << "src_points: " << endl << src_points << endl;
   cout << "dst_points: " << endl << dst_points << endl;
   cout << "transform matrix: " << endl << tform << endl;
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
+  Mat rotation_matrix = tform.colRange(Range(0,2));
+  Mat translation_matrix = tform.col(2);
+  Mat new_transation_matrix = (-1) * rotation_matrix.inv() * translation_matrix;
+
+  cout << "rot" << rotation_matrix << endl;
+  cout << "translation" << translation_matrix << endl;
+  cout << "new_translation" << new_transation_matrix << endl;
+  
   string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
-        btMatrix3x3(tform.at<double>(0,0),tform.at<double>(0,1),0,// rotation matrix
-                  tform.at<double>(1,0),tform.at<double>(1,1),0,
+        btMatrix3x3(rotation_matrix.at<double>(0,0),rotation_matrix.at<double>(0,1),0,// rotation matrix
+                  rotation_matrix.at<double>(1,0),rotation_matrix.at<double>(1,1),0,
                   0,0,1), 
-        btVector3(tform.at<double>(0,2),tform.at<double>(1,2),0));// translation vector
+        btVector3(translation_matrix.at<double>(0,0),translation_matrix.at<double>(1,0),0));// translation vector
+
+  
 
 #if ROS_VERSION_MINIMUM(1,8,0)
   tf::Matrix3x3 ma= transform.getBasis();      
