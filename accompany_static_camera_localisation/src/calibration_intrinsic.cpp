@@ -157,6 +157,10 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 //			|CV_CALIB_FIX_K3
 //			|CV_CALIB_FIX_K4
 //			|CV_CALIB_FIX_K5
+|CV_CALIB_FIX_PRINCIPAL_POINT
+|CV_CALIB_FIX_ASPECT_RATIO
+|CV_CALIB_RATIONAL_MODEL
+|CV_CALIB_ZERO_TANGENT_DIST
                         );
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
