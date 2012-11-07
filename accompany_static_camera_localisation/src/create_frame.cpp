@@ -14,22 +14,26 @@ int main(int argc, char **argv)
 {
   string parent;
   string frameName;
+  string filename;
   double a;
   double x,y,z;
 
   // handling arguments
   options_description optionsDescription(
-      "Create a coordinate frame relative to a parent\n"
+      "Create a coordinate frame relative to a parent and save it to disk\n"
       "Allowed options");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("frame-name,f", value<string>(&frameName)->required(),"name of the new frame")
-    ("parent,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
+    ("filename,f", value<string>(&filename)->default_value("frame.dat"),"filename of the coordiante name file")
+    ("frame-name,n", value<string>(&frameName)->default_value("/child_frame"),"name of the new frame")
+    ("parent-name,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
     ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane")
     ("xpos,x", value<double>(&x)->default_value(0.0),"x position")
     ("ypos,y", value<double>(&y)->default_value(0.0),"y position")
-    ("zpos,z", value<double>(&z)->default_value(0.0),"z position");
-  
+    ("zpos,z", value<double>(&z)->default_value(0.0),"z position")
+    ("view-only,v","don't create a new coordinate frame, only print current file to screen")
+    ("rename,r","rename the child and parent of existing frame when new names are given, implies '-v'");
+
   variables_map variablesMap;
   try
   {
@@ -48,26 +52,58 @@ int main(int argc, char **argv)
 
 
   ros::init(argc, argv, "create_frame");
-  
-  string filename="frame.dat";
-  cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
-  geometry_msgs::TransformStamped transformStamped;
 
-  tf::Transform transform=tf::Transform(btMatrix3x3( cos(a),sin(a),0, // rotation matrix
-                                                    -sin(a),cos(a),0,
-                                                    0,0,1),  
-                                        btVector3(x,y,z)); // translation vector
-  tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
-                                                             ros::Time(0),  // time, not used here
-                                                             parent,        // parent coordinate frame
-                                                             frameName); // child coordinate frame
-  tf::transformStampedTFToMsg(stampedTransform,transformStamped);
-  save_msg(transformStamped,filename); // write to file
- 
+  if ((!variablesMap.count("view-only")) && (!variablesMap.count("rename")) )
+  {
+    // create frame
+    cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
+    geometry_msgs::TransformStamped transformStamped;
 
+    tf::Transform transform=tf::Transform(btMatrix3x3( cos(a),sin(a),0, // rotation matrix
+                                                       -sin(a),cos(a),0,
+                                                       0,0,1),  
+                                          btVector3(x,y,z)); // translation vector
+    tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
+                                                               ros::Time(0),  // time, not used here
+                                                               parent,        // parent coordinate frame
+                                                               frameName); // child coordinate frame
+    tf::transformStampedTFToMsg(stampedTransform,transformStamped);
+    save_msg(transformStamped,filename); // write to file
+  }
+  if (variablesMap.count("rename"))
+  {
+    // load and rename frames
+    cout<<"load and rename frame names"<<endl;
+    geometry_msgs::TransformStamped transformStamped;
+    load_msg(transformStamped,filename);
+    bool rename=false;
+    if (variablesMap.count("frame-name"))
+    {
+      cout<<"renaming frame-name: '"<<frameName<<"'"<<endl;
+      transformStamped.child_frame_id=frameName;
+      rename=true;
+    }
+    if (variablesMap.count("parent-name"))
+    {
+      cout<<"renaming parent-name: '"<<parent<<"'"<<endl;
+      transformStamped.header.frame_id=parent;
+      rename=true;
+    }
+    if (rename)
+      save_msg(transformStamped,filename); // write to file
+  }
+
+  // load frame and print
   cout<<"read from file '"<<filename<<"' and print, just a test:"<<endl;
-  geometry_msgs::TransformStamped transformStamped2;
-  load_msg(transformStamped2,filename);
-  cout<<transformStamped2;
-  
+  geometry_msgs::TransformStamped transformStamped;
+  load_msg(transformStamped,filename);
+  cout<<transformStamped;
+ 
+  geometry_msgs::Quaternion rot=transformStamped.transform.rotation;
+  btMatrix3x3 mat(btQuaternion(rot.x,rot.y,rot.z,rot.w));
+  cout<<"conversion to 3x3 rotation matrix:"<<endl;
+  for (int i=0;i<3;i++)    
+    cout<<"|"<<setw(12)<<mat[i].x()<<" "<<setw(12)<<mat[i].y()<<" "<<setw(12)<<mat[i].z()<<"|"<<endl;
+ 
+ 
 }

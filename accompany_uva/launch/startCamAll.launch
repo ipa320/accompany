@@ -1,11 +1,35 @@
 <launch>
 
-  <include file="$(find accompany_uva)/launch/startCam.launch">
+  <!-- machines in Amsterdam
+  <include file="$(find accompany_uva)/launch/startPlayVideo.launch">
      <arg name="machine" value="bterwijnDesktop" />
   </include>
   
-  <include file="$(find accompany_uva)/launch/startCam.launch">
+  <include file="$(find accompany_uva)/launch/startPlayVideo.launch">
      <arg name="machine" value="ThinkpadX200" />
   </include>
+  -->
+
+  <!-- machines in robot house in Cornwall -->
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="omni_cam1_pc" />
+     <arg name="topic_name" value="cam1" />
+     <arg name="gscam_config" value="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace" />
+  </include>
+
+  <!-- -->
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="omni_cam2_pc" />
+     <arg name="topic_name" value="cam2" />
+     <arg name="gscam_config" value="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace" />
+  </include>
+  
+
+  <!-- kinect
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="" />
+     <arg name="gscam_config" value="">
+  </include>
+  -->	
 
 </launch>

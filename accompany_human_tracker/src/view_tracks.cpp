@@ -107,12 +107,13 @@ public:
     return l*viewports[currentViewport].scale;
   }
 
-  CvPoint scaledCvPoint(float x,float y)
+  CvPoint scaledCvPoint(float x,float y,int update=0)
   {
     float sx=imgWidth/2+(x-viewports[currentViewport].midX)*viewports[currentViewport].scale;
     float sy=imgHeight/2+(viewports[currentViewport].midY-y)*viewports[currentViewport].scale;
     CvPoint point=cvPoint(sx,sy);
-    viewports[(currentViewport+1)%2].updateMinMax(x,y);
+    if (update)
+      viewports[(currentViewport+1)%2].updateMinMax(x,y);
     return point;
   }
 
@@ -220,10 +221,10 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
     cvCopy( mapImage, img, NULL );
   }
 
-  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMin), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMax), viewports.scaledLength(0.2), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMin), viewports.scaledLength(0.3), cvScalar(255,0,0), 1);
-  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMax), viewports.scaledLength(0.4), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMin,1), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMin,viewMax,1), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMin,1), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
+  cvCircle(img, viewports.scaledCvPoint(viewMax,viewMax,1), viewports.scaledLength(0.1), cvScalar(255,0,0), 1);
   
   
   drawTrackedHumans(trackedHumans); // draw tracked humans

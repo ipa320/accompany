@@ -36,7 +36,7 @@ Commands:
 
 -Build background model from recorded images on all hosts:
 
-  roslaunch accompany_uva buildBackgroundModel.launch 
+  roslaunch accompany_uva buildBackgroundModelAll.launch 
 
 
 -Start detection of humans on all hosts:

@@ -19,7 +19,7 @@ extern "C"{
 #include <sys/shm.h>
 
 //forward declarations
-static gboolean processData(GstPad *pad, GstBuffer *buffer, gpointer u_data);
+//static gboolean processData(GstPad *pad, GstBuffer *buffer, gpointer u_data);
 bool setCameraInfo(sensor_msgs::SetCameraInfo::Request &req, sensor_msgs::SetCameraInfo::Response &rsp);
 
 //globals
@@ -33,6 +33,11 @@ int main(int argc, char** argv) {
 		std::cout << "Problem getting GSCAM_CONFIG variable." << std::endl;
 		exit(-1);
 	}
+
+        ros::init(argc, argv, "gscam_publisher");
+	ros::NodeHandle nh;
+        std::string resolved_gscam=nh.resolveName("gscam");// allows users to rename topics
+	std::cout<<"publishing to topic name: '"<<resolved_gscam<<"'"<<std::endl;
 
 	gst_init(0,0);
 	std::cout << "Gstreamer Version: " << gst_version_string() << std::endl;
@@ -121,9 +126,7 @@ int main(int argc, char** argv) {
 	  ROS_ERROR("No camera_parameters.txt file found.  Use default file if no other is available.");
 	}
 
-	ros::init(argc, argv, "gscam_publisher");
-	ros::NodeHandle nh;
-
+	
 	int preroll;
 	nh.param("brown/gscam/preroll", preroll, 0);
 	if (preroll) {
@@ -149,9 +152,12 @@ int main(int argc, char** argv) {
 	}
 
 	image_transport::ImageTransport it(nh);
-	image_transport::CameraPublisher pub = it.advertiseCamera("gscam/image_raw", 1);
+	
 
-	ros::ServiceServer set_camera_info = nh.advertiseService("gscam/set_camera_info", setCameraInfo);
+	
+	
+	image_transport::CameraPublisher pub = it.advertiseCamera(resolved_gscam+"/image_raw", 1);
+	ros::ServiceServer set_camera_info = nh.advertiseService(resolved_gscam+"/set_camera_info", setCameraInfo);
 
 	std::cout << "Processing..." << std::endl;
 
