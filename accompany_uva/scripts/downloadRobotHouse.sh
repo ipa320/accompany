@@ -5,6 +5,9 @@ cd res
 mkdir -p testRobotHouse
 cd testRobotHouse
 
+wget -nc http://basterwijn.nl/bterwijn/Accompany/RobotHouse/map.pgm
+wget -nc http://basterwijn.nl/bterwijn/Accompany/RobotHouse/map.yaml
+
 mkdir -p camera1
 cd camera1
 wget -nc http://basterwijn.nl/bterwijn/Accompany/RobotHouse/camera1/2012-09-25-11-59-11.bag
