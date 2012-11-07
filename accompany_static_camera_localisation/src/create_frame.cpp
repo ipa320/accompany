@@ -25,14 +25,15 @@ int main(int argc, char **argv)
   optionsDescription.add_options()
     ("help,h","show help message")
     ("filename,f", value<string>(&filename)->default_value("frame.dat"),"filename of the coordiante name file")
-    ("frame-name,n", value<string>(&frameName)->default_value("child_frame"),"name of the new frame")
-    ("parent,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
+    ("frame-name,n", value<string>(&frameName)->default_value("/child_frame"),"name of the new frame")
+    ("parent-name,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
     ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane")
     ("xpos,x", value<double>(&x)->default_value(0.0),"x position")
     ("ypos,y", value<double>(&y)->default_value(0.0),"y position")
     ("zpos,z", value<double>(&z)->default_value(0.0),"z position")
-    ("view-only,v","don't create a new coordinate frame, only print current file to screen");
-  
+    ("view-only,v","don't create a new coordinate frame, only print current file to screen")
+    ("rename,r","rename the child and parent of existing frame when new names are given, implies '-v'");
+
   variables_map variablesMap;
   try
   {
@@ -52,7 +53,7 @@ int main(int argc, char **argv)
 
   ros::init(argc, argv, "create_frame");
 
-  if (variablesMap.count("view-only")==0)
+  if ((!variablesMap.count("view-only")) && (!variablesMap.count("rename")) )
   {
     // create frame
     cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
@@ -69,6 +70,28 @@ int main(int argc, char **argv)
     tf::transformStampedTFToMsg(stampedTransform,transformStamped);
     save_msg(transformStamped,filename); // write to file
   }
+  if (variablesMap.count("rename"))
+  {
+    // load and rename frames
+    cout<<"load and rename frame names"<<endl;
+    geometry_msgs::TransformStamped transformStamped;
+    load_msg(transformStamped,filename);
+    bool rename=false;
+    if (variablesMap.count("frame-name"))
+    {
+      cout<<"renaming frame-name: '"<<frameName<<"'"<<endl;
+      transformStamped.child_frame_id=frameName;
+      rename=true;
+    }
+    if (variablesMap.count("parent-name"))
+    {
+      cout<<"renaming parent-name: '"<<parent<<"'"<<endl;
+      transformStamped.header.frame_id=parent;
+      rename=true;
+    }
+    if (rename)
+      save_msg(transformStamped,filename); // write to file
+  }
 
   // load frame and print
   cout<<"read from file '"<<filename<<"' and print, just a test:"<<endl;
@@ -81,5 +104,6 @@ int main(int argc, char **argv)
   cout<<"conversion to 3x3 rotation matrix:"<<endl;
   for (int i=0;i<3;i++)    
     cout<<"|"<<setw(12)<<mat[i].x()<<" "<<setw(12)<<mat[i].y()<<" "<<setw(12)<<mat[i].z()<<"|"<<endl;
+ 
  
 }
