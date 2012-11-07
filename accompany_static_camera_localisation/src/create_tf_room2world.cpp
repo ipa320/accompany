@@ -92,7 +92,8 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
     ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n")
-    ("name,o",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
+    ("file_name,f",po::value<string>(&name)->default_value("frame.dat"), "name of the tf file\n")
+    ("frame_name,n",po::value<string>(&name)->default_value("child_frame"), "name of the frame in tf messages\n");
 
   po::variables_map variablesMap;
 
@@ -212,11 +213,11 @@ int main(int argc, char **argv)
 
   Mat rotation_matrix = tform.colRange(Range(0,2));
   Mat translation_matrix = tform.col(2);
-  Mat new_transation_matrix = (-1) * rotation_matrix.inv() * translation_matrix;
+  Mat new_translation_matrix = (-1) * rotation_matrix.inv() * translation_matrix;
 
   cout << "rot" << rotation_matrix << endl;
   cout << "translation" << translation_matrix << endl;
-  cout << "new_translation" << new_transation_matrix << endl;
+  cout << "new_translation" << new_translation_matrix << endl;
   
   Mat rot_corrected = correct_2x2rot_mtx(rotation_matrix); 
   cout << "rotation corrected: " << rot_corrected << endl;
@@ -228,7 +229,7 @@ int main(int argc, char **argv)
         btMatrix3x3(rot_corrected.at<double>(0,0),rot_corrected.at<double>(0,1),0,// rotation matrix
                   rot_corrected.at<double>(1,0),rot_corrected.at<double>(1,1),0,
                   0,0,1), 
-        btVector3(translation_matrix.at<double>(0,0),translation_matrix.at<double>(1,0),0));// translation vector
+        btVector3(new_translation_matrix.at<double>(0,0),new_translation_matrix.at<double>(1,0),0));// translation vector
 
   
 
