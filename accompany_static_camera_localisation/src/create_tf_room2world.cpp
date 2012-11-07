@@ -219,7 +219,7 @@ int main(int argc, char **argv)
   cout << "translation" << translation_matrix << endl;
   cout << "new_translation" << new_translation_matrix << endl;
   
-  Mat rot_corrected = correct_2x2rot_mtx(rotation_matrix); 
+  Mat rot_corrected = correct_2x2rot_mtx(rotation_matrix.inv()); 
   cout << "rotation corrected: " << rot_corrected << endl;
   
   string filename="frame.dat";
