@@ -148,22 +148,17 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -o ../camera_intrinsic.xml -su calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -a -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml // TODO check parameters
 
 Test:
 
   roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun accompany_static_camera_localisation undistortion ../camera_intrinsic.xml [image name]
+  rosrun accompany_static_camera_localisation undistortion_test -s [image] -i [camera_intrinsic] -f
 
 ----------------------------------------
 
 
-#-- [DEPRECATED_LOW ACCURACY]KINECT Intrinsic Calibration (using ROS) --#
-
-Run calibration:
-
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_calibration.sh
+#-- [DEPRECATED_LOW_ACCURACY] Intrinsic Calibration (using ROS) --#
 
 More information refers to refer to:
 
