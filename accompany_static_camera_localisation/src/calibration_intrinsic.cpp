@@ -35,9 +35,6 @@ const char * usage =
 		"</images>\n"
 		"</opencv_storage>\n";
 
-
-
-
 const char* liveCaptureHelp =
 		"When the live video from camera is used as input, the following hot-keys may be used:\n"
 		"  <ESC>, 'q' - quit the program\n"
@@ -56,12 +53,13 @@ void help()
 			"                              #  of board views actually available)\n"
 			"     [-d <delay>]             # a minimum delay in ms between subsequent attempts to capture a next view\n"
 			"                              # (used only for video capturing)\n"
-			"     [-s <squareSize>]       # square size in some user-defined units (1 by default)\n"
+			"     [-s <squareSize>]        # square size in some user-defined units (1 by default)\n"
 			"     [-o <out_camera_params>] # the output filename for intrinsic [and extrinsic] parameters\n"
 			"     [-op]                    # write detected feature points\n"
 			"     [-oe]                    # write extrinsic parameters\n"
 			"     [-zt]                    # assume zero tangential distortion\n"
-			"     [-a <aspectRatio>]      # fix aspect ratio (fx/fy)\n"
+			"     [-a <aspectRatio>]       # fix aspect ratio (fx/fy)\n"
+			"     [-rm]                    # use rational model (K4 K5 K6)\n"
 			"     [-p]                     # fix the principal point at the center\n"
 			"     [-v]                     # flip the captured images around the horizontal axis\n"
 			"     [-V]                     # use a video file, and not an image list, uses\n"
@@ -153,15 +151,7 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	
 	cout << "= start calibration =" << endl;
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-			distCoeffs, rvecs, tvecs, flags
-//			|CV_CALIB_FIX_K3
-//			|CV_CALIB_FIX_K4
-//			|CV_CALIB_FIX_K5
-|CV_CALIB_FIX_PRINCIPAL_POINT
-|CV_CALIB_FIX_ASPECT_RATIO
-|CV_CALIB_RATIONAL_MODEL
-|CV_CALIB_ZERO_TANGENT_DIST
-                        );
+			distCoeffs, rvecs, tvecs, flags);
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
 	bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
@@ -381,12 +371,29 @@ int main( int argc, char** argv )
 			if( sscanf( argv[++i], "%u", &nframes ) != 1 || nframes <= 3 )
 				return printf("Invalid number of images\n" ), -1;
 		}
+		
+		/* start of calibration parameters */
 		else if( strcmp( s, "-a" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%f", &aspectRatio ) != 1 || aspectRatio <= 0 )
 				return printf("Invalid aspect ratio\n" ), -1;
-			flags |= CV_CALIB_FIX_ASPECT_RATIO;
+			flags |= CV_CALIB_FIX_ASPECT_RATIO; //
 		}
+		else if( strcmp( s, "-zt" ) == 0 )
+		{
+			flags |= CV_CALIB_ZERO_TANGENT_DIST; //
+		}
+		else if( strcmp( s, "-p" ) == 0 )
+		{
+			flags |= CV_CALIB_FIX_PRINCIPAL_POINT; //
+		}
+	  else if( strcmp( s, "-rm" ) == 0 )
+	  {
+	    flags |= CV_CALIB_RATIONAL_MODEL;
+	  }
+		/* end of calibration parameters */
+		
+		
 		else if( strcmp( s, "-d" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%u", &delay ) != 1 || delay <= 0 )
@@ -399,14 +406,6 @@ int main( int argc, char** argv )
 		else if( strcmp( s, "-oe" ) == 0 )
 		{
 			writeExtrinsics = true;
-		}
-		else if( strcmp( s, "-zt" ) == 0 )
-		{
-			flags |= CV_CALIB_ZERO_TANGENT_DIST;
-		}
-		else if( strcmp( s, "-p" ) == 0 )
-		{
-			flags |= CV_CALIB_FIX_PRINCIPAL_POINT;
 		}
 		else if( strcmp( s, "-v" ) == 0 )
 		{
@@ -507,7 +506,10 @@ int main( int argc, char** argv )
               found = false;
                 
 		found = findChessboardCorners( view, boardSize, pointbuf,
-					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+					CV_CALIB_CB_ADAPTIVE_THRESH | 
+//					CV_CALIB_CB_FAST_CHECK | 
+					CV_CALIB_CB_NORMALIZE_IMAGE
+					);
 			break;
 		}
 		case CIRCLES_GRID:
@@ -606,7 +608,7 @@ int main( int argc, char** argv )
 			if(!view.data)
 				continue;
 //		    remap(view, rview, map1, map2, INTER_LINEAR);
-		    imshow("original image", view);
+		  imshow("original image", view);
 			undistort( view, rview, cameraMatrix, distCoeffs);
 			imshow("undistorted image", rview);
 			waitKey(0);
