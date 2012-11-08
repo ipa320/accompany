@@ -54,13 +54,13 @@ rosmake cob_perception_common
 # cob_people_perception
 cd ~/ros
 git clone https://github.com/ipa320/cob_people_perception.git
-# add these lines to cob_people_detection/CMakeLists.txt:
+# add these lines to cob_people_perception/CMakeLists.txt:
 # target_link_libraries(face_recognizer_node boost_filesystem boost_system)
 # target_link_libraries(detection_tracker_node boost_signals)
 # target_link_libraries(people_detection_display_node boost_signals)
 # target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
 rosdep install cob_people_perception
-rosmake cob_people_detection
+rosmake cob_people_perception
 
 # UvA localization
 rosdep install accompany_static_camera_localisation

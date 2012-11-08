@@ -450,8 +450,8 @@ int main( int argc, char** argv )
 			mode = CAPTURING;
 		else
 		{
-		    cout << "ERROR: " << "image list not found" << endl;
-		    exit(1);
+		    cout << inputFilename << " not found" << endl;
+		    return -1;
 		}	
 	}
 	else
@@ -487,6 +487,11 @@ int main( int argc, char** argv )
 
 		if(!view.data)
 		{
+      if (i == 0)
+      {
+        cout << imageList[i] << " not found, check the image list " << inputFilename << " again" << endl;
+        return -1;
+      }
 			if( imagePoints.size() > 0 )
 			{
 				runAndSave(outputFilename, imagePoints, imageSize,
