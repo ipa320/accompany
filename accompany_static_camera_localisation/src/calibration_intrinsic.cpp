@@ -1,3 +1,4 @@
+
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -60,6 +61,7 @@ void help()
 			"     [-oe]                    # write extrinsic parameters\n"
 			"     [-zt]                    # assume zero tangential distortion\n"
 			"     [-a <aspectRatio>]       # fix aspect ratio (fx/fy)\n"
+			"     [-q]                     # quiet model, no display\n"
 			"     [-rm]                    # use rational model (K4 K5 K6)\n"
 			"     [-p]                     # fix the principal point at the center\n"
 			"     [-v]                     # flip the captured images around the horizontal axis\n"
@@ -316,6 +318,7 @@ int main( int argc, char** argv )
 	const char* inputFilename = 0;
 	const char*	maskFilename = 0;
 	bool HAS_MASK = false;
+	bool QUIET_MODE = false;
 	Mat image_mask;
 
 	int i, nframes = 10;
@@ -407,6 +410,10 @@ int main( int argc, char** argv )
 		{
 			writePoints = true;
 		}
+		else if( strcmp( s, "-q" ) == 0 )
+		{
+			QUIET_MODE = true;
+		}
 		else if( strcmp( s, "-oe" ) == 0 )
 		{
 			writeExtrinsics = true;
@@ -466,7 +473,9 @@ int main( int argc, char** argv )
 	if( capture.isOpened() )
 		printf( "%s", liveCaptureHelp );
 
-	namedWindow( "original image", CV_WINDOW_NORMAL );
+  if (!QUIET_MODE)
+	  namedWindow( "original image", CV_WINDOW_NORMAL );
+	  
 	for(i = 0;;i++)
 	{
 		Mat view, viewGray;
@@ -582,7 +591,8 @@ int main( int argc, char** argv )
 			undistort(temp, view, cameraMatrix, distCoeffs);
 		}
 
-		imshow("original image", view);
+    if (!QUIET_MODE)
+		  imshow("original image", view);
 //		waitKey(0);
 		
 		int key = 0xff & waitKey(capture.isOpened() ? 50 : 500);
@@ -612,7 +622,8 @@ int main( int argc, char** argv )
 				break;
 		}
 	}
-    
+   
+  if (!QUIET_MODE) 
     namedWindow( "undistorted image", CV_WINDOW_NORMAL );
 
 	if( !capture.isOpened() && showUndistorted )
@@ -627,9 +638,12 @@ int main( int argc, char** argv )
 			if(!view.data)
 				continue;
 //		    remap(view, rview, map1, map2, INTER_LINEAR);
-		  imshow("original image", view);
 			undistort( view, rview, cameraMatrix, distCoeffs);
-			imshow("undistorted image", rview);
+		  if (!QUIET_MODE)
+			{
+  		  imshow("original image", view);
+			  imshow("undistorted image", rview);
+			}
 			waitKey(0);
 		}
 	}
