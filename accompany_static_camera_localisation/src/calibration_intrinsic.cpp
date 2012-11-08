@@ -61,6 +61,7 @@ void help()
 			"     [-oe]                    # write extrinsic parameters\n"
 			"     [-zt]                    # assume zero tangential distortion\n"
 			"     [-a <aspectRatio>]       # fix aspect ratio (fx/fy)\n"
+			"     [-k <fixed polynomial>]  # fixed polynomial order (K4 K5 K6 fixed)\n"
 			"     [-q]                     # quiet model, no display\n"
 			"     [-rm]                    # use rational model (K4 K5 K6)\n"
 			"     [-p]                     # fix the principal point at the center\n"
@@ -296,7 +297,7 @@ bool runAndSave(const string& outputFilename,
 int main( int argc, char** argv )
 {
 
-    // csv reader
+////// csv reader
 //    CvMLData csvData1, csvData2;
 //    if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
 //    {
@@ -401,6 +402,21 @@ int main( int argc, char** argv )
 	  else if( strcmp( s, "-rm" ) == 0 )
 	  {
 	    flags |= CV_CALIB_RATIONAL_MODEL;
+	  }
+	  else if( strcmp( s, "-k" ) == 0 )
+	  {
+	    int K;
+			if( sscanf( argv[++i], "%u", &K ) < 4 || K > 6 )
+			{
+				return printf("Invalid K\n" ), -1;
+		  }
+	    flags |= CV_CALIB_FIX_K6;
+	    if (K < 6)
+	    {
+	      flags |= CV_CALIB_FIX_K5;
+	      if (K < 5)
+	        flags |= CV_CALIB_FIX_K5;
+	    }
 	  }
 		/* end of calibration parameters */
 		
