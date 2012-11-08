@@ -319,6 +319,7 @@ int main( int argc, char** argv )
 	const char*	maskFilename = 0;
 	bool HAS_MASK = false;
 	bool QUIET_MODE = false;
+	bool SET_NFRAME = false;
 	Mat image_mask;
 
 	int i, nframes = 10;
@@ -376,7 +377,10 @@ int main( int argc, char** argv )
 		else if( strcmp( s, "-n" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%u", &nframes ) != 1 || nframes <= 3 )
+			{
+			  SET_NFRAME = true;
 				return printf("Invalid number of images\n" ), -1;
+		  }
 		}
 		
 		/* start of calibration parameters */
@@ -435,6 +439,11 @@ int main( int argc, char** argv )
 			maskFilename = argv[++i];
 			HAS_MASK = true;
 			image_mask = imread(maskFilename,0);
+			if (!image_mask.data)
+			{  
+			  cout << maskFilename << "not found" << endl;
+			  return -1;
+			}
 		}
 		else if( strcmp( s, "-su" ) == 0 )
 		{
@@ -467,8 +476,8 @@ int main( int argc, char** argv )
 	if( !capture.isOpened() && imageList.empty() )
 		return fprintf( stderr, "Could not initialize video (%d) capture\n",cameraId ), -2;
 
-//	if( !imageList.empty() )
-//		nframes = (int)imageList.size();
+	if( !imageList.empty() && !SET_NFRAME )
+		nframes = (int)imageList.size();
 
 	if( capture.isOpened() )
 		printf( "%s", liveCaptureHelp );
@@ -644,7 +653,8 @@ int main( int argc, char** argv )
   		  imshow("original image", view);
 			  imshow("undistorted image", rview);
 			}
-			waitKey(0);
+			if (!QUIET_MODE)
+			  waitKey(0);
 		}
 	}
 
