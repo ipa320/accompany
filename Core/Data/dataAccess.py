@@ -15,8 +15,8 @@ class DataAccess(object):
         self._sensorTable = config['mysql_sensor_table']
         self._sensorTypeTable = config['mysql_sensor_table']
         self._guiQuestionTable = config['mysql_questions_table']
-        self._responsesTable = config['mysql_responses_table']
-        self._usersTable = config['mysql_users_table']
+        self._responseTable = config['mysql_responses_table']
+        self._userTable = config['mysql_users_table']
         self._config = config
 
     def saveLocation(self, pk, locid, x, y, orientation, table, pkField):
@@ -40,7 +40,7 @@ class DataAccess(object):
         return self.saveLocation(robotid, locid, x, y, orientation, self._robotTable, 'robotId')
         
     def saveUserLocation(self, userId, locid, x, y, orientation):
-        return self.saveLocation(userId, locid, x, y, orientation, self._usersTable, 'userId')
+        return self.saveLocation(userId, locid, x, y, orientation, self._userTable, 'userId')
 
     def getActiveQuestion(self):
         sql = 'SELECT * FROM `%s`' % (self._guiQuestionTable)
@@ -68,7 +68,7 @@ class DataAccess(object):
         return self.saveData(sql, args) >= 0
         
     def getResponses(self, sequenceName=None):
-        sql = 'SELECT * FROM `%s`' % (self._responsesTable)
+        sql = 'SELECT * FROM `%s`' % (self._responseTable)
         args = None
         if sequenceName != None:
             sql += ' WHERE `name` = %(seqName)s'
@@ -135,10 +135,10 @@ class DataAccess(object):
         return self.getSingle(sql, args)
 
     def findUsers(self, userName=None):
-        sql = "SELECT `%(user)s`.*, %(user)s.name as 'locationName' \
+        sql = "SELECT `%(user)s`.*, %(loc)s.name as 'locationName' \
                FROM `%(user)s` \
                INNER JOIN `%(loc)s` ON %(loc)s.`locationId` = `%(user)s`.`locationId`" % {
-                              'rob': self._userTable,
+                              'user': self._userTable,
                               'loc': self._locationTable
                               }
         args = None
