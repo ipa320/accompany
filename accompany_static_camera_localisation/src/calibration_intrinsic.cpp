@@ -51,6 +51,7 @@ void help()
 			"     [-n <number_of_frames>]  # the number of frames to use for calibration\n"
 			"                              # (if not specified, it will be set to the number\n"
 			"                              #  of board views actually available)\n"
+			"     [-m <mask_image>]        # mask image to compute patterns\n"			
 			"     [-d <delay>]             # a minimum delay in ms between subsequent attempts to capture a next view\n"
 			"                              # (used only for video capturing)\n"
 			"     [-s <squareSize>]        # square size in some user-defined units (1 by default)\n"
@@ -313,6 +314,9 @@ int main( int argc, char** argv )
 	Mat cameraMatrix, distCoeffs;
 	const char* outputFilename = "out_camera_data.yml";
 	const char* inputFilename = 0;
+	const char*	maskFilename = 0;
+	bool HAS_MASK = false;
+	Mat image_mask;
 
 	int i, nframes = 10;
 	bool writeExtrinsics = false, writePoints = false;
@@ -419,6 +423,12 @@ int main( int argc, char** argv )
 		{
 			outputFilename = argv[++i];
 		}
+		else if( strcmp( s, "-m" ) == 0 )
+		{
+			maskFilename = argv[++i];
+			HAS_MASK = true;
+			image_mask = imread(maskFilename,0);
+		}
 		else if( strcmp( s, "-su" ) == 0 )
 		{
 			showUndistorted = true;
@@ -450,8 +460,8 @@ int main( int argc, char** argv )
 	if( !capture.isOpened() && imageList.empty() )
 		return fprintf( stderr, "Could not initialize video (%d) capture\n",cameraId ), -2;
 
-	if( !imageList.empty() )
-		nframes = (int)imageList.size();
+//	if( !imageList.empty() )
+//		nframes = (int)imageList.size();
 
 	if( capture.isOpened() )
 		printf( "%s", liveCaptureHelp );
@@ -469,7 +479,11 @@ int main( int argc, char** argv )
 			view0.copyTo(view);
 		}
 		else if( i < (int)imageList.size() )
+		{
 			view = imread(imageList[i], 1);
+		  if (HAS_MASK)
+		    view.setTo(Scalar(0),~image_mask);
+    }
 
 		if(!view.data)
 		{

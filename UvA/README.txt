@@ -157,28 +157,11 @@ Test:
 
 ----------------------------------------
 
-
-#-- [DEPRECATED_LOW_ACCURACY] Intrinsic Calibration (using ROS) --#
+#-- [DEPRECATED_DUE_TO_UNCONTROLED_IMAGE_STREAM] Intrinsic Calibration (using ROS) --#
 
 More information refers to refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
-
-Open the intrinsic sample:
-
-  gedit camera_intrinsic.xml &
-
-Copy the calibration info from the command line to the file:
-
-Capture a new frame:
-
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_color.sh
-  [RIGHT CLICK on the image]
-
-Test the undistorted image
-
-  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
 
 ----------------------------------------
 
