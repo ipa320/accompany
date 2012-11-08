@@ -406,7 +406,7 @@ int main( int argc, char** argv )
 	  else if( strcmp( s, "-k" ) == 0 )
 	  {
 	    int K;
-			if( sscanf( argv[++i], "%u", &K ) < 4 || K > 6 )
+			if( sscanf( argv[++i], "%i", &K ) != 1 || K < 4 || K > 6 )
 			{
 				return printf("Invalid K\n" ), -1;
 		  }
