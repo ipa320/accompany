@@ -323,7 +323,7 @@ int main( int argc, char** argv )
 	bool SET_NFRAME = false;
 	Mat image_mask;
 
-	int i, nframes = 10;
+	int i, nframes = -1;
 	bool writeExtrinsics = false, writePoints = false;
 	bool undistortImage = false;
 	int flags = 0;
@@ -379,9 +379,9 @@ int main( int argc, char** argv )
 		{
 			if( sscanf( argv[++i], "%u", &nframes ) != 1 || nframes <= 3 )
 			{
-			  SET_NFRAME = true;
 				return printf("Invalid number of images\n" ), -1;
 		  }
+		  SET_NFRAME = true;
 		}
 		
 		/* start of calibration parameters */
@@ -492,7 +492,9 @@ int main( int argc, char** argv )
 	if( !capture.isOpened() && imageList.empty() )
 		return fprintf( stderr, "Could not initialize video (%d) capture\n",cameraId ), -2;
 
-	if( !imageList.empty() && !SET_NFRAME )
+	if( imageList.empty())
+	  cout << inputFilename << "not found or unable to read" << endl;
+	else if (!SET_NFRAME)
 		nframes = (int)imageList.size();
 
 	if( capture.isOpened() )
