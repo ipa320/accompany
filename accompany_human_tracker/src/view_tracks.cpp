@@ -157,8 +157,8 @@ void drawTrackedHumans(const accompany_human_tracker::TrackedHumans::ConstPtr& t
       if (identity.length()>0)
         ss<<","<<identity;
       string name=ss.str();
-      cvCircle(img, viewports.scaledCvPoint(x,y), viewports.scaledLength(0.25), cvScalar(0,0,255),2);
-      myCvPutText(img,name.c_str(),viewports.scaledCvPoint(x,y),&font,cvScalar(0,0,255));
+      cvCircle(img, viewports.scaledCvPoint(x,y,1), viewports.scaledLength(0.25), cvScalar(0,0,255),2);
+      myCvPutText(img,name.c_str(),viewports.scaledCvPoint(x,y,1),&font,cvScalar(0,0,255));
     }
     catch (tf::TransformException e)
     {
