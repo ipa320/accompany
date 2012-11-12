@@ -12,6 +12,7 @@
   <depend package="geometry_msgs"/>
   <depend package="cob_people_detection_msgs"/>
   <depend package="tf"/>
+  <depend package="accompany_uva_msg"/>
 
 </package>
 

@@ -17,7 +17,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
@@ -28,22 +28,3 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
-
-# check for libs
-find_library(TIM_TRACKER TimTracker)
-if(NOT TIM_TRACKER)
-  message(FATAL_ERROR "Could not find 'TimTracker' library, please git clone 'git://basterwijn.nl/home/bterwijn/git/TimTracker.git' and make install")
-endif(NOT TIM_TRACKER)
-
-find_package( OpenCV REQUIRED )
-
-include_directories ("${PROJECT_SOURCE_DIR}/src")
-rosbuild_add_executable(human_tracker src/human_tracker.cpp src/MyTracker.cpp)
-target_link_libraries(human_tracker ${TIM_TRACKER} ${OpenCV_LIBS} boost_program_options)
-
-rosbuild_add_executable(view_tracks src/view_tracks.cpp)
-target_link_libraries(view_tracks ${OpenCV_LIBS} boost_program_options)
-
-rosbuild_add_executable(tracker_test_data src/tracker_test_data.cpp)
-
-rosbuild_add_executable(DataAssociationTest src/DataAssociationTest.cpp)

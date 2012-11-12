@@ -24,9 +24,9 @@
 #include <opencv/cvwimage.h>
 
 #include <accompany_uva_utils/uva_utils.h>
-#include <accompany_human_tracker/HumanLocations.h>
-#include <accompany_static_camera_localisation/HumanLocationsParticle.h>
-#include <accompany_static_camera_localisation/HumanLocationsParticles.h>
+#include <accompany_uva_msg/HumanLocations.h>
+#include <accompany_uva_msg/HumanLocationsParticle.h>
+#include <accompany_uva_msg/HumanLocationsParticles.h>
 
 #include "cmn/FastMath.hh"
 #include "cmn/random.hh"
@@ -283,7 +283,7 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
         CV_RGB(255,0,0), 2);
 }
 
-accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
+accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
     vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
     const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
@@ -310,7 +310,7 @@ accompany_human_tracker::HumanLocations findPerson(unsigned imgNum,
 
   // report locations
   cout << "locations found are" << endl;
-  accompany_human_tracker::HumanLocations humanLocations;
+  accompany_uva_msg::HumanLocations humanLocations;
   
   geometry_msgs::Vector3Stamped v;
   std_msgs::Header header;
@@ -448,7 +448,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       HAS_INIT = true;
     }
 
-    accompany_human_tracker::HumanLocations humanLocations;
+    accompany_uva_msg::HumanLocations humanLocations;
     for (unsigned c = 0; c != cam.size(); ++c)
     {
       cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
@@ -467,10 +467,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     // publish human locations particles
     //        if (particles)
     //        {
-    //            accompany_static_camera_localisation::HumanLocationsParticles humanLocationsParticles;
+    //            accompany_uva_msg::HumanLocationsParticles humanLocationsParticles;
     //            for (int i=0;i<nrParticles;i++)
     //            {
-    //            accompany_static_camera_localisation::HumanLocationsParticle humanLocationsParticle;
+    //            accompany_uva_msg::HumanLocationsParticle humanLocationsParticle;
     //            int numberOfLocations=(rand()%humanLocations.locations.size())+1;
     //            for (int l=0;l<numberOfLocations;l++)
     //            {
@@ -588,8 +588,8 @@ int main(int argc, char **argv)
   transformBroadcasterPtr=&transformBroadcaster;
   ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
   image_transport::ImageTransport it(n);
-  humanLocationsPub = n.advertise<accompany_human_tracker::HumanLocations>(resolved_humanLocations, 10);
-  //humanLocationsParticlesPub=n.advertise<accompany_static_camera_localisation::HumanLocationsParticles>("/humanLocationsParticles",10);
+  humanLocationsPub = n.advertise<accompany_uva_msg::HumanLocations>(resolved_humanLocations, 10);
+  //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
   image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
   ros::spin();
 

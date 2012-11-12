@@ -2,9 +2,9 @@
 #include <ros/ros.h>
 #include <tf/transform_listener.h>
 
-#include <accompany_human_tracker/HumanLocations.h>
-#include <accompany_human_tracker/TrackedHuman.h>
-#include <accompany_human_tracker/TrackedHumans.h>
+#include <accompany_uva_msg/HumanLocations.h>
+#include <accompany_uva_msg/TrackedHuman.h>
+#include <accompany_uva_msg/TrackedHumans.h>
 #include <cob_people_detection_msgs/Detection.h>
 #include <cob_people_detection_msgs/DetectionArray.h>
 
@@ -34,7 +34,7 @@ IplImage* mapImage=NULL;
 CvScalar colors[nrColors];
 
 vector<cob_people_detection_msgs::DetectionArray> identifiedHumansStore;
-map<string,accompany_human_tracker::HumanLocations> humanLocationStore;
+map<string,accompany_uva_msg::HumanLocations> humanLocationStore;
 
 class Viewport
 {
@@ -139,7 +139,7 @@ CvFont font;
 
 tf::TransformListener *listener=NULL;
 
-void drawTrackedHumans(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
+void drawTrackedHumans(const accompany_uva_msg::TrackedHumans::ConstPtr& trackedHumans)
 {
   for (unsigned int i=0;i<trackedHumans->trackedHumans.size();i++)
   {
@@ -191,7 +191,7 @@ void drawIdentifiedHumans(const cob_people_detection_msgs::DetectionArray& ident
   }
 }
 
-void drawHumanLocations(const accompany_human_tracker::HumanLocations& humanLocations,int color)
+void drawHumanLocations(const accompany_uva_msg::HumanLocations& humanLocations,int color)
 {
   for (unsigned int i=0;i<humanLocations.locations.size();i++)
   {
@@ -212,7 +212,7 @@ void drawHumanLocations(const accompany_human_tracker::HumanLocations& humanLoca
   }
 }
 
-void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPtr& trackedHumans)
+void trackedHumansReceived(const accompany_uva_msg::TrackedHumans::ConstPtr& trackedHumans)
 {
   if (mapImage==NULL)
     cvSet(img, cvScalar(0,0,0));
@@ -234,7 +234,7 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
   identifiedHumansStore.clear();
 
   int c=0;
-  for (map<string,accompany_human_tracker::HumanLocations>::iterator it=humanLocationStore.begin(); // draw last identified humans
+  for (map<string,accompany_uva_msg::HumanLocations>::iterator it=humanLocationStore.begin(); // draw last identified humans
        it!=humanLocationStore.end();it++)
   {
     drawHumanLocations(it->second,c);
@@ -254,7 +254,7 @@ void trackedHumansReceived(const accompany_human_tracker::TrackedHumans::ConstPt
   viewports.next();
 }
 
-void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
   if (humanLocations->locations.size()>0)
   {
@@ -322,8 +322,8 @@ int main(int argc,char **argv)
   ros::NodeHandle n;
   tf::TransformListener initListener;
   listener=&initListener;
-  ros::Subscriber trackedHumansSub=n.subscribe<accompany_human_tracker::TrackedHumans>("/trackedHumans",10,trackedHumansReceived);
-  ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
+  ros::Subscriber trackedHumansSub=n.subscribe<accompany_uva_msg::TrackedHumans>("/trackedHumans",10,trackedHumansReceived);
+  ros::Subscriber humanLocationsSub=n.subscribe<accompany_uva_msg::HumanLocations>("/humanLocations",10,humanLocationsReceived);
   ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
   ros::spin();
   cvReleaseImage(&img);

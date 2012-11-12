@@ -1,7 +1,7 @@
 
 #include <ros/ros.h>
-#include <accompany_human_tracker/HumanLocations.h>
-#include <accompany_human_tracker/TrackedHumans.h>
+#include <accompany_uva_msg/HumanLocations.h>
+#include <accompany_uva_msg/TrackedHumans.h>
 #include <cob_people_detection_msgs/Detection.h>
 #include <cob_people_detection_msgs/DetectionArray.h>
 #include <tf/transform_listener.h>
@@ -35,7 +35,7 @@ tf::TransformListener *listener=NULL;
 map<string,int> identityToID; // map of identities to id's
 map<int,string> idToIdentity; // map of id's to identities
 
-accompany_human_tracker::TrackedHumans trackedHumans;// array of tracked humans
+accompany_uva_msg::TrackedHumans trackedHumans;// array of tracked humans
 #if TRACKER == MY_TRACKER
 MyTracker myTracker;
 #elif TRACKER == TIM_TRACKER
@@ -76,7 +76,7 @@ DataAssociation<vector<Tracker::TrackPoint>,TrackPointsTraits,
                 DistanceTrackPoint> trackPointsDataAssociation;
 
 
-vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
@@ -142,7 +142,7 @@ void fuseTracks(vector<Tracker::TrackPoint> &trackPoints,TrackPointsMap trackPoi
 void updateTrackedHumans()
 {
   trackedHumans.trackedHumans.clear();
-  accompany_human_tracker::TrackedHuman trackedHuman;
+  accompany_uva_msg::TrackedHuman trackedHuman;
   trackedHuman.location.header.stamp=ros::Time::now();
   trackedHuman.location.header.frame_id="/map";
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
@@ -165,7 +165,7 @@ void updateTrackedHumans()
 }
 
 // receive human locations and track them
-void humanLocationsReceived(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
 #if TRACKER == MY_TRACKER // using simple MyTracker
 
@@ -198,12 +198,12 @@ void humanLocationsReceived(const accompany_human_tracker::HumanLocations::Const
 
 struct TrackedHumansTraits // used to access all elements 
 {
-  static unsigned int getSize(const accompany_human_tracker::TrackedHumans &t)
+  static unsigned int getSize(const accompany_uva_msg::TrackedHumans &t)
   {
     return t.trackedHumans.size();
   }
 
-  static const geometry_msgs::Vector3 &getElement(const accompany_human_tracker::TrackedHumans &t,int i)
+  static const geometry_msgs::Vector3 &getElement(const accompany_uva_msg::TrackedHumans &t,int i)
   {
     return t.trackedHumans[i].location.vector;
   }
@@ -235,7 +235,7 @@ struct DistanceVector3Point // computes distance between elements
   }
 };
 
-DataAssociation<accompany_human_tracker::TrackedHumans,TrackedHumansTraits,
+DataAssociation<accompany_uva_msg::TrackedHumans,TrackedHumansTraits,
                 cob_people_detection_msgs::DetectionArray,DetectionArrayTraits,
                 DistanceVector3Point> identityDataAssociation;
 
@@ -315,8 +315,8 @@ int main(int argc,char **argv)
   tf::TransformListener initListener;
   listener=&initListener;
 
-  trackedHumansPub=n.advertise<accompany_human_tracker::TrackedHumans>("/trackedHumans",10);
-  ros::Subscriber humanLocationsSub=n.subscribe<accompany_human_tracker::HumanLocations>("/humanLocations",10,humanLocationsReceived);
+  trackedHumansPub=n.advertise<accompany_uva_msg::TrackedHumans>("/trackedHumans",10);
+  ros::Subscriber humanLocationsSub=n.subscribe<accompany_uva_msg::HumanLocations>("/humanLocations",10,humanLocationsReceived);
   ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
   ros::spin();
 

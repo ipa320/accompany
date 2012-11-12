@@ -1,0 +1,16 @@
+<package>
+  <description brief="accompany_uva_msg">
+
+     accompany_uva_msg
+
+  </description>
+  <author>Bas Terwijn</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_uva_msg</url>
+  <depend package="roscpp"/>
+  <depend package="geometry_msgs"/>
+
+</package>
+
+
