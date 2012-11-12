@@ -1,3 +1,5 @@
+#ifndef uva_utils_h_INCLUDED
+#define uva_utils_h_INCLUDED
 
 #include <ros/ros.h>
 #include <std_msgs/UInt32.h>
@@ -36,3 +38,5 @@ template<class T> bool load_msg(T &t,std::string filename)
   }
   return ret;
 }
+
+#endif

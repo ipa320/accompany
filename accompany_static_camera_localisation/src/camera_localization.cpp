@@ -27,6 +27,7 @@
 #include <accompany_uva_msg/HumanLocations.h>
 #include <accompany_uva_msg/HumanLocationsParticle.h>
 #include <accompany_uva_msg/HumanLocationsParticles.h>
+#include <accompany_uva_msg/MsgToMarkerArray.h>
 
 #include "cmn/FastMath.hh"
 #include "cmn/random.hh"
@@ -58,6 +59,7 @@ vector<WorldPoint> scanLocations;
 geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
+ros::Publisher markerArrayPub;
 sensor_msgs::CvBridge bridge;
 unsigned int CAM_NUM = 1;
 int NUM_PERSONS;
@@ -462,7 +464,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     cvReleaseImage(&src_vec[0]);
 
     if (!particles)
+    {
       humanLocationsPub.publish(humanLocations);
+      markerArrayPub.publish(toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+    }
 
     // publish human locations particles
     //        if (particles)
@@ -590,6 +595,7 @@ int main(int argc, char **argv)
   image_transport::ImageTransport it(n);
   humanLocationsPub = n.advertise<accompany_uva_msg::HumanLocations>(resolved_humanLocations, 10);
   //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
+  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
   image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
   ros::spin();
 
