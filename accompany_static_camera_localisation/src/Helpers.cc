@@ -1301,8 +1301,7 @@ void loadPrior(const char *file, vnl_vector<FLOAT> &prior)
 
 void loadCalibration(const char *fileName)
 {
-  XmlReader
-  rd(fileName);
+  XmlReader rd(fileName);
 
   rd.unpack("camPosX", camPosX);
   rd.unpack("camPosY", camPosY);

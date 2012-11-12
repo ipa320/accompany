@@ -60,7 +60,7 @@ tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 sensor_msgs::CvBridge bridge;
 unsigned int CAM_NUM = 1;
-int NUM_PERSONS;
+unsigned int NUM_PERSONS;
 bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
@@ -70,7 +70,8 @@ vector<IplImage *> src_vec(CAM_NUM);
 bool particles = false;
 int nrParticles = 10;
 int max = 100;
-int count = 0;
+int cnt = 0;
+int cum_cnt = 0;
 int direction = 1;
 
 ImgProducer *producer;
@@ -82,6 +83,12 @@ const char* bgwin = "background";
 string saveImagesPath;
 string imagePostfix;
 int visualize;
+
+string save_all;
+char image_name[200];
+char data_file[200];
+Mat ID, human_location,  template_points, idx;
+FileStorage fs;
 
 void buildMasks()
 {
@@ -423,6 +430,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     // load the first image to get image size
     IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
+         
     src_vec[0] = cvCloneImage(oriImage);
 
     if (!HAS_INIT)
@@ -459,6 +467,41 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,
         logSumPixelFGProb, sumPixel);
+        
+    if (!save_all.empty()) //TODO save all images
+    { 
+      sprintf(image_name,"%s//%04d.jpg",save_all.c_str(),++cnt);  
+
+      imwrite(image_name,cvarrToMat(oriImage));
+      
+      Mat increment_loc = Mat::zeros(humanLocations.locations.size(),2,CV_64F);
+      cum_cnt += humanLocations.locations.size();
+      Mat increment_id = (Mat_<int>(1,2) << cnt , cum_cnt);
+      for (int id_iter=0;id_iter<increment_id.rows;id_iter++)
+      {
+        increment_loc.at<double>(id_iter,0) = humanLocations.locations[id_iter].vector.x;
+        increment_loc.at<double>(id_iter,1) = humanLocations.locations[id_iter].vector.y;
+      }
+      if (cnt <= 1)
+      {
+        human_location = increment_loc;
+        ID = increment_id;
+      }
+      else
+      {
+        vconcat(ID,increment_id,ID);
+        vconcat(human_location,increment_loc,human_location);
+      }
+      fs.open(data_file, FileStorage::WRITE);
+      fs << "ID" << ID;
+      fs << "human_location" << human_location;
+      fs.release();
+      
+//  fs << "human_location" << human_location;
+//  fs << "template_points" << Mat::eye(2,2,CV_64FC2);
+//  fs << "idx" << Mat::eye(2,1,CV_64FC2);
+    }
+        
     cvReleaseImage(&src_vec[0]);
 
     if (!particles)
@@ -507,7 +550,7 @@ void timerCallback(const ros::TimerEvent& timerEvent)
 int main(int argc, char **argv)
 {
   string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file, frame_file;
-  
+
   // handling arguments
   po::options_description optionsDescription(
       "Human Detection main function\n"
@@ -520,10 +563,11 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
-    ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1))
+    ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(0))
     ("saveImagePath,s", po::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
     ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n")
-    ("visualize,v","visualize detection\n");
+    ("visualize,v","visualize detection\n")
+    ("save_all,a", po::value<string>(&save_all)->default_value(""),"save all data\n");
 
   po::variables_map variablesMap;
 
@@ -543,6 +587,11 @@ int main(int argc, char **argv)
   }
 
   visualize=variablesMap.count("visualize"); // are we visualizing the frames and detections?
+  
+  if (!save_all.empty())
+  {
+    sprintf(data_file,"%s/data.xml",save_all.c_str());
+  }
 
   bgmodel_file = path + "/" + "bgmodel.xml";
   params_file = path + "/" + "params.xml";
