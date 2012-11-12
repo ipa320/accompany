@@ -7,6 +7,7 @@
 #include <geometry_msgs/TransformStamped.h>
 #include <tf/transform_datatypes.h>
 #include <accompany_uva_utils/uva_utils.h>
+#include <math.h>
 
 namespace po = boost::program_options;
 using namespace std;
@@ -51,6 +52,25 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
   }
 }
 
+Mat correct_2x2rot_mtx(const Mat& rot_mtx)
+{
+
+  double meanx = (rot_mtx.at<double>(0,0) + rot_mtx.at<double>(0,1)) / 2;
+  double meany = (rot_mtx.at<double>(1,0) + rot_mtx.at<double>(1,1)) / 2;
+  double angle = atan2(meany,meanx);
+
+  double angle_x = angle - CV_PI/4;
+  double angle_y = angle + CV_PI/4;
+
+  Mat m = rot_mtx.clone();
+
+  m.at<double>(0,0) = cos(angle_x);
+  m.at<double>(0,1) = cos(angle_y);
+  m.at<double>(1,0) = sin(angle_x);
+  m.at<double>(1,1) = sin(angle_y);
+  return m;
+}
+
 void printUsage()
 {
   cout << "Options:" << endl;
@@ -72,7 +92,8 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("map,m",po::value<string>(&imFile)->required(), "the world map\n")
     ("param,p",po::value<string>(&mapParamFile)->required(), "parameters of the map\n")
-    ("name,o",po::value<string>(&name)->required(), "name of the output tf file (.dat)\n");
+    ("file_name,f",po::value<string>(&name)->default_value("frame.dat"), "name of the tf file\n")
+    ("frame_name,n",po::value<string>(&name)->default_value("child_frame"), "name of the frame in tf messages\n");
 
   po::variables_map variablesMap;
 
@@ -172,25 +193,45 @@ int main(int argc, char **argv)
 //  cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
 //  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
 //  dst_points.at<float>(2, 1) = dst_points.at<float>(1, 0);
-  cout << "dst_points are: " << dst_points << endl;
+
+//  src_points.at<float>(0,0) = 3;
+//  src_points.at<float>(0,1) = 4;
+//  src_points.at<float>(1,0) = 3;
+//  src_points.at<float>(1,1) = 2;
+//  src_points.at<float>(2,0) = 2;
+//  src_points.at<float>(2,1) = 3;
+  
   cout << "-------------------------------------" << endl;
 
   Mat tform( 2, 3, CV_32FC1 );;
-  tform = getAffineTransform(src_points, dst_points);
+  tform = getAffineTransform(src_points,dst_points);
   cout << "src_points: " << endl << src_points << endl;
   cout << "dst_points: " << endl << dst_points << endl;
   cout << "transform matrix: " << endl << tform << endl;
   cout << "How it works: " << endl
       << "dst_points = transform matrix * [src_points'; 1,1,1]" << endl;
 
+  Mat rotation_matrix = tform.colRange(Range(0,2));
+  Mat translation_matrix = tform.col(2);
+  Mat new_translation_matrix = (-1) * rotation_matrix.inv() * translation_matrix;
+
+  cout << "rot" << rotation_matrix << endl;
+  cout << "translation" << translation_matrix << endl;
+  cout << "new_translation" << new_translation_matrix << endl;
+  
+  Mat rot_corrected = correct_2x2rot_mtx(rotation_matrix.t()); 
+  cout << "rotation corrected: " << rot_corrected << endl;
+  
   string filename="frame.dat";
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
-        btMatrix3x3(tform.at<double>(0,0),tform.at<double>(0,1),0,// rotation matrix
-                  tform.at<double>(1,0),tform.at<double>(1,1),0,
+        btMatrix3x3(rot_corrected.at<double>(0,0),rot_corrected.at<double>(0,1),0,// rotation matrix
+                  rot_corrected.at<double>(1,0),rot_corrected.at<double>(1,1),0,
                   0,0,1), 
-        btVector3(tform.at<double>(0,2),tform.at<double>(1,2),0));// translation vector
+        btVector3(new_translation_matrix.at<double>(0,0),new_translation_matrix.at<double>(1,0),0));// translation vector
+
+  
 
 #if ROS_VERSION_MINIMUM(1,8,0)
   tf::Matrix3x3 ma= transform.getBasis();      

@@ -148,42 +148,20 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -o ../camera_intrinsic.xml -su calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -a -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml // TODO check parameters
 
 Test:
 
   roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun accompany_static_camera_localisation undistortion ../camera_intrinsic.xml [image name]
+  rosrun accompany_static_camera_localisation undistortion_test -s [image] -i [camera_intrinsic] -f
 
 ----------------------------------------
 
-
-#-- [DEPRECATED_LOW ACCURACY]KINECT Intrinsic Calibration (using ROS) --#
-
-Run calibration:
-
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_calibration.sh
+#-- [DEPRECATED_DUE_TO_UNCONTROLED_IMAGE_STREAM] Intrinsic Calibration (using ROS) --#
 
 More information refers to refer to:
 
   http://www.ros.org/wiki/camera_calibration/Tutorials/MonocularCalibration
-
-Open the intrinsic sample:
-
-  gedit camera_intrinsic.xml &
-
-Copy the calibration info from the command line to the file:
-
-Capture a new frame:
-
-  roscd accompany_static_camera_localisation/res/
-  ../scripts/kinect_color.sh
-  [RIGHT CLICK on the image]
-
-Test the undistorted image
-
-  rosrun accompany_static_camera_localisation undistortion camera_intrinsic.xml frame0000.jpg
 
 ----------------------------------------
 

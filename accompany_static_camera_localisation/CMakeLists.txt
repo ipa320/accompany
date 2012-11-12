@@ -133,8 +133,8 @@ target_link_libraries(create_frame boost_program_options)
 rosbuild_add_executable(create_tf_room2world src/create_tf_room2world.cpp)
 target_link_libraries(create_tf_room2world opencv_highgui opencv_core opencv_imgproc boost_program_options yaml-cpp)
 
-rosbuild_add_executable(undistortion src/undistortion.cpp)
-target_link_libraries(undistortion opencv_highgui opencv_core opencv_imgproc opencv_calib3d)
+rosbuild_add_executable(undistortion_test src/undistortion_test.cpp)
+target_link_libraries(undistortion_test opencv_highgui opencv_core opencv_imgproc opencv_calib3d boost_program_options)
 
 rosbuild_add_executable(testCameraModel src/testCameraModel.cpp)
 target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc opencv_calib3d helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})

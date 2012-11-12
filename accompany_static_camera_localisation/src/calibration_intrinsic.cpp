@@ -1,3 +1,4 @@
+
 #include "opencv2/core/core.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -35,9 +36,6 @@ const char * usage =
 		"</images>\n"
 		"</opencv_storage>\n";
 
-
-
-
 const char* liveCaptureHelp =
 		"When the live video from camera is used as input, the following hot-keys may be used:\n"
 		"  <ESC>, 'q' - quit the program\n"
@@ -54,14 +52,18 @@ void help()
 			"     [-n <number_of_frames>]  # the number of frames to use for calibration\n"
 			"                              # (if not specified, it will be set to the number\n"
 			"                              #  of board views actually available)\n"
+			"     [-m <mask_image>]        # mask image to compute patterns\n"			
 			"     [-d <delay>]             # a minimum delay in ms between subsequent attempts to capture a next view\n"
 			"                              # (used only for video capturing)\n"
-			"     [-s <squareSize>]       # square size in some user-defined units (1 by default)\n"
+			"     [-s <squareSize>]        # square size in some user-defined units (1 by default)\n"
 			"     [-o <out_camera_params>] # the output filename for intrinsic [and extrinsic] parameters\n"
 			"     [-op]                    # write detected feature points\n"
 			"     [-oe]                    # write extrinsic parameters\n"
 			"     [-zt]                    # assume zero tangential distortion\n"
-			"     [-a <aspectRatio>]      # fix aspect ratio (fx/fy)\n"
+			"     [-a <aspectRatio>]       # fix aspect ratio (fx/fy)\n"
+			"     [-k <fixed polynomial>]  # fixed polynomial order (K4 K5 K6 fixed)\n"
+			"     [-q]                     # quiet model, no display\n"
+			"     [-rm]                    # use rational model (K4 K5 K6)\n"
 			"     [-p]                     # fix the principal point at the center\n"
 			"     [-v]                     # flip the captured images around the horizontal axis\n"
 			"     [-V]                     # use a video file, and not an image list, uses\n"
@@ -153,11 +155,7 @@ static bool runCalibration( vector<vector<Point2f> > imagePoints,
 	
 	cout << "= start calibration =" << endl;
 	double rms = calibrateCamera(objectPoints, imagePoints, imageSize, cameraMatrix,
-			distCoeffs, rvecs, tvecs, flags
-//			|CV_CALIB_FIX_K3
-//			|CV_CALIB_FIX_K4
-//			|CV_CALIB_FIX_K5
-                        );
+			distCoeffs, rvecs, tvecs, flags);
 	printf("RMS error reported by calibrateCamera: %g\n", rms);
 
 	bool ok = checkRange(cameraMatrix) && checkRange(distCoeffs);
@@ -299,7 +297,7 @@ bool runAndSave(const string& outputFilename,
 int main( int argc, char** argv )
 {
 
-    // csv reader
+////// csv reader
 //    CvMLData csvData1, csvData2;
 //    if (csvData1.read_csv("X.csv")!=0 || csvData2.read_csv("Y.csv")!=0)
 //    {
@@ -319,8 +317,13 @@ int main( int argc, char** argv )
 	Mat cameraMatrix, distCoeffs;
 	const char* outputFilename = "out_camera_data.yml";
 	const char* inputFilename = 0;
+	const char*	maskFilename = 0;
+	bool HAS_MASK = false;
+	bool QUIET_MODE = false;
+	bool SET_NFRAME = false;
+	Mat image_mask;
 
-	int i, nframes = 10;
+	int i, nframes = -1;
 	bool writeExtrinsics = false, writePoints = false;
 	bool undistortImage = false;
 	int flags = 0;
@@ -375,14 +378,49 @@ int main( int argc, char** argv )
 		else if( strcmp( s, "-n" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%u", &nframes ) != 1 || nframes <= 3 )
+			{
 				return printf("Invalid number of images\n" ), -1;
+		  }
+		  SET_NFRAME = true;
 		}
+		
+		/* start of calibration parameters */
 		else if( strcmp( s, "-a" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%f", &aspectRatio ) != 1 || aspectRatio <= 0 )
 				return printf("Invalid aspect ratio\n" ), -1;
-			flags |= CV_CALIB_FIX_ASPECT_RATIO;
+			flags |= CV_CALIB_FIX_ASPECT_RATIO; //
 		}
+		else if( strcmp( s, "-zt" ) == 0 )
+		{
+			flags |= CV_CALIB_ZERO_TANGENT_DIST; //
+		}
+		else if( strcmp( s, "-p" ) == 0 )
+		{
+			flags |= CV_CALIB_FIX_PRINCIPAL_POINT; //
+		}
+	  else if( strcmp( s, "-rm" ) == 0 )
+	  {
+	    flags |= CV_CALIB_RATIONAL_MODEL;
+	  }
+	  else if( strcmp( s, "-k" ) == 0 )
+	  {
+	    int K;
+			if( sscanf( argv[++i], "%i", &K ) != 1 || K < 4 || K > 6 )
+			{
+				return printf("Invalid K\n" ), -1;
+		  }
+	    flags |= CV_CALIB_FIX_K6;
+	    if (K < 6)
+	    {
+	      flags |= CV_CALIB_FIX_K5;
+	      if (K < 5)
+	        flags |= CV_CALIB_FIX_K5;
+	    }
+	  }
+		/* end of calibration parameters */
+		
+		
 		else if( strcmp( s, "-d" ) == 0 )
 		{
 			if( sscanf( argv[++i], "%u", &delay ) != 1 || delay <= 0 )
@@ -392,17 +430,13 @@ int main( int argc, char** argv )
 		{
 			writePoints = true;
 		}
+		else if( strcmp( s, "-q" ) == 0 )
+		{
+			QUIET_MODE = true;
+		}
 		else if( strcmp( s, "-oe" ) == 0 )
 		{
 			writeExtrinsics = true;
-		}
-		else if( strcmp( s, "-zt" ) == 0 )
-		{
-			flags |= CV_CALIB_ZERO_TANGENT_DIST;
-		}
-		else if( strcmp( s, "-p" ) == 0 )
-		{
-			flags |= CV_CALIB_FIX_PRINCIPAL_POINT;
 		}
 		else if( strcmp( s, "-v" ) == 0 )
 		{
@@ -415,6 +449,17 @@ int main( int argc, char** argv )
 		else if( strcmp( s, "-o" ) == 0 )
 		{
 			outputFilename = argv[++i];
+		}
+		else if( strcmp( s, "-m" ) == 0 )
+		{
+			maskFilename = argv[++i];
+			HAS_MASK = true;
+			image_mask = imread(maskFilename,0);
+			if (!image_mask.data)
+			{  
+			  cout << maskFilename << "not found" << endl;
+			  return -1;
+			}
 		}
 		else if( strcmp( s, "-su" ) == 0 )
 		{
@@ -437,8 +482,8 @@ int main( int argc, char** argv )
 			mode = CAPTURING;
 		else
 		{
-		    cout << "ERROR: " << "image list not found" << endl;
-		    exit(1);
+		    cout << inputFilename << " not found" << endl;
+		    return -1;
 		}	
 	}
 	else
@@ -447,13 +492,17 @@ int main( int argc, char** argv )
 	if( !capture.isOpened() && imageList.empty() )
 		return fprintf( stderr, "Could not initialize video (%d) capture\n",cameraId ), -2;
 
-	if( !imageList.empty() )
+	if( imageList.empty())
+	  cout << inputFilename << "not found or unable to read" << endl;
+	else if (!SET_NFRAME)
 		nframes = (int)imageList.size();
 
 	if( capture.isOpened() )
 		printf( "%s", liveCaptureHelp );
 
-	namedWindow( "original image", CV_WINDOW_NORMAL );
+  if (!QUIET_MODE)
+	  namedWindow( "original image", CV_WINDOW_NORMAL );
+	  
 	for(i = 0;;i++)
 	{
 		Mat view, viewGray;
@@ -466,10 +515,19 @@ int main( int argc, char** argv )
 			view0.copyTo(view);
 		}
 		else if( i < (int)imageList.size() )
+		{
 			view = imread(imageList[i], 1);
+		  if (HAS_MASK)
+		    view.setTo(Scalar(0),~image_mask);
+    }
 
 		if(!view.data)
 		{
+      if (i == 0)
+      {
+        cout << imageList[i] << " not found, check the image list " << inputFilename << " again" << endl;
+        return -1;
+      }
 			if( imagePoints.size() > 0 )
 			{
 				runAndSave(outputFilename, imagePoints, imageSize,
@@ -503,7 +561,10 @@ int main( int argc, char** argv )
               found = false;
                 
 		found = findChessboardCorners( view, boardSize, pointbuf,
-					CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+					CV_CALIB_CB_ADAPTIVE_THRESH | 
+//					CV_CALIB_CB_FAST_CHECK | 
+					CV_CALIB_CB_NORMALIZE_IMAGE
+					);
 			break;
 		}
 		case CIRCLES_GRID:
@@ -557,7 +618,8 @@ int main( int argc, char** argv )
 			undistort(temp, view, cameraMatrix, distCoeffs);
 		}
 
-		imshow("original image", view);
+    if (!QUIET_MODE)
+		  imshow("original image", view);
 //		waitKey(0);
 		
 		int key = 0xff & waitKey(capture.isOpened() ? 50 : 500);
@@ -587,7 +649,8 @@ int main( int argc, char** argv )
 				break;
 		}
 	}
-    
+   
+  if (!QUIET_MODE) 
     namedWindow( "undistorted image", CV_WINDOW_NORMAL );
 
 	if( !capture.isOpened() && showUndistorted )
@@ -602,10 +665,14 @@ int main( int argc, char** argv )
 			if(!view.data)
 				continue;
 //		    remap(view, rview, map1, map2, INTER_LINEAR);
-		    imshow("original image", view);
 			undistort( view, rview, cameraMatrix, distCoeffs);
-			imshow("undistorted image", rview);
-			waitKey(0);
+		  if (!QUIET_MODE)
+			{
+  		  imshow("original image", view);
+			  imshow("undistorted image", rview);
+			}
+			if (!QUIET_MODE)
+			  waitKey(0);
 		}
 	}
 

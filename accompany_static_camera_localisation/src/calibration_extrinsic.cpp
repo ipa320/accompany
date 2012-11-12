@@ -63,16 +63,12 @@ int main(int argc, char** argv)
 
   // handling arguments
   po::options_description optionsDescription(
-      "Calibrate extrinsic parameters of camera, give rotation matrix and translation matrix to world frame\nAllowed options\n");
-  optionsDescription.add_options()("intrinsicFile,i",
-      po::value<string>(&intrinsicFile)->required(),
-      "the input filename for intrinsic parameter\n")("extrinsicFile,o",
-      po::value<string>(&extrinsicFile)->required(),
-      "the output filename for extrinsic parameter\n")("point2d,p",
-      po::value<string>(&points2dFile)->required(),
-      "the annotated 2D points on the image space\n")("point3d,q",
-      po::value<string>(&points3dFile)->required(),
-      "the corresponding 3D coordinates in the world frame\n");
+      "Calibrate extrinsic parameters of camera, give rotation matrix and translation matrix to world frame\nAllowed options");
+  optionsDescription.add_options()
+    ("intrinsicFile,i",po::value<string>(&intrinsicFile)->required(),"the input filename for intrinsic parameter")
+    ("extrinsicFile,o",po::value<string>(&extrinsicFile)->required(),"the output filename for extrinsic parameter")
+    ("point2d,p",po::value<string>(&points2dFile)->required(),"the annotated 2D points on the image space")
+    ("point3d,q",po::value<string>(&points3dFile)->required(),"the corresponding 3D coordinates in the world frame");
 
   po::variables_map variablesMap;
 

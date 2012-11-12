@@ -1,4 +1,5 @@
 = NINGHANG =
+CALIBRATION FISHEYE
 *change the template parameters in param.xml to fit sitting and standing 
 *change the prior as smaller region 
 change the resolution of the frame in RH
