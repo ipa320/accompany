@@ -20,6 +20,7 @@ using namespace std;
 using namespace boost;
 
 #define FUSE_HUMAN_DETECTION_DISTANCE 3 // meters
+#define FILTER_NEW_TRACKS 5 // new tracks are published only when updated FILTER_NEW_TRACKS times
 
 #define MY_TRACKER	1
 #define TIM_TRACKER	2
@@ -146,17 +147,20 @@ void updateTrackedHumans()
   trackedHuman.location.header.frame_id="/map";
   for (vector<Tracker::Track>::iterator it=tracker.tracks.begin();it!=tracker.tracks.end();it++)
   {
-    cv::Mat mat=it->filter.getState();
-    trackedHuman.location.vector.x=mat.at<float>(0,0);
-    trackedHuman.location.vector.y=mat.at<float>(1,0);
-    trackedHuman.location.vector.z=0;
-    trackedHuman.id=it->id;
-    map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
-    if (it!=idToIdentity.end())
-      trackedHuman.identity=it->second;
-    else
-      trackedHuman.identity="";
-    trackedHumans.trackedHumans.push_back(trackedHuman);
+    if (it->updateCount>=FILTER_NEW_TRACKS )
+    {
+      cv::Mat mat=it->filter.getState();
+      trackedHuman.location.vector.x=mat.at<float>(0,0);
+      trackedHuman.location.vector.y=mat.at<float>(1,0);
+      trackedHuman.location.vector.z=0;
+      trackedHuman.id=it->id;
+      map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
+      if (it!=idToIdentity.end())
+        trackedHuman.identity=it->second;
+      else
+        trackedHuman.identity="";
+      trackedHumans.trackedHumans.push_back(trackedHuman);
+    }
   }
 }
 
