@@ -496,7 +496,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 void timerCallback(const ros::TimerEvent& timerEvent)
 {
-  // date transform in the future so that tf alwas has a 'current' transform
+  // publish transform
+  frame.header.stamp=ros::Time::now();
+  transformBroadcasterPtr->sendTransform(frame);
+  // also publish transform with time in the future so that tf always has a 'current' transform
   frame.header.stamp=ros::Time::now()+ros::Duration(2);
   transformBroadcasterPtr->sendTransform(frame);
 }
