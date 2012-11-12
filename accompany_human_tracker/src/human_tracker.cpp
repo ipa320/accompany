@@ -5,6 +5,7 @@
 #include <cob_people_detection_msgs/Detection.h>
 #include <cob_people_detection_msgs/DetectionArray.h>
 #include <tf/transform_listener.h>
+#include <accompany_uva_msg/MsgToMarkerArray.h>
 
 #include <MyTracker.h>
 #include <TimTracker/Tracker.h>
@@ -30,6 +31,7 @@ using namespace boost;
 
 // globals
 ros::Publisher trackedHumansPub;
+ros::Publisher markerArrayPub;
 ros::Time prevNow;
 tf::TransformListener *listener=NULL;
 map<string,int> identityToID; // map of identities to id's
@@ -194,6 +196,7 @@ void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& h
 #endif
 
   trackedHumansPub.publish(trackedHumans);
+  markerArrayPub.publish(toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
 }
 
 struct TrackedHumansTraits // used to access all elements 
@@ -318,6 +321,8 @@ int main(int argc,char **argv)
   trackedHumansPub=n.advertise<accompany_uva_msg::TrackedHumans>("/trackedHumans",10);
   ros::Subscriber humanLocationsSub=n.subscribe<accompany_uva_msg::HumanLocations>("/humanLocations",10,humanLocationsReceived);
   ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
+  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
+
   ros::spin();
 
   return 0;

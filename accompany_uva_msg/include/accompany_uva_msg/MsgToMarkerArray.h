@@ -5,11 +5,13 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <accompany_uva_msg/HumanLocations.h>
-
+#include <accompany_uva_msg/TrackedHumans.h>
 
 std_msgs::ColorRGBA getRandomColor(std::string name,double a=1.0);
 
 visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
+                                              std::string name="",int id=0);
+visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
                                               std::string name="",int id=0);
 
 #endif
