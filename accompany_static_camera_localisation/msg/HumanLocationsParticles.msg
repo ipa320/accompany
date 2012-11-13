@@ -1,1 +1,0 @@
-accompany_static_camera_localisation/HumanLocationsParticle[] particles

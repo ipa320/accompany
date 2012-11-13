@@ -14,8 +14,7 @@
   <depend package="cv_bridge"/>
   <depend package="image_transport"/>
   <depend package="gscam"/>
+  <depend package="accompany_uva_msg"/>
   <depend package="accompany_uva_utils"/>
 
 </package>
-
-

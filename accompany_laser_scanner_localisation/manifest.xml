@@ -11,8 +11,7 @@
   <depend package="roscpp"/>
   <depend package="sensor_msgs" />
   <depend package="tf"/>
-  <depend package="accompany_static_camera_localisation"/>
-  <depend package="accompany_human_tracker"/>
+  <depend package="accompany_uva_msg"/>
 
 </package>
 

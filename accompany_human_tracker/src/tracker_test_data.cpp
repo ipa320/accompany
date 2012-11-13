@@ -1,7 +1,7 @@
 
 #include <ros/ros.h>
 
-#include <accompany_human_tracker/HumanLocations.h>
+#include <accompany_uva_msg/HumanLocations.h>
 #include <cob_people_detection_msgs/DetectionArray.h>
 
 #include <vector>
@@ -21,7 +21,7 @@ double rand(int min,int max)
   return ((rand()/(double)RAND_MAX)*range)+min;
 }
 
-void move(accompany_human_tracker::HumanLocations &humanLocations,vector<geometry_msgs::Vector3Stamped> &speeds)
+void move(accompany_uva_msg::HumanLocations &humanLocations,vector<geometry_msgs::Vector3Stamped> &speeds)
 {
   vector<geometry_msgs::Vector3Stamped>::iterator lit=humanLocations.locations.begin();
   vector<geometry_msgs::Vector3Stamped>::iterator sit=speeds.begin();
@@ -77,12 +77,12 @@ int main(int argc,char **argv)
 
   // create publisher and subscribers
   ros::NodeHandle n;
-  ros::Publisher humanLocationPub=n.advertise<accompany_human_tracker::HumanLocations>("/humanLocations",10);
+  ros::Publisher humanLocationPub=n.advertise<accompany_uva_msg::HumanLocations>("/humanLocations",10);
   ros::Publisher humanIdentityPub=n.advertise<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10);
   
   // init humans
   int nrHumans1=4;
-  accompany_human_tracker::HumanLocations humanLocations1;
+  accompany_uva_msg::HumanLocations humanLocations1;
   vector<geometry_msgs::Vector3Stamped> humanSpeeds1;
   for (int i=0;i<nrHumans1;i++)
   {
@@ -101,7 +101,7 @@ int main(int argc,char **argv)
 
   // init humans
   int nrHumans2=4;
-  accompany_human_tracker::HumanLocations humanLocations2;
+  accompany_uva_msg::HumanLocations humanLocations2;
   vector<geometry_msgs::Vector3Stamped> humanSpeeds2;
   for (int i=0;i<nrHumans2;i++)
   {

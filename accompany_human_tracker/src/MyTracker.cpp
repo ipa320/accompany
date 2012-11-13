@@ -10,17 +10,17 @@ MyTracker::MyTracker()
   id=0;
 }
 
-void MyTracker::trackHumans(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations)
+void MyTracker::trackHumans(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
   set<int> assigned;
   // all new locations
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
     // all known locations
-    list<accompany_human_tracker::TrackedHuman >::iterator best;
+    list<accompany_uva_msg::TrackedHuman >::iterator best;
     double maxDist=1;
     double bestDist=maxDist;
-    for (list<accompany_human_tracker::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
+    for (list<accompany_uva_msg::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
     {
       double dx=humanLocations->locations[i].vector.x-it->location.vector.x;
       double dy=humanLocations->locations[i].vector.y-it->location.vector.y;
@@ -53,12 +53,12 @@ void MyTracker::trackHumans(const accompany_human_tracker::HumanLocations::Const
   }
 }
 
-accompany_human_tracker::TrackedHumans MyTracker::getTrackedHumans()
+accompany_uva_msg::TrackedHumans MyTracker::getTrackedHumans()
 {
   removeOldTracks();
   ros::Time now=ros::Time::now();
-  accompany_human_tracker::TrackedHumans trackedHumans;
-  for (list<accompany_human_tracker::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
+  accompany_uva_msg::TrackedHumans trackedHumans;
+  for (list<accompany_uva_msg::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
   {
     ros::Duration duration=now-(it->lastSeen);
     if (duration.toSec()<0.5) // only add when seen recently
@@ -77,7 +77,7 @@ int MyTracker::getID()
 void MyTracker::removeOldTracks()
 {
   ros::Time now=ros::Time::now();
-  for (list<accompany_human_tracker::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();)
+  for (list<accompany_uva_msg::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();)
   {
     ros::Duration duration=now-(it->lastSeen);
     //cout<<"old: "<<duration.toSec()<<"  ";
@@ -94,16 +94,16 @@ void MyTracker::removeOldTracks()
   }
 }
 
-void MyTracker::update(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations,int index,
-                       std::list<accompany_human_tracker::TrackedHuman>::iterator it)
+void MyTracker::update(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations,int index,
+                       std::list<accompany_uva_msg::TrackedHuman>::iterator it)
 {
   it->location=humanLocations->locations[index];
   it->lastSeen=ros::Time::now();
 }
 
-void MyTracker::add(const accompany_human_tracker::HumanLocations::ConstPtr& humanLocations,int index)
+void MyTracker::add(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations,int index)
 {
-  accompany_human_tracker::TrackedHuman trackedHuman;
+  accompany_uva_msg::TrackedHuman trackedHuman;
   trackedHuman.id=getID();
   trackedHuman.location=humanLocations->locations[index];
   trackedHuman.firstSeen=ros::Time::now();
