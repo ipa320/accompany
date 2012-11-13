@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     ("filename,f", value<string>(&filename)->default_value("frame.dat"),"filename of the coordiante name file")
     ("frame-name,n", value<string>(&frameName)->default_value("/child_frame"),"name of the new frame")
     ("parent-name,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
-    ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane")
+    ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane in degrees")
     ("xpos,x", value<double>(&x)->default_value(0.0),"x position")
     ("ypos,y", value<double>(&y)->default_value(0.0),"y position")
     ("zpos,z", value<double>(&z)->default_value(0.0),"z position")
@@ -59,9 +59,9 @@ int main(int argc, char **argv)
     cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
     geometry_msgs::TransformStamped transformStamped;
 
-    tf::Transform transform=tf::Transform(btMatrix3x3( cos(a),sin(a),0, // rotation matrix
-                                                       -sin(a),cos(a),0,
-                                                       0,0,1),  
+    tf::Transform transform=tf::Transform(btMatrix3x3( cos(a*M_PI/180),sin(a*M_PI/180),0, // rotation matrix
+                                                      -sin(a*M_PI/180),cos(a*M_PI/180),0,
+                                                                     0,              0,1),
                                           btVector3(x,y,z)); // translation vector
     tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
                                                                ros::Time(0),  // time, not used here
