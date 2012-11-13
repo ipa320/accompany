@@ -264,6 +264,10 @@ Echo human localizations:
 
 ----------------------------------------
 
+script ./fast_start.sh
+
+----------------------------------------
+
 = TODO
  
  - Adaptive background model
