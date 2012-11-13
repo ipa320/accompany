@@ -36,6 +36,7 @@ ros::Time prevNow;
 tf::TransformListener *listener=NULL;
 map<string,int> identityToID; // map of identities to id's
 map<int,string> idToIdentity; // map of id's to identities
+MsgToMarkerArray msgToMarkerArray;
 
 accompany_uva_msg::TrackedHumans trackedHumans;// array of tracked humans
 #if TRACKER == MY_TRACKER
@@ -196,7 +197,7 @@ void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& h
 #endif
 
   trackedHumansPub.publish(trackedHumans);
-  markerArrayPub.publish(toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
+  markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
 }
 
 struct TrackedHumansTraits // used to access all elements 

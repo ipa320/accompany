@@ -1,13 +1,14 @@
 
 #include <accompany_uva_msg/MsgToMarkerArray.h>
+#include <boost/functional/hash.hpp>
 
 using namespace std;
 
-visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
-                                              std::string name,int id)
+visualization_msgs::MarkerArray MsgToMarkerArray::toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
+                                                                std::string name)
 {
   visualization_msgs::MarkerArray markerArray;
-  for (int i=0;i<msg.locations.size();i++)
+  for (unsigned int i=0;i<msg.locations.size();i++)
   {
     visualization_msgs::Marker marker;
     marker.header.frame_id = msg.locations[0].header.frame_id;
@@ -32,17 +33,17 @@ visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::HumanLoca
   return markerArray;
 }
 
-visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
-                                              std::string name,int id)
+visualization_msgs::MarkerArray MsgToMarkerArray::toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
+                                                                std::string name)
 {
   visualization_msgs::MarkerArray markerArray;
-  for (int i=0;i<msg.trackedHumans.size();i++)
+  for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
     visualization_msgs::Marker marker;
     marker.header.frame_id = msg.trackedHumans[i].location.header.frame_id;
     marker.header.stamp = ros::Time();
     marker.ns = name;
-    marker.id = i;
+    marker.id = 1;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
     marker.pose.position.x = msg.trackedHumans[i].location.point.x;
@@ -68,21 +69,21 @@ visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::TrackedHu
 // --- generate pseudo random color using name
 // --------------------------------
 
-size_t hashString(string data)
+size_t MsgToMarkerArray::hashString(string data)
 {
   size_t h=0;
-  for (int i=0;i<data.size();i++)
+  for (unsigned int i=0;i<data.size();i++)
   {
-    int shift=(7*i)%(sizeof(size_t)*8-4);
-    h^=(data[i]<<shift); // xor
+    int cut=h>>(sizeof(size_t)*7);
+    h=((h<<7)^cut)^data[i];
   }
   return h;
 }
 
-size_t reverseBits(size_t data)
+size_t MsgToMarkerArray::reverseBits(size_t data)
 {
   size_t ret=0;
-  for (int i=0;i<sizeof(size_t)*8;i++)
+  for (unsigned int i=0;i<sizeof(size_t)*8;i++)
   {
     if (((1<<i)&data)>0)
       ret|=1<<(sizeof(size_t)*8-i-1);
@@ -91,9 +92,8 @@ size_t reverseBits(size_t data)
 }
 
 // get a random color wich will be associated with the name on future invocations
-std_msgs::ColorRGBA getRandomColor(string name,double a)
+std_msgs::ColorRGBA MsgToMarkerArray::getRandomColor(string name,double a)
 {
-  static map<string,std_msgs::ColorRGBA> nameToColor;
   map<string,std_msgs::ColorRGBA>::const_iterator it=nameToColor.find(name);
   std_msgs::ColorRGBA color;
   if (it==nameToColor.end())

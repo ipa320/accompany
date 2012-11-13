@@ -55,6 +55,7 @@ vector<WorldPoint> priorHull;
 vector<vnl_vector<FLOAT> > logSumPixelFGProb;
 vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
+MsgToMarkerArray msgToMarkerArray;
 
 geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
@@ -466,7 +467,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     if (!particles)
     {
       humanLocationsPub.publish(humanLocations);
-      markerArrayPub.publish(toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+      markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
     }
 
     // publish human locations particles
