@@ -1,4 +1,4 @@
-geometry_msgs/Vector3Stamped location
+geometry_msgs/PointStamped location
 int32 id
 string identity
 time firstSeen

@@ -22,9 +22,14 @@ rosbuild_genmsg()
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(MsgToMarkerArray src/MsgToMarkerArray.cpp)
+
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
+
+rosbuild_add_library(MsgToMarkerArray src/MsgToMarkerArray.cpp)
+
+rosbuild_add_executable(MsgToMarkerArrayTest src/MsgToMarkerArrayTest.cpp)
+target_link_libraries(MsgToMarkerArrayTest MsgToMarkerArray)

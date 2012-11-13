@@ -55,6 +55,7 @@ vector<WorldPoint> priorHull;
 vector<vnl_vector<FLOAT> > logSumPixelFGProb;
 vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
+MsgToMarkerArray msgToMarkerArray;
 
 geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
@@ -370,7 +371,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   cout << "locations found are" << endl;
   accompany_uva_msg::HumanLocations humanLocations;
   
-  geometry_msgs::Vector3Stamped v;
+  geometry_msgs::PointStamped v;
   std_msgs::Header header;
   header.stamp=ros::Time::now();
   header.frame_id=frame.child_frame_id;
@@ -379,9 +380,9 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   {
     WorldPoint wp = scanLocations[existing[i]];
     cout << " " << scanLocations[existing[i]];
-    v.vector.x = wp.x/1000; // millimeters to meters
-    v.vector.y = wp.y/1000;
-    v.vector.z = 0;
+    v.point.x = wp.x/1000; // millimeters to meters
+    v.point.y = wp.y/1000;
+    v.point.z = 0;
     humanLocations.locations.push_back(v);
   }
   cout << endl << "===========" << endl;
@@ -529,7 +530,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     if (!particles)
     {
       humanLocationsPub.publish(humanLocations);
-      markerArrayPub.publish(toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+      markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
     }
 
     // publish human locations particles
@@ -543,7 +544,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //            for (int l=0;l<numberOfLocations;l++)
     //            {
     //              int randomLoc=(rand()%humanLocations.locations.size());// random location index
-    //              geometry_msgs::Vector3Stamped v=humanLocations.locations[randomLoc];// random location vector
+    //              geometry_msgs::PointStamped v=humanLocations.locations[randomLoc];// random location vector
     //              humanLocationsParticle.locations.push_back(v);// add location to particle
     //            }
     //            humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight

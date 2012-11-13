@@ -145,12 +145,12 @@ void drawTrackedHumans(const accompany_uva_msg::TrackedHumans::ConstPtr& tracked
   {
     try// transform to map coordinate system
     {
-      geometry_msgs::Vector3Stamped transVec;
-      listener->transformVector("/map",
+      geometry_msgs::PointStamped transVec;
+      listener->transformPoint("/map",
                                 trackedHumans->trackedHumans[i].location,
                                 transVec);
-      float x=transVec.vector.x;
-      float y=transVec.vector.y;
+      float x=transVec.point.x;
+      float y=transVec.point.y;
       int id=trackedHumans->trackedHumans[i].id;
       string identity=trackedHumans->trackedHumans[i].identity;
       stringstream ss;ss<<id;
@@ -197,12 +197,12 @@ void drawHumanLocations(const accompany_uva_msg::HumanLocations& humanLocations,
   {
     try// transform to map coordinate system
     {
-      geometry_msgs::Vector3Stamped transVec;
-      listener->transformVector("/map",
+      geometry_msgs::PointStamped transVec;
+      listener->transformPoint("/map",
                                 humanLocations.locations[i],
                                 transVec);
-      float x=transVec.vector.x;
-      float y=transVec.vector.y;
+      float x=transVec.point.x;
+      float y=transVec.point.y;
       cvCircle(img,viewports.scaledCvPoint(x,y),viewports.scaledLength(0.08),colors[color%nrColors],2);
     }
     catch (tf::TransformException e)
