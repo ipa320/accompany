@@ -222,7 +222,7 @@ class DataAccess(object):
             
         return self.getSingle(sql, args)
     
-    def getSensorByname(self, sensorName):
+    def getSensorByName(self, sensorName):
         sql = "SELECT * FROM `%s`" % (self._sensorTable)
         sql += " WHERE `name` = %(name)s" 
         args = {'name': sensorName}
