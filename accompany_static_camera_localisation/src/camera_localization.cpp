@@ -332,7 +332,6 @@ void save_detection_results(vector<unsigned> existing)
   fs << "human_location" << human_location;
   fs << "human_template" << human_template;
   fs.release();
-  exit(0);
 }
 
 void save_image_frames(IplImage* oriImage)

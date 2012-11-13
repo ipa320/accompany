@@ -2,11 +2,11 @@
 
 <!-- localise camera1 -->
     <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
-    args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 2 -a /home/ninghang/workspace/pose_estimation/
+    args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 2 -a /home/ninghang/workspace/pose_estimation/res
           image:=/camera1/gscam/image_raw"/>
 
   <node pkg="rosbag" type="play" name="playBags"
-   args="-l -d 2 
+   args="-d 6
      $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag"/>
 
 
@@ -16,7 +16,5 @@
 
   <node pkg="image_view" type="image_view" name="image_viewCamera1"
    args="image:=/camera1/gscam/image_raw"/>
-
-
 
 </launch>
