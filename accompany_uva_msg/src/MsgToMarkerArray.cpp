@@ -16,9 +16,9 @@ visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::HumanLoca
     marker.id = i;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = msg.locations[i].vector.x;
-    marker.pose.position.y = msg.locations[i].vector.y;
-    marker.pose.position.z = msg.locations[i].vector.z;
+    marker.pose.position.x = msg.locations[i].point.x;
+    marker.pose.position.y = msg.locations[i].point.y;
+    marker.pose.position.z = msg.locations[i].point.z;
     marker.pose.orientation.x = 0.0;
     marker.pose.orientation.y = 0.0;
     marker.pose.orientation.z = 0.0;
@@ -45,9 +45,9 @@ visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::TrackedHu
     marker.id = i;
     marker.type = visualization_msgs::Marker::SPHERE;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.x = msg.trackedHumans[i].location.vector.x;
-    marker.pose.position.y = msg.trackedHumans[i].location.vector.y;
-    marker.pose.position.z = msg.trackedHumans[i].location.vector.z;
+    marker.pose.position.x = msg.trackedHumans[i].location.point.x;
+    marker.pose.position.y = msg.trackedHumans[i].location.point.y;
+    marker.pose.position.z = msg.trackedHumans[i].location.point.z;
     marker.pose.orientation.x = 0.0;
     marker.pose.orientation.y = 0.0;
     marker.pose.orientation.z = 0.0;

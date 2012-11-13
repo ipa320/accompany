@@ -85,12 +85,12 @@ vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_uva_msg:
   {
     try// transform to map coordinate system
     {
-      geometry_msgs::Vector3Stamped transVec;
-      listener->transformVector("/map",
+      geometry_msgs::PointStamped transVec;
+      listener->transformPoint("/map",
                                 humanLocations->locations[i],
                                 transVec);
-      Tracker::TrackPoint point = {transVec.vector.x,
-                                   transVec.vector.y,
+      Tracker::TrackPoint point = {transVec.point.x,
+                                   transVec.point.y,
                                    0.01,
                                    0.01};
       trackPoints.push_back(point);
@@ -152,9 +152,9 @@ void updateTrackedHumans()
     if (it->updateCount>=FILTER_NEW_TRACKS )
     {
       cv::Mat mat=it->filter.getState();
-      trackedHuman.location.vector.x=mat.at<float>(0,0);
-      trackedHuman.location.vector.y=mat.at<float>(1,0);
-      trackedHuman.location.vector.z=0;
+      trackedHuman.location.point.x=mat.at<float>(0,0);
+      trackedHuman.location.point.y=mat.at<float>(1,0);
+      trackedHuman.location.point.z=0;
       trackedHuman.id=it->id;
       map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
       if (it!=idToIdentity.end())
@@ -206,9 +206,9 @@ struct TrackedHumansTraits // used to access all elements
     return t.trackedHumans.size();
   }
 
-  static const geometry_msgs::Vector3 &getElement(const accompany_uva_msg::TrackedHumans &t,int i)
+  static const geometry_msgs::Point &getElement(const accompany_uva_msg::TrackedHumans &t,int i)
   {
-    return t.trackedHumans[i].location.vector;
+    return t.trackedHumans[i].location.point;
   }
 
 };
@@ -229,7 +229,7 @@ struct DetectionArrayTraits // used to access all elements
 
 struct DistanceVector3Point // computes distance between elements
 {
-  static double squareDistance(const geometry_msgs::Vector3 &t1,
+  static double squareDistance(const geometry_msgs::Point &t1,
                                const geometry_msgs::Point &t2)
   {
     double dx=t1.x-t2.x;

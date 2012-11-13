@@ -22,9 +22,9 @@ void MyTracker::trackHumans(const accompany_uva_msg::HumanLocations::ConstPtr& h
     double bestDist=maxDist;
     for (list<accompany_uva_msg::TrackedHuman>::iterator it=trackedHumansList.begin();it!=trackedHumansList.end();it++)
     {
-      double dx=humanLocations->locations[i].vector.x-it->location.vector.x;
-      double dy=humanLocations->locations[i].vector.y-it->location.vector.y;
-      double dz=humanLocations->locations[i].vector.z-it->location.vector.z;
+      double dx=humanLocations->locations[i].point.x-it->location.point.x;
+      double dy=humanLocations->locations[i].point.y-it->location.point.y;
+      double dz=humanLocations->locations[i].point.z-it->location.point.z;
       double squaredDistance=dx*dx+dy*dy+dz*dz;
       //cout<<"squaredDistance: "<<squaredDistance<<endl;
       if (squaredDistance<bestDist)
