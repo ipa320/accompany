@@ -13,9 +13,9 @@ class MsgToMarkerArray
 {
  public:
 
-   visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
+   visualization_msgs::MarkerArray &toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
                                                        std::string name="");
-   visualization_msgs::MarkerArray toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
+   visualization_msgs::MarkerArray &toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
                                                        std::string name="");
   
  private:
@@ -23,8 +23,15 @@ class MsgToMarkerArray
    size_t reverseBits(size_t data);
    std_msgs::ColorRGBA getRandomColor(std::string name,double a=1.0);
 
+   // removes the markers that are not used compared to previous call with same name
+   //int removeUnusedMarkers(std::string name,visualization_msgs::MarkerArray &markerArra);
+
+   visualization_msgs::MarkerArray &getMarkerArray(std::string name,int size);
+
   // members
    std::map<std::string,std_msgs::ColorRGBA> nameToColor;
+   std::map<std::string,visualization_msgs::MarkerArray> nameToMarkerArray;
+   std::map<std::string,int> nameToSize;
 };
 
 #endif
