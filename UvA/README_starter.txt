@@ -108,3 +108,7 @@ Check the calibration results:
   roscd accompany_static_camera_localisation/res
 
   rosrun accompany_static_camera_localisation annotate_pos -l background_images/background_list.txt -p params.xml -r prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml -a temp.txt
+  
+#-- capture all the data --#
+
+roslaunch accompanyroslaunch accompany_uva save_all_results_test.launch
