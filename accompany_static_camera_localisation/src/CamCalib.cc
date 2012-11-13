@@ -155,35 +155,6 @@ void CamCalib::genTemplate(const WorldPoint &pt, vector<CvPoint> &points) const
   points[22] = project(WorldPoint(x, y - hw, personHeight));
   points[23] = project(WorldPoint(x + shw, y - shw, personHeight));
 
-//  cv::Point a; //TODO
-//  a.x = points[8].x - points[0].x;
-//  a.y = points[8].y - points[0].y;
-//  cv::Point b;
-//  b.x = points[16].x - points[8].x;
-//  b.y = points[16].y - points[8].y;
-////  CvPoint b = points[16] - points[0];
-////  CvPoint c = points[16] - points[8];
-//  if (a.x * b.x + a.y * b.y < 0)
-//  {
-//    cout << "a+b" << endl;
-//    points[8] = project(WorldPoint(x + hw, y, mh*0.8));
-//    points[9] = project(WorldPoint(x + shw, y + shw, mh*0.8));
-//    points[10] = project(WorldPoint(x, y + hw, mh*0.8));
-//    points[11] = project(WorldPoint(x - shw, y + shw, mh*0.8));
-//    points[12] = project(WorldPoint(x - hw, y, mh*0.8));
-//    points[13] = project(WorldPoint(x - shw, y - shw, mh*0.8));
-//    points[14] = project(WorldPoint(x, y - hw, mh*0.8));
-//    points[15] = project(WorldPoint(x + shw, y - shw, mh*0.8));
-//    points[16] = project(WorldPoint(x + hw, y, personHeight * 0.8)); //TODO
-//    points[17] = project(WorldPoint(x + shw, y + shw, personHeight * 0.8));
-//    points[18] = project(WorldPoint(x, y + hw, personHeight * 0.8));
-//    points[19] = project(WorldPoint(x - shw, y + shw, personHeight * 0.8));
-//    points[20] = project(WorldPoint(x - hw, y, personHeight * 0.8));
-//    points[21] = project(WorldPoint(x - shw, y - shw, personHeight * 0.8));
-//    points[22] = project(WorldPoint(x, y - hw, personHeight * 0.8));
-//    points[23] = project(WorldPoint(x + shw, y - shw, personHeight * 0.8));
-//  }
-
   // points[8] = project(WorldPoint(x-hw,y-hw,personHeight));
   // points[9] = project(WorldPoint(x-hw,y+hw,personHeight));
   // points[10] = project(WorldPoint(x+hw,y+hw,personHeight));

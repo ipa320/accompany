@@ -89,7 +89,7 @@ int visualize;
 string save_all;
 char image_name[200];
 char data_file[200];
-Mat ID, human_location,  template_points, idx;
+Mat ID, human_location, human_template; // buffer to store detection results
 FileStorage fs;
 
 void buildMasks()
@@ -292,6 +292,56 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
         CV_RGB(255,0,0), 2);
 }
 
+void save_detection_results(vector<unsigned> existing)
+{
+  cum_cnt += existing.size();
+  Mat increment_id = (Mat_<int>(1,2) << cnt , cum_cnt);
+  Mat increment_loc = Mat::zeros(existing.size(),2,CV_32F);
+  Mat increment_tplt = Mat::zeros(existing.size(),24,CV_64FC2);
+
+  for (unsigned i = 0; i != existing.size(); ++i)
+  {
+    WorldPoint wp = scanLocations[existing[i]];
+    Point human_location_2D = cam[0].project(scanLocations[existing[i]]);
+    increment_loc.at<float>(i,0) =  human_location_2D.x;
+    increment_loc.at<float>(i,1) =  human_location_2D.y;
+//    increment_loc.at<double>(i,0) =  wp.x/1000;
+//    increment_loc.at<double>(i,1) =  wp.y/1000;
+
+    vector<CvPoint> tplt;
+    cam[0].genTemplate(wp, tplt);
+    
+    vector<Point2d> reload_tplt;
+    for (unsigned iter_tplt=0; iter_tplt != tplt.size(); iter_tplt++)
+    {
+      reload_tplt.push_back(tplt[iter_tplt]);
+    }
+//    cout << "---" << endl;
+    
+    Mat iP(reload_tplt);
+    CV_Assert(iP.depth() == increment_tplt.depth());
+    increment_tplt.row(i) = iP.clone().t();
+  }
+  
+  ID.push_back(increment_id);
+  human_location.push_back(increment_loc);
+  human_template.push_back(increment_tplt);
+  
+  fs.open(data_file, FileStorage::WRITE);
+  fs << "ID" << ID;
+  fs << "human_location" << human_location;
+  fs << "human_template" << human_template;
+  fs.release();
+  exit(0);
+}
+
+void save_image_frames(IplImage* oriImage)
+{
+    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++cnt);  
+    imwrite(image_name,cvarrToMat(oriImage));
+}
+
+
 accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
     vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
@@ -352,6 +402,10 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
       mlprob = marginal[i];
     }
   }
+
+  // SAVE Locations and template points
+  if (!save_all.empty()) //TODO save all images
+    save_detection_results(existing);
 
   static int number = 0;
   number++;
@@ -432,7 +486,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     // load the first image to get image size
     IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
-         
+    if (!save_all.empty()) 
+      save_image_frames(oriImage);
     src_vec[0] = cvCloneImage(oriImage);
 
     if (!HAS_INIT)
@@ -469,40 +524,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,
         logSumPixelFGProb, sumPixel);
-        
-    if (!save_all.empty()) //TODO save all images
-    { 
-      sprintf(image_name,"%s//%04d.jpg",save_all.c_str(),++cnt);  
-
-      imwrite(image_name,cvarrToMat(oriImage));
-      
-      Mat increment_loc = Mat::zeros(humanLocations.locations.size(),2,CV_64F);
-      cum_cnt += humanLocations.locations.size();
-      Mat increment_id = (Mat_<int>(1,2) << cnt , cum_cnt);
-      for (int id_iter=0;id_iter<increment_id.rows;id_iter++)
-      {
-        increment_loc.at<double>(id_iter,0) = humanLocations.locations[id_iter].vector.x;
-        increment_loc.at<double>(id_iter,1) = humanLocations.locations[id_iter].vector.y;
-      }
-      if (cnt <= 1)
-      {
-        human_location = increment_loc;
-        ID = increment_id;
-      }
-      else
-      {
-        vconcat(ID,increment_id,ID);
-        vconcat(human_location,increment_loc,human_location);
-      }
-      fs.open(data_file, FileStorage::WRITE);
-      fs << "ID" << ID;
-      fs << "human_location" << human_location;
-      fs.release();
-      
-//  fs << "human_location" << human_location;
-//  fs << "template_points" << Mat::eye(2,2,CV_64FC2);
-//  fs << "idx" << Mat::eye(2,1,CV_64FC2);
-    }
         
     cvReleaseImage(&src_vec[0]);
 
@@ -551,6 +572,7 @@ void timerCallback(const ros::TimerEvent& timerEvent)
   frame.header.stamp=ros::Time::now()+ros::Duration(2);
   transformBroadcasterPtr->sendTransform(frame);
 }
+
 
 int main(int argc, char **argv)
 {
