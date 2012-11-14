@@ -325,6 +325,8 @@ void save_detection_results(vector<unsigned> existing)
     frame_id.push_back(frame_cnt);
   }
   
+  if (cum_id.empty())
+    cum_id.push_back(0);
   cum_id.push_back(cum_cnt);
   human_locations.push_back(increment_loc);
   human_templates.push_back(increment_tplt);
@@ -406,7 +408,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   }
 
   // SAVE Locations and template points
-  if (!save_all.empty()) //TODO save all images
+  if (!save_all.empty()) // save all images
     save_detection_results(existing);
 
   static int number = 0;
