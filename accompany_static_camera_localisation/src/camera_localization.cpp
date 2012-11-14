@@ -73,7 +73,7 @@ vector<IplImage *> src_vec(CAM_NUM);
 bool particles = false;
 int nrParticles = 10;
 int max = 100;
-int cnt = 0;
+int frame_cnt = 0;
 int cum_cnt = 0;
 int direction = 1;
 
@@ -90,7 +90,8 @@ int visualize;
 string save_all;
 char image_name[200];
 char data_file[200];
-Mat ID, human_location, human_template; // buffer to store detection results
+Mat human_locations, human_templates; // buffer to store detection results
+vector<int> frame_id, cum_id;
 FileStorage fs;
 
 void buildMasks()
@@ -296,7 +297,6 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
 void save_detection_results(vector<unsigned> existing)
 {
   cum_cnt += existing.size();
-  Mat increment_id = (Mat_<int>(1,2) << cnt , cum_cnt);
   Mat increment_loc = Mat::zeros(existing.size(),2,CV_32F);
   Mat increment_tplt = Mat::zeros(existing.size(),24,CV_64FC2);
 
@@ -322,22 +322,24 @@ void save_detection_results(vector<unsigned> existing)
     Mat iP(reload_tplt);
     CV_Assert(iP.depth() == increment_tplt.depth());
     increment_tplt.row(i) = iP.clone().t();
+    frame_id.push_back(frame_cnt);
   }
   
-  ID.push_back(increment_id);
-  human_location.push_back(increment_loc);
-  human_template.push_back(increment_tplt);
+  cum_id.push_back(cum_cnt);
+  human_locations.push_back(increment_loc);
+  human_templates.push_back(increment_tplt);
   
   fs.open(data_file, FileStorage::WRITE);
-  fs << "ID" << ID;
-  fs << "human_location" << human_location;
-  fs << "human_template" << human_template;
+  fs << "frame_id" << frame_id;
+  fs << "cum_id" << cum_id;
+  fs << "human_locations" << human_locations;
+  fs << "human_templates" << human_templates;
   fs.release();
 }
 
 void save_image_frames(IplImage* oriImage)
 {
-    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++cnt);  
+    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++frame_cnt);  
     imwrite(image_name,cvarrToMat(oriImage));
 }
 

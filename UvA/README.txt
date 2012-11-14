@@ -32,17 +32,6 @@ and install using (this will take some time):
   cmake .. -DBUILD_BRL=OFF
   make -j 4
   sudo make install
-  
-and install yaml-cpp:
-
-  sudo apt-get install mercurial
-  hg clone https://code.google.com/p/yaml-cpp.new-api yaml-cpp
-  cd yaml-cpp
-  mkdir build
-  cd build
-  cmake ../
-  make -j 4
-  sudo make install
 
 Install ubuntu-restricted-extras
 
