@@ -21,7 +21,7 @@ class MsgToMarkerArray
  private:
    size_t hashString(std::string data);
    size_t reverseBits(size_t data);
-   std_msgs::ColorRGBA getRandomColor(std::string name,double a=1.0);
+   std_msgs::ColorRGBA getColorByName(std::string name,double a=1.0);
 
    // removes the markers that are not used compared to previous call with same name
    //int removeUnusedMarkers(std::string name,visualization_msgs::MarkerArray &markerArra);
