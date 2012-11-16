@@ -1,7 +1,7 @@
 import datetime
-from Data.dataAccess import DataAccess
+from Data.dataAccess import DataAccess, SQLDao
 from threading import Thread
-from extensions import PollingThread
+from extensions import PollingThread, PollingProcessor
 from Robots.careobot import CareOBot
 
 class ActionHistory(object):
@@ -54,8 +54,58 @@ class ActionHistory(object):
         
         return historyId > 0
 
-if __name__ == '__main__':
-    #import sys
-    #print sys.argv
-    #h = ActionHistory()
-    #print h.addHistory('testRule')
+################################################################################
+#
+# Logger thread
+#
+# Logs channel value and / or status changes into a (separate) MySQL
+# database table.
+#
+################################################################################
+class SensorHistory(PollingProcessor):    
+    def __init__ (self, channelFunc):
+        super(SensorHistory, self).__init__()
+        self._dao = SQLDao()
+        self._channelFunc = channelFunc
+                
+    # This method handles the actual writing procedure.
+    def writechannel(self, channel):
+        dateNow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        sql = "INSERT INTO `%s` (`timestamp`, `sensorId`, `room`, `channel`, `value`, `status`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')"
+        args = (            dateNow, 
+                            channel['id'],
+                            channel['room'], 
+                            channel['channel'], 
+                            channel['value'], 
+                            channel['status'])
+        
+        if self._dao.saveData(sql, args) > 0:
+            return True
+        else:
+            return False
+
+    def startHistoryPolling(self):
+        print "Started polling sensor changes"
+        self._addPollingProcessor('sensorHistory', self.checkUpdateSensors, (self._channelFunc), 0.01)
+
+    def stopHistoryPolling(self):
+        print "Stopped polling sensor changes"
+        self._removePollingProcessor('sensorHistory')
+
+    def checkUpdateSensors(self, channelFunc):
+        logged_channels = {}
+
+        channels = channelFunc()
+        key = channels.keys()
+        for k in key:
+            try:
+#               if logged_channels[k]['value'] != channels[k]['value'] or 
+                if logged_channels[k]['status'] != channels[k]['status']:
+                    self.writechannel(channels[k])
+                    logged_channels[k]['value'] = channels[k]['value']
+                    logged_channels[k]['status'] = channels[k]['status']
+            except:
+                self.writechannel(channels[k])
+                logged_channels.setdefault(k, {})
+                logged_channels[k].setdefault('value', channels[k]['value'])
+                logged_channels[k].setdefault('status', channels[k]['status'])

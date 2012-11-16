@@ -1,7 +1,63 @@
 import io, math, time, sys
 from PIL import Image
+from extensions import PollingProcessor
 from Data.dataAccess import DataAccess
 import rosHelper
+
+class PoseUpdater(PollingProcessor):
+    def __init__(self, robot=None):
+        super(PoseUpdater, self).__init__()
+        if robot == None:
+            robot = CareOBot()
+        self._robot = robot
+        self._dao = DataAccess()
+        self._ros = rosHelper.ROS()
+    
+    def startPoseUpdates(self):
+        print "Started polling pose for %s" % (self._robot.name)
+        self._addPollingProcessor('pose ' + self._robot.name, self.checkUpdatePose, (self._robot, ), 2)
+    
+    def stopPoseUpdates(self):        
+        print "Stopped polling location for %s" % (self._robot.name)
+        self._removePollingProcessor('pose ' + self._robot.name)
+    
+    def checkUpdatePose(self, robot):
+        self.updateTray(robot)
+
+    def updateTray(self, robot):
+        (name, _) = robot.getComponentState('tray')
+        trayIsRaised = False
+        trayIsLowered = False
+        trayIsEmpty = True
+        if name == 'up':
+            trayIsRaised = True
+        elif name == 'down':
+            trayIsLowered = True
+            
+        if 'range_0' in len(self._ros.getTopics('/range_0')) > 0:
+            threshold = 0.2
+            range0 = self._ros.getSingleMessage('/range_0')['range']
+            range1 = self._ros.getSingleMessage('/range_1')['range']
+            range2 = self._ros.getSingleMessage('/range_2')['range']
+            range3 = self._ros.getSingleMessage('/range_3')['range']
+            if range0 > threshold or range1 > threshold or range2 > threshold or range3 > threshold:
+                trayIsEmpty = False
+        else:
+            print "Phidget sensors not detected in running state"
+        
+        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsLowered'"
+        args = (trayIsLowered)
+        self._dao.saveData(sql, args)
+        
+        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsRaised'"
+        args = (trayIsRaised)
+        self._dao.saveData(sql, args)
+        
+        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsEmpty'"
+        args = (trayIsEmpty)
+        self._dao.saveData(sql, args)
+        
+        print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
 
 class CareOBot(object):
     _imageFormats = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'PCD', 'PCX', 'PDF', 'PNG', 'PPM', 'TIFF', 'XBM', 'XPM']
@@ -309,37 +365,43 @@ class ActionLib(object):
         service_name = None
         duration = None
         
-        if kwargs.has_key('name'):
-            name = kwargs['name']
+        if kwargs.has_key('component_name'):
+            name = str(kwargs['component_name']).encode('ascii', 'ignore')
+            
         if kwargs.has_key('parameter_name'):
-            value = kwargs['parameter_name']
+            value = str(kwargs['parameter_name']).encode('ascii', 'ignore')
+                        
         if kwargs.has_key('mode'):
-            mode = kwargs['mode']
+            mode = str(kwargs['mode']).encode('ascii', 'ignore')
+            
         if kwargs.has_key('blocking'):
-            blocking = kwargs['blocking']
+            blocking = bool(kwargs['blocking'])
+            
         if kwargs.has_key('service_name'):
-            service_name = kwargs['service_name']
+            service_name = str(kwargs['service_name']).encode('ascii', 'ignore')
+            
         if kwargs.has_key('duration'):
-            duration = kwargs['duration']
+            duration = float(kwargs['duration'])
 
         goal = self._ssMsgs.ScriptGoal(
                           function_name=str(funcName).encode('ascii', 'ignore'),
-                          component_name=str(name).encode('ascii', 'ignore'),
-                          parameter_name=str(value).encode('ascii', 'ignore'),
-                          mode=str(mode).encode('ascii', 'ignore'),
-                          blocking=bool(blocking),
-                          service_name=str(service_name).encode('ascii', 'ignore'),
-                          duration=float(duration)
+                          component_name=name,
+                          parameter_name=value,
+                          mode=mode,
+                          blocking=blocking,
+                          service_name=service_name,
+                          duration=duration
                           )
         
         return self._client.send_goal_and_wait(goal)
         
     def initComponent(self, name):
         if name not in ActionLib._specialCases.keys():
-            func = 'initROS'
-            goal = self._ssMsgs.msg.ScriptGoal(
+            func = 'init'
+            goal = self._ssMsgs.ScriptGoal(
                               function_name=func.encode('ascii', 'ignore'),
-                              component_name=name.encode('ascii', 'ignore'))
+                              component_name=name.encode('ascii', 'ignore'),
+                              blocking=True)
             return self._client.send_goal_and_wait(goal)
         return 3
     
@@ -366,10 +428,22 @@ if __name__ == '__main__':
     #l = c.executeFunction('say', {'parameter_name': ['I can talk!'], 'blocking': True})
     #print l
     #l = c.setComponentState('tray', 'down')
-    a = ActionLib()
-    a.runComponent('base', 'home', None, False)
-    a.runComponent('tray', 'down', None, True)
-    a.runComponent('torso', 'home', None, False)
-    a.runComponent('light', 'red', None, False)
-    a.runComponent('sound', ['Walk togeather to the kitchen'], None, False)
-    a.runFunction('sleep', {'duration':5.0})
+    
+    #rosHelper.ROS.configureROS(packageName='cob_script_server', packagePath='/home/nathan/git', rosMaster='http://cob3-2-pc1:11311')
+    #a = ActionLib()
+    #print 'Init: ' + str(a.initComponent('torso'))
+    #print 'Reco: ' + str(a.runFunction('recover', {'component_name': 'torso', 'blocking':True}))
+    #print 'Move: ' + str(a.runComponent('torso', 'front', True))
+    #print 'Move: ' + str(a.runComponent('torso', 'home', True))
+    
+    rosHelper.ROS.configureROS(packageName='cob_script_server', packagePath='/home/nathan/git', rosMaster='http://cob3-2-pc1:11311')
+    p = PoseUpdater()
+    p.startPoseUpdates()
+    
+    while True:
+        try:
+            sys.stdin.read()
+        except KeyboardInterrupt:
+            break
+        
+    p.stopPoseUpdates()

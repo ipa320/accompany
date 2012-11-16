@@ -25,3 +25,25 @@ class PollingThread(Thread):
                     
         if self._completed != None:
             self._completed(*self._Thread__args, **self._Thread__kwargs)
+
+class PollingProcessor(object):
+    
+    def __init__(self):
+        self._runningThreads = {}
+    
+    def _removePollingProcessor(self, name):
+        if self._runningThreads.has_key(name):
+            lp = self._runningThreads[name]
+            lp.cancel()
+            lp.join()
+            return True
+        else:
+            return False
+    
+    def _addPollingProcessor(self, name, function , args, delaySeconds):
+        if not self._runningThreads.has_key(name):
+            ahw = PollingThread(target=function, delayTime=delaySeconds, args=args)
+            ahw.start()
+            self._runningThreads[name] = ahw
+        
+        return name

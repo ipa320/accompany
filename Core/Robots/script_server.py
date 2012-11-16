@@ -117,10 +117,11 @@ class script_server():
 			self.script_action_server.set_aborted(server_result)
 			return
 		
-		if 'get_error_code' in dir(handle01):
+		if handle01 != None and 'get_error_code' in dir(handle01):
 			server_result.error_code = handle01.get_error_code()
 		else:
 			rospy.logwarn("unexpected action result type<<%s>> for function %s", type(handle01), server_goal.function_name)
+
 		if server_result.error_code == 0:
 			rospy.logdebug("action result success")
 			self.script_action_server.set_succeeded(server_result)
@@ -128,7 +129,7 @@ class script_server():
 			rospy.logdebug("component already initialised")
 			self.script_action_server.set_succeeded(server_result)
 		else:
-			rospy.logerr("action result error")
+			rospy.logerr("action result error: " + str(server_result))
 			self.script_action_server.set_aborted(server_result)
 
 ## Main routine for running the script server

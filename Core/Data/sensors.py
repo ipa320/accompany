@@ -71,7 +71,101 @@ class StateResolver(object):
             sensor['location'] = (x, y, '%sd' % (d))
             sensor['type'] = meta.get('type', '')
         
-        return sensorList
+        return sensorList    
+    
+    # Callback methods that transform the transmitted value into
+    # the device's according status and generate a colour and a
+    # human-readable value for the web-based presentation.
+    def handler_contact_reed_status(self, channel_uuid, value):
+        if value == '1':
+            return 'Open'
+        else:
+            return 'Closed'
+
+    def handler_contact_reed_color(self, channel_uuid, value):
+        if value == '1':
+            return 'FF0000'
+        else:
+            return '00FF00' # closed door == green colour
+
+    def handler_contact_pressuremat_status(self, channel_uuid, value):
+        if value == '1':
+            return 'Free'
+        else:
+            return 'Occupied'
+
+    def handler_contact_pressuremat_color(self, channel_uuid, value):
+        if value == '1':
+            return '00FF00' # vacant chair == green colour
+        else:
+            return 'FF0000'
+
+    def handler_temperature_mcp9700_value(self, channel_uuid, value):
+        return str((float(value) - 0.5) * 100.0) + 'C'
+
+    def handler_temperature_mcp9700_hot_status(self, channel_uuid, value):
+        channel_uuid = channel_uuid + '_handler_temperature_mcp9700_hot_status'
+        filter_length = 20 # Moving Average Filter of length 20
+        try:
+            valmem = self.handler_memory[channel_uuid]['values']
+            status = self.handler_memory[channel_uuid]['status']
+        except:
+            self.handler_memory[channel_uuid] = {}
+            self.handler_memory[channel_uuid]['values'] = []
+            valmem = self.handler_memory[channel_uuid]['values']
+            self.handler_memory[channel_uuid]['status'] = False
+            status = self.handler_memory[channel_uuid]['status']
+        temp = (float(value) - 0.5) * 100.0
+        valmem.append(temp)
+        if len(valmem) > filter_length:
+            valmem.pop(0)
+        avg = sum(valmem) / len(valmem)
+        if (status == False and temp >= 1.1 * avg):
+            status = True
+        elif (status == True and temp <= 0.9 * avg):
+            status = False
+        if status == True:
+            return 'On'
+        else:
+            return 'Off'
+
+    def handler_temperature_mcp9700_cold_status(self, channel_uuid, value):
+        channel_uuid = channel_uuid + '_handler_temperature_mcp9700_cold_status'
+        filter_length = 20 # Moving Average Filter of length 20
+        try:
+            valmem = self.handler_memory[channel_uuid]['values']
+            status = self.handler_memory[channel_uuid]['status']
+        except:
+            self.handler_memory[channel_uuid] = {}
+            self.handler_memory[channel_uuid]['values'] = []
+            valmem = self.handler_memory[channel_uuid]['values']
+            self.handler_memory[channel_uuid]['status'] = False
+            status = self.handler_memory[channel_uuid]['status']
+        temp = (float(value) - 0.5) * 100.0
+        valmem.append(temp)
+        if len(valmem) > filter_length:
+            valmem.pop(0)
+        avg = sum(valmem) / len(valmem)
+        if (status == False and temp <= 0.9 * avg):
+            status = True
+        elif (status == True and temp >= 1.1 * avg):
+            status = False
+        if status == True:
+            return 'On'
+        else:
+            return 'Off'
+
+    def handler_temperature_mcp9700_color(self, channel_uuid, value):
+        temp = (float(value) - 0.5) * 100.0
+        if temp < 0.0:
+            r = 0
+        elif temp > 50.0:
+            r = 255
+        else:
+            r = int(temp * 5.1) # -0C..+50C -> 0..255
+        g = 0
+        b = 255 - r
+        return '%02X%02X%02X' % (r, g, b)
     
     def _importMetaData(self):
         from xml.etree import ElementTree as et

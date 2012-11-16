@@ -70,7 +70,7 @@ class RobotLocationProcessor(LocationProcessor):
 class HumanLocationProcessor(LocationProcessor):
     
     def __init__(self, robot=None):
-        super(RobotLocationProcessor, self).__init__()
+        super(HumanLocationProcessor, self).__init__()
         if robot == None:
             from Robots.careobot import CareOBot
             self._robot = CareOBot()
