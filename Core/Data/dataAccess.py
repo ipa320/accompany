@@ -306,7 +306,7 @@ class Sensors(object):
             
         return self._sql.getSingle(sql, args)
     
-    def getSensorByname(self, sensorName):
+    def getSensorByName(self, sensorName):
         sql = "SELECT * FROM `%s`" % (self._sensorTable)
         sql += " WHERE `name` = %(name)s" 
         args = {'name': sensorName}
@@ -322,7 +322,7 @@ class Sensors(object):
             args = {'name': sensorName}
             
         return self._sql.getData(sql, args)
-
+                
 class Binary(object):
     def __init__(self, binaryTable=None, binaryIdCol=None):
         from config import server_config
