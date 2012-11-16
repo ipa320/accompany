@@ -1,7 +1,7 @@
 <launch>
 
   <node pkg="rosbag" type="play" name="playBags"
-   args="-l -d 1 -r 0.2
+   args="-l -d 2 -r 0.2
      $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag 
      $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
      "/>
