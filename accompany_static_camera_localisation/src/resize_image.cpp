@@ -12,10 +12,12 @@
 using namespace std;
 using namespace boost::program_options;
 
-int width,height;
+variables_map variablesMap;
+int abWidth,abHeight;
+double scWidth,scHeight;
+
 cv::Mat resize;
 image_transport::Publisher *imagePub;
-
 cv_bridge::CvImagePtr cv_ptr;
 
 void callback(const sensor_msgs::ImageConstPtr& msg)
@@ -23,11 +25,20 @@ void callback(const sensor_msgs::ImageConstPtr& msg)
   cv_bridge::CvImageConstPtr cv_ptr;
   try
   {
+    // conver to OpenCV Mat
     cv_ptr=cv_bridge::toCvShare(msg,"bgr8");
-    cv::resize(cv_ptr->image,resize, cv::Size(width,height));
+    // compute new size
+    if (!variablesMap.count("aw"))
+      abWidth=cv_ptr->image.size().width*scWidth+0.5;
+    if (!variablesMap.count("ah"))
+      abHeight=cv_ptr->image.size().height*scHeight+0.5;
+    // resize
+    cv::resize(cv_ptr->image,resize, cv::Size(abWidth,abHeight));
+    // convert to Ros image
     cv_bridge::CvImage resizeRos;
     resizeRos.encoding = "bgr8";
     resizeRos.image = resize;
+    // republish image
     imagePub->publish(resizeRos.toImageMsg());
   }
   catch (cv_bridge::Exception& e)
@@ -42,14 +53,17 @@ int main(int argc,char **argv)
   string topic_in,topic_out;
   
   // handling arguments
-  options_description optionsDescription("Reads image from input topic, resize it and publishes it to output topic");
+  options_description optionsDescription("Reads image from input topic, resize it and publishes it to output topic.\n"
+                                         "To resize set either the absolute or scales width or height for the output");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("topic_in,i", value<string>(&topic_in)->required(),"name of input topic")
     ("topic_out,o", value<string>(&topic_out)->required(),"name of input topic")
-    ("with", value<int>(&width)->required(),"the width of the output")
-    ("height", value<int>(&height)->required(),"the height of the output");
-    
+    ("aw", value<int>(&abWidth),"the absolute width of the output")
+    ("ah", value<int>(&abHeight),"the absolute height of the output")
+    ("sw", value<double>(&scWidth)->default_value(1.0),"the width scaling factor")
+    ("sh", value<double>(&scHeight)->default_value(1.0),"the height scaling factor");
+
   variables_map variablesMap;
   try
   {
