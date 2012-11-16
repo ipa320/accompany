@@ -90,8 +90,7 @@ int visualize;
 string save_all;
 char image_name[200];
 char data_file[200];
-Mat human_locations, human_templates; // buffer to store detection results
-vector<int> frame_id, cum_id;
+Mat frame_id, cum_id, human_locations, human_templates; // buffer to store detection results
 FileStorage fs;
 
 void buildMasks()
@@ -297,40 +296,40 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
 void save_detection_results(vector<unsigned> existing)
 {
   cum_cnt += existing.size();
-  Mat increment_loc = Mat::zeros(existing.size(),2,CV_32F);
+  Mat increment_loc = Mat::zeros(existing.size(),1,CV_64FC2);
   Mat increment_tplt = Mat::zeros(existing.size(),24,CV_64FC2);
 
   for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];
-    Point human_location_2D = cam[0].project(scanLocations[existing[i]]);
-    increment_loc.at<float>(i,0) =  human_location_2D.x;
-    increment_loc.at<float>(i,1) =  human_location_2D.y;
+    Point2d human_location_2D = cam[0].project(scanLocations[existing[i]]);
+    increment_loc.at<Point2d>(i,0) =  human_location_2D;
 //    increment_loc.at<double>(i,0) =  wp.x/1000;
 //    increment_loc.at<double>(i,1) =  wp.y/1000;
 
     vector<CvPoint> tplt;
     cam[0].genTemplate(wp, tplt);
-    
+
     vector<Point2d> reload_tplt;
     for (unsigned iter_tplt=0; iter_tplt != tplt.size(); iter_tplt++)
     {
       reload_tplt.push_back(tplt[iter_tplt]);
     }
 //    cout << "---" << endl;
-    
+
     Mat iP(reload_tplt);
     CV_Assert(iP.depth() == increment_tplt.depth());
-    increment_tplt.row(i) = iP.clone().t();
+    iP = iP.t();
+    iP.copyTo(increment_tplt.row(i));
     frame_id.push_back(frame_cnt);
   }
-  
+
   if (cum_id.empty())
     cum_id.push_back(0);
   cum_id.push_back(cum_cnt);
   human_locations.push_back(increment_loc);
   human_templates.push_back(increment_tplt);
-  
+
   fs.open(data_file, FileStorage::WRITE);
   fs << "frame_id" << frame_id;
   fs << "cum_id" << cum_id;
@@ -341,7 +340,7 @@ void save_detection_results(vector<unsigned> existing)
 
 void save_image_frames(IplImage* oriImage)
 {
-    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++frame_cnt);  
+    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++frame_cnt);
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
@@ -374,7 +373,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   // report locations
   cout << "locations found are" << endl;
   accompany_uva_msg::HumanLocations humanLocations;
-  
+
   geometry_msgs::PointStamped v;
   std_msgs::Header header;
   header.stamp=ros::Time::now();
@@ -439,7 +438,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     cvReleaseImage(&bg);
     cvReleaseImage(&cvt);
     if (visualize) cvShowImage(win, src[c]);
-    
+
     if (saveImagesPath!="")
     {
       ros::Time begin = ros::Time::now();
@@ -490,7 +489,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     // load the first image to get image size
     IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
-    if (!save_all.empty()) 
+    if (!save_all.empty())
       save_image_frames(oriImage);
     src_vec[0] = cvCloneImage(oriImage);
 
@@ -528,7 +527,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,
         logSumPixelFGProb, sumPixel);
-        
+
     cvReleaseImage(&src_vec[0]);
 
     if (!particles)
@@ -618,7 +617,7 @@ int main(int argc, char **argv)
   }
 
   visualize=variablesMap.count("visualize"); // are we visualizing the frames and detections?
-  
+
   if (!save_all.empty())
   {
     sprintf(data_file,"%s/data.xml",save_all.c_str());
