@@ -25,6 +25,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
     markerArray.markers[i].scale.y = radius*2;
     markerArray.markers[i].scale.z = radius*2;
     markerArray.markers[i].color=getColorByName(msg.locations[0].header.frame_id,0.5);
+    markerArray.markers[i].lifetime = ros::Duration(10);
   }
   return markerArray;
 }
@@ -54,6 +55,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
     markerArray.markers[i].color.g = 0.0;
     markerArray.markers[i].color.b = 0.0;
     markerArray.markers[i].color.a = 0.2;
+    markerArray.markers[i].lifetime = ros::Duration(10);
   }
   // text
   int ind=msg.trackedHumans.size();
@@ -81,6 +83,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
     if (msg.trackedHumans[i].identity.size()>0)
       ss<<","<<msg.trackedHumans[i].identity;
     markerArray.markers[ind+i].text=ss.str();
+    markerArray.markers[ind+i].lifetime = ros::Duration(10);
   }
   return markerArray;
 }
@@ -108,10 +111,11 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
     int prevSize=nameToSize[name];
     
     // reduce length after deleting in previous step
-    if (prevSize<size)
-      prevSize=size;
-    if (prevSize<it->second.markers.size())
-      it->second.markers.resize(prevSize);
+    int reduce=prevSize;
+    if (size>reduce)
+      reduce=size;
+    if (reduce<it->second.markers.size())
+      it->second.markers.resize(reduce);
 
     // delete unused markers
     for (unsigned int i=size;i<it->second.markers.size();i++)
@@ -130,7 +134,6 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
     // reactivate previously deleted markers
     for (unsigned int i=prevSize;i<size;i++)
       it->second.markers[i].action=visualization_msgs::Marker::ADD;
-    
   }
   nameToSize[name]=size;
   return it->second;
