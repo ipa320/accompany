@@ -141,3 +141,8 @@ target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc 
 
 rosbuild_add_executable(test_transform src/test_transform.cpp)
 target_link_libraries(test_transform boost_program_options)
+
+rosbuild_add_executable(resize_image src/resize_image.cpp)
+target_link_libraries(resize_image opencv_core boost_program_options)
+
+
