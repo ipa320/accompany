@@ -15,7 +15,14 @@ class PollingThread(Thread):
     def run(self):
         while not self._cancelRequested:
             if self._Thread__target:
-                self._Thread__target(*self._Thread__args, **self._Thread__kwargs)
+                if self._Thread__args != None and self._Thread__kwargs != None:
+                    self._Thread__target(*self._Thread__args, **self._Thread__kwargs)
+                elif self._Thread__args != None:
+                    self._Thread__target(*self._Thread__args, **{})
+                elif self._Thread__kwargs != None:
+                    self._Thread__target(*(), **self._Thread__kwargs)
+                else:
+                    self._Thread__target()
             
             if self._delayTime > 0:
                 delay = self._delayTime

@@ -82,23 +82,11 @@ class StateResolver(object):
         else:
             return 'Closed'
 
-    def handler_contact_reed_color(self, channel_uuid, value):
-        if value == '1':
-            return 'FF0000'
-        else:
-            return '00FF00' # closed door == green colour
-
     def handler_contact_pressuremat_status(self, channel_uuid, value):
         if value == '1':
             return 'Free'
         else:
             return 'Occupied'
-
-    def handler_contact_pressuremat_color(self, channel_uuid, value):
-        if value == '1':
-            return '00FF00' # vacant chair == green colour
-        else:
-            return 'FF0000'
 
     def handler_temperature_mcp9700_value(self, channel_uuid, value):
         return str((float(value) - 0.5) * 100.0) + 'C'
@@ -155,18 +143,6 @@ class StateResolver(object):
         else:
             return 'Off'
 
-    def handler_temperature_mcp9700_color(self, channel_uuid, value):
-        temp = (float(value) - 0.5) * 100.0
-        if temp < 0.0:
-            r = 0
-        elif temp > 50.0:
-            r = 255
-        else:
-            r = int(temp * 5.1) # -0C..+50C -> 0..255
-        g = 0
-        b = 255 - r
-        return '%02X%02X%02X' % (r, g, b)
-    
     def _importMetaData(self):
         from xml.etree import ElementTree as et
         import os

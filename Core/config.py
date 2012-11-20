@@ -28,7 +28,7 @@ server_config = {
   'udp_listen_port': 5050,
 
   # The settings of the Geo-System MySQL server / database / table
-  'mysql_geo_server':   '192.168.1.68',
+  'mysql_geo_server':   'geo-eee-pc',
   'mysql_geo_user':     'guest',
   'mysql_geo_password': 'r0b0th0use##',
   'mysql_geo_db':       'livewiredb',

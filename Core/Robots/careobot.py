@@ -34,7 +34,7 @@ class PoseUpdater(PollingProcessor):
         elif name == 'down':
             trayIsLowered = True
             
-        if 'range_0' in len(self._ros.getTopics('/range_0')) > 0:
+        if len(self._ros.getTopics('/range_0')) > 0:
             threshold = 0.2
             range0 = self._ros.getSingleMessage('/range_0')['range']
             range1 = self._ros.getSingleMessage('/range_1')['range']
@@ -57,7 +57,7 @@ class PoseUpdater(PollingProcessor):
         args = (trayIsEmpty)
         self._dao.saveData(sql, args)
         
-        print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
+        print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)s" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
 
 class CareOBot(object):
     _imageFormats = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'PCD', 'PCX', 'PDF', 'PNG', 'PPM', 'TIFF', 'XBM', 'XPM']
@@ -185,7 +185,9 @@ class CareOBot(object):
             #We're not worried about orientation for location matching
             #use a fraction of the orientation in case we get two named
             # locations with the same x/y and different orientations
-            dist += math.pow(curPos[2] - loc['orientation'], 2) / 1000
+            # needs to be a very small fraction since rotation uses a different unit measurement
+            # than location does (degrees vs. meters)
+            dist += math.pow(curPos[2] - loc['orientation'], 2) / 100000
             dist = math.sqrt(dist)
             if name == None or dist < diff:
                 name = loc['name']
