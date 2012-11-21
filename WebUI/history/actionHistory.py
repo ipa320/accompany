@@ -5,7 +5,7 @@ from Data.sensors import StateResolver
 import cherrypy
 from cherrypy.lib import file_generator
 
-import io, mimetypes, simplejson
+import io, mimetypes, json
 
 class Data(object):
     exposed = True
@@ -33,7 +33,7 @@ class Data(object):
             raise cherrypy.HTTPError(400)
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return simplejson.dumps(obj)
+        return json.dumps(obj)
 
     def getEvents(self, key):
         events = self._dao.getHistory(key)

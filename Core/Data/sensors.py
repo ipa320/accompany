@@ -14,8 +14,21 @@ class StateResolver(object):
         if rule == 'Moving Average':
             return self.temperatureStatus(sensor) == 'On'
         elif rule == 'Boolean':
-            return sensor['value'] == 1
+            return self.evaluateBoolean(sensor['sensorTypeName'], value)
         elif rule.find('Watts') > -1:
+            return self.evaluateRule(rule, value)
+        else:
+            return None
+        
+    def evaluateBoolean(self, sensorType, value):            
+        if sensorType == 'CONTACT_REED':
+            return float(value) == 1
+        elif sensorType == 'CONTACT_PRESSUREMAT':
+            return float(value) != 1
+        else:
+            return None
+    
+    def evaluateRule(self, rule, value):
             try:
                 #Rules are in Java notation
                 pyRule = rule.replace('&&', 'and').replace('||', 'or')
@@ -25,8 +38,6 @@ class StateResolver(object):
             except Exception as e:
                 print >> sys.stderr, 'Error parsing rule "%(rule)s", Exception: %(exception)s' % { 'rule': rule, 'exception': e }
                 return None
-        else:
-            return None
     
     def resolveStates(self, sensorList):
         """returns [{'id': sensor['sensorId'], 'value': sensor['value'], 'state':'Open'/'', 'on':True/False/None},]"""
