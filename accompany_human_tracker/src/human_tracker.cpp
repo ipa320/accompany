@@ -20,8 +20,8 @@
 using namespace std;
 using namespace boost;
 
-#define FUSE_HUMAN_DETECTION_DISTANCE 3 // meters
-#define FILTER_NEW_TRACKS 5 // new tracks are published only when updated FILTER_NEW_TRACKS times
+#define FUSE_HUMAN_DETECTION_DISTANCE 1.5 // meters
+#define FILTER_NEW_TRACKS 6 // new tracks are published only when updated FILTER_NEW_TRACKS times
 
 #define MY_TRACKER	1
 #define TIM_TRACKER	2
@@ -81,6 +81,7 @@ DataAssociation<vector<Tracker::TrackPoint>,TrackPointsTraits,
 
 vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
+  //cout<<"humanLocationsToTrackpoints"<<endl;
   vector<Tracker::TrackPoint> trackPoints;
   for (unsigned int i=0;i<humanLocations->locations.size();i++)
   {
@@ -107,6 +108,7 @@ vector<Tracker::TrackPoint> humanLocationsToTrackpoints(const accompany_uva_msg:
 
 void fuseTracks(vector<Tracker::TrackPoint> &trackPoints,TrackPointsMap trackPointsMap)
 {
+  //cout<<"fuseTracks"<<endl;
   bool first=true;
   BOOST_FOREACH(TrackPointsMap::value_type &it, trackPointsMap) 
   {
@@ -144,6 +146,7 @@ void fuseTracks(vector<Tracker::TrackPoint> &trackPoints,TrackPointsMap trackPoi
 
 void updateTrackedHumans()
 {
+  //cout<<"updateTrackedHumans"<<endl;
   trackedHumans.trackedHumans.clear();
   accompany_uva_msg::TrackedHuman trackedHuman;
   trackedHuman.location.header.stamp=ros::Time::now();
@@ -170,6 +173,7 @@ void updateTrackedHumans()
 // receive human locations and track them
 void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& humanLocations)
 {
+  //cout<<"humanLocationsReceived"<<endl;
 #if TRACKER == MY_TRACKER // using simple MyTracker
 
   myTracker.trackHumans(humanLocations);
@@ -263,6 +267,7 @@ void match(cob_people_detection_msgs::DetectionArray &transformedIdentifiedHuman
 // receive identities and transform them to the camera's coordinate system
 void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& identifiedHumans)
 {
+  //cout<<"identityReceived"<<endl;
   cob_people_detection_msgs::DetectionArray transformedIdentifiedHumans=*identifiedHumans;
   for (unsigned int i=0;i<identifiedHumans->detections.size();i++)
   {
