@@ -11,7 +11,7 @@ class PollingThread(Thread):
 
     def cancel(self):
         self._cancelRequested = True
-    
+        
     def run(self):
         while not self._cancelRequested:
             if self._Thread__target:
@@ -25,11 +25,15 @@ class PollingThread(Thread):
                     self._Thread__target()
             
             if self._delayTime > 0:
+                if self._delayTime < 1:
+                    sleep = self._delayTime / 10
+                else:
+                    sleep = 0.05
                 delay = self._delayTime
                 while delay > 0 and not self._cancelRequested:
-                    time.sleep(0.1)
-                    delay -= 0.1
-                    
+                    time.sleep(sleep)
+                    delay -= sleep
+
         if self._completed != None:
             self._completed(*self._Thread__args, **self._Thread__kwargs)
 

@@ -12,7 +12,7 @@ class MapProcessor(object):
     def mapBase(self):
         return et.parse(self._baseFile)     
     
-    def getIcon(self, sensorType, sensorState=''):
+    def getIcon(self, sensorType, sensorOn=False):
             rhSensorDef = None
             if sys.version_info >= (2, 7):
                 rhSensorDef = self._sensorTypes.find('type[@name="%s"]' % (sensorType))
@@ -23,26 +23,24 @@ class MapProcessor(object):
                         break
             
             imgFile = None
+            imgPath = None
             if rhSensorDef != None and rhSensorDef.attrib.has_key('image'):
-                if sensorState != '':
-                    sensorState = '_' + sensorState
+                if sensorOn:
+                    imgPath = rhSensorDef.attrib['image'] + '_on' + ".svg"
+                else:
+                    imgPath = rhSensorDef.attrib['image'] + ".svg"
 
-                imgPath = rhSensorDef.attrib['image'] + sensorState + ".svg"
                 try:
                     imgFile = et.parse(os.path.join(self._root, imgPath))      
                 except Exception as e:
-                    if sensorState != '_off':
-                        print >> sys.stderr, "Error parsing %(name)s sensor image: %(error)s" % {'error' :e, 'name': sensorType }
-                if imgFile == None:
-                    imgPath = rhSensorDef.attrib['image'] + ".svg"
-                    try:
-                        imgFile = et.parse(os.path.join(self._root, imgPath))
-                        if sensorState != '_off':
-                            print "Using base image: %(path)s" % {'path' :imgPath }
-                    except Exception as e:
+                    if sensorOn:
                         print >> sys.stderr, "Error parsing %(name)s sensor image: %(error)s" % {'error' :e, 'name': sensorType }
 
             if imgFile == None:
+                if imgPath != None:
+                    print "Unable to load image from %(path)s, using default" % {'path' : imgPath }
+                else:
+                    print "Unable to load image for %(type)s, using default" % {'type': sensorType }
                 imgPath = 'icons/default.svg'
                 imgFile = et.parse(os.path.join(self._root, imgPath))
                 imgFile.find('{http://www.w3.org/2000/svg}text').text = sensorType            
@@ -76,10 +74,10 @@ class MapProcessor(object):
         cc = CoordinateConvertor()
         
         for element in elements:
-            if element.has_key('state'):
-                state = element['state']
+            if element.has_key('on'):
+                state = element['on']
             else:
-                state = ''
+                state = False
             (x, y, d) = cc.toSensorMap(element['location'])
             (img, height, width) = self.getIcon(element['type'], state)
 

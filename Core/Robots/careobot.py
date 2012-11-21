@@ -12,12 +12,13 @@ class PoseUpdater(PollingProcessor):
         self._robot = robot
         self._dao = DataAccess()
         self._ros = rosHelper.ROS()
+        self._lastState = { 'raised': None, 'lowered': None, 'empty': None }
     
-    def startPoseUpdates(self):
+    def start(self):
         print "Started polling pose for %s" % (self._robot.name)
         self._addPollingProcessor('pose ' + self._robot.name, self.checkUpdatePose, (self._robot, ), 2)
     
-    def stopPoseUpdates(self):        
+    def stop(self):        
         print "Stopped polling location for %s" % (self._robot.name)
         self._removePollingProcessor('pose ' + self._robot.name)
     
@@ -34,30 +35,42 @@ class PoseUpdater(PollingProcessor):
         elif name == 'down':
             trayIsLowered = True
             
-        if len(self._ros.getTopics('/range_0')) > 0:
+        range0 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
+        range1 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
+        range2 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
+        range3 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
+        if range0 != None and range1 != None and range2 != None and range3 != None:
             threshold = 0.2
-            range0 = self._ros.getSingleMessage('/range_0')['range']
-            range1 = self._ros.getSingleMessage('/range_1')['range']
-            range2 = self._ros.getSingleMessage('/range_2')['range']
-            range3 = self._ros.getSingleMessage('/range_3')['range']
-            if range0 > threshold or range1 > threshold or range2 > threshold or range3 > threshold:
+            if range0.range < threshold or range1.range < threshold or range2.range < threshold or range3.range < threshold:
                 trayIsEmpty = False
         else:
-            print "Phidget sensors not detected in running state"
+            print "Phidget sensors not ready before timeout"
         
-        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsLowered'"
-        args = (trayIsLowered)
-        self._dao.saveData(sql, args)
+        update = False
+        if self._lastState['lowered'] != trayIsLowered:
+            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsLowered'"
+            args = (trayIsLowered)
+            update = True
+            self._dao.saveData(sql, args)
         
-        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsRaised'"
-        args = (trayIsRaised)
-        self._dao.saveData(sql, args)
+        if self._lastState['raised'] != trayIsRaised:
+            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsRaised'"
+            args = (trayIsRaised)
+            update = True
+            self._dao.saveData(sql, args)
         
-        sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsEmpty'"
-        args = (trayIsEmpty)
-        self._dao.saveData(sql, args)
-        
-        print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)s" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
+        if self._lastState['empty'] != trayIsEmpty:
+            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsEmpty'"
+            args = (trayIsEmpty)
+            update = True
+            self._dao.saveData(sql, args)
+            
+        self._lastState['raised'] = trayIsRaised
+        self._lastState['lowered'] = trayIsLowered
+        self._lastState['empty'] = trayIsEmpty
+                
+        if update:
+            print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)s" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
 
 class CareOBot(object):
     _imageFormats = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'PCD', 'PCX', 'PDF', 'PNG', 'PPM', 'TIFF', 'XBM', 'XPM']
@@ -157,8 +170,8 @@ class CareOBot(object):
             else:
                 return (None, (None, None, None))
         
-        angle = round(math.degrees(rxy))        
-        pos = (x, y, angle)
+        angle = round(math.degrees(rxy))
+        pos = (round(x, 3), round(y, 3), angle)
         
         if raw:
             return pos
@@ -440,7 +453,7 @@ if __name__ == '__main__':
     
     rosHelper.ROS.configureROS(packageName='cob_script_server', packagePath='/home/nathan/git', rosMaster='http://cob3-2-pc1:11311')
     p = PoseUpdater()
-    p.startPoseUpdates()
+    p.start()
     
     while True:
         try:
@@ -448,4 +461,4 @@ if __name__ == '__main__':
         except KeyboardInterrupt:
             break
         
-    p.stopPoseUpdates()
+    p.stop()

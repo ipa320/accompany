@@ -1,7 +1,7 @@
 import handlers, os
 import states
 
-name = "Live Sensor View"
+name = "Live Sensor Details"
 __dir = os.path.dirname(os.path.realpath(__file__))
 
 root = handlers.Index(os.path.join(__dir, 'sensorstates.html'))

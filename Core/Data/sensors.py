@@ -5,12 +5,14 @@ class StateResolver(object):
 
     def __init__(self):
         self._dao = dataAccess.DataAccess()
+        self._movingAverageCache = {}
+        self._movingAverageCacheLength = 20
     
     def isSensorOn(self, sensor):
         rule = sensor['sensorRule']
         value = sensor['value']
         if rule == 'Moving Average':
-            return sensor['value'] > 0
+            return self.temperatureStatus(sensor) == 'On'
         elif rule == 'Boolean':
             return sensor['value'] == 1
         elif rule.find('Watts') > -1:
@@ -22,24 +24,21 @@ class StateResolver(object):
                 return eval(pyRule)
             except Exception as e:
                 print >> sys.stderr, 'Error parsing rule "%(rule)s", Exception: %(exception)s' % { 'rule': rule, 'exception': e }
-                return -1
+                return None
         else:
-            return -1
+            return None
     
     def resolveStates(self, sensorList):
-        """returns [{'id': sensor['sensorId'], 'value': sensor['value'], 'state':'on'},]"""
+        """returns [{'id': sensor['sensorId'], 'value': sensor['value'], 'state':'Open'/'', 'on':True/False/None},]"""
         states = []
                 
         for sensor in sensorList:
-            state = {'id': sensor['sensorId'], 'value': sensor['value']}
+            state = {
+                     'id': sensor['sensorId'], 
+                     'value': sensor['value'],
+                     'on': self.isSensorOn(sensor),
+                     'state': self.getDisplayState(sensor)}
             
-            ss = self.isSensorOn(sensor)
-            if ss == 1:
-                state['state'] = 'on'
-            elif ss == 0:
-                state['state'] = 'off'
-            else:
-                state['state'] = ''
             states.append(state)
             
         return states
@@ -71,74 +70,61 @@ class StateResolver(object):
             sensor['location'] = (x, y, '%sd' % (d))
             sensor['type'] = meta.get('type', '')
         
-        return sensorList    
+        return sensorList
     
-    # Callback methods that transform the transmitted value into
-    # the device's according status and generate a colour and a
-    # human-readable value for the web-based presentation.
-    def handler_contact_reed_status(self, channel_uuid, value):
-        if value == '1':
-            return 'Open'
+    def getDisplayState(self, sensor):
+        stype = sensor['sensorTypeName']
+        if stype == 'CONTACT_REED':
+            if float(sensor['value']) == 1:
+                return 'Open'
+            else:
+                return 'Closed'
+        elif stype == 'CONTACT_PRESSUREMAT':
+            if float(sensor['value']) == 1:
+                return 'Free'
+            else:
+                return 'Occupied'
+        elif stype == 'TEMPERATURE_MCP9700_HOT' or stype == 'TEMPERATURE_MCP9700_COLD':
+            #return str((float(sensor['value']) - 0.5) * 100.0) + 'C'
+            return self.temperatureStatus(sensor)
+        elif stype == 'POWER_CONSUMPTION_MONITOR':
+            if float(sensor['value']) > 0.1:
+                return 'On'
+            else:
+                return 'Off'
         else:
-            return 'Closed'
+            return str(sensor['value'])
 
-    def handler_contact_pressuremat_status(self, channel_uuid, value):
-        if value == '1':
-            return 'Free'
-        else:
-            return 'Occupied'
+    def temperatureStatus(self, sensor):
+        if not self._movingAverageCache.has_key(sensor['sensorId']):
+            self._movingAverageCache[sensor['sensorId']] = { 'values':[], 'status': False }
+            
+        valmem = self._movingAverageCache[sensor['sensorId']]['values']
+        status = self._movingAverageCache[sensor['sensorId']]['status']
 
-    def handler_temperature_mcp9700_value(self, channel_uuid, value):
-        return str((float(value) - 0.5) * 100.0) + 'C'
-
-    def handler_temperature_mcp9700_hot_status(self, channel_uuid, value):
-        channel_uuid = channel_uuid + '_handler_temperature_mcp9700_hot_status'
-        filter_length = 20 # Moving Average Filter of length 20
-        try:
-            valmem = self.handler_memory[channel_uuid]['values']
-            status = self.handler_memory[channel_uuid]['status']
-        except:
-            self.handler_memory[channel_uuid] = {}
-            self.handler_memory[channel_uuid]['values'] = []
-            valmem = self.handler_memory[channel_uuid]['values']
-            self.handler_memory[channel_uuid]['status'] = False
-            status = self.handler_memory[channel_uuid]['status']
-        temp = (float(value) - 0.5) * 100.0
+        temp = (float(sensor['value']) - 0.5) * 100.0
         valmem.append(temp)
-        if len(valmem) > filter_length:
+        
+        if len(valmem) > self._movingAverageCacheLength:
             valmem.pop(0)
-        avg = sum(valmem) / len(valmem)
-        if (status == False and temp >= 1.1 * avg):
-            status = True
-        elif (status == True and temp <= 0.9 * avg):
-            status = False
-        if status == True:
-            return 'On'
-        else:
-            return 'Off'
 
-    def handler_temperature_mcp9700_cold_status(self, channel_uuid, value):
-        channel_uuid = channel_uuid + '_handler_temperature_mcp9700_cold_status'
-        filter_length = 20 # Moving Average Filter of length 20
-        try:
-            valmem = self.handler_memory[channel_uuid]['values']
-            status = self.handler_memory[channel_uuid]['status']
-        except:
-            self.handler_memory[channel_uuid] = {}
-            self.handler_memory[channel_uuid]['values'] = []
-            valmem = self.handler_memory[channel_uuid]['values']
-            self.handler_memory[channel_uuid]['status'] = False
-            status = self.handler_memory[channel_uuid]['status']
-        temp = (float(value) - 0.5) * 100.0
-        valmem.append(temp)
-        if len(valmem) > filter_length:
-            valmem.pop(0)
         avg = sum(valmem) / len(valmem)
-        if (status == False and temp <= 0.9 * avg):
-            status = True
-        elif (status == True and temp >= 1.1 * avg):
-            status = False
-        if status == True:
+        
+        if sensor['sensorTypeName'] == 'TEMPERATURE_MCP9700_HOT':
+            if (status == False and temp >= 1.1 * avg):
+                status = True
+            elif (status == True and temp <= 0.9 * avg):
+                status = False
+        elif sensor['sensorTypeName'] == 'TEMPERATURE_MCP9700_COLD':
+            if (status == False and temp <= 0.9 * avg):
+                status = True
+            elif (status == True and temp >= 1.1 * avg):
+                status = False
+        else:
+            print >> sys.stderr, 'Unknown moving average sensor type: %s' % (sensor['sensorTypeName'])
+            status = None
+            
+        if status:
             return 'On'
         else:
             return 'Off'

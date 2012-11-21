@@ -294,35 +294,63 @@ class ActionHistory(object):
         return imageId
 
 class Sensors(object):
-    def __init__(self, sensorTable=None):
+    def __init__(self, sensorTable=None, sensorTypeTable=None, sensorLogTable=None, locationTable=None):
         from config import server_config
         self._sensorTable = sensorTable or server_config['mysql_sensor_table']
+        self._sensorTypeTable = sensorTypeTable or server_config['mysql_sensorType_table']
+        self._sensorLogTable = sensorLogTable or server_config['mysql_log_table']
+        self._locationTable = locationTable or server_config['mysql_location_table']
+        
+        self._sqlQuery = "SELECT `%(sensors)s`.*, `%(type)s`.`sensorType` as `sensorTypeName`, `%(loc)s`.`name` as `locationName` \
+                FROM `%(sensors)s` \
+                INNER JOIN `%(type)s` ON `%(sensors)s`.`sensorTypeId` = `%(type)s`.`sensorTypeId`\
+                INNER JOIN `%(loc)s` ON `%(loc)s`.`locationId` = `%(sensors)s`.`locationId`" % { 
+                                                                                 'sensors': self._sensorTable,
+                                                                                 'type': self._sensorTypeTable,
+                                                                                 'loc': self._locationTable }
         self._sql = SQLDao()
  
     def getSensor(self, sensorId):
-        sql = "SELECT * FROM `%s`" % (self._sensorTable)
+        sql = self._sqlQuery
         sql += " WHERE `sensorId` = %(sid)s" 
-        args = {'sid': sensorId}
+        args = {'sid': sensorId }
             
         return self._sql.getSingle(sql, args)
     
     def getSensorByName(self, sensorName):
-        sql = "SELECT * FROM `%s`" % (self._sensorTable)
+        sql = self._sqlQuery
         sql += " WHERE `name` = %(name)s" 
         args = {'name': sensorName}
             
         return self._sql.getSingle(sql, args)
     
     def findSensors(self, sensorName=None):
-        sql = "SELECT * FROM `%s`" % (self._sensorTable)
-        
         args = None
+        sql = self._sqlQuery
         if sensorName != None:
             sql += " WHERE `name` like %(name)s" 
             args = {'name': sensorName}
             
         return self._sql.getData(sql, args)
-                
+
+    def saveSensorLog(self, sensorId, value, status, timestamp, room='', channel=''):
+        sql = "INSERT INTO `%(log)s`" % { 'log': self._sensorLogTable }
+        sql += "(`timestamp`, `sensorId`, `room`, `channel`, `value`, `status`) \
+                    VALUES (%s, %s, %s, %s, %s, %s)"
+        
+        args = (            timestamp, 
+                            sensorId,
+                            room, 
+                            channel, 
+                            value, 
+                            status)
+        
+        if self._sql.saveData(sql, args) >= 0:
+            return True
+        else:
+            return False
+
+
 class Binary(object):
     def __init__(self, binaryTable=None, binaryIdCol=None):
         from config import server_config
@@ -529,7 +557,7 @@ class SQLDao(object):
             return default
 
     def _getCursor(self):
-        #get a new connection for each request
+        # get a new connection for each request
         conn = MySQLdb.connect(self._host, self._user, self._pass, self._db)
         
         return (conn, conn.cursor(MySQLdb.cursors.DictCursor))
@@ -546,8 +574,8 @@ class SQLDao(object):
         except Exception as e:
             cursor.close()
             conn.close()
-            #Server connection was forcibly severed from the server side
-            #retry the request
+            # Server connection was forcibly severed from the server side
+            # retry the request
             if e.args[0] == 2006:
                 return self.getData(sql, args, trimString)
             
@@ -567,8 +595,8 @@ class SQLDao(object):
         except MySQLdb.Error, e:
             cursor.close()
             conn.close()
-            #Server connection was forcibly severed from the server side
-            #retry the request
+            # Server connection was forcibly severed from the server side
+            # retry the request
             if e.args[0] == 2006:
                 return self.saveData(sql, args)
             

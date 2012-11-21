@@ -12,11 +12,11 @@ class LocationProcessor(PollingProcessor):
         self._updateLoc = lambda locid, x, y, orientation: True
         self._targetName = ''
     
-    def startLocationPolling(self):
+    def start(self):
         print "Started polling location for %s" % (self._targetName)
         self._addPollingProcessor('location', self.checkUpdateLocation, (self._curLoc, self._storedLoc, self._updateLoc), 2)
 
-    def stopLocationPolling(self):
+    def stop(self):
         print "Stopped polling location for %s" % (self._targetName)
         self._removePollingProcessor('location')
     
@@ -47,7 +47,7 @@ class LocationProcessor(PollingProcessor):
                 locid = None
             else:
                 locid = loc['locationId']
-            print "Updating %(target)s location to Name:%(name)s, X:%(x)s, Y:%(y)s" % dict({'target':self._targetName}.items() + locals().items())
+            print "Updating %(target)s location to Name:%(name)s, X:%(x)s, Y:%(y)s, O:%(orientation)s" % dict({'target':self._targetName}.items() + locals().items())
             updateLocation(locid, x, y, orientation)
 
 class RobotLocationProcessor(LocationProcessor):
@@ -88,10 +88,10 @@ class HumanLocationProcessor(LocationProcessor):
 if __name__ == '__main__':
     import sys
     lp = RobotLocationProcessor()
-    lp.startLocationPolling()
+    lp.start()
     while True:
         try:
             sys.stdin.read()
         except KeyboardInterrupt:
             break
-    lp.stopLocationPolling()
+    lp.stop()

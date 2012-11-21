@@ -45,45 +45,58 @@ uiHelper.prototype = {
 		dao.pollResponses(this.fill.bind(this), targetDiv);
 	},
 
-	fill : function(root, lastId, data) {
+	fill : function(root, data) {
 		$(root).empty();
 		
 		var table = $('<table></table>');
+        $(root).append(table);
+        
 		var head = $('<thead></thead>');
-		var row = $('<tr></tr>');
-		var col = $('<th></th>');
-		$(col).text = 'Room';
-		$(row).append(col);
-		var col = $('<th></th>');
-		$(col).text = 'Channel';
-		$(row).append(col);
-		var col = $('<th></th>');
-		$(col).text = 'Value';
-		$(row).append(col);
-		var col = $('<th></th>');
-		$(col).text = 'Status';
-		$(row).append(col);
-		$(head).append(row);
 		$(table).append(head);
+		
+		var row = $('<tr></tr>');
+		$(head).append(row);
+		
+		var col = $('<th></th>');
+		$(row).append(col);
+		$(col).text('Room');
+		
+		var col = $('<th></th>');
+		$(row).append(col);
+		$(col).text('Channel');
+		
+		var col = $('<th></th>');
+		$(row).append(col);
+		$(col).text('Value');
+		
+		var col = $('<th></th>');
+		$(row).append(col);
+		$(col).text('Status');
+		
 		var body = $('<tbody></tbody');
-        for (channel in data){
-        	row = $('<tr></tr>')
-        	$(row).prop('style', 'background-color:' + channel['color']);
-	    	var data = $('<td></td>')
-	    	$(data).text = channel['room'];
-	    	$(row).append(data);
+		$(table).append(body);
+		
+        for (key in data){
+        	var channel = data[key];
+        	var row = $('<tr></tr>')
+        	$(body).append(row);        	
+        	$(row).css('background-color', channel['color']);
+        	
+	    	var cell = $('<td></td>')
+	    	$(row).append(cell);
+	    	$(cell).text(channel['room']);
 	    	
-	    	data = $('<td></td>')
-	    	$(data).text = channel['channel'];
-	    	$(row).append(data);
+	    	cell = $('<td></td>')
+	    	$(row).append(cell);
+	    	$(cell).text(channel['channel']);
 	    	
-	    	data = $('<td></td>')
-	    	$(data).text = channel['value'];
-	    	$(row).append(data);
+	    	cell = $('<td></td>')
+	    	$(row).append(cell);
+	    	$(cell).text(channel['value']);
 	    	
-	    	data = $('<td></td>')
-	    	$(data).text = channel['status'];
-	    	$(row).append(data);
-        }
+	    	cell = $('<td></td>')
+	    	$(row).append(cell);
+	    	$(cell).text(channel['status']);
+    	}
 	},
 }

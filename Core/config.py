@@ -14,6 +14,7 @@ server_config = {
   
   'mysql_history_table':'ActionHistory',
   'mysql_sensorHistory_table':'SensorHistory',
+  'mysql_sensorType_table':'SensorType',
   'mysql_sensor_table':'Sensors',
   'mysql_location_table':'Locations',
   'mysql_robot_table':'Robot',
@@ -270,115 +271,103 @@ zigbee_devices = {
 ################################################################################
 geosystem_devices = {
   1: {                         # The "channel ID" delivered by the MySQL function
-    'id'  : 44,                # This ID is only relevant for logging
+    'id'  : 41,                # This ID is only relevant for logging
     'room': 'Other',           # Room name
     'name': 'Lights exterior', # Channel name
     'rule': 'p > 10'           # Device is "On", if power consumption is higher than 10 Watts
   },
   2: {
-    'id'  : 45,
+    'id'  : 42,
     'room': 'Other',
     'name': 'Upstairs Lights',
     'rule': 'p > 10'
   },
   3: {
-    'id'  : 46,
+    'id'  : 43,
     'room': 'Other',
     'name': 'Downstairs Lights',
     'rule': 'p > 10'
   },
   7: {
-    'id'  : 47,
+    'id'  : 44,
     'room': 'Kitchen',
     'name': 'Cooker',
     'rule': 'p > 10'
   },
   8: {
-    'id'  : 48,
+    'id'  : 45,
     'room': 'Other',
     'name': 'Garage',
     'rule': 'p > 5'
   },
   9: {
-    'id'  : 49,
+    'id'  : 46,
     'room': 'Other',
     'name': 'Sockets',
     'rule': 'p > 5'
   },
   10: {
-    'id'  : 50,
+    'id'  : 47,
     'room': 'Other',
     'name': 'Sockets Ext. and garden',
     'rule': 'p > 5'
   },
   12: {
-    'id'  : 51,
+    'id'  : 48,
     'room': 'Other',
     'name': 'Mains Supply',
     'rule': 'p > 10'
   },
   13: {
-    'id'  : 52,
+    'id'  : 49,
     'room': 'Living room (Sofa)',
     'name': '1 TV',
     'rule': 'p > 10'
   },
   14: {
-    'id'  : 53,
+    'id'  : 5,
     'room': 'Kitchen',
     'name': '2 Fridge Freezer',
     'rule': '(p > 10 and p < 50) or (p > 100)'
   },
   15: {
-    'id'  : 54,
+    'id'  : 51,
     'room': 'Kitchen',
     'name': '3 Kettle',
     'rule': 'p > 10'
   },
   16: {
-    'id'  : 55,
+    'id'  : 52,
     'room': 'Bedroom',
     'name': '4 Computer',
     'rule': 'p > 10'
   },
   17: {
-    'id'  : 56,
+    'id'  : 53,
     'room': 'Bedroom',
     'name': '5 Table Lamp',
     'rule': 'p > 10'
   },
   18: {
-    'id'  : 57,
+    'id'  : 54,
     'room': 'Kitchen',
     'name': '6 Microwave',
     'rule': 'p > 10'
   },
   19: {
-    'id'  : 58,
+    'id'  : 55,
     'room': 'Kitchen',
     'name': '7 Dishwasher',
     'rule': 'p > 10'
   },
   20: {
-    'id'  : 59,
+    'id'  : 56,
     'room': 'Kitchen',
     'name': 'Toaster',
     'rule': 'p > 10'
   },
-  21: {
-    'id'  : 60,
-    'room': 'Living room (Sofa)',
-    'name': '9 Living room light',
-    'rule': 'p > 5'
-  },
-  22: {
-    'id'  : 61,
-    'room': 'Other',
-    'name': '10 Rumba',
-    'rule': 'p > 10'
-  },
   24: {
-    'id'  : 62,
+    'id'  : 59,
     'room': 'Other',
     'name': '12 Doorbell',
     'rule': 'p > 1'

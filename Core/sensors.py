@@ -1,4 +1,4 @@
-from socket import AF_INET, SOCK_DGRAM, socket
+from socket import AF_INET, SOCK_DGRAM, socket, timeout
 from Data.dataAccess import SQLDao
 from Data.sensors import StateResolver
 
@@ -51,49 +51,43 @@ class ZigBee(PollingProcessor):
 		try:
 			data, _ = self.sock.recvfrom(10240, 0)
 		except Exception as e:
-			print e
+			if type(e) != timeout:
+				print e
 			return
 		
-		ar = data.split(' ')
+		(_, mac, channel, val) = data.split(' ')
 
+		mac = mac.lower()
+		channel = channel.upper()
+		
 		try:
-			_device = zigbee_devices[ar[1].lower()]['room']
+			_device = zigbee_devices[mac]['room']
 		except:
 			return
 
 		try:
-			_pin = zigbee_devices[ar[1].lower()][ar[2].upper()]['name']
-			_id = zigbee_devices[ar[1].lower()][ar[2].upper()]['id']
+			_pin = zigbee_devices[mac][channel]['name']
+			_id = zigbee_devices[mac][channel]['id']
 		except:
 			return
 
-		if ar[3] != '-' and ar[3] != '':
-			_type = zigbee_devices[ar[1].lower()][ar[2].upper()]['type']
-			_uuid = 'ZigBee_' + ar[1].lower() + '_' + ar[2].upper()
-
-			if _type == 'CONTACT_REED':
-				_value = ar[3]
-				_status = self._sr.handler_contact_reed_status(_uuid, ar[3])
-				#_color = self.handler_contact_reed_color(_uuid, ar[3])
-			elif _type == 'CONTACT_PRESSUREMAT':
-				_value = ar[3]
-				_status = self._sr.handler_contact_pressuremat_status(_uuid, ar[3])
-				#_color = self.handler_contact_pressuremat_color(_uuid, ar[3])
-			elif _type == 'TEMPERATURE_MCP9700_HOT':
-				_value = self._sr.handler_temperature_mcp9700_value(_uuid, ar[3])
-				_status = self._sr.handler_temperature_mcp9700_hot_status(_uuid, ar[3])
-				#_color = self.handler_temperature_mcp9700_color(_uuid, ar[3])
-			elif _type == 'TEMPERATURE_MCP9700_COLD':
-				_value = self._sr.handler_temperature_mcp9700_value(_uuid, ar[3])
-				_status = self._sr.handler_temperature_mcp9700_cold_status(_uuid, ar[3])
-				#_color = self.handler_temperature_mcp9700_color(_uuid, ar[3])
+		if val != '-' and val != '':
+			_type = zigbee_devices[mac][channel]['type']
+			_uuid = '%s_%s' % (mac , channel)
+			if _type == 'TEMPERATURE_MCP9700_HOT' or _type == 'TEMPERATURE_MCP9700_COLD':
+				_value = str((float( val) - 0.5) * 100.0)
 			else:
-				_value = ar[3]
-				_status = 'undefined'
-				#_color = '000000'
+				_value = val
+			
+			_status = self._sr.getDisplayState({'sensorTypeName': _type, 'value': _value, 'sensorId': _id })
 
-#			print 'ZigBee thread: %s %s: %s %s' % (_device, _pin, _value, _status)
-			self._channels[_uuid] = { 'id': _id, 'room': _device, 'channel': _pin, 'value': _value, 'status': _status}#, 'color': _color }
+			self._channels[_uuid] = { 
+									'id': _id, 
+									'room': _device, 
+									'channel': _pin, 
+									'value': _value, 
+									'status': _status
+									}
 
 ################################################################################
 #
@@ -105,9 +99,10 @@ class ZigBee(PollingProcessor):
 ################################################################################
 class GEOSystem(PollingProcessor):
 	
-	def __init__ (self, hostName, userName, password, database):
+	def __init__ (self, hostName, userName, password, database, query):
 		super(GEOSystem, self).__init__()
 		self._sql = SQLDao(hostName, userName, password, database)		
+		self._geoQuery = query
 		self._channels = {}
 
 	@property
@@ -123,7 +118,7 @@ class GEOSystem(PollingProcessor):
 		self._removePollingProcessor('geoSensors')
 
 	def pollGeoSystem(self):
-		rows = self._sql.getData(server_config['mysql_geo_query'])
+		rows = self._sql.getData(self._geoQuery)
 		for row in rows:
 			try:
 				_device = geosystem_devices[row['ID']]['room']
@@ -137,16 +132,21 @@ class GEOSystem(PollingProcessor):
 
 			#p is used in the eval rule
 			p = row['Power']
+			if p > 0:
+				pass
 			_state = eval(geosystem_devices[row['ID']]['rule'])
 			if _state:
 				_state = 'On'
-				#_color = '00FF00'
 			else:
 				_state = 'Off'
-				#_color = 'FF0000'
 
-#				print 'MySQL thread: %s: %s (%4.1f Watts)' % (_device, _state, row[1])
-			self._channels['MySQL_' + str(row['ID'])] = { 'id': _id, 'room': _device, 'channel': _name, 'value': '%4.1f Watts' % row['Power'], 'status': _state } #, 'color': _color }
+			self._channels[row['ID']] = { 
+										'id': _id, 
+										'room': _device, 
+										'channel': _name, 
+										'value': '%.1f' % row['Power'], 
+										'status': _state 
+										}
 
 if __name__ == '__main__':
 	from config import server_config
@@ -155,9 +155,10 @@ if __name__ == '__main__':
 	z.start()
 	
 	g = GEOSystem(server_config['mysql_geo_server'],
-							server_config['mysql_geo_user'],
-							server_config['mysql_geo_password'],
-							server_config['mysql_geo_db'])
+                            server_config['mysql_geo_user'],
+                            server_config['mysql_geo_password'],
+                            server_config['mysql_geo_db'],
+                            server_config['mysql_geo_query'])
 	#g.start()
 	
 	while True:

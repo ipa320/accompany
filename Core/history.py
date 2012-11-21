@@ -1,5 +1,5 @@
 import datetime
-from Data.dataAccess import DataAccess, SQLDao
+from Data.dataAccess import DataAccess
 from threading import Thread
 from extensions import PollingThread, PollingProcessor
 from Robots.careobot import CareOBot
@@ -62,50 +62,68 @@ class ActionHistory(object):
 # database table.
 #
 ################################################################################
-class SensorHistory(PollingProcessor):    
-    def __init__ (self, channelFunc):
-        super(SensorHistory, self).__init__()
-        self._dao = SQLDao()
-        self._channelFunc = channelFunc
+class SensorLog(PollingProcessor):    
+    def __init__ (self, channels, name=''):
+        super(SensorLog, self).__init__()
+        self._dao = DataAccess().sensors
+        self._channels = channels
+        self._logCache = {}
+        self._name = name
                 
-    # This method handles the actual writing procedure.
-    def writechannel(self, channel):
-        dateNow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        sql = "INSERT INTO `%s` (`timestamp`, `sensorId`, `room`, `channel`, `value`, `status`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s')"
-        args = (            dateNow, 
-                            channel['id'],
-                            channel['room'], 
-                            channel['channel'], 
-                            channel['value'], 
-                            channel['status'])
-        
-        if self._dao.saveData(sql, args) > 0:
-            return True
+    def start(self):
+        if self._name != '':
+            print "Started polling sensor changes for %s" % (self._name)
         else:
-            return False
+            print "Started polling sensor changes"
+        self._addPollingProcessor('sensorHistory', self.checkUpdateSensors, (self._channels, ), 0.01)
 
-    def startHistoryPolling(self):
-        print "Started polling sensor changes"
-        self._addPollingProcessor('sensorHistory', self.checkUpdateSensors, (self._channelFunc), 0.01)
+    def stop(self):
+        if self._name != '':
+            print "Stopped polling sensor changes for %s" % (self._name)
+        else:
+            print "Stopped polling sensor changes"
 
-    def stopHistoryPolling(self):
-        print "Stopped polling sensor changes"
         self._removePollingProcessor('sensorHistory')
 
-    def checkUpdateSensors(self, channelFunc):
-        logged_channels = {}
+    def checkUpdateSensors(self, channels):
+        for k in channels.keys():
+            if not self._logCache.has_key(k):
+                self._logCache.setdefault(k, { 'value': None, 'status': ''})
+            if self._logCache[k]['status'] != channels[k]['status']:
+                timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                success = self._dao.saveSensorLog(
+                                                  channels[k]['id'], 
+                                                  channels[k]['value'], 
+                                                  channels[k]['status'].lower(),
+                                                  timestamp,
+                                                  channels[k]['room'],
+                                                  channels[k]['channel'])
+                if success:
+                    self._logCache[k]['value'] = channels[k]['value']
+                    self._logCache[k]['status'] = channels[k]['status']
 
-        channels = channelFunc()
-        key = channels.keys()
-        for k in key:
-            try:
-#               if logged_channels[k]['value'] != channels[k]['value'] or 
-                if logged_channels[k]['status'] != channels[k]['status']:
-                    self.writechannel(channels[k])
-                    logged_channels[k]['value'] = channels[k]['value']
-                    logged_channels[k]['status'] = channels[k]['status']
-            except:
-                self.writechannel(channels[k])
-                logged_channels.setdefault(k, {})
-                logged_channels[k].setdefault('value', channels[k]['value'])
-                logged_channels[k].setdefault('status', channels[k]['status'])
+if __name__ == '__main__':
+    import sys
+    import config
+    import sensors
+    z = sensors.ZigBee(config.server_config['udp_listen_port'])
+    g = sensors.GEOSystem(config.server_config['mysql_geo_server'],
+                            config.server_config['mysql_geo_user'],
+                            config.server_config['mysql_geo_password'],
+                            config.server_config['mysql_geo_db'],
+                            config.server_config['mysql_geo_query'])
+    sz = SensorLog(z.channels)
+    sg = SensorLog(g.channels)
+    z.start()
+    #g.start()
+    sz.start()
+    #sg.start()
+    while True:
+        try:
+            sys.stdin.read()
+        except KeyboardInterrupt:
+            break
+    sz.stop()
+    sg.stop()
+    g.stop()
+    #z.stop()

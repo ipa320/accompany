@@ -10,7 +10,7 @@ class ROS(object):
         if not self._rospy.core.is_initialized():
             self._rospy.init_node('rosHelper', anonymous=True, disable_signals=True)
         
-    def getSingleMessage(self, topic, dataType=None, retryOnFailure=1):
+    def getSingleMessage(self, topic, dataType=None, retryOnFailure=1, timeout=None):
         
         try:
             if dataType == None:
@@ -21,14 +21,19 @@ class ROS(object):
             subscriber = self._rospy.Subscriber(topic, dataType, callback.callback)
             
             while not callback.done:
-                time.sleep(0.1)
+                if timeout != None:
+                    if timeout < 0:
+                        break
+                    else:
+                        timeout -= 0.01
+                time.sleep(0.01)                
     
             subscriber.unregister()
-    
+
             return callback.data
         except:
             if retryOnFailure > 0:
-                return self.getSingleMessage(topic, dataType, retryOnFailure - 1)
+                return self.getSingleMessage(topic, dataType, retryOnFailure - 1, timeout)
             else:
                 return None
     
@@ -60,10 +65,10 @@ class ROS(object):
             msgCls = getattr(ns, cls)
             return msgCls
         except Exception as e:
-            raise Exception('Error occured while loading message class: %s' % (e.message))
+            raise Exception('Error occured while loading message class: %s' % (e))
         
     @staticmethod
-    def configureROS(version='electric', packagePath=None, packageName=None, rosMaster='http://localhost:11311', overlayPath=None):
+    def configureROS(version='electric', packagePath=None, packageName=None, rosMaster='http://cob3-2-pc1:11311', overlayPath=None):
         if 'ROS_MASTER_URI' not in os.environ.keys():
             os.environ['ROS_MASTER_URI'] = rosMaster
 

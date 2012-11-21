@@ -7,6 +7,7 @@ import cherrypy
 import history
 import questions
 import sensorMap
+import sensorDetails
 import listRoot
 
 from config import server_config
@@ -26,6 +27,7 @@ root = listRoot.root
 listRoot.setLinks((
               ('history', history), 
               ('question', questions),
+              ('details', sensorDetails),
               ('liveMap', sensorMap)))
 
 #from processor import RobotLocationProcessor

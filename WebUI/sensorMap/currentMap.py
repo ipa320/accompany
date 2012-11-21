@@ -25,7 +25,7 @@ class MapImage(object):
         robot = {
                'type':'robot', 
                'name':cob['robotName'], 
-               'location': (cob['xCoord'], cob['yCoord'], '%sd' % (cob['orientation'])), 
+               'location': (cob['xCoord'], cob['yCoord'], '%sd' % (cob['orientation'] * -1)), #svg rotates opposite of our cooridnate system
                'id':'r%s' % (cob['robotId'])
                }
 
