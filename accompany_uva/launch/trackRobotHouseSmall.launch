@@ -26,11 +26,11 @@
 
   <!-- localise camera1 -->
   <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
-        args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 2 -v
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 8 -v
               image:=/camera1/small"/>
   <!-- localise camera3 -->
   <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3"
-        args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 2 -v
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 8 -v
               image:=/camera3/small"/>
 
 
