@@ -99,6 +99,10 @@ class SensorLog(PollingProcessor):
                                                   channels[k]['room'],
                                                   channels[k]['channel'])
                 if success:
+                    print "Updated sensor log for %(id)s to %(status)s" % { 
+                                                                           'id':channels[k]['channel'], 
+                                                                           'status': channels[k]['status']
+                                                                           }
                     self._logCache[k]['value'] = channels[k]['value']
                     self._logCache[k]['status'] = channels[k]['status']
 

@@ -1,3 +1,4 @@
+import sys
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
 from Data.dataAccess import SQLDao, Sensors
 from Data.sensors import StateResolver
@@ -31,6 +32,7 @@ class ZigBee(PollingProcessor):
 		self._sr = StateResolver()
 		self._sensorDao = Sensors()
 		self._sensors = self._sensorDao.findSensors()
+		self._warned = []
 
 	@property
 	def channels(self):
@@ -61,23 +63,20 @@ class ZigBee(PollingProcessor):
 		mac = mac.lower()
 		channel = channel.upper()
 		
-		sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(mac) + str(channel))
 		try:
-			#_device = zigbee_devices[mac]['room']
-			_device = sensor['locationName']
-		#except:
-		#	return
-
-		#try:
-			#_pin = zigbee_devices[mac][channel]['name']
-			#_id = zigbee_devices[mac][channel]['id']
-			_pin = sensor['name']
-			_id = sensor['sensorId']
-		except:
+			sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(mac) + str(channel))
+		except StopIteration:
+			#Only warn once, or we'll flood the console
+			if str(mac) + str(channel) not in self._warned:
+				print >> sys.stderr, "Warning: Unable to locate sensor record for zigbee sensor ID: %s" % (str(mac) + str(channel))
+				self._warned.append(str(mac) + str(channel))
 			return
 
+		_device = sensor['locationName']
+		_pin = sensor['name']
+		_id = sensor['sensorId']
+
 		if val != '-' and val != '':
-			#_type = zigbee_devices[mac][channel]['type']
 			_type = sensor['sensorTypeName']
 			_uuid = '%s_%s' % (mac , channel)
 			if _type == 'TEMPERATURE_MCP9700_HOT' or _type == 'TEMPERATURE_MCP9700_COLD':
@@ -113,6 +112,7 @@ class GEOSystem(PollingProcessor):
 		self._sensors = self._sensorDao.findSensors()
 		self._sr = StateResolver()
 		self._channels = {}
+		self._warned = []
 
 	@property
 	def channels(self):		
@@ -129,29 +129,31 @@ class GEOSystem(PollingProcessor):
 	def pollGeoSystem(self):
 		rows = self._geoDao.getData(self._geoQuery)
 		for row in rows:
-			sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == row['ID'])
 			try:
-				#_device = geosystem_devices[row['ID']]['room']
-				#_name = geosystem_devices[row['ID']]['name']
-				#_id = geosystem_devices[row['ID']]['id']
-				_device = sensor['locationName']
-				_name = sensor['name']
-				_id = sensor['sensorId']
-			except:
+				sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(row['ID']))
+			except StopIteration:
+				#Only warn once, or we'll flood the console
+				if row['ID'] not in self._warned:
+					print >> sys.stderr, "Warning: Unable to locate sensor record for geo sensor %s. ID: %s" % (row['Description'], row['ID'])
+					self._warned.append(row['ID'])
 				continue
+			
+			_device = sensor['locationName']
+			_name = sensor['name']
+			_id = sensor['sensorId']
 
-			if _name != row['Description']:
-				print 'Warning: Channel name differs from Geo-System description: %s / %s' % (_name, row['Description'])
+			#Only warn once, or we'll flood the console
+			if _name != row['Description'] and row['ID'] not in self._warned:
+				print >> sys.stderr, 'Warning: Channel name differs from Geo-System description: %s / %s' % (_name, row['Description'])
+				self._warned.append(row['ID'])
 
-			#p is used in the eval rule
-			#p = row['Power']
-			#_state = eval(geosystem_devices[row['ID']]['rule'])
-			#if _state:
-			#	_state = 'On'
-			#else:
-			#	_state = 'Off'
-			_state = self._sr.evaluateRule(sensor['rule'], row['Power'])
-
+			_state = self._sr.evaluateRule(sensor['sensorRule'], row['Power'])
+			
+			if _state:
+				_state = 'On'
+			else:
+				_state = 'Off'
+			
 			self._channels[row['ID']] = { 
 										'id': _id, 
 										'room': _device, 
@@ -162,7 +164,6 @@ class GEOSystem(PollingProcessor):
 
 if __name__ == '__main__':
 	from config import server_config
-	import sys
 	z = ZigBee(server_config['udp_listen_port'])
 	z.start()
 	

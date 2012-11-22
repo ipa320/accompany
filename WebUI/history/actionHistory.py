@@ -5,8 +5,31 @@ from Data.sensors import StateResolver
 import cherrypy
 from cherrypy.lib import file_generator
 
-import io, mimetypes, json
+import io, mimetypes, json, os
 
+class Root(object):
+    exposed = True
+    
+    def __init__(self):
+        self._index = 'actionHistory.html'
+    
+    def GET(self, *args, **kwargs):
+        if not cherrypy.request.path_info.endswith('/'):
+            raise cherrypy.HTTPRedirect(cherrypy.request.path_info + '/')
+        
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), self._index)
+        f = open(path)
+        text = f.read()
+        f.close()
+        
+        cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(path)[0]
+        
+        if not kwargs.has_key('tags'):
+            return text
+        else:
+            #extremely dangerous and hacky way to do this...
+            return text.replace("dao.getEvents('')", "dao.getEvents('', '%s')" % kwargs['tags'])
+        
 class Data(object):
     exposed = True
     
@@ -40,6 +63,23 @@ class Data(object):
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
         return json.dumps(obj)
+    
+    def POST(self, *args, **kwargs):
+        request = json.loads(cherrypy.request.body.read())
+        if not request.has_key('historyId'):
+            raise cherrypy.HTTPError(400)
+        else:
+            historyId = request['historyId']
+            tags = request['tags']
+            if type(tags) != tuple and type(tags) != list:
+                tags = (tags, )
+            if type(tags) == list:
+                tags = tuple(tags)
+            if self._dao.actionHistory.updateTags(historyId, tags) >= 0:
+                return 'OK'
+            else:
+                raise cherrypy.HTTPError(500)
+
 
     def getEvents(self, key, tags):
         events = self._dao.getHistory(key, tags)
@@ -60,6 +100,7 @@ class Images(object):
     
     def __init__(self):
         self._dao = DataAccess()
+        self._basePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'images')
         
     def GET(self, *args, **kwargs):
         if len(args) < 1:
@@ -68,9 +109,14 @@ class Images(object):
         img = self._dao.getBinary(args[0])
         
         if img['data'] == None:
-            raise cherrypy.HTTPError(404)
-        
-        data = io.BytesIO(img['data'])
+            path = os.path.join(self._basePath, args[0])
+            if os.path.exists(path):
+                data = io.FileIO(path)
+            else:
+                raise cherrypy.HTTPError(404)
+        else:
+            data = io.BytesIO(img['data'])
+
         cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(img['meta']['name'] + '.' + img['meta']['type'])[0]
         return file_generator(data)
 

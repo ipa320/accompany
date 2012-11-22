@@ -16,7 +16,7 @@ conf = {
     'global': {
         'server.socket_host': '0.0.0.0',
         'server.socket_port': server_config['http_port'],
-        'environment': 'production'
+        #'environment': 'production'
     },
     '/': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),
@@ -25,10 +25,11 @@ conf = {
 
 root = listRoot.root
 listRoot.setLinks((
-              ('history', history), 
+              ('history', history),
               ('question', questions),
               ('details', sensorDetails),
               ('liveMap', sensorMap)))
+listRoot.setLink('Important History', 'history/?tags=important')
 
 #from processor import RobotLocationProcessor
 #lp = RobotLocationProcessor()

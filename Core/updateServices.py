@@ -26,16 +26,16 @@ if __name__ == '__main__':
     g.start()
     sg.start()
 
-    l.start()
-    rp.start()
+    #l.start()
+    #rp.start()
 
     while True:
         try:
             sys.stdin.read()
         except KeyboardInterrupt:
             break
-    rp.stop()
-    l.stop()
+    #rp.stop()
+    #l.stop()
 
     sg.stop()
     g.stop()

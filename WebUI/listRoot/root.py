@@ -15,3 +15,6 @@ def setLinks(links):
 
     root.js.links = LinkData(links)
     return root
+
+def setLink(title, path):
+    root.js.links.addLink(title, path)

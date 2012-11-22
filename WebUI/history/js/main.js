@@ -4,18 +4,19 @@ function dataHelper() {
 dataHelper.prototype = {
 	getEvents : function(key, tag) {
 		var eventData = null;
-		var url = 'data/events/?';
+		var args = {};
 		if (key != undefined && key != null && key != '') {
-			url += 'key=' + key;
+			args['key'] = key;
 		}
 
 		if (tag != undefined && key != null && tag != '') {
-			url += '?tags=' + tag;
+			args['tags'] = tag;
 		}
 		
 		$.ajax({
 			//Key not currently implemented
-			url : url,
+			url : 'data/events/',
+			data : args,
 			dataType : 'json',
 			async : false,
 			success : function(data, textStatus, jqXHR) {
@@ -25,6 +26,34 @@ dataHelper.prototype = {
 
 		return eventData;
 	},
+	
+	setTags : function(historyId, tags) {
+		var url = 'data/tags'
+		var result = {};
+		var obj = {
+			'historyId' : historyId,
+			'tags' : tags
+		};
+		$.ajax({
+			url : url,
+			data : JSON.stringify(obj),
+			async : false,
+			contentType : 'application/json',
+			error : function(jqXHR, status, error) {
+				result = {
+					status : status,
+					error : jqXHR.responseText
+				};
+			},
+			success : function(data, status, jqXHR) {
+				result = {
+					status : status,
+					data : data
+				};
+			},
+			type : 'POST'
+		});
+	}
 }
 
 function uiHelper() {
@@ -86,12 +115,30 @@ uiHelper.prototype = {
 						}
 					}
 
-					if (event['tags'] != undefined && event['tags'].length > 0) {
+					//if (event['tags'] != undefined && event['tags'].length > 0) {
 						details.append(this.createListItem('group', 'Event Tags'));
-						for (index in event['tags']) {
-							details.append(this.createListItem(null, event['tags'][index]));
+						var url = ''
+						if (event['tags'] != undefined && event['tags'].indexOf('important') >= 0) {
+							url = 'images/favorite.png';
+						} else {
+							url = 'images/addfavorite.png';
 						}
-					}
+						
+						var img = $('<img></img>');
+						$(img).prop('src', url);
+						var self = this;
+						$(img).attr('eventId', event['id']); 
+						$(img).click(function() {
+							self.toggleImportant(this);
+						});
+						
+						details.append(this.createListItem(null, img));
+						
+						//When we support more tags, list them instead of icons
+						//for (index in event['tags']) {
+							//details.append(this.createListItem(null, event['tags'][index]));
+						//}
+					//}
 
 					if (event['sensorMapUrl'] != undefined) {
 						details.append(this.createListItem('group', 'Sensor Map'));
@@ -149,6 +196,19 @@ uiHelper.prototype = {
 		return node;
 	},
 
+	toggleImportant : function(image) {
+		//Really hacky way of checking the tag status
+		var dao = new dataHelper()
+		var historyId = $(image).attr('eventId');
+		if($(image).prop('src').indexOf('addfavorite.png') > 0) {
+			$(image).prop('src', $(image).prop('src').replace('addfavorite.png', 'favorite.png'));
+			dao.setTags(historyId, ['important'])
+		} else {
+			$(image).prop('src', $(image).prop('src').replace('favorite.png', 'addfavorite.png'));
+			dao.setTags(historyId, [])
+		}
+	},
+	
 	toggleSize : function(image, forceSmall) {
 		if (forceSmall == undefined) {
 			forceSmall = false;
