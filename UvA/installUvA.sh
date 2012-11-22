@@ -46,11 +46,11 @@ make -j 4
 sudo make install
 
 # gscam
-cd ~/ros/accompany/UvA/dependencies/gscam
 rosdep install gscam
-rosmake
+rosmake gscam
 
 # skeleton_marker
+cd ~/ros
 svn checkout http://pi-robot-ros-pkg.googlecode.com/svn/trunk/skeleton_markers
 rosdep install skeleton_markers
 rosmake skeleton_markers
@@ -78,8 +78,8 @@ rosmake accompany_static_camera_localisation
 
 # Test
 # downloads prerecorded video and does detection and tracking
-roscd accompany/UvA/startScripts/
-./startTestNonGSCam
+roscd accompany_uva/scripts
+./startTestRobotHouse.sh
 
 # tracks humans and identities using artificial data
 roslaunch accompany_human_tracker testTracker.launch
