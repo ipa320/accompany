@@ -1,7 +1,7 @@
 from Data.dataAccess import DataAccess
 
 import cherrypy
-import simplejson
+import json
 
 class Data(object):
     exposed = True
@@ -28,10 +28,10 @@ class Data(object):
             obj = {'query': 'none'}
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return simplejson.dumps(obj)
+        return json.dumps(obj)
 
     def POST(self, *args, **kwargs):
-        request = simplejson.loads(cherrypy.request.body.read())
+        request = json.loads(cherrypy.request.body.read())
         if not request.has_key('response'):
             raise cherrypy.HTTPError(400)
         else:

@@ -1,5 +1,5 @@
 import cherrypy
-import simplejson
+import json
 
 class LinkData(object):
     exposed = True
@@ -17,4 +17,4 @@ class LinkData(object):
                           })
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return simplejson.dumps(obj)
+        return json.dumps(obj)

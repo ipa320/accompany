@@ -2,11 +2,20 @@ function dataHelper() {
 }
 
 dataHelper.prototype = {
-	getEvents : function(key) {
+	getEvents : function(key, tag) {
 		var eventData = null;
+		var url = 'data/events/?';
+		if (key != undefined && key != null && key != '') {
+			url += 'key=' + key;
+		}
+
+		if (tag != undefined && key != null && tag != '') {
+			url += '?tags=' + tag;
+		}
+		
 		$.ajax({
 			//Key not currently implemented
-			url : 'data/events/' + key,
+			url : url,
 			dataType : 'json',
 			async : false,
 			success : function(data, textStatus, jqXHR) {
@@ -74,6 +83,13 @@ uiHelper.prototype = {
 						details.append(this.createListItem('group', 'Other Information'));
 						for (index in event['parameters']) {
 							details.append(this.createListItem(null, event['parameters'][index]['name'] + ': ' + event['parameters'][index]['value']));
+						}
+					}
+
+					if (event['tags'] != undefined && event['tags'].length > 0) {
+						details.append(this.createListItem('group', 'Event Tags'));
+						for (index in event['tags']) {
+							details.append(this.createListItem(null, event['tags'][index]));
 						}
 					}
 

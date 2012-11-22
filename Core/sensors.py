@@ -1,9 +1,8 @@
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
-from Data.dataAccess import SQLDao
+from Data.dataAccess import SQLDao, Sensors
 from Data.sensors import StateResolver
 
 from extensions import PollingProcessor
-from config import zigbee_devices, geosystem_devices
 
 ################################################################################
 #
@@ -30,7 +29,9 @@ class ZigBee(PollingProcessor):
 		self._handler_memory = {}
 		self._channels = {}
 		self._sr = StateResolver()
-		
+		self._sensorDao = Sensors()
+		self._sensors = self._sensorDao.findSensors()
+
 	@property
 	def channels(self):
 		if self._channels == None:
@@ -60,19 +61,24 @@ class ZigBee(PollingProcessor):
 		mac = mac.lower()
 		channel = channel.upper()
 		
+		sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(mac) + str(channel))
 		try:
-			_device = zigbee_devices[mac]['room']
-		except:
-			return
+			#_device = zigbee_devices[mac]['room']
+			_device = sensor['locationName']
+		#except:
+		#	return
 
-		try:
-			_pin = zigbee_devices[mac][channel]['name']
-			_id = zigbee_devices[mac][channel]['id']
+		#try:
+			#_pin = zigbee_devices[mac][channel]['name']
+			#_id = zigbee_devices[mac][channel]['id']
+			_pin = sensor['name']
+			_id = sensor['sensorId']
 		except:
 			return
 
 		if val != '-' and val != '':
-			_type = zigbee_devices[mac][channel]['type']
+			#_type = zigbee_devices[mac][channel]['type']
+			_type = sensor['sensorTypeName']
 			_uuid = '%s_%s' % (mac , channel)
 			if _type == 'TEMPERATURE_MCP9700_HOT' or _type == 'TEMPERATURE_MCP9700_COLD':
 				_value = str((float( val) - 0.5) * 100.0)
@@ -101,8 +107,11 @@ class GEOSystem(PollingProcessor):
 	
 	def __init__ (self, hostName, userName, password, database, query):
 		super(GEOSystem, self).__init__()
-		self._sql = SQLDao(hostName, userName, password, database)		
+		self._geoDao = SQLDao(hostName, userName, password, database)		
 		self._geoQuery = query
+		self._sensorDao = Sensors()
+		self._sensors = self._sensorDao.findSensors()
+		self._sr = StateResolver()
 		self._channels = {}
 
 	@property
@@ -118,12 +127,16 @@ class GEOSystem(PollingProcessor):
 		self._removePollingProcessor('geoSensors')
 
 	def pollGeoSystem(self):
-		rows = self._sql.getData(self._geoQuery)
+		rows = self._geoDao.getData(self._geoQuery)
 		for row in rows:
+			sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == row['ID'])
 			try:
-				_device = geosystem_devices[row['ID']]['room']
-				_name = geosystem_devices[row['ID']]['name']
-				_id = geosystem_devices[row['ID']]['id']
+				#_device = geosystem_devices[row['ID']]['room']
+				#_name = geosystem_devices[row['ID']]['name']
+				#_id = geosystem_devices[row['ID']]['id']
+				_device = sensor['locationName']
+				_name = sensor['name']
+				_id = sensor['sensorId']
 			except:
 				continue
 
@@ -131,14 +144,13 @@ class GEOSystem(PollingProcessor):
 				print 'Warning: Channel name differs from Geo-System description: %s / %s' % (_name, row['Description'])
 
 			#p is used in the eval rule
-			p = row['Power']
-			if p > 0:
-				pass
-			_state = eval(geosystem_devices[row['ID']]['rule'])
-			if _state:
-				_state = 'On'
-			else:
-				_state = 'Off'
+			#p = row['Power']
+			#_state = eval(geosystem_devices[row['ID']]['rule'])
+			#if _state:
+			#	_state = 'On'
+			#else:
+			#	_state = 'Off'
+			_state = self._sr.evaluateRule(sensor['rule'], row['Power'])
 
 			self._channels[row['ID']] = { 
 										'id': _id, 

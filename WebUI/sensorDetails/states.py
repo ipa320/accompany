@@ -3,7 +3,7 @@ from Data.sensors import StateResolver
 
 from operator import itemgetter
 import cherrypy
-import simplejson
+import json
 
 class States(object):
     def __init__(self):
@@ -29,7 +29,7 @@ class States(object):
                              })
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return simplejson.dumps(elements)
+        return json.dumps(elements)
 
     def getBackgroundColor(self, sensor):
         stype = sensor['sensorTypeName']

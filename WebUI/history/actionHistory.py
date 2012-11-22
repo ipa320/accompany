@@ -5,7 +5,7 @@ from Data.sensors import StateResolver
 import cherrypy
 from cherrypy.lib import file_generator
 
-import io, mimetypes, simplejson
+import io, mimetypes, json
 
 class Data(object):
     exposed = True
@@ -19,6 +19,8 @@ class Data(object):
         dataType = args[0]
         if len(args) > 1:
             dataKey = args[1]
+        elif kwargs.has_key('key'):
+            dataKey = kwargs['key']
         else:
             dataKey = None
 
@@ -28,17 +30,21 @@ class Data(object):
         elif dataType == 'robot':
             obj = {}
         elif dataType == 'events':
-            obj = self.getEvents(dataKey)
+            if kwargs.has_key('tags'):
+                tags = kwargs['tags'].split(',')
+            else:
+                tags = ()
+            obj = self.getEvents(dataKey, tags)
         else :
             raise cherrypy.HTTPError(400)
         
         cherrypy.response.headers['Content-Type'] = 'application/json'
-        return simplejson.dumps(obj)
+        return json.dumps(obj)
 
-    def getEvents(self, key):
-        events = self._dao.getHistory(key)
-        if len(events) == 0:
-            raise cherrypy.HTTPError(404)
+    def getEvents(self, key, tags):
+        events = self._dao.getHistory(key, tags)
+        #if len(events) == 0:
+        #    raise cherrypy.HTTPError(404)
         
         for event in events:
             if event['imageId'] != None:
