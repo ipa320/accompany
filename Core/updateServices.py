@@ -19,13 +19,13 @@ if __name__ == '__main__':
 
     sz = SensorLog(z.channels, 'ZigBee')
     sg = SensorLog(g.channels, 'GEO')
-    
+
     z.start()
     sz.start()
 
     g.start()
     sg.start()
-    
+
     l.start()
     rp.start()
 
@@ -36,9 +36,9 @@ if __name__ == '__main__':
             break
     rp.stop()
     l.stop()
-    
+
     sg.stop()
     g.stop()
-    
+
     sz.stop()
     z.stop()

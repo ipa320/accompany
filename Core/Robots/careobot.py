@@ -345,7 +345,8 @@ class Pose(object):
         try:
             self._listener.waitForTransform("/map", "/base_footprint", now, self._rospy.Duration(1.0))
         except self._tf.Exception as e:
-            print >> sys.stderr, "Error while waiting for transform: " + str(e)
+            if str(e) != 'Unable to lookup transform, cache is empty, when looking up transform from frame [/base_footprint] to frame [/map]':
+                print >> sys.stderr, "Error while waiting for transform: " + str(e)
             return ((None, None, None), None)
         
         try:

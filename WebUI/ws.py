@@ -16,7 +16,7 @@ conf = {
     'global': {
         'server.socket_host': '0.0.0.0',
         'server.socket_port': server_config['http_port'],
-        #'environment': 'production'
+        'environment': 'production'
     },
     '/': {
         'request.dispatch': cherrypy.dispatch.MethodDispatcher(),

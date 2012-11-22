@@ -325,7 +325,7 @@ geosystem_devices = {
     'rule': 'p > 10'
   },
   14: {
-    'id'  : 5,
+    'id'  : 50,
     'room': 'Kitchen',
     'name': '2 Fridge Freezer',
     'rule': '(p > 10 and p < 50) or (p > 100)'
