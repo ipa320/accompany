@@ -77,6 +77,13 @@ uiHelper.prototype = {
 						}
 					}
 
+					if (event['tags'] != undefined && event['tags'].length > 0) {
+						details.append(this.createListItem('group', 'Event Tags'));
+						for (index in event['tags']) {
+							details.append(this.createListItem(null, event['tags'][index]));
+						}
+					}
+
 					if (event['sensorMapUrl'] != undefined) {
 						details.append(this.createListItem('group', 'Sensor Map'));
 						var img = $('<img></img>');

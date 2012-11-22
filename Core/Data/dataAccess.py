@@ -199,52 +199,71 @@ class Robots(object):
         return self._sql.getData(sql, args)
 
 class ActionHistory(object):
-    def __init__(self, actionHistoryTable=None, sensorSnapshotTable=None, sensorTable=None, locationTable=None):
+    def __init__(self, actionHistoryTable=None, sensorSnapshotTable=None, sensorTable=None, sensorTypeTable=None, locationTable=None):
         from config import server_config
         self._historyTable = actionHistoryTable or server_config['mysql_history_table']
         self._sensorHistoryTable = sensorSnapshotTable or server_config['mysql_sensorHistory_table']
         self._sensorTable = sensorTable or server_config['mysql_sensor_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
+        self._sensorTypeTable = sensorTypeTable or server_config['mysql_sensorType_table']
         self._sql = SQLDao()
-    
-    def getHistory(self, ruleName=None):
-        sql = "SELECT `actionHistoryId`, `imageId`, `timestamp`, `ruleName`, `%(loc)s`.`name` as 'location' \
+        self._selectQuery = "SELECT `actionHistoryId`, `imageId`, `timestamp`, `ruleName`, `tags`, `%(loc)s`.`name` as 'location' \
                FROM `%(hist)s` \
                INNER JOIN `%(loc)s` ON `%(loc)s`.`locationId` = `%(hist)s`.`locationId`" % {
                                                                                             'hist' : self._historyTable,
                                                                                             'loc': self._locationTable
                                                                                            }
+    
+    def getHistory(self, ruleName=None):
+        sql = self._selectQuery
         args = None
         if ruleName != None:
             sql += " WHERE `ruleName` = %(name)s" 
             args = {'name': ruleName}
 
-        obj = []
-        for row in self._sql.getData(sql, args):
-            obj.append({
+        return self._processResults(self._sql.getData(sql, args))
+
+    def getHistoryByTag(self, tag):
+        sql = self._selectQuery
+        sql += " WHERE `tags` like %(tag)s" 
+        args = {'tag': '%' + tag + '%' }
+        
+        return self._processResults(self._sql.getData(sql, args))
+
+    def _processResults(self, data):
+        result = []
+        for row in data:
+            obj = {
                        'id': row['actionHistoryId'],
                        'name':row['ruleName'],
                        'status': 'activate',
                        'imageId':row['imageId'],
                        'location': row['location'],
+                       'tags': eval(row['tags'] or '()'),
                        'time': {
                                 'real': row['timestamp'].strftime('%Y-%m-%d %H:%M:%S'),
                                 'narrative': row['timestamp'].strftime('%Y%m%d%H%M%S')
                                 },
                         'sensors': self.getSensorSnapshot(row['actionHistoryId'])
-                       })
-        
-        return obj
+                       }
+            
+            if type(obj['tags']) != list and type(obj['tags']) != tuple:
+                obj['tags'] = (obj['tags'],)
+            result.append(obj)
+            
+        return result
 
     def getSensorSnapshot(self, historyId):
         sql = "SELECT `%(sensor)s`.`name` as `name`, `%(sensor)s`.`sensorId` as `sensorId`, `%(sensor)s`.`sensorRule` as `sensorRule`, \
-                `%(loc)s`.`name` as `location`, `%(hist)s`.`sensorValue` as `value`\
+                `%(loc)s`.`name` as `location`, `%(hist)s`.`sensorValue` as `value`, `%(type)s`.`sensorType` as `sensorTypeName`\
         FROM `%(hist)s` \
         INNER JOIN `%(sensor)s` ON `%(sensor)s`.`sensorId` = `%(hist)s`.`sensorId`\
+        INNER JOIN `%(type)s` ON `%(sensor)s`.`sensorTypeId` = `%(type)s`.`sensorTypeId`\
         INNER JOIN `%(loc)s` ON `%(loc)s`.`locationId` = `%(sensor)s`.`locationId` " % {
                                           'hist': self._sensorHistoryTable,
                                           'loc': self._locationTable,
-                                          'sensor': self._sensorTable
+                                          'sensor': self._sensorTable,
+                                          'type': self._sensorTypeTable
                                           }        
         sql += " WHERE `actionHistoryId` = %(histid)s"        
         args = { 'histid': historyId}
@@ -280,6 +299,17 @@ class ActionHistory(object):
                   }
         
         return self._sql.saveData(sql, args)
+    
+    def updateTags(self, historyId, tags):
+        sql = "UPDATE `%s`" % (self._historyTable)
+        sql += " SET `tags` = %(tags)s WHERE `actionHistoryId` = %(histid)s" 
+        args = {
+              'tags' : str(tags),
+              'histid': historyId
+              }
+        
+        self._sql.saveData(sql, args)
+        return historyId
 
     def saveHistoryImage(self, historyId, imageBytes, imageType):
         imageId = self.saveBinary('Image for history %s' % (historyId), imageBytes, imageType)
@@ -603,3 +633,9 @@ class SQLDao(object):
             print "Error %d: %s" % (e.args[0], e.args[1])            
             conn.rollback()
             return -1
+
+
+if __name__ == '__main__':
+    h = ActionHistory()
+    hi =h.getHistoryByTag('other')
+    print hi
