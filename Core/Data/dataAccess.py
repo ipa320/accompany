@@ -214,21 +214,35 @@ class ActionHistory(object):
                                                                                             'loc': self._locationTable
                                                                                            }
     
-    def getHistory(self, ruleName=None):
+    def getHistory(self, ruleName=None, tags=None):
         sql = self._selectQuery
-        args = None
+        args = {}
+        where = ''
         if ruleName != None:
-            sql += " WHERE `ruleName` = %(name)s" 
-            args = {'name': ruleName}
+            where = self._appendWhere(where, "`ruleName` = %(name)s")
+            args['name'] = ruleName
+        if tags != None and len(tags) > 0:
+            clause = ''
+            for index in range(0, len(tags)):
+                tag = tags[index]
+                key = 'tag_' + str(index)
+                clause += "`tags` like %(" + key + ")s"
+                if index + 1 != len(tags):
+                    clause += " OR "
+                args[key] = '%' + tag + '%'
+            clause = '(' + clause + ')'
+            where = self._appendWhere(where, clause)
 
+        sql += where
         return self._processResults(self._sql.getData(sql, args))
 
-    def getHistoryByTag(self, tag):
-        sql = self._selectQuery
-        sql += " WHERE `tags` like %(tag)s" 
-        args = {'tag': '%' + tag + '%' }
-        
-        return self._processResults(self._sql.getData(sql, args))
+    def _appendWhere(self, where, clause):
+        if where == None or where == '' or where.strip() == '':
+            where = " WHERE "
+        else:
+            where = " AND "
+        where += clause
+        return where
 
     def _processResults(self, data):
         result = []
@@ -532,8 +546,8 @@ class DataAccess(object):
     def findRobots(self, robotName=None):
         return self.robots.findRobots(robotName)
 
-    def getHistory(self, ruleName=None):
-        return self.actionHistory.getHistory(ruleName)
+    def getHistory(self, ruleName=None, tags=None):
+        return self.actionHistory.getHistory(ruleName, tags)
     
     def getSensor(self, sensorId):
         return self.sensors.getSensor(sensorId)

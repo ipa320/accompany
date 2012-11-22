@@ -2,11 +2,20 @@ function dataHelper() {
 }
 
 dataHelper.prototype = {
-	getEvents : function(key) {
+	getEvents : function(key, tag) {
 		var eventData = null;
+		var url = 'data/events/?';
+		if (key != undefined && key != null && key != '') {
+			url += 'key=' + key;
+		}
+
+		if (tag != undefined && key != null && tag != '') {
+			url += '?tags=' + tag;
+		}
+		
 		$.ajax({
 			//Key not currently implemented
-			url : 'data/events/' + key,
+			url : url,
 			dataType : 'json',
 			async : false,
 			success : function(data, textStatus, jqXHR) {
