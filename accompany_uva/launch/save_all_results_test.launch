@@ -1,20 +1,18 @@
 <launch>
 
-<!-- localise camera1 -->
-    <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
-    args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 2 -a /home/ninghang/workspace/pose_estimation/res
-          image:=/camera1/gscam/image_raw"/>
-
+  <!-- localise $(arg camera) -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localise$(arg camera)"
+    args="-p $(arg param_path) -n 2 -a $(arg dst_path)
+    image:=/$(arg camera)/gscam/image_raw"/>
+  
   <node pkg="rosbag" type="play" name="playBags"
-   args="-d 6
-     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag"/>
+    args="-d 6 $(arg video_file)"/>
 
+  <!-- decode and view $(arg camera) -->
+  <node pkg="image_transport" type="republish" name="republish$(arg camera)"
+    args="theora in:=/$(arg camera)/gscam/image_raw _image_transport:=theora raw out:=/$(arg camera)/gscam/image_raw"/>
 
-  <!-- decode and view camera1 -->
-  <node pkg="image_transport" type="republish" name="republishCamera1"
-   args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
-
-  <node pkg="image_view" type="image_view" name="image_viewCamera1"
-   args="image:=/camera1/gscam/image_raw"/>
+  <node pkg="image_view" type="image_view" name="image_view$(arg camera)"
+    args="image:=/$(arg camera)/gscam/image_raw"/>
 
 </launch>

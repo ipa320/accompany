@@ -344,6 +344,11 @@ void save_image_frames(IplImage* oriImage)
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
+void save_background_frames(IplImage* oriImage)
+{
+    sprintf(image_name,"%s/bg%04d.jpg",save_all.c_str(),++frame_cnt);
+    imwrite(image_name,cvarrToMat(oriImage));
+}
 
 accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
@@ -420,6 +425,9 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     IplImage *bg = vec2img((/*imgVec[c]-*/bgVec[c]).apply(fabs));
     IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
     cvCvtColor(bg, cvt, TO_IMG_FMT);
+
+    if (!save_all.empty())
+      save_background_frames(cvt);
 
     plotHull(src[c], priorHull, c);
     plotHull(cvt, priorHull, c);
