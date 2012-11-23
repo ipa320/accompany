@@ -340,13 +340,13 @@ void save_detection_results(vector<unsigned> existing)
 
 void save_image_frames(IplImage* oriImage)
 {
-    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),++frame_cnt);
+    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),frame_cnt);
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
 void save_background_frames(IplImage* oriImage)
 {
-    sprintf(image_name,"%s/bg%04d.jpg",save_all.c_str(),++frame_cnt);
+    sprintf(image_name,"%s/bg%04d.jpg",save_all.c_str(),frame_cnt);
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
@@ -495,6 +495,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
   try
   {
+    frame_cnt ++ ;
     // load the first image to get image size
     IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
     if (!save_all.empty())
