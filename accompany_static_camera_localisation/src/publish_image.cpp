@@ -61,7 +61,7 @@ int main(int argc,char **argv)
   // handling arguments
   options_description optionsDescription("Reads images from disk and publishes them. Example usage:\n\n"
                                          "  publish_image -i imageFile1.txt -o topic1 -i imageFile2.txt -o topic2\n\n"
-                                         "all options:");
+                                         "all options");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("frequency,f", value<double>(&frequency)->default_value(1.0),"frequency for publishing images")

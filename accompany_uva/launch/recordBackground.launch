@@ -11,7 +11,7 @@
 
   <!-- capture background image -->
   <node machine="$(arg machine)" pkg="accompany_static_camera_localisation" type="image_saver" name="$(anon image_saver)"
-        args="-n $(arg nr_images) -p $(arg res_path) image:=$(arg image_topic)" />
+        args="-n $(arg nr_images) -p $(arg res_path) -t $(arg image_topic)" />
 
   
 </launch>

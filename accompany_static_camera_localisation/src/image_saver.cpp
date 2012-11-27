@@ -5,9 +5,8 @@
 #include <fstream>
 
 #include <ros/ros.h>
-#include <cv_bridge/CvBridge.h>
 #include <image_transport/image_transport.h>
-//#include <camera_calibration_parsers/parse.h>
+#include <cv_bridge/cv_bridge.h>
 
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
@@ -15,50 +14,64 @@
 namespace po = boost::program_options;
 using namespace std;
 
-sensor_msgs::CvBridge g_bridge;
-boost::format g_format;
 int g_count = 0;
 int nrImage;
-string path;
 
-ofstream backgroundList;
-
-void callback(const sensor_msgs::ImageConstPtr& image)
+class ImageSaver
 {
-  if (g_bridge.fromImage(*image, "bgr8"))
+public:
+  ImageSaver(string path)
   {
-    IplImage *image = g_bridge.toIpl();
-    if (image)
-    { 
-        string filename = (g_format % g_count % "jpg").str();
-        cvSaveImage((path+"/"+filename).c_str(), image);
-	backgroundList<<(path+"/"+filename).c_str()<<endl;
-        ROS_INFO("Saved image %s", filename.c_str());
-	if (++g_count>nrImage-1)
-	  ros::shutdown();
-    }
-    else
-    {
-      ROS_WARN("Couldn't save image, no data!");
-    }
+    this->path=path;
+    backgroundList.open((path+"/"+"background_list.txt").c_str());
+    cout<<"constructed ImageSaver to path: "<<path<<endl;
   }
-  else
-    ROS_ERROR("Unable to convert %s image to bgr8", image->encoding.c_str());
-} 
+
+  ~ImageSaver()
+  {
+    backgroundList.close();
+  }
+
+  void callback(const sensor_msgs::ImageConstPtr& image)
+  {
+    ros::Time now=ros::Time::now();
+    cv_bridge::CvImageConstPtr cv_ptr=cv_bridge::toCvShare(image,"bgr8");
+    stringstream ss;
+    ss<<path<<"/"<<setfill('0')<<setw(12)<<now.sec<<"."
+      <<setfill('0')<<setw(9)<<now.nsec<<".jpg";
+    string filename=ss.str();
+    cout<<"saving "<<filename<<endl;
+    cv::imwrite(filename,cv_ptr->image);
+    backgroundList<<filename<<endl;
+
+    if (nrImage>0)
+      if (++g_count>nrImage-1)
+        ros::shutdown();
+  }
+
+private:
+  string path;
+  ofstream backgroundList;
+};
+
 
 int main(int argc, char** argv)
 {
+  vector<string> paths;
+  vector<string> topics;
+  vector<ImageSaver*> imageSavers;
+  unsigned int nrTopics;
+
   // handling arguments
   po::options_description optionsDescription(
-      "Image saver\n"
-      "Available remappings:\n"
-      "  image:=<image-topic>\n"
-      "\n"
+      "Subscribe to ros topics and write images to disk. Example usage:\n\n"
+      "  image_saver -t topic1 -p /home/ros/temp1 -t topic2 -p /home/ros/temp2\n\n"
       "Allowed options");
   optionsDescription.add_options()
     ("help,h", "produce help message")
-    ("nr,n", po::value<int>(&nrImage)->default_value(10),"number of images to save")
-    ("path,p", po::value<string>(&path)->default_value("./"),"path to save images to");
+    ("nr,n", po::value<int>(&nrImage)->default_value(10),"total number of images to save, <=0 means unlimited")
+    ("topic,t", po::value<vector<string> >(&topics)->required(),"topic to read images from")
+    ("path,p", po::value<vector<string> >(&paths),"global path to save images to");
   po::variables_map variablesMap;
 
   try
@@ -75,27 +88,32 @@ int main(int argc, char** argv)
     cerr << optionsDescription << endl;
     return 1;
   }
-  if (variablesMap.count("help")) 
-  {
-    cout<<optionsDescription<<endl;
-    return 1;
-  }
-
+  
   cout<<"number of images to save: "<<nrImage<<endl;
-  cout<<"path to save images to: '"<<path<<"'"<<endl;
 
-  backgroundList.open((path+"/"+"background_list.txt").c_str());
+  if (paths.size()==0) // set default when non given
+    paths.push_back("./");
+
+  nrTopics=topics.size();
+  if (paths.size()<nrTopics)
+    nrTopics=paths.size();
 
   ros::init(argc, argv, "image_saver", ros::init_options::AnonymousName);
   ros::NodeHandle nh;
-  string resolved_image=nh.resolveName("image");
-  cout<<"subscribe to image topic: '"<<resolved_image<<"'"<<endl;
+  image_transport::ImageTransport it(nh);
 
-  g_format.parse("%04i.%s");
-  image_transport::ImageTransport it(nh);  
-  image_transport::Subscriber sub = it.subscribe(resolved_image, 1, &callback);
+  vector<image_transport::Subscriber> subs;
+  for (int i=0;i<nrTopics;i++)
+  {
+    ImageSaver *imageSaver=new ImageSaver(paths[i]);
+    cout<<"subscribe to topic: "<<topics[i]<<endl;
+    subs.push_back(it.subscribe(topics[i], 1, &ImageSaver::callback,imageSaver));
+    imageSavers.push_back(imageSaver);
+  }
 
   ros::spin();
-  backgroundList.close();
+  for (int i=0;i<nrTopics;i++)
+    delete imageSavers[i]; // close files
+
   return 0;
 }
