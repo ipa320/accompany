@@ -9,8 +9,8 @@ using namespace cv;
 
 int main(int argc, char **argv)
 {
-  string src_im, calib_file;
-  
+  string src_im, calib_file, image_path;
+
   // handling arguments
   options_description optionsDescription
     ("Show undistorted image given the intrinsic parameter of the camera\n"
@@ -19,9 +19,11 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("intrinsic_file,i", value<string>(&calib_file)->default_value("camera_intrinsic.xml"),"filename of the intrinsic parameter")
     ("src_im,s", value<string>(&src_im)->required(),"filename of the image to be undistorted")
-    ("view_full_image,f", "filename of the image to be undistorted");
+    ("view_full_image,f", "filename of the image to be undistorted")
+    ("save_image,w", value<string>(&image_path)->default_value("/home/ninghang/tmp/test.jpg"),"path to save undistorted images");
 
   variables_map variablesMap;
+
   try
   {
     store(parse_command_line(argc, argv, optionsDescription),variablesMap);
@@ -36,7 +38,7 @@ int main(int argc, char **argv)
     std::cout << optionsDescription << std::endl;
     return 1;
   }
-  
+
   cout << "loading intrinsic file: " << calib_file << endl;
   FileStorage fs(calib_file, FileStorage::READ);
   if( !fs.isOpened() )
@@ -47,8 +49,8 @@ int main(int argc, char **argv)
   Mat cameraMatrix, distCoeffs;
   fs["camera_matrix"] >> cameraMatrix;
   fs["distortion_coefficients"] >> distCoeffs;
-  
-  
+
+
   cout << "loading image: " << src_im << endl;
   Mat view, rview, map1, map2;
   view = imread(src_im);
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
     cout <<  "Could not open or find the image: " << src_im << endl ;
     return -1;
   }
-  
+
   // undistortion
   if (variablesMap.count("view_full_image"))
   {
@@ -72,12 +74,16 @@ int main(int argc, char **argv)
   {
     undistort( view, rview, cameraMatrix, distCoeffs);
   }
-  
+
   // view
   namedWindow( "original", CV_WINDOW_NORMAL );
   imshow("original",view);
   namedWindow( "undistorted", CV_WINDOW_NORMAL );
   imshow("undistorted",rview);
+  if (variablesMap.count("save_image"))
+  {
+    imwrite(image_path,rview);
+  }
 
   waitKey(0);
   return 0;

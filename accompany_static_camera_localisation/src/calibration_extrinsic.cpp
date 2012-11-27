@@ -98,6 +98,11 @@ int main(int argc, char** argv)
 
   // Load Intrinsic Parameters
   cv::FileStorage fs(intrinsicFile, cv::FileStorage::READ);
+  if( !fs.isOpened() )
+  {
+    cout << intrinsicFile << ": No such file" << endl;
+    return -1;
+  }
   fs["camera_matrix"] >> camera_matrix;
   fs["distortion_coefficients"] >> distortion_coefficients;
 
@@ -113,4 +118,3 @@ int main(int argc, char** argv)
   cout << endl;
   cout << "extrinsic parameters saved to " << extrinsicFile << endl;
 }
-
