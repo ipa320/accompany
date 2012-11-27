@@ -16,6 +16,8 @@ conf = {
     'global': {
         'server.socket_host': '0.0.0.0',
         'server.socket_port': server_config['http_port'],
+        'server.thread_pool': 10,
+        'server.thread_pool_max': -1,
         #'environment': 'production'
     },
     '/': {
@@ -26,15 +28,10 @@ conf = {
 root = listRoot.root
 listRoot.setLinks((
               ('history', history),
+              ('history/?tags=important', 'Important History'),
+              ('history/?tags=question', 'Unclear History'),
               ('question', questions),
               ('details', sensorDetails),
               ('liveMap', sensorMap)))
-listRoot.setLink('Important History', 'history/?tags=important')
-
-#from processor import RobotLocationProcessor
-#lp = RobotLocationProcessor()
-#lp.startLocationPolling()
 
 cherrypy.quickstart(root, '/', conf)
-
-#lp.stopLocationPolling()

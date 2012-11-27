@@ -68,7 +68,14 @@ class ROS(object):
             raise Exception('Error occured while loading message class: %s' % (e))
         
     @staticmethod
-    def configureROS(version='electric', packagePath=None, packageName=None, rosMaster='http://cob3-2-pc1:11311', overlayPath=None):
+    def configureROS(version=None, packagePath=None, packageName=None, rosMaster=None, overlayPath=None):
+        """Any values not provided will be read from ros_config in config.py"""
+        
+        from config import ros_config
+        version = version or ros_config['version']
+        rosMaster = rosMaster or ros_config['rosMaster']
+        overlayPath = overlayPath or ros_config['overlayPath']
+        
         if 'ROS_MASTER_URI' not in os.environ.keys():
             os.environ['ROS_MASTER_URI'] = rosMaster
 
@@ -85,7 +92,7 @@ class ROS(object):
         elif os.environ['ROS_PACKAGE_PATH'].find(path) == -1:
             os.environ['ROS_PACKAGE_PATH'] = ':'.join((path, os.environ['ROS_PACKAGE_PATH']))  
 
-        path = overlayPath or os.path.expanduser('~/ROS_Workspace/%(version)s' % { 'version': version})
+        path = os.path.expanduser(overlayPath)
         if os.environ['ROS_PACKAGE_PATH'].find(path) == -1:
             os.environ['ROS_PACKAGE_PATH'] = ':'.join((path, os.environ['ROS_PACKAGE_PATH']))
 

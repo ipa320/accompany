@@ -1,7 +1,12 @@
-import io, sys, os, math
+import io, sys, os, math, copy
 from xml.etree import ElementTree as et
+from threading import RLock
 
 class MapProcessor(object):
+    _mapCache = {}
+    _iconCache = {}
+    _mapLock = RLock()
+    _iconLock = RLock()
 
     def __init__(self, baseMap='RobotHouseMap.svg'):
         self._root = os.path.dirname(os.path.realpath(__file__))
@@ -10,53 +15,68 @@ class MapProcessor(object):
 
     @property
     def mapBase(self):
-        return et.parse(self._baseFile)     
+        if not MapProcessor._mapCache.has_key(self._baseFile):
+            MapProcessor._mapLock.acquire()
+            try:
+                MapProcessor._mapCache[self._baseFile] = et.parse(self._baseFile)
+            finally:
+                MapProcessor._mapLock.release()
+        
+        return copy.deepcopy(MapProcessor._mapCache[self._baseFile])
     
     def getIcon(self, sensorType, sensorOn=False):
-            rhSensorDef = None
-            if sys.version_info >= (2, 7):
-                rhSensorDef = self._sensorTypes.find('type[@name="%s"]' % (sensorType))
-            else:
-                for sensor in self._sensorTypes.findall('type'):
-                    if sensor.attrib['name'] == sensorType:
-                        rhSensorDef = sensor
-                        break
-            
-            imgFile = None
-            imgPath = None
-            if rhSensorDef != None and rhSensorDef.attrib.has_key('image'):
-                if sensorOn:
-                    imgPath = rhSensorDef.attrib['image'] + '_on' + ".svg"
+        key = sensorType + str(sensorOn)
+        if not MapProcessor._iconCache.has_key(key):
+            MapProcessor._iconLock.acquire()
+            try:
+                rhSensorDef = None
+                if sys.version_info >= (2, 7):
+                    rhSensorDef = self._sensorTypes.find('type[@name="%s"]' % (sensorType))
                 else:
-                    imgPath = rhSensorDef.attrib['image'] + ".svg"
-
-                try:
-                    imgFile = et.parse(os.path.join(self._root, imgPath))      
-                except Exception as e:
+                    for sensor in self._sensorTypes.findall('type'):
+                        if sensor.attrib['name'] == sensorType:
+                            rhSensorDef = sensor
+                            break
+                
+                imgFile = None
+                imgPath = None
+                if rhSensorDef != None and rhSensorDef.attrib.has_key('image'):
                     if sensorOn:
-                        print >> sys.stderr, "Error parsing %(name)s sensor image: %(error)s" % {'error' :e, 'name': sensorType }
-
-            if imgFile == None:
-                if imgPath != None:
-                    print "Unable to load image from %(path)s, using default" % {'path' : imgPath }
+                        imgPath = rhSensorDef.attrib['image'] + '_on' + ".svg"
+                    else:
+                        imgPath = rhSensorDef.attrib['image'] + ".svg"
+    
+                    try:
+                        imgFile = et.parse(os.path.join(self._root, imgPath))      
+                    except Exception as e:
+                        if sensorOn:
+                            print >> sys.stderr, "Error parsing %(name)s sensor image: %(error)s" % {'error' :e, 'name': sensorType }
+    
+                if imgFile == None:
+                    if imgPath != None:
+                        print "Unable to load image from %(path)s, using default" % {'path' : imgPath }
+                    else:
+                        print "Unable to load image for %(type)s, using default" % {'type': sensorType }
+                    imgPath = 'icons/default.svg'
+                    imgFile = et.parse(os.path.join(self._root, imgPath))
+                    imgFile.find('{http://www.w3.org/2000/svg}text').text = sensorType            
+                
+                if sys.version_info >= (2, 7):
+                    group = et.Element('g')
                 else:
-                    print "Unable to load image for %(type)s, using default" % {'type': sensorType }
-                imgPath = 'icons/default.svg'
-                imgFile = et.parse(os.path.join(self._root, imgPath))
-                imgFile.find('{http://www.w3.org/2000/svg}text').text = sensorType            
-            
-            if sys.version_info >= (2, 7):
-                group = et.Element('g')
-            else:
-                group = et.Element('ns0:g')
-
-            for child in imgFile.getroot().getchildren():
-                group.append(et.fromstring(et.tostring(child)))
-            
-            height = float(imgFile.getroot().get('height', 0))
-            width = float(imgFile.getroot().get('width', 0))
-            
-            return (group, height, width)
+                    group = et.Element('ns0:g')
+    
+                for child in imgFile.getroot().getchildren():
+                    group.append(et.fromstring(et.tostring(child)))
+                
+                height = float(imgFile.getroot().get('height', 0))
+                width = float(imgFile.getroot().get('width', 0))
+                
+                MapProcessor._iconCache[key] = (group, height, width)
+            finally:
+                MapProcessor._iconLock.release()
+        
+        return copy.deepcopy(MapProcessor._iconCache[key])
 
     def buildMap(self, elements=[]):
         """elements=[{'state':'on', 'location':{'xCoord':2.3, 'yCoord':9.2', 'orientation':3.141}, 'id':12]"""

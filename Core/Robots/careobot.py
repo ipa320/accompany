@@ -1,7 +1,7 @@
 import io, math, time, sys
 from PIL import Image
 from extensions import PollingProcessor
-from Data.dataAccess import DataAccess
+from Data.dataAccess import Sensors, Locations
 import rosHelper
 
 class PoseUpdater(PollingProcessor):
@@ -10,9 +10,9 @@ class PoseUpdater(PollingProcessor):
         if robot == None:
             robot = CareOBot()
         self._robot = robot
-        self._dao = DataAccess()
         self._ros = rosHelper.ROS()
-        self._lastState = { 'raised': None, 'lowered': None, 'empty': None }
+        self._sensors = Sensors().findSensors()
+        self._channels = {}
     
     def start(self):
         print "Started polling pose for %s" % (self._robot.name)
@@ -22,18 +22,35 @@ class PoseUpdater(PollingProcessor):
         print "Stopped polling location for %s" % (self._robot.name)
         self._removePollingProcessor('pose ' + self._robot.name)
     
+    @property
+    def robot(self):
+        return self._robot
+    
+    @property
+    def channels(self):
+        if self._channels == None:
+            self._channels = {}
+        
+        return self._channels
+    
     def checkUpdatePose(self, robot):
         self.updateTray(robot)
 
     def updateTray(self, robot):
         (name, _) = robot.getComponentState('tray')
-        trayIsRaised = False
-        trayIsLowered = False
-        trayIsEmpty = True
+
+        trayIsRaised = None
+        trayIsLowered = None
+        trayIsEmpty = None
         if name == 'up':
-            trayIsRaised = True
-        elif name == 'down':
-            trayIsLowered = True
+            trayIsRaised = 'up'
+        else:
+            trayIsRaised = ''
+            
+        if name == 'down':
+            trayIsLowered = 'down'
+        else:
+            trayIsLowered = ''
             
         range0 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
         range1 = self._ros.getSingleMessage(topic='/range_0', timeout=0.25)
@@ -42,35 +59,36 @@ class PoseUpdater(PollingProcessor):
         if range0 != None and range1 != None and range2 != None and range3 != None:
             threshold = 0.2
             if range0.range < threshold or range1.range < threshold or range2.range < threshold or range3.range < threshold:
-                trayIsEmpty = False
-        else:
-            print "Phidget sensors not ready before timeout"
-        
-        update = False
-        if self._lastState['lowered'] != trayIsLowered:
-            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsLowered'"
-            args = (trayIsLowered)
-            update = True
-            self._dao.saveData(sql, args)
-        
-        if self._lastState['raised'] != trayIsRaised:
-            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsRaised'"
-            args = (trayIsRaised)
-            update = True
-            self._dao.saveData(sql, args)
-        
-        if self._lastState['empty'] != trayIsEmpty:
-            sql = "UPDATE `ActionGoals` SET `value` = %s WHERE `name`='trayIsEmpty'"
-            args = (trayIsEmpty)
-            update = True
-            self._dao.saveData(sql, args)
-            
-        self._lastState['raised'] = trayIsRaised
-        self._lastState['lowered'] = trayIsLowered
-        self._lastState['empty'] = trayIsEmpty
+                trayIsEmpty = 'full'
                 
-        if update:
-            print "Updated tray state to Lowered: %(lowered)s, Raised: %(raised)s, Empty: %(empty)s" % { 'lowered': trayIsLowered, 'raised': trayIsRaised, 'empty': trayIsEmpty }
+            else:
+                trayIsEmpty = 'empty'
+        else:
+            trayIsEmpty = None
+            print "Phidget sensors not ready before timeout"
+
+        _states = {
+                   'trayIsRaised': (trayIsRaised == 'up', trayIsRaised),
+                   'trayIsLowered': (trayIsLowered == 'down', trayIsLowered),
+                   'trayIsEmpty': (trayIsEmpty == 'empty', trayIsEmpty) }
+
+        for key, value in _states.items():
+            if value[1] != None:
+                try:                           
+                    sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == "%s:%s" % (self._robot.name, key))
+                except StopInteration:
+                    if key not in self._warned:
+                        print >> sys.stderr, "Warning: Unable to locate sensor record for %s sensor %s." % (self._robot.name, key)
+                        self._warned.append(key)
+                    continue
+                
+                _id = sensor['sensorId']
+                self._channels[key] = {
+                                         'id': _id,
+                                         'room': self._robot.name,
+                                         'channel': key,
+                                         'value': value[0],
+                                         'status': value[1] }
 
 class CareOBot(object):
     _imageFormats = ['BMP', 'EPS', 'GIF', 'IM', 'JPEG', 'PCD', 'PCX', 'PDF', 'PNG', 'PPM', 'TIFF', 'XBM', 'XPM']
@@ -179,7 +197,7 @@ class CareOBot(object):
             return self.resolveLocation(pos)
 
     def resolveLocation(self, curPos, maxDistance=None):
-        dao = DataAccess()
+        dao = Locations()
 
         try:
             locations = dao.findLocations()
@@ -248,13 +266,16 @@ class CareOBot(object):
     def getComponentState(self, componentName, raw=False):
         topic = '/%(name)s_controller/state' % { 'name': componentName }
         state = self._ros.getSingleMessage(topic)
-                
+        
         if raw:
             return state
         else:
             return self.resolveComponentState(componentName, state)
     
     def resolveComponentState(self, componentName, state, tolerance=0.10):
+        if state == None:
+            return (None, None)
+        
         curPos = state.actual.positions
 
         positions = self.getComponentPositions(componentName)

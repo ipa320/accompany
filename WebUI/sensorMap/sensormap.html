@@ -8,6 +8,9 @@
 		<link rel="stylesheet" href="css/map.css" type="text/css" />
 		<script src="js/main.js"></script>
 		<script type="text/javascript">
+			function svgClick(evt) {
+				alert(evt);
+			};
 			$(function() {
 				var ui = new uiHelper();
 				ui.load('#map');

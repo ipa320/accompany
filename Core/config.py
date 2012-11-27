@@ -24,7 +24,7 @@ server_config = {
   'mysql_responses_table':'userInterfaceGUI',
   'mysql_users_table':'Users',
   
-    # The port on which the program is listening for UDP broadcast messages
+  # The port on which the program is listening for UDP broadcast messages
   # transmitted by the ZigBee gateway
 
   'udp_listen_port': 5050,
@@ -36,3 +36,10 @@ server_config = {
   'mysql_geo_db':       'livewiredb',
   'mysql_geo_query':    'CALL expPower',
 }
+
+ros_config = {
+    'version': 'electric',
+    #'rosMaster': 'http://cob3-2-pc1:11311',
+    'rosMaster': 'http://localhost:11311',
+    'overlayPath': '~/ROS_Workspace/electric' 
+    }

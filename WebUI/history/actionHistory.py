@@ -28,6 +28,7 @@ class Root(object):
             return text
         else:
             #extremely dangerous and hacky way to do this...
+            #return text.replace("var tags = ''", "var tags = '%s'" % kwargs['tags']);
             return text.replace("dao.getEvents('')", "dao.getEvents('', '%s')" % kwargs['tags'])
         
 class Data(object):

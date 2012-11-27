@@ -19,23 +19,28 @@ if __name__ == '__main__':
 
     sz = SensorLog(z.channels, 'ZigBee')
     sg = SensorLog(g.channels, 'GEO')
+    sr = SensorLog(rp.channels, rp.robot.name)
 
-    z.start()
-    sz.start()
+    #z.start()
+    #sz.start()
 
-    g.start()
-    sg.start()
+    #g.start()
+    #sg.start()
 
+    rp.start()
+    sr.start()
+    
     #l.start()
-    #rp.start()
-
+    
     while True:
         try:
             sys.stdin.read()
         except KeyboardInterrupt:
             break
-    #rp.stop()
     #l.stop()
+
+    sr.stop()
+    rp.stop()
 
     sg.stop()
     g.stop()

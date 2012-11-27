@@ -229,7 +229,7 @@ class ActionHistory(object):
                 clause += "`tags` like %(" + key + ")s"
                 if index + 1 != len(tags):
                     clause += " OR "
-                args[key] = '%' + tag + '%'
+                args[key] = "%'" + tag + "'%"
             clause = '(' + clause + ')'
             where = self._appendWhere(where, clause)
 

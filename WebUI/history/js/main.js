@@ -115,30 +115,36 @@ uiHelper.prototype = {
 						}
 					}
 
-					//if (event['tags'] != undefined && event['tags'].length > 0) {
-						details.append(this.createListItem('group', 'Event Tags'));
+					if (event['tags'] == undefined) {
+						event['tags'] = []
+					}
+					
+					details.append(this.createListItem('group', 'Event Tags'));
+					var alltags = ['important', 'question'];
+					var tags = this.createListItem(null, null);
+					$(tags).data('tags', event['tags']);
+					for (index in alltags) {
 						var url = ''
-						if (event['tags'] != undefined && event['tags'].indexOf('important') >= 0) {
-							url = 'images/favorite.png';
+						if (event['tags'].indexOf(alltags[index]) >= 0) {
+							url = 'images/' + alltags[index] + '.png';
 						} else {
-							url = 'images/addfavorite.png';
+							url = 'images/add' + alltags[index] + '.png';
 						}
 						
 						var img = $('<img></img>');
 						$(img).prop('src', url);
+						$(img).data('tag', alltags[index]);
+						$(img).data('eventId', event['id']);
+
 						var self = this;
-						$(img).attr('eventId', event['id']); 
 						$(img).click(function() {
 							self.toggleImportant(this);
 						});
 						
-						details.append(this.createListItem(null, img));
-						
-						//When we support more tags, list them instead of icons
-						//for (index in event['tags']) {
-							//details.append(this.createListItem(null, event['tags'][index]));
-						//}
-					//}
+						$(tags).append(img);
+					}
+					
+					details.append(tags);
 
 					if (event['sensorMapUrl'] != undefined) {
 						details.append(this.createListItem('group', 'Sensor Map'));
@@ -199,14 +205,21 @@ uiHelper.prototype = {
 	toggleImportant : function(image) {
 		//Really hacky way of checking the tag status
 		var dao = new dataHelper()
-		var historyId = $(image).attr('eventId');
-		if($(image).prop('src').indexOf('addfavorite.png') > 0) {
-			$(image).prop('src', $(image).prop('src').replace('addfavorite.png', 'favorite.png'));
-			dao.setTags(historyId, ['important'])
+		var historyId = $(image).data('eventId');
+		var tagName = $(image).data('tag');
+		var allTags = $(image).parent().data('tags');
+
+		var filename = $(image).prop('src').replace(/^.*[\\\/]/, '')
+		if(filename.indexOf('add') == 0) {
+			$(image).prop('src', $(image).prop('src').replace(filename, filename.substring(3)));
+			allTags.push(tagName);
 		} else {
-			$(image).prop('src', $(image).prop('src').replace('favorite.png', 'addfavorite.png'));
-			dao.setTags(historyId, [])
+			$(image).prop('src', $(image).prop('src').replace(filename, 'add' + filename));
+			allTags.splice(allTags.indexOf(tagName), 1);
 		}
+		
+		$(image).parent().data('tags', allTags);
+		dao.setTags(historyId, allTags)
 	},
 	
 	toggleSize : function(image, forceSmall) {

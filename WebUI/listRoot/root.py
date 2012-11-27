@@ -11,10 +11,8 @@ root.favicon_ico = handlers.StaticFile(os.path.join(os.path.dirname(os.path.real
 
 def setLinks(links):
     for (path, webRoot) in links:
-        root.__dict__[path] = webRoot.root
+        if type(webRoot) != str:
+            root.__dict__[path] = webRoot.root
 
     root.js.links = LinkData(links)
     return root
-
-def setLink(title, path):
-    root.js.links.addLink(title, path)
