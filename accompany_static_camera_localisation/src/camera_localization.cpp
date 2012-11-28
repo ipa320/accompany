@@ -320,7 +320,8 @@ void save_detection_results(vector<unsigned> existing)
     Mat iP(reload_tplt);
     CV_Assert(iP.depth() == increment_tplt.depth());
     iP = iP.t();
-    iP = increment_tplt.row(i).clone();
+    Mat temp=increment_tplt.row(i);
+    iP.copyTo(temp);
     frame_id.push_back(frame_cnt);
   }
 
