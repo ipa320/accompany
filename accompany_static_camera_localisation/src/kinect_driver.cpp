@@ -86,7 +86,8 @@ int main(int argc, char** argv)
     ros::Publisher pub2 = nh.advertise<dynamic_reconfigure::Config>("/camera/driver/parameter_updates", 1);
     cout<<"publishing '"<<configFilename<<"'"<<endl;
     pub1.publish(config);
-      
+
+    ros::spinOnce();
   }
 
   return 0;
