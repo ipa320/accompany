@@ -58,10 +58,10 @@ int main(int argc, char** argv)
   }
   
   stringstream ss;
-  ss<<path<<"/"<<"ConfigDescription.dat"<<endl;
+  ss<<path<<"/"<<"ConfigDescription.dat";
   configDescriptionFilename=ss.str();
   ss.str("");
-  ss<<path<<"/"<<"Config.dat"<<endl;
+  ss<<path<<"/"<<"Config.dat";
   configFilename=ss.str();
 
   ros::init(argc, argv, "kinect_driver", ros::init_options::AnonymousName);
@@ -78,16 +78,24 @@ int main(int argc, char** argv)
     dynamic_reconfigure::ConfigDescription configDescription;
     load_msg(configDescription,configDescriptionFilename);
     ros::Publisher pub1 = nh.advertise<dynamic_reconfigure::ConfigDescription>("/camera/driver/parameter_descriptions", 1);
-    cout<<"publishing '"<<configDescriptionFilename<<"'"<<endl;
-    pub1.publish(configDescription);
-
+    
     dynamic_reconfigure::Config config;
     load_msg(config,configFilename);
     ros::Publisher pub2 = nh.advertise<dynamic_reconfigure::Config>("/camera/driver/parameter_updates", 1);
-    cout<<"publishing '"<<configFilename<<"'"<<endl;
-    pub1.publish(config);
-
+   
+    ros::spinOnce(); // wait for connections
+    ros::Duration(2).sleep();
     ros::spinOnce();
+    
+    cout<<"publishing '"<<configDescriptionFilename<<"'"<<endl;
+    pub1.publish(configDescription);
+    cout<<"publishing '"<<configFilename<<"'"<<endl;
+    pub2.publish(config);
+
+    ros::spinOnce(); // wait for messages to be send
+    ros::Duration(2).sleep();
+    ros::spinOnce();
+
   }
 
   return 0;
