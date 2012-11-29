@@ -137,7 +137,7 @@ class GEOSystem(PollingProcessor):
 					print >> sys.stderr, "Warning: Unable to locate sensor record for geo sensor %s. ID: %s" % (row['Description'], row['ID'])
 					self._warned.append(row['ID'])
 				continue
-			
+
 			_device = sensor['locationName']
 			_name = sensor['name']
 			_id = sensor['sensorId']
@@ -148,12 +148,12 @@ class GEOSystem(PollingProcessor):
 				self._warned.append(row['ID'])
 
 			_state = self._sr.evaluateRule(sensor['sensorRule'], row['Power'])
-			
+
 			if _state:
 				_state = 'On'
 			else:
 				_state = 'Off'
-			
+
 			self._channels[row['ID']] = { 
 										'id': _id, 
 										'room': _device, 
@@ -166,14 +166,14 @@ if __name__ == '__main__':
 	from config import server_config
 	z = ZigBee(server_config['udp_listen_port'])
 	z.start()
-	
+
 	g = GEOSystem(server_config['mysql_geo_server'],
                             server_config['mysql_geo_user'],
                             server_config['mysql_geo_password'],
                             server_config['mysql_geo_db'],
                             server_config['mysql_geo_query'])
-	#g.start()
-	
+	g.start()
+
 	while True:
 		try:
 			sys.stdin.read()
