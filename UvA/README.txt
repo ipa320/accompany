@@ -262,3 +262,9 @@ script ./fast_start.sh
  - Adaptive background model
  
  - Multiple camera tracking
+ 
+-----------------------------------------
+
+OpenNI skeleton tracking on ROS Fuerte + Ubuntu 12.04
+
+In the default openni-dev package, the skeleton tracker binaries are out-of-date. To make it work, download OpenNI Compliant Middleware Binaries and do an uninstall and then install. This will replace/install some libraies and make it work
