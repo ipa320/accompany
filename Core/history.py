@@ -88,13 +88,14 @@ class SensorLog(PollingProcessor):
     def checkUpdateSensors(self, channels):
         for k in channels.keys():
             if not self._logCache.has_key(k):
-                self._logCache.setdefault(k, { 'value': None, 'status': ''})
+                current = self._dao.getSensor(channels[k]['id'])
+                self._logCache.setdefault(k, { 'value': current['value'], 'status': current['status']})
             if self._logCache[k]['status'] != channels[k]['status']:
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 success = self._dao.saveSensorLog(
                                                   channels[k]['id'], 
                                                   channels[k]['value'], 
-                                                  channels[k]['status'].lower(),
+                                                  channels[k]['status'],
                                                   timestamp,
                                                   channels[k]['room'],
                                                   channels[k]['channel'])
@@ -119,9 +120,9 @@ if __name__ == '__main__':
     sz = SensorLog(z.channels)
     sg = SensorLog(g.channels)
     z.start()
-    #g.start()
+    g.start()
     sz.start()
-    #sg.start()
+    sg.start()
     while True:
         try:
             sys.stdin.read()
@@ -130,4 +131,4 @@ if __name__ == '__main__':
     sz.stop()
     sg.stop()
     g.stop()
-    #z.stop()
+    z.stop()

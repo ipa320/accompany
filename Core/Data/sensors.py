@@ -12,7 +12,7 @@ class StateResolver(object):
         rule = sensor['sensorRule']
         value = sensor['value']
         if rule == 'Moving Average':
-            return self.temperatureStatus(sensor) == 'On'
+            return self.temperatureStatus(sensor).lower() == 'on'
         elif rule == 'Boolean':
             return self.evaluateBoolean(sensor['sensorTypeName'], value)
         elif rule.find('Watts') > -1:

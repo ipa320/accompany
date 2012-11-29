@@ -3,6 +3,7 @@ from PIL import Image
 from extensions import PollingProcessor
 from Data.dataAccess import Sensors, Locations
 import rosHelper
+from exceptions import StopIteration
 
 class PoseUpdater(PollingProcessor):
     def __init__(self, robot=None):
@@ -13,10 +14,11 @@ class PoseUpdater(PollingProcessor):
         self._ros = rosHelper.ROS()
         self._sensors = Sensors().findSensors()
         self._channels = {}
+        self._warned = []
     
     def start(self):
         print "Started polling pose for %s" % (self._robot.name)
-        self._addPollingProcessor('pose ' + self._robot.name, self.checkUpdatePose, (self._robot, ), 2)
+        self._addPollingProcessor('pose ' + self._robot.name, self.checkUpdatePose, (self._robot, ), .25)
     
     def stop(self):        
         print "Stopped polling location for %s" % (self._robot.name)
@@ -65,7 +67,7 @@ class PoseUpdater(PollingProcessor):
                 trayIsEmpty = 'empty'
         else:
             trayIsEmpty = None
-            print "Phidget sensors not ready before timeout"
+            #print "Phidget sensors not ready before timeout"
 
         _states = {
                    'trayIsRaised': (trayIsRaised == 'up', trayIsRaised),
@@ -76,7 +78,7 @@ class PoseUpdater(PollingProcessor):
             if value[1] != None:
                 try:                           
                     sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == "%s:%s" % (self._robot.name, key))
-                except StopInteration:
+                except StopIteration:
                     if key not in self._warned:
                         print >> sys.stderr, "Warning: Unable to locate sensor record for %s sensor %s." % (self._robot.name, key)
                         self._warned.append(key)
