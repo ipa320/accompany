@@ -94,7 +94,7 @@ class ROS(object):
                 env.update(ros_config['envVars'])
 
             ROS._envVars[version] = env
-        
+
         return ROS._envVars[version]
 
     @staticmethod
@@ -104,13 +104,12 @@ class ROS(object):
         data = pipe.communicate()[0]
         env = dict((line.split("=", 1) for line in data.splitlines()))
         return env
-        
+
     @staticmethod
     def configureROS(version=None, packagePath=None, packageName=None, rosMaster=None, overlayPath=None):
         """Any values not provided will be read from ros_config in config.py"""
         version = version or ros_config['version']
 
-        envVars = ROS.parseRosBash(version)
         for k, v in ROS.parseRosBash(version).items():
             if k == 'PYTHONPATH' and sys.path.count(v) == 0:
                 sys.path.append(v)
@@ -120,7 +119,7 @@ class ROS(object):
                 os.environ[k] = ':'.join((v, os.environ[k]))
 
         overlayPath = overlayPath or ros_config['overlayPath']
-        
+
         #if 'ROS_MASTER_URI' not in os.environ.keys():
         if rosMaster != None:
             os.environ['ROS_MASTER_URI'] = rosMaster
@@ -156,23 +155,22 @@ class ROS(object):
             roslib.load_manifest(packageName)
 
 class RosCallback(object):
-     
+
     def __init__(self):
         self._done = False
         self._message = None
-         
+
     def callback(self, msg):
         self._message = msg
         self._done = True
-        
+
     @property
     def done(self):
         return self._done
-    
+
     @property
     def data(self):
         return self._message
-
 
 if __name__ == '__main__':
     #import os

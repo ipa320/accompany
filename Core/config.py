@@ -7,7 +7,6 @@ server_config = {
 
   # The settings for the channel logging MySQL server / database / table
   'mysql_log_server':   'rh-database',
-  #'mysql_log_server':   'localhost',
   'mysql_log_user':     'rhUser',
   'mysql_log_password': 'waterloo',
   'mysql_log_db':       'Accompany',
@@ -38,12 +37,12 @@ server_config = {
 }
 
 """ Note: While the defaults for {version} will be read from the setup.bash file, 
-    NO ENVIRONMETN VARIABLES WILL BE READ FROM .bashrc
+    NO ENVIRONMENT VARIABLES WILL BE READ FROM .bashrc
     if any overrides are set in .bashrc, they need to be redefined here
 """
 ros_config = {
     'version': 'electric',
-    #'rosMaster': 'http://cob3-2-pc1:11311',
+    'rosMaster': 'http://cob3-2-pc1:11311',
     'overlayPath': '~/ROS_Workspace/electric',
     'envVars': {
                  'ROBOT':'cob3-3'
