@@ -108,7 +108,7 @@ class UserInterface(object):
         return data
 
 class Users(object):
-    def __init__(self, userTable, locationTable):
+    def __init__(self, userTable=None, locationTable=None):
         from config import server_config
         self._userTable = userTable or server_config['mysql_users_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
@@ -133,7 +133,7 @@ class Users(object):
                               'user': self._userTable,
                               'loc': self._locationTable
                               }
-        sql += " WHERE `userName` = %(name)s"
+        sql += " WHERE `firstName` = %(name)s"
         args = {'name': userName }
 
         return self._sql.getSingle(sql, args)

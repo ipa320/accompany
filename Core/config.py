@@ -38,8 +38,11 @@ server_config = {
 }
 
 ros_config = {
+    """ Note: While the defaults for {version} will be read from the setup.bash file, 
+        NO ENVIRONMETN VARIABLES WILL BE READ FROM .bashrc
+        if any overrides are set in .bashrc, they need to be redefined here
+    """ 
     'version': 'electric',
     #'rosMaster': 'http://cob3-2-pc1:11311',
-    'rosMaster': 'http://localhost:11311',
     'overlayPath': '~/ROS_Workspace/electric' 
     }
