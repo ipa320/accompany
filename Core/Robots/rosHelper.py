@@ -9,6 +9,13 @@ class ROS(object):
         ROS.configureROS(packageName='rospy')
         import rospy
         self._rospy = rospy
+        self._topicTypes = {}
+        self._subscribers = {}
+        self.initROS()
+        
+    def __del__(self):
+        for sub in self._subscribers.values():
+            sub.unregister()
         
     def initROS(self, name='rosHelper'):
         if not self._rospy.core.is_initialized():
@@ -18,13 +25,16 @@ class ROS(object):
         
         try:
             if dataType == None:
-                dataType = self.getMessageType(topic)
-            
-            callback = RosCallback()
-            self.initROS()
-            subscriber = self._rospy.Subscriber(topic, dataType, callback.callback)
-            
-            while not callback.done:
+                if not self._topicTypes.has_key(topic):
+                    self._topicTypes[topic] = self.getMessageType(topic)
+                    
+                dataType = self._topicTypes[topic]
+
+            if not self._subscribers.has_key(topic):
+                self._subscribers[topic] = RosSubscriber(topic, dataType)
+
+            subscriber = self._subscribers[topic]
+            while not subscriber.hasNewMessage:
                 if timeout != None:
                     if timeout < 0:
                         break
@@ -32,9 +42,7 @@ class ROS(object):
                         timeout -= 0.01
                 time.sleep(0.01)                
     
-            subscriber.unregister()
-
-            return callback.data
+            return subscriber.lastMessage
         except:
             if retryOnFailure > 0:
                 return self.getSingleMessage(topic, dataType, retryOnFailure - 1, timeout)
@@ -154,27 +162,53 @@ class ROS(object):
             import roslib
             roslib.load_manifest(packageName)
 
-class RosCallback(object):
-
-    def __init__(self):
-        self._done = False
-        self._message = None
-
-    def callback(self, msg):
-        self._message = msg
-        self._done = True
+class RosSubscriber(object):
+    
+    def __init__(self, topic, dataType, idleTime=15):
+        ROS.configureROS(packageName='rospy')
+        import rospy
+        self._rospy = rospy
+        self._lastAccess = time.time()
+        self._subscriber = None
+        self._topic = topic
+        self._dataType = dataType
+        self._newMessage = False
+        self._idleTimeout = idleTime
 
     @property
-    def done(self):
-        return self._done
-
+    def hasNewMessage(self):
+        self._touch()
+        return self._newMessage
+    
     @property
-    def data(self):
-        return self._message
+    def lastMessage(self):
+        self._touch()
+        self._newMessage = False
+        return self._data
+    
+    def _touch(self):
+        self._lastAccess = time.time()
+        if self._subscriber == None:
+            self._subscriber = self._rospy.Subscriber(self._topic, self._dataType, self._callback)
+    
+    def unregister(self):
+        if self._subscriber != None:
+            self._subscriber.unregister()
+            self._subscriber = None
+       
+    def _callback(self, msg):
+        self._data = msg
+        self._newMessage = True
+        if time.time() - self._lastAccess > self._idleTimeout:
+            self.unregister()
 
 if __name__ == '__main__':
-    #import os
-    #r = ROS()
-    #r.configureROS()
-    #print os.environ['ROS_PACKAGE_PATH']
-    print ROS.configureROS()
+    r = ROS()
+    er = 0
+    start = time.clock()
+    num = 1000
+    while(er < num):
+        r.getSingleMessage('/head_controller/state')
+        er +=1
+
+    print 'iterationTime = ' + str((time.clock() - start) / num)
