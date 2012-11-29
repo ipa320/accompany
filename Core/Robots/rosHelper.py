@@ -1,6 +1,10 @@
 import time, os, sys
+from subprocess import Popen, PIPE
+from config import ros_config
 
 class ROS(object):
+    _envVars = {}
+    
     def __init__(self, *args, **kwargs):
         ROS.configureROS(packageName='rospy')
         import rospy
@@ -68,25 +72,68 @@ class ROS(object):
             raise Exception('Error occured while loading message class: %s' % (e))
         
     @staticmethod
+    def parseRosBash(version=None):
+        version = version or ros_config['version']
+        if not ROS._envVars.has_key(version):
+            #executes the bash script and exports env vars
+            bashScript = '/opt/ros/%s/setup.bash' % version
+            env = {}
+            if os.path.exists(bashScript):
+                rosEnv = ROS.parseBashEnviron('source ' + bashScript)
+                allEnv = ROS.parseBashEnviron()
+        
+                #find all the variables that ros added/changed
+                for key, value in rosEnv.items():
+                    if not allEnv.has_key(key):
+                        env[key] = value
+                    elif allEnv[key] != value:
+                        #We really only want the bit that ros added
+                        env[key] = value.replace(allEnv[key], '').strip(':')
+        
+                #Add in any overrides from the config file
+                env.update(ros_config['envVars'])
+
+            ROS._envVars[version] = env
+        
+        return ROS._envVars[version]
+
+    @staticmethod
+    def parseBashEnviron(preCommand=''):
+        command = ['bash', '-c', ('%s; env' % preCommand).strip('; ')]
+        pipe = Popen(command, stdout=PIPE)
+        data = pipe.communicate()[0]
+        env = dict((line.split("=", 1) for line in data.splitlines()))
+        return env
+        
+    @staticmethod
     def configureROS(version=None, packagePath=None, packageName=None, rosMaster=None, overlayPath=None):
         """Any values not provided will be read from ros_config in config.py"""
-        
-        from config import ros_config
         version = version or ros_config['version']
-        rosMaster = rosMaster or ros_config['rosMaster']
+
+        envVars = ROS.parseRosBash(version)
+        for k, v in ROS.parseRosBash(version).items():
+            if k == 'PYTHONPATH' and sys.path.count(v) == 0:
+                sys.path.append(v)
+            elif not os.environ.has_key(k):
+                os.environ[k] = v
+            elif k.endswith('PATH'):
+                os.environ[k] = ':'.join((v, os.environ[k]))
+
         overlayPath = overlayPath or ros_config['overlayPath']
         
-        if 'ROS_MASTER_URI' not in os.environ.keys():
+        #if 'ROS_MASTER_URI' not in os.environ.keys():
+        if rosMaster != None:
             os.environ['ROS_MASTER_URI'] = rosMaster
 
-        if 'ROS_ROOT' not in os.environ.keys():
-            os.environ['ROS_ROOT'] = '/opt/ros/%(version)s/ros' % { 'version': version}
+        path = '/opt/ros/%(version)s/ros' % { 'version': version}
+        if 'ROS_ROOT' not in os.environ.keys() or os.environ['ROS_ROOT'] != path:
+            os.environ['ROS_ROOT'] = path
 
         path = '%(root)s/bin' % { 'root': os.environ['ROS_ROOT']}
         if os.environ['PATH'].find(path) == -1:
             os.environ['PATH'] = ':'.join((path, os.environ['PATH']))
 
-        path = '/opt/ros/%(version)s/stacks:' % { 'version': version}
+        path = '/opt/ros/%(version)s/stacks' % { 'version': version}
         if 'ROS_PACKAGE_PATH' not in os.environ.keys():
             os.environ['ROS_PACKAGE_PATH'] = path
         elif os.environ['ROS_PACKAGE_PATH'].find(path) == -1:
@@ -128,7 +175,8 @@ class RosCallback(object):
 
 
 if __name__ == '__main__':
-    import os
-    r = ROS()
-    r.configureROS()
-    print os.environ['ROS_PACKAGE_PATH']
+    #import os
+    #r = ROS()
+    #r.configureROS()
+    #print os.environ['ROS_PACKAGE_PATH']
+    print ROS.configureROS()

@@ -37,12 +37,15 @@ server_config = {
   'mysql_geo_query':    'CALL expPower',
 }
 
+""" Note: While the defaults for {version} will be read from the setup.bash file, 
+    NO ENVIRONMETN VARIABLES WILL BE READ FROM .bashrc
+    if any overrides are set in .bashrc, they need to be redefined here
+"""
 ros_config = {
-    """ Note: While the defaults for {version} will be read from the setup.bash file, 
-        NO ENVIRONMETN VARIABLES WILL BE READ FROM .bashrc
-        if any overrides are set in .bashrc, they need to be redefined here
-    """ 
     'version': 'electric',
     #'rosMaster': 'http://cob3-2-pc1:11311',
-    'overlayPath': '~/ROS_Workspace/electric' 
+    'overlayPath': '~/ROS_Workspace/electric',
+    'envVars': {
+                 'ROBOT':'cob3-3'
+                 }
     }
