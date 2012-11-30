@@ -1,0 +1,18 @@
+<launch>
+
+  <!-- launch openni driver to record depth and color images -->
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <!--<arg name="machine" value="omni_cam2_pc" />-->
+    <!--<arg name="topic_name" value="cam2" />-->
+    <arg name="depth_registration" value="true" />
+  </include>
+
+  <!-- start openni_tracker to get skeleton -->
+  <node pkg="openni_tracker" type="openni_tracker" name="openni_tracker">
+  </node>
+
+  <!-- record kinect images and skeleton -->
+  <node pkg="rosbag" type="record" name="record" args="camera/depth_registered/image_raw camera/depth_registered/camera_info camera/rgb/image_raw camera/rgb/camera_info /tf">
+  </node>
+
+</launch>
