@@ -7,8 +7,7 @@
     <arg name="depth_registration" value="true" />
   </include>
 
-  <!-- start openni_tracker to get skeleton -->
-  <node pkg="openni_tracker" type="openni_tracker" name="openni_tracker">
+  <node pkg="openni_tracker" name="openni_tracker" type="openni_tracker">
   </node>
 
   <!-- record kinect images and skeleton -->
