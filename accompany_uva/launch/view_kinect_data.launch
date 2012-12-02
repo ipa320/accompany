@@ -11,7 +11,7 @@
   </include>  
 
   <!-- brige tf between openni_tracker and openni driver -->
-  <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher_openni" args=" 0 0 0 0 0 0 camera_rgb_frame openni_depth_frame  100">
+  <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher_openni" args=" 0 0 0 0 0 0 camera_depth_frame openni_depth_frame  100">
   </node>
 
 </launch>

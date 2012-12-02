@@ -4,14 +4,14 @@
   <include file="$(find openni_launch)/launch/openni.launch">
     <!--<arg name="machine" value="omni_cam2_pc" />-->
     <!--<arg name="topic_name" value="cam2" />-->
-    <arg name="depth_registration" value="true" />
+    <!--<arg name="depth_registration" value="false" />-->
   </include>
 
   <node pkg="openni_tracker" name="openni_tracker" type="openni_tracker">
   </node>
 
   <!-- record kinect images and skeleton -->
-  <node pkg="rosbag" type="record" name="record" args="camera/depth_registered/image_raw camera/depth_registered/camera_info camera/rgb/image_raw camera/rgb/camera_info /tf">
+  <node pkg="rosbag" type="record" name="record_kinect" args="camera/depth/image_raw camera/depth/camera_info camera/rgb/image_raw camera/rgb/camera_info /tf">
   </node>
 
 </launch>
