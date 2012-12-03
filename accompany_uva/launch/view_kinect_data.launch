@@ -1,17 +1,37 @@
 <launch>
 
+  <!-- publish video data under "kinect" to avoid conflict names -->
+  <arg name="vid" />
+  <arg name="buf_camera" default="kinect" />
+
   <!-- use old time stamp to play video -->
   <param name="/use_sim_time" value="True" />
 
-  <!-- launch openni driver to record depth and color images -->
+  <!-- launch openni driver -->
   <include file="$(find openni_launch)/launch/openni.launch">
     <!--<arg name="machine" value="omni_cam2_pc" />-->
     <!--<arg name="topic_name" value="cam2" />-->
     <arg name="load_driver" value="false" />
   </include>  
 
-  <!-- brige tf between openni_tracker and openni driver -->
+
+  <!-- set openni_depth_frame = camera_depth_frame -->
   <node pkg="tf" type="static_transform_publisher" name="static_transform_publisher_openni" args=" 0 0 0 0 0 0 camera_depth_frame openni_depth_frame  100">
+  </node>
+
+
+  <!-- play video, remap topics to avoid conflicts -->
+  <node pkg="rosbag" type="play" name="play_kinect_camera" args="--clock -l  $(arg vid)">
+    <remap from="/camera/depth/image_raw/compressedDepth" to="/$(arg buf_camera)/depth/image_raw/compressedDepth" />
+    <remap from="/camera/rgb/image_raw/compressed" to="/$(arg buf_camera)/rgb/image_raw/compressed" />
+  </node>
+
+
+  <!-- uncompress images -->
+  <node pkg="image_transport" type="republish" name="republish_color_image" args="compressed in:=/$(arg buf_camera)/rgb/image_raw _image_transport:=compressed raw out:=/camera/rgb/image_raw">
+  </node>
+
+  <node pkg="image_transport" type="republish" name="republish_depth_image" args="compressedDepth in:=/$(arg buf_camera)/depth/image_raw _image_transport:=compressedDepth raw out:=/camera/depth/image_raw">
   </node>
 
 </launch>
