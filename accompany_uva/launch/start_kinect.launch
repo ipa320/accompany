@@ -1,0 +1,12 @@
+<launch>
+
+  <!-- openni driver -->
+  <include file="$(find openni_launch)/launch/openni.launch">
+    <!--<arg name="machine" value="omni_cam2_pc" />-->
+    <!--<arg name="depth_registration" value="false" />-->
+  </include>
+
+  <!-- opnni tracker -->
+  <node pkg="openni_tracker" name="openni_tracker" type="openni_tracker" />
+
+</launch>

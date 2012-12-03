@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- machines in AMS -->
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="bterwijnDesktop" />
+     <arg name="topic_name" value="cam1" />
+     <arg name="gscam_config" value="rtspsrc location=rtsp://admin:admin@192.168.0.11:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace" />
+  </include>
+
+  <!--<include file="$(find accompany_uva)/launch/startCam.launch">-->
+     <!--<arg name="machine" value="thinkpad-ninghang" />-->
+     <!--<arg name="topic_name" value="cam2" />-->
+     <!--<arg name="gscam_config" value="rtspsrc location=rtsp://admin:admin@192.168.0.11:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace" />-->
+  <!--</include>-->
+  
+  <!-- kinect
+  <include file="$(find accompany_uva)/launch/startCam.launch">
+     <arg name="machine" value="" />
+     <arg name="gscam_config" value="">
+  </include>
+  -->	
+
+</launch>
