@@ -372,7 +372,7 @@ class Sensors(object):
         args = None
         sql = self._sqlQuery
         if sensorName != None:
-            sql += " WHERE `name` like %(name)s" 
+            sql += " WHERE `%s`.`name` like" % (self._sensorTable) + " %(name)s" 
             args = {'name': sensorName}
             
         return self._sql.getData(sql, args)
