@@ -117,16 +117,16 @@ class ROS(object):
     def configureROS(version=None, packagePath=None, packageName=None, rosMaster=None, overlayPath=None):
         """Any values not provided will be read from ros_config in config.py"""
         version = version or ros_config['version']
+        overlayPath = overlayPath or ros_config['overlayPath']
+        rosMaster = rosMaster or ros_config['rosMaster']
 
         for k, v in ROS.parseRosBash(version).items():
             if k == 'PYTHONPATH' and sys.path.count(v) == 0:
                 sys.path.append(v)
             elif not os.environ.has_key(k):
                 os.environ[k] = v
-            elif k.endswith('PATH'):
+            elif k.endswith('PATH') and os.environ[k].find(v) == -1:
                 os.environ[k] = ':'.join((v, os.environ[k]))
-
-        overlayPath = overlayPath or ros_config['overlayPath']
 
         #if 'ROS_MASTER_URI' not in os.environ.keys():
         if rosMaster != None:
