@@ -126,8 +126,17 @@ Start FISH-EYE
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 //  roslaunch accompany_static_camera_localisation fisheye_calib_image_saver.launch
   rosrun gscam gscam -s 0
-  roscd accompany_static_camera_localisation/res/calib_frames/
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  roscd accompany_static_camera_localisation/res/calib_frames
+  rosrun accompany_static_camera_localisation image_saver -n 5000 -p ./ image:=/gscam/image_raw
+
+Remove similar checkerboard images
+  ./modPics.sh
+  mkdir OLD
+  mv *jpg_OLD OLD/
+  cd ..
+
+Check checkerboard images if they are clear
+  eog *.jpg
 
 Create a image list:
   
@@ -137,7 +146,7 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -a -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml // TODO check parameters
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -m ../mask_large.png -k 5 -a 1 -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml
 
 Test:
 
