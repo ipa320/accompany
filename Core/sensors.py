@@ -43,7 +43,7 @@ class ZigBee(PollingProcessor):
 
 	def start(self):
 		print "Started polling zigBee sensors"
-		self._addPollingProcessor('zigBee', self.pollZigbeeSensors, None, 0.1)
+		self._addPollingProcessor('zigBee', self.pollZigbeeSensors, None, 0.0001)
 
 	def stop(self):
 		print "Stopped polling zigBee sensors"
