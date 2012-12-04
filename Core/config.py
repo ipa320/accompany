@@ -26,7 +26,7 @@ server_config = {
   # The port on which the program is listening for UDP broadcast messages
   # transmitted by the ZigBee gateway
 
-  'udp_listen_port': 5050,
+  'udp_listen_port': 5000,
 
   # The settings of the Geo-System MySQL server / database / table
   'mysql_geo_server':   'geo-eee-pc',
