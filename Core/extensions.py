@@ -46,7 +46,7 @@ class PollingProcessor(object):
         if self._runningThreads.has_key(name):
             lp = self._runningThreads[name]
             lp.cancel()
-            lp.join()
+            lp.join(5)
             return True
         else:
             return False
