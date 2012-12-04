@@ -67,7 +67,7 @@ class PoseUpdater(PollingProcessor):
                 trayIsEmpty = 'empty'
         else:
             trayIsEmpty = None
-            #print "Phidget sensors not ready before timeout"
+            print "Phidget sensors not ready before timeout"
 
         _states = {
                    'trayIsRaised': (trayIsRaised == 'up', trayIsRaised),
@@ -463,26 +463,24 @@ class ActionLib(object):
         return status
 
 if __name__ == '__main__':
-    #c = CareOBot()
-    #l = c.executeFunction('say', {'parameter_name': ['I can talk!'], 'blocking': True})
-    #print l
-    #l = c.setComponentState('tray', 'down')
+    robot = CareOBot()
+    import locations
+    from history import SensorLog
+    l = locations.RobotLocationProcessor(robot)
+    rp = PoseUpdater(robot)
+    sr = SensorLog(rp.channels, rp.robot.name)
+
+    rp.start()
+    sr.start()
     
-    #rosHelper.ROS.configureROS(packageName='cob_script_server', packagePath='/home/nathan/git', rosMaster='http://cob3-2-pc1:11311')
-    #a = ActionLib()
-    #print 'Init: ' + str(a.initComponent('torso'))
-    #print 'Reco: ' + str(a.runFunction('recover', {'component_name': 'torso', 'blocking':True}))
-    #print 'Move: ' + str(a.runComponent('torso', 'front', True))
-    #print 'Move: ' + str(a.runComponent('torso', 'home', True))
-    
-    rosHelper.ROS.configureROS(packageName='cob_script_server', packagePath='/home/nathan/git', rosMaster='http://cob3-2-pc1:11311')
-    p = PoseUpdater()
-    p.start()
+    l.start()
     
     while True:
         try:
             sys.stdin.read()
         except KeyboardInterrupt:
             break
-        
-    p.stop()
+    l.stop()
+
+    sr.stop()
+    rp.stop()
