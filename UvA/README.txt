@@ -127,13 +127,13 @@ Start FISH-EYE
 //  roslaunch accompany_static_camera_localisation fisheye_calib_image_saver.launch
   rosrun gscam gscam -s 0
   roscd accompany_static_camera_localisation/res/calib_frames
-  rosrun accompany_static_camera_localisation image_saver -n 5000 -p ./ image:=/gscam/image_raw
+  rosrun image_view image_view image:=/gscam/image_raw
+  rosrun accompany_static_camera_localisation image_saver -n 5000 -p ./ -t /gscam/image_raw
 
 Remove similar checkerboard images
   ./modPics.sh
   mkdir OLD
   mv *jpg_OLD OLD/
-  cd ..
 
 Check checkerboard images if they are clear
   eog *.jpg
