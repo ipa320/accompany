@@ -89,6 +89,8 @@ class SensorLog(PollingProcessor):
         for k in channels.keys():
             if not self._logCache.has_key(k):
                 current = self._dao.getSensor(channels[k]['id'])
+                if current == None:
+                    pass
                 self._logCache.setdefault(k, { 'value': current['value'], 'status': current['status']})
             if self._logCache[k]['status'] != channels[k]['status']:
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -106,6 +108,7 @@ class SensorLog(PollingProcessor):
                                                                            }
                     self._logCache[k]['value'] = channels[k]['value']
                     self._logCache[k]['status'] = channels[k]['status']
+        
 
 if __name__ == '__main__':
     import sys

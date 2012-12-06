@@ -349,19 +349,20 @@ class ScriptServer(object):
 
 class Pose(object):
     def __init__(self):
-        ros = rosHelper.ROS()
-        ros.configureROS(packageName='cob_map_pose')
+        self._ros = rosHelper.ROS()
+        self._ros.configureROS(packageName='cob_map_pose')
         import tf, rospy
         self._rospy = rospy
         self._tf = tf
-        ros.initROS()
-        self._listener = self._tf.TransformListener()
+        self._ros.initROS()
+        #self._listener = self._tf.TransformListener()
     
     def getRobotPose(self):
         """
         Waits for the /base_footprint to /map transform to be availalble and 
         returns two tuples: (x, y, z) and a quaternion ( rx, ry, rz, rxy)
         Note: z values are 0 for 2D mapping and navigation.
+        """
         """
         # Wait for tf to get the frames
         now = self._rospy.Time.now()
@@ -379,6 +380,12 @@ class Pose(object):
         except (self._tf.LookupException, self._tf.ConnectivityException, self._tf.ExtrapolationException) as e:
             print >> sys.stderr, "Error while looking up transform: " + str(e)
             return ((None, None, None), None)
+        """
+        pose = self._ros.getSingleMessage('/base_pose').pose
+        xyPos = (pose.position.x, pose.position.y, pose.position.z)
+        (_, _, orientation) = self._tf.transformations.euler_from_quaternion((pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w))
+        return (xyPos, orientation)
+        
 
 class ActionLib(object):
     _specialCases = {
@@ -464,6 +471,23 @@ class ActionLib(object):
 
 if __name__ == '__main__':
     robot = CareOBot()
+    """
+    frequency=math.pi*2/100
+    phase1=2
+    phase2=0
+    phase3=4
+    center=128
+    width=127
+    l=50
+    robot = CareOBot()
+    while True:
+        for i in range(0, l):
+            red = (math.sin(frequency*i + phase1) * width + center) / 255
+            grn = (math.sin(frequency*i + phase2) * width + center) / 255
+            blu = (math.sin(frequency*i + phase3) * width + center) / 255
+            robot.setLight([red, grn, blu])
+
+    """
     import locations
     from history import SensorLog
     l = locations.RobotLocationProcessor(robot)
@@ -484,3 +508,4 @@ if __name__ == '__main__':
 
     sr.stop()
     rp.stop()
+    

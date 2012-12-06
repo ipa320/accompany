@@ -57,7 +57,7 @@ class ZigBee(PollingProcessor):
 			if type(e) != timeout:
 				print e
 			return
-		
+
 		(_, mac, channel, val) = data.split(' ')
 
 		mac = mac.lower()
@@ -113,6 +113,7 @@ class GEOSystem(PollingProcessor):
 		self._sr = StateResolver()
 		self._channels = {}
 		self._warned = []
+		self._i = 0
 
 	@property
 	def channels(self):		
@@ -128,6 +129,11 @@ class GEOSystem(PollingProcessor):
 
 	def pollGeoSystem(self):
 		rows = self._geoDao.getData(self._geoQuery)
+		#This appears to be needed or 'CALL exppower' doesn't update the power values,
+		# oddly, it updates the timestamp field though...
+		self._geoDao.close()
+		self._i += 1
+		print 'geo' + str(self._i)
 		for row in rows:
 			try:
 				sensor = next(s for s in self._sensors if s['ChannelDescriptor'] == str(row['ID']))

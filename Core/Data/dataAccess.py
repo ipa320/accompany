@@ -1,4 +1,4 @@
-import MySQLdb
+import MySQLdb, sys
 
 class Locations(object):
     def __init__ (self, robotTable=None, userTable=None, locationTable=None):
@@ -591,7 +591,11 @@ class SQLDao(object):
         self._host = hostname or server_config['mysql_log_server'] 
         self._pass = password or server_config['mysql_log_password']
         self._user = username or server_config['mysql_log_user']
-        self._db = database or server_config['mysql_log_db']        
+        self._db = database or server_config['mysql_log_db']
+        self._conn = None
+        
+    def __del__(self):
+        self.close()
     
     def getSingle(self, sql, args=None, default=None):
         data = self.getData(sql, args)
@@ -600,24 +604,43 @@ class SQLDao(object):
         else:
             return default
 
-    def _getCursor(self):
-        # get a new connection for each request
-        conn = MySQLdb.connect(self._host, self._user, self._pass, self._db)
+    def _getCursor(self, retry=10):
+        if self._conn == None:
+            try:
+                self._conn = MySQLdb.connect(self._host, self._user, self._pass, self._db)
+            except Exception as e:
+                #TODO: Need to protect this against infinite recursion
+                print >> sys.stderr, e
+                if retry > 0:
+                    return self._getCursor(retry-1)
+                else:
+                    raise e
         
-        return (conn, conn.cursor(MySQLdb.cursors.DictCursor))
+        try:
+            return (self._conn, self._conn.cursor(MySQLdb.cursors.DictCursor))
+        except:
+            self._conn = None
+            return self._getCursor()
+
+    def close(self):        
+        if self._conn is not None:
+            try:
+                self._conn.close()
+            except:
+                pass
+            
+            self._conn = None
 
     def getData(self, sql, args=None, trimString=True):
-        (conn, cursor) = self._getCursor()
+        (_, cursor) = self._getCursor()
 
         try:
             cursor.execute(sql, args)
             rows = cursor.fetchall()
             cursor.close()
-            conn.close()
             return rows
         except Exception as e:
             cursor.close()
-            conn.close()
             # Server connection was forcibly severed from the server side
             # retry the request
             if e.args[0] == 2006:
@@ -634,11 +657,11 @@ class SQLDao(object):
             conn.commit()
             rowId = cursor.lastrowid
             cursor.close()
-            conn.close()
+            #conn.close()
             return rowId
         except MySQLdb.Error, e:
             cursor.close()
-            conn.close()
+            #conn.close()
             # Server connection was forcibly severed from the server side
             # retry the request
             if e.args[0] == 2006:
