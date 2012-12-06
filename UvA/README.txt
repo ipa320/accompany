@@ -253,8 +253,8 @@ FISHEYE:
   roslaunch accompany_static_camera_localisation fisheye_localization.launch
 
 KINECT:
-   
-  roslaunch accompany_static_camera_localisation kinect_localization.launch
+  roslaunch openni_launch openni.launch   
+  rosrun accompany_static_camera_localisation camera_localization -p ./ image:=/camera/rgb/image_color -v -n 1
 
 Echo human localizations:
 
