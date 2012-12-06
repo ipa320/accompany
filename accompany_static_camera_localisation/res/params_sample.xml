@@ -5,24 +5,24 @@
   <Cameras>
     <Vector>
       <Elt>
-        <sigma1>16</sigma1>
-        <sigma2>16</sigma2>
-        <sigma3>16</sigma3>
+        <sigma1>8</sigma1>
+        <sigma2>8</sigma2>
+        <sigma3>8</sigma3>
         <scanres>5</scanres>
         <IntrinsicFile>camera_intrinsic.xml</IntrinsicFile>
         <ExtrinsicFile>camera_extrinsic.xml</ExtrinsicFile>
-        <SCALE>0.25</SCALE>
+        <SCALE>1</SCALE>
       </Elt>
     </Vector>
   </Cameras>
 
-  <personHeight>1800</personHeight>
-  <wg>400</wg>
-  <wm>300</wm>
-  <wt>100</wt>
-  <midRatio>.8</midRatio>
+  <personHeight>1810</personHeight>
+  <wg>460</wg>
+  <wm>610</wm>
+  <wt>270</wt>
+  <midRatio>.80</midRatio>
   <persDist>500</persDist>
   <scanres>50</scanres>
   
-  <w2>500</w2>
+  <w2>800</w2>
 </DOCUMENTROOT>
