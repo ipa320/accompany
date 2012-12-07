@@ -49,25 +49,39 @@ class ROS(object):
             else:
                 return None
     
-    def getTopics(self, baseFilter=''):
-        topics = self._rospy.get_published_topics(baseFilter)
+    def getTopics(self, baseFilter='', exactMatch=False):
+        #topics = self._rospy.get_published_topics(baseFilter)
+        #if len(topics) == 0 and baseFilter.strip('/').find('/') == -1:
+        
+        #decided to do filtering a little different than ros
+        #ros requires an exact match (of the parent namespace)
+        #this can grab any partial matches
+        
+        #ros doesn't return topics when the full namespace is specified
+        # i.e. head_controller works and brings back all nested topics
+        # but head_controller/state does not
+        # in this case, get all of them and loop through
+        topics = []
+        allTopics = self._rospy.get_published_topics()
+        if baseFilter.startswith('/'):
+            baseFilter = baseFilter[1:]
+        for t in allTopics:
+            name = t[0]
+            if name.startswith('/'):
+                name = name[1:]
+            if name.strip('/') == baseFilter.strip('/') or (not exactMatch and name.startswith(baseFilter)):
+                topics.append(t)
+            
         return topics
 
     def getMessageType(self, topic):
-        controller_name = topic[0: topic.rfind('/')]
-        controller_msgType = None
-        
-        topics = self.getTopics(controller_name)
-        for pubTopic in topics:
-            if pubTopic[0] == topic:
-                controller_msgType = pubTopic[1]
-                break
-        
-        if controller_msgType == None:
+        pubTopic = self.getTopics(topic, True)
+        if len(pubTopic) != 0: 
+            controller_msgType = pubTopic[0][1]
+        else:
             raise Exception('Could not determine ROS messageType for topic: %s' % (topic))
-        
-        manifest = controller_msgType.split('/')[0]
-        cls = controller_msgType.split('/')[1]
+                
+        (manifest, cls) = controller_msgType.split('/')
         
         try:
             import roslib
@@ -204,11 +218,5 @@ class RosSubscriber(object):
 
 if __name__ == '__main__':
     r = ROS()
-    er = 0
-    start = time.clock()
-    num = 1000
-    while(er < num):
-        r.getSingleMessage('/head_controller/state')
-        er +=1
-
-    print 'iterationTime = ' + str((time.clock() - start) / num)
+    r.getSingleMessage('/range_0')
+ 
