@@ -38,7 +38,7 @@ int main(int argc, char **argv)
     ("imagelist_training,i",po::value<string>(&imagelist_training)->required(),"the input image list for training\n")
     ("output_background_model,o",po::value<string>(&output_background_model)->required(),"the output background model\n")
     ("num_components,c",po::value<int>(&num_components)->default_value(3),"the number of components\n")
-    ("num_frames,f",po::value<int>(&num_frames)->default_value(0),"the number of components\n");
+    ("num_frames,f",po::value<int>(&num_frames)->default_value(0),"the number of frames to use\n");
 
   po::variables_map variablesMap;
 
