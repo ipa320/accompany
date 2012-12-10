@@ -55,14 +55,22 @@ int main(int argc, char** argv) {
 
 	// parse arguments and set sync property accordingly, default sync=true.
 	bool sync=true;
+  std::string calib_file = "../camera_parameters.txt";
 	for (int i=0;i<argc;i++)
 	{
-	  if (strcpy(argv[i],"--sync") || strcpy(argv[i],"-s"))
+    const char* s = argv[i];
+	  if (!strcmp(s,"-s"))
 	  {
-	    if (i+1<argc && (strcpy(argv[i],"false") || strcpy(argv[i],"0")))
+	    if (!strcmp(argv[i+1],"0"));
 	      sync=false;
 	  }
+    else if( !strcmp( s, "-i" ))
+		{
+      i++;
+      calib_file = argv[i];
+    }
 	}
+
 	if (sync)
 	  gst_base_sink_set_sync(GST_BASE_SINK(sink),TRUE);
 	else
@@ -119,8 +127,9 @@ int main(int argc, char** argv) {
 	// We could probably do something with the camera name, check
 	// errors or something, but at the moment, we don't care.
 	std::string camera_name;
-	if (camera_calibration_parsers::readCalibrationIni("../camera_parameters.txt", camera_name, camera_info)) {
-	  ROS_INFO("Successfully read camera calibration.  Rerun camera calibrator if it is incorrect.");
+  ROS_INFO("loading calibration file %s", calib_file.c_str());
+	if (camera_calibration_parsers::readCalibrationIni(calib_file, camera_name, camera_info)) {
+	  ROS_INFO("Successfully read camera calibration.  Return camera calibrator if it is incorrect.");
 	}
 	else {
 	  ROS_ERROR("No camera_parameters.txt file found.  Use default file if no other is available.");
