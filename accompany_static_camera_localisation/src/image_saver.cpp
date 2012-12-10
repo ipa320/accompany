@@ -16,6 +16,8 @@ using namespace std;
 
 int g_count = 0;
 int nrImage;
+string encoding = "bgr8";
+string imgExt = ".jpg";
 
 class ImageSaver
 {
@@ -35,10 +37,10 @@ public:
   void callback(const sensor_msgs::ImageConstPtr& image)
   {
     ros::Time now=ros::Time::now();
-    cv_bridge::CvImageConstPtr cv_ptr=cv_bridge::toCvShare(image,"bgr8");
+    cv_bridge::CvImageConstPtr cv_ptr=cv_bridge::toCvShare(image,encoding);
     stringstream ss;
     ss<<path<<"/"<<setfill('0')<<setw(12)<<now.sec<<"."
-      <<setfill('0')<<setw(9)<<now.nsec<<".jpg";
+      <<setfill('0')<<setw(9)<<now.nsec<<imgExt;
     string filename=ss.str();
     cout<<"saving "<<filename<<endl;
     cv::imwrite(filename,cv_ptr->image);
@@ -71,6 +73,7 @@ int main(int argc, char** argv)
     ("help,h", "produce help message")
     ("nr,n", po::value<int>(&nrImage)->default_value(10),"total number of images to save, <=0 means unlimited")
     ("topic,t", po::value<vector<string> >(&topics)->required(),"topic to read images from")
+    ("depth_image,d", "specify if it is the depth image")
     ("path,p", po::value<vector<string> >(&paths),"global path to save images to");
   po::variables_map variablesMap;
 
@@ -91,6 +94,13 @@ int main(int argc, char** argv)
   
   cout<<"number of images to save: "<<nrImage<<endl;
 
+  if (variablesMap.count("depth_image"))
+  {
+    encoding = "mono16";
+    imgExt = ".png";
+  }
+  cout << "encoding: " << encoding << endl;
+    
   if (paths.size()==0) // set default when non given
     paths.push_back("./");
 

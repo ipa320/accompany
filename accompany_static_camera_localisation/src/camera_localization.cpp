@@ -650,10 +650,10 @@ int main(int argc, char **argv)
 
   cout<<"loading '"<<bgmodel_file<<"'"<<endl;
   // Initialize localization module
-  getBackground(bgmodel_file.c_str(), bgModel);
+  getBackground(bgmodel_file.c_str(), bgModel); // load background model
   cout<<"loading '"<<intrinsic_file<<"'"<<endl;
   cout<<"loading '"<<extrinsic_file<<"'"<<endl;
-  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
+  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(), // load calibration
       extrinsic_file.c_str());
   cout<<"loading '"<<prior_file<<"'"<<endl;
   loadWorldPriorHull(prior_file.c_str(), priorHull);
@@ -680,7 +680,9 @@ int main(int argc, char **argv)
   humanLocationsPub = n.advertise<accompany_uva_msg::HumanLocations>(resolved_humanLocations, 10);
   //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
   markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
-  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
+
+  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback); // function of localization
+  
   ros::spin();
 
   return 0;
