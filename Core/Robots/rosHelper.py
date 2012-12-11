@@ -94,30 +94,34 @@ class ROS(object):
             raise Exception('Error occured while loading message class: %s' % (e))
         
     @staticmethod
-    def parseRosBash(version=None):
+    def parseRosBash(version=None, onlyDifferent=True):
         version = version or ros_config['version']
         if not ROS._envVars.has_key(version):
             #executes the bash script and exports env vars
             bashScript = '/opt/ros/%s/setup.bash' % version
-            env = {}
+            diffEnv = {}
             if os.path.exists(bashScript):
                 rosEnv = ROS.parseBashEnviron('source ' + bashScript)
-                allEnv = ROS.parseBashEnviron()
+                baseEnv = ROS.parseBashEnviron()
         
                 #find all the variables that ros added/changed
                 for key, value in rosEnv.items():
-                    if not allEnv.has_key(key):
-                        env[key] = value
-                    elif allEnv[key] != value:
+                    if not baseEnv.has_key(key):
+                        diffEnv[key] = value
+                    elif baseEnv[key] != value:
                         #We really only want the bit that ros added
-                        env[key] = value.replace(allEnv[key], '').strip(':')
+                        diffEnv[key] = value.replace(baseEnv[key], '').strip(':')
         
                 #Add in any overrides from the config file
-                env.update(ros_config['envVars'])
+                diffEnv.update(ros_config['envVars'])
+                rosEnv.update(ros_config['envVars'])
 
-            ROS._envVars[version] = env
+            ROS._envVars[version] = (diffEnv, rosEnv)
 
-        return ROS._envVars[version]
+        if onlyDifferent:
+            return ROS._envVars[version][0]
+        else:
+            return ROS._envVars[version][1]
 
     @staticmethod
     def parseBashEnviron(preCommand=''):
