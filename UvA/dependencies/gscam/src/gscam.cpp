@@ -19,6 +19,8 @@ extern "C"{
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#include <opencv2/opencv.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 namespace po = boost::program_options;
 
@@ -31,10 +33,50 @@ bool gstreamerPad, rosPad;
 int width, height;
 sensor_msgs::CameraInfo camera_info;
 
+void xml2yaml(std::string calib_xml, std::string& calib_yaml)
+{
+  int image_width, image_height;
+  std::string camera_name, distortion_model;
+  cv::Mat camera_matrix, distortion_coefficients, rectification_matrix, projection_matrix;
+
+  boost::filesystem::path p(calib_xml);
+  boost::filesystem::path dir = p.parent_path();
+  calib_yaml = dir.string() + "/camera_intrinsic.yaml";
+
+  cv::FileStorage fs1(calib_xml, cv::FileStorage::READ);
+  cv::FileStorage fs2(calib_yaml,cv::FileStorage::WRITE);
+  if (!fs1.isOpened())
+  {
+    ROS_ERROR("cannot open %s", calib_xml.c_str());
+  }
+
+  ROS_INFO("convert %s to %s", calib_xml.c_str(), calib_yaml.c_str());
+  fs1["image_width"] >> image_width;
+  fs2 << "image_width" << image_width;
+  fs1["image_height"] >> image_height;
+  fs2 << "image_height" << image_height;
+  fs2 << "camera_name" << "camera";
+  fs1["camera_matrix"] >> camera_matrix;
+  fs2 << "camera_matrix" << camera_matrix;
+
+  fs2 << "distortion_model" << "plumb_bob";
+  fs1["distortion_coefficients"] >> distortion_coefficients;
+  fs2 << "distortion_coefficients" << distortion_coefficients;
+
+  cv::hconcat(camera_matrix,cv::Mat::zeros(3,1,CV_64F),projection_matrix);
+
+  fs2 << "rectification_matrix" << cv::Mat::eye(3,3,CV_32F);
+  fs2 << "projection_matrix" << projection_matrix;
+  
+  fs1.release();
+  fs2.release();
+
+}
+
 int main(int argc, char** argv)
 {
   bool sync;
-  std::string frame_id, calib_file;
+  std::string frame_id, calib_xml, calib_yaml;
 
   // arguments
   po::options_description optionsDescription(
@@ -47,7 +89,7 @@ int main(int argc, char** argv)
     ("help,h","show help message")
     ("sync,s", po::value<bool>(&sync)->default_value(true),"parent frame\n")
     ("frame_id,f", po::value<std::string>(&frame_id)->default_value("gscam_optical_frame"),"assign camera frame with frame_id\n")
-    ("intrinsic_xml,i", po::value<std::string>(&calib_file)->default_value("../camera_parameters.txt"),"load intrinsic parameters, use image_proc for image undistortion\n");
+    ("intrinsic_xml,i", po::value<std::string>(&calib_xml)->default_value("../camera_parameters.txt"),"load intrinsic parameters, use image_proc for image undistortion\n");
 
   po::variables_map variablesMap;
 
@@ -148,8 +190,11 @@ int main(int argc, char** argv)
   // We could probably do something with the camera name, check
   // errors or something, but at the moment, we don't care.
   std::string camera_name;
-  ROS_INFO("loading calibration file %s", calib_file.c_str());
-  if (camera_calibration_parsers::readCalibrationYml(calib_file, camera_name, camera_info)) 
+  ROS_INFO("loading calibration file %s", calib_xml.c_str());
+
+  xml2yaml(calib_xml,calib_yaml);
+
+  if (camera_calibration_parsers::readCalibrationYml(calib_yaml, camera_name, camera_info)) 
   {
     ROS_INFO("Successfully read camera calibration. Return camera calibrator if it is incorrect.");
     camera_info.header.frame_id = frame_id; 
@@ -190,9 +235,6 @@ int main(int argc, char** argv)
   }
 
   image_transport::ImageTransport it(nh);
-
-
-
 
   image_transport::CameraPublisher pub = it.advertiseCamera(resolved_gscam+"/image_raw", 1);
   ros::ServiceServer set_camera_info = nh.advertiseService(resolved_gscam+"/set_camera_info", setCameraInfo);
