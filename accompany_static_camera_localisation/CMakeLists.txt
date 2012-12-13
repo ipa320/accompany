@@ -148,5 +148,5 @@ target_link_libraries(publish_image opencv_core boost_program_options)
 rosbuild_add_executable(kinect_driver src/kinect_driver.cpp)
 target_link_libraries(kinect_driver boost_program_options)
 
-rosbuild_add_executable(tf_camera_from_extrinsic src/tf_camera_from_extrinsic.cpp)
-target_link_libraries(tf_camera_from_extrinsic boost_program_options)
+rosbuild_add_executable(publish_tf_from_extrinsic src/publish_tf_from_extrinsic.cpp)
+target_link_libraries(publish_tf_from_extrinsic boost_program_options)
