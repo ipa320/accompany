@@ -98,6 +98,7 @@ int main(int argc, char ** argv)
   }
   fs["tvec"] >> tvec; tvec = tvec / 1000; // scale translation to meters
   fs["rvec"] >> rvec;
+  fs.release();
   cv::Rodrigues(rvec,rmat); // rotation vector to rotation matrix
 
   if (variablesMap.count("reverse") == 0) // default: World->Camera 
@@ -124,4 +125,3 @@ int main(int argc, char ** argv)
 
   return 0;
 };
-
