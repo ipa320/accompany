@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 
   ros::init(argc, argv, "gscam_publisher");
   ros::NodeHandle nh;
-  std::string resolved_gscam=nh.resolveName("gscam");// allows users to rename topics
+  std::string resolved_gscam = nh.resolveName("gscam");// allows users to rename topics
   std::cout<<"publishing to topic name: '"<<resolved_gscam<<"'"<<std::endl;
 
   gst_init(0,0);
@@ -259,9 +259,10 @@ int main(int argc, char** argv)
 
     sensor_msgs::Image msg;
 
-    camera_info.header.stamp = ros::Time::now(); //TODO
-    msg.header.stamp = camera_info.header.stamp; //TODO
-    msg.header.frame_id = camera_info.header.frame_id; //TODO
+    // load camera info to image msg
+    camera_info.header.stamp = ros::Time::now();
+    msg.header.stamp = camera_info.header.stamp;
+    msg.header.frame_id = camera_info.header.frame_id;
 
     msg.width = width; 
     msg.height = height;
