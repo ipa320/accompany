@@ -12,6 +12,7 @@ extern "C"{
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/SetCameraInfo.h>
+#include <camera_calibration_parsers/parse_yml.h>
 #include <camera_calibration_parsers/parse_ini.h>
 
 #include <unistd.h>
@@ -128,8 +129,9 @@ int main(int argc, char** argv) {
   // errors or something, but at the moment, we don't care.
   std::string camera_name;
   ROS_INFO("loading calibration file %s", calib_file.c_str());
-  if (camera_calibration_parsers::readCalibrationIni(calib_file, camera_name, camera_info)) {
+  if (camera_calibration_parsers::readCalibrationYml(calib_file, camera_name, camera_info)) {
     ROS_INFO("Successfully read camera calibration.  Return camera calibrator if it is incorrect.");
+    camera_info.header.frame_id = "/fisheye_optical_frame"; // TODO
   }
   else {
     ROS_ERROR("No camera_parameters.txt file found.  Use default file if no other is available.");
@@ -187,6 +189,11 @@ int main(int argc, char** argv) {
     gst_structure_get_int(structure,"height",&height);
 
     sensor_msgs::Image msg;
+
+    camera_info.header.stamp = ros::Time::now(); //TODO
+    msg.header.stamp = camera_info.header.stamp; //TODO
+    msg.header.frame_id = camera_info.header.frame_id; //TODO
+
     msg.width = width; 
     msg.height = height;
     msg.encoding = "rgb8";
