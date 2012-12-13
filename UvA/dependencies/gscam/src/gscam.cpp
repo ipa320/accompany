@@ -19,6 +19,9 @@ extern "C"{
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 //forward declarations
 //static gboolean processData(GstPad *pad, GstBuffer *buffer, gpointer u_data);
 bool setCameraInfo(sensor_msgs::SetCameraInfo::Request &req, sensor_msgs::SetCameraInfo::Response &rsp);
@@ -28,7 +31,41 @@ bool gstreamerPad, rosPad;
 int width, height;
 sensor_msgs::CameraInfo camera_info;
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
+  bool sync;
+  std::string frame_id, calib_file;
+
+  // arguments
+  po::options_description optionsDescription(
+      " GSCAM: camera driver\n"
+      " example: rosrun gscam gscam -s 0 -f gscam_optical_frame -i camera_intrinsic.xml\n"
+      " start camera without synchronization and load intrinsic parameters\n"
+      " use image_proc to produce rectified image (undistortion)\n"
+      "Allowed options");
+  optionsDescription.add_options()
+    ("help,h","show help message")
+    ("sync,s", po::value<bool>(&sync)->default_value(true),"parent frame\n")
+    ("frame_id,f", po::value<std::string>(&frame_id)->default_value("gscam_optical_frame"),"assign camera frame with frame_id\n")
+    ("intrinsic_xml,i", po::value<std::string>(&calib_file)->default_value("../camera_parameters.txt"),"load intrinsic parameters, use image_proc for image undistortion\n");
+
+  po::variables_map variablesMap;
+
+  try
+  {
+    po::store(po::parse_command_line(argc, argv, optionsDescription),variablesMap);
+    if (variablesMap.count("help")) {std::cout<<optionsDescription<<std::endl; return 0;}
+    po::notify(variablesMap);
+  }
+  catch (const std::exception& e)
+  {
+    std::cout << "--------------------" << std::endl;
+    std::cerr << "- " << e.what() << std::endl;
+    std::cout << "--------------------" << std::endl;
+    std::cout << optionsDescription << std::endl;
+    return 1;
+  }
+
   char *config = getenv("GSCAM_CONFIG");
   if (config == NULL) {
     std::cout << "Problem getting GSCAM_CONFIG variable." << std::endl;
@@ -54,23 +91,6 @@ int main(int argc, char** argv) {
   gst_app_sink_set_caps(GST_APP_SINK(sink), caps);
   gst_caps_unref(caps);
 
-  // parse arguments and set sync property accordingly, default sync=true.
-  bool sync=true;
-  std::string calib_file = "../camera_parameters.txt";
-  for (int i=0;i<argc;i++)
-  {
-    const char* s = argv[i];
-    if (!strcmp(s,"-s"))
-    {
-      if (!strcmp(argv[i+1],"0"));
-      sync=false;
-    }
-    else if( !strcmp( s, "-i" ))
-    {
-      i++;
-      calib_file = argv[i];
-    }
-  }
 
   if (sync)
     gst_base_sink_set_sync(GST_BASE_SINK(sink),TRUE);
@@ -129,12 +149,19 @@ int main(int argc, char** argv) {
   // errors or something, but at the moment, we don't care.
   std::string camera_name;
   ROS_INFO("loading calibration file %s", calib_file.c_str());
-  if (camera_calibration_parsers::readCalibrationYml(calib_file, camera_name, camera_info)) {
-    ROS_INFO("Successfully read camera calibration.  Return camera calibrator if it is incorrect.");
-    camera_info.header.frame_id = "/fisheye_optical_frame"; // TODO
+  if (camera_calibration_parsers::readCalibrationYml(calib_file, camera_name, camera_info)) 
+  {
+    ROS_INFO("Successfully read camera calibration. Return camera calibrator if it is incorrect.");
+    camera_info.header.frame_id = frame_id; 
+    if (variablesMap.count("frame_id") == 0)
+      ROS_WARN("No frame_id specified, use default: %s\n Use option -f to specify which frame to associate", frame_id.c_str());
+    else
+      ROS_INFO("Use the specified frame_id: %s", frame_id.c_str());
   }
-  else {
-    ROS_ERROR("No camera_parameters.txt file found.  Use default file if no other is available.");
+  else 
+  {
+    ROS_WARN("No camera_parameters.txt file found.  Use default file if no other is available.");
+    ROS_WARN("Use -i option to load the intrinsic parameters");
   }
 
 
