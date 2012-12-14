@@ -1,4 +1,4 @@
-rosbag record -b 0 /gscam/image_raw/theora /gscam/camera_info
+rosbag record -b 0 /gscam/image_raw/compressed /gscam/camera_info
 #
 # to play back use image_transport to convert from theora to raw images like so:
 #
