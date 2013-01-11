@@ -28,7 +28,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv)
 # check cmn headers
 find_path(CMN_INCLUDE_DIR cmn/random.hh
   HINTS  /usr/include/cmn /usr/local/include/cmn
-  PATH_SUFFIXES cmn) 
+  PATH_SUFFIXES cmn)
 if (NOT CMN_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'cmn/random.hh', please install cmn from ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn.git or set CMN_SRC_DIR")
 else (NOT CMN_INCLUDE_DIR)
@@ -38,7 +38,7 @@ endif (NOT CMN_INCLUDE_DIR)
 # check vxl headers
 find_path(VNL_INCLUDE_DIR vnl/vnl_vector.h
   HINTS  /usr/include/vxl/core /usr/local/include/vxl/core ${VXL_BASE_DIR}/core
-  PATH_SUFFIXES vnl) 
+  PATH_SUFFIXES vnl)
 if (NOT VNL_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'vnl/vnl_vector.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
 else (NOT VNL_INCLUDE_DIR)
@@ -48,7 +48,7 @@ endif (NOT VNL_INCLUDE_DIR)
 # check vcl headers
 find_path(VCL_INCLUDE_DIR vcl/vcl_iosfwd.h
   HINTS  /usr/include/vxl /usr/local/include/vxl
-  PATH_SUFFIXES vcl) 
+  PATH_SUFFIXES vcl)
 if (NOT VCL_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'vcl/vcl_iosfwd.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
 else (NOT VCL_INCLUDE_DIR)
@@ -150,3 +150,6 @@ target_link_libraries(kinect_driver boost_program_options)
 
 rosbuild_add_executable(publish_tf_from_extrinsic src/publish_tf_from_extrinsic.cpp)
 target_link_libraries(publish_tf_from_extrinsic boost_program_options)
+
+rosbuild_add_executable(transformPoints src/transformPoints.cpp)
+target_link_libraries(transformPoints boost_program_options opencv_highgui opencv_core)
