@@ -16,6 +16,7 @@ using namespace std;
 bool view_on;
 bool save_on = false;
 string save_file;
+float time_shift;
 cv::Mat col_vals; // buffer of skeleton points (TimexNumx2)
 cv::Mat timestamp; // buffer of time stamp
 
@@ -67,10 +68,10 @@ public:
   FrameDrawer(const std::vector<std::string>& frame_ids, std::string image_topic)
     : it_(nh_), frame_ids_(frame_ids)
   {
-    ROS_INFO("subscribed to camera %s",image_topic.c_str());
     sub_ = it_.subscribeCamera(image_topic, 1, &FrameDrawer::imageCb, this);
     if (view_on)
     {
+      ROS_INFO("subscribed to camera %s",image_topic.c_str());
       pub_ = it_.advertise("image_out", 1);
     }
   }
@@ -91,7 +92,10 @@ public:
     cam_model_.fromCameraInfo(info_msg);
 
     vector<cv::Point2d> pts;
-    ros::Time acquisition_time = info_msg->header.stamp;
+    ros::Duration time_compensate(time_shift); //TODO:
+
+    ros::Time acquisition_time = info_msg->header.stamp + time_compensate; // TODO
+
     BOOST_FOREACH(const std::string& frame_id, frame_ids_)
     {
       tf::StampedTransform transform;
@@ -162,6 +166,7 @@ int main(int argc, char** argv)
     ("frame_id,f", po::value<std::vector<string> > (&frame_ids)->multitoken()->required(), "list of frame_ids to be transformed to the camera")
     ("image_topic,t", po::value<string>(&image_topic)->required(), "image topics to be processed")
     ("visualize,v", "visualize all tf in an new image (/image_out)")
+    ("time_compensate,c", po::value<float>(&time_shift)->required(), "compensate timestamp for a small shift")
     ("save_to_file,s", po::value<string>(&save_file)->default_value(""), "file to store skeleton points");
 
   po::variables_map variablesMap;
