@@ -36,11 +36,12 @@ public:
 
   void callback(const sensor_msgs::ImageConstPtr& image)
   {
-    ros::Time now=ros::Time::now();
+    // ros::Time now=ros::Time::now();
+    ros::Time acquisition_time = image->header.stamp; // use acquisition time instead of now()
     cv_bridge::CvImageConstPtr cv_ptr=cv_bridge::toCvShare(image,encoding);
     stringstream ss;
-    ss<<path<<"/"<<setfill('0')<<setw(12)<<now.sec<<"."
-      <<setfill('0')<<setw(9)<<now.nsec<<imgExt;
+    ss<<path<<"/"<<setfill('0')<<setw(12)<<acquisition_time.sec<<"."
+      <<setfill('0')<<setw(9)<<acquisition_time.nsec<<imgExt;
     string filename=ss.str();
     cout<<"saving "<<filename<<endl;
     cv::imwrite(filename,cv_ptr->image);
@@ -91,7 +92,7 @@ int main(int argc, char** argv)
     cerr << optionsDescription << endl;
     return 1;
   }
-  
+
   cout<<"number of images to save: "<<nrImage<<endl;
 
   if (variablesMap.count("depth_image"))
@@ -100,7 +101,7 @@ int main(int argc, char** argv)
     imgExt = ".png";
   }
   cout << "encoding: " << encoding << endl;
-    
+
   if (paths.size()==0) // set default when non given
     paths.push_back("./");
 
