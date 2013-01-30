@@ -19,7 +19,6 @@ int abWidth,abHeight;
 double scWidth,scHeight;
 
 cv::Mat resize;
-cv_bridge::CvImagePtr cv_ptr;
 
 vector< vector<string> > readImages(vector<string> files)
 {
