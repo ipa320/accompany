@@ -54,15 +54,17 @@ unsigned MAX_TRACK_AGE = 8;
 #define DYNBG_TYPE float
 #define DYNBG_DIM 3
 #define DYNBG_MAXGAUS 3
+#define SHOW_FORGROUND 1 // plot forground for debugging purposes
+#define INIT_FIRST_FRAMES 2 // use first X frames to initializa the background model
 GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
 DYNBG_TYPE decay=1/1000.0f;
-DYNBG_TYPE initVar=50;
-DYNBG_TYPE minWeight=0.1;
+DYNBG_TYPE initVar=40;
+DYNBG_TYPE minWeight=0.2;
 DYNBG_TYPE squareMahanobisMatch=16;
-DYNBG_TYPE weightReduction=0.002;
-DYNBG_TYPE decisionBackground=1E-8;
-IplImage *smooth=NULL;
-vnl_vector<FLOAT> sumPix;
+DYNBG_TYPE weightReduction=0.01;
+DYNBG_TYPE decisionBackground=1E-10;
+const char* dynbg = "dynamic background";
+const char* dynNrGaus = "nrGaussians";
 // ---- dynamic background model ---- end
 
 extern unsigned w2;
@@ -99,7 +101,7 @@ ImgProducer *producer;
 int waitTime = 30;
 const char* win = "foreground";
 const char* bgwin = "background";
-const char* dynbg = "dynamic background";
+
 
 string saveImagesPath;
 string imagePostfix;
@@ -133,8 +135,7 @@ FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
   //      << logSumPixelBGProb.size() << ", mask.size()=" << mask.size() << endl;
   // cerr << "logSumPixelFGProb.size()=" << logSumPixelFGProb.size() << endl;
   FLOAT res = bgSum;
-  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
-      ++i)
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();++i)
   {
     unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     //cout << "offset=" << offset << ", start=" << i->start << ", end=" << i->end << ", size=" << logSumPixelBGProb.size() << endl;
@@ -143,7 +144,6 @@ FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
     // res += (logSumPixelFGProb(offset + i->end) - logSumPixelFGProb(offset + i->start - 1))
     //      - (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
   }
-
   return res;
 }
 
@@ -151,8 +151,7 @@ FLOAT logMaskProbDiff(const vnl_vector<FLOAT> &logSumPixelFGProb,
     const vnl_vector<FLOAT> &logSumPixelBGProb, const vector<scanline_t> &mask)
 {
   FLOAT res = 0;
-  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
-      ++i)
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();++i)
   {
     unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     res -= (logSumPixelBGProb(offset + i->end)
@@ -267,7 +266,6 @@ void scanRest(vector<unsigned> &existing,
             logSumPixelBGProb[c], lSum[c], masks[c][p]); // already includes lSum
       }
       lpp(p) = logPosProbCache[p] + logNP;
-
       logPosProbCache[p] -= logNumPrior[0];
       for (unsigned c = 0; c != cam.size(); ++c)
       {
@@ -507,61 +505,54 @@ void initStaticProbs()
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
-void getDynamicBackgroundSumLogProb(IplImage *oriImage,vnl_vector<FLOAT> &sumPix,FLOAT &sum)
+void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,FLOAT &sum)
 {
-  int width=oriImage->width;
-  int widthExtra=oriImage->width+1; // width plus one extra
-  int imgSize=width*oriImage->height;
-  int imgSizeExtra=widthExtra*oriImage->height; // width plus one extra
+  int widthExtra=smooth->width+1; // each line needs an extra leading zero
+  int imgSizeExtra=widthExtra*smooth->height;
 
-  if (gaussianMixtures==NULL) // init in first pass
-  {
-    gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[imgSize];
-    sumPix.set_size(imgSizeExtra); // predecing each line is a zero, therefor use imgSizeExtra
-    smooth=cvCreateImage(cvSize(oriImage->width,oriImage->height),IPL_DEPTH_8U,oriImage->nChannels);
-  }
-  cvResize(oriImage, smooth, CV_INTER_CUBIC);
-  cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth image to improve background estimation
+  if (sumPix.size()!=imgSizeExtra)
+    sumPix.set_size(imgSizeExtra);
 
-  int pixelInd=0;
-  int channelInd=0;
+  int updateGaussianID;
+  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
+  int pixelInd=0,channelInd=0;
   for (int i=0;i<imgSizeExtra;i++)
   {
-    if (i%widthExtra==0)
+    if (i%widthExtra==0) // add leading zero
     {
       sumPix(i)=0;
     }
     else
     {
-      DYNBG_TYPE data[DYNBG_DIM];
       data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
-      int updateGaussianID;
-      DYNBG_TYPE squareDist[DYNBG_DIM];
       // compute background probablity for pixel
       DYNBG_TYPE probBG=gaussianMixtures[pixelInd].probability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
       // update mixture of gaussians for pixel
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
+      // set log probabilities
+      if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity
       double logProbBG=log(probBG);
       sumPix(i)=sumPix(i-1)+logProbBG;
       sum+=logProbBG;
 
+#if SHOW_FORGROUND
       if (probBG<decisionBackground)
       {
         smooth->imageData[channelInd+0]=255;
         smooth->imageData[channelInd+1]=255;
         smooth->imageData[channelInd+2]=255;
       }
-
-      pixelInd+=1;
+#endif
+      pixelInd+=1; // next pixel
       channelInd+=3;
     }
-
   }
-  cvShowImage(dynbg, smooth);
+
 }
+
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -604,33 +595,39 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       HAS_INIT = true;
     }
     
-    FLOAT sum=0;
-    getDynamicBackgroundSumLogProb(oriImage,sumPix,sum);
+    if (gaussianMixtures==NULL) // init on first pass
+      gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[width*height];
+    IplImage *smooth=cvCloneImage(oriImage);
+    IplImage *nrGaus=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+    cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
+    unsigned c=0;
+    getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
 
-    accompany_uva_msg::HumanLocations humanLocations;
-    for (unsigned c = 0; c != cam.size(); ++c)
+    int size=width*height;
+    for (int i=0;i<size;i++)
+      nrGaus->imageData[i]=(gaussianMixtures[i].getNrGaussians()-1)*(255/(DYNBG_MAXGAUS-1));
+
+    if (frame_cnt>INIT_FIRST_FRAMES)
     {
-      cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
-      img2vec(cvt_vec[c], img_vec[c]);
-      bgModel[c].getBackground(img_vec[c], bg_vec[c]);
-      cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c], sum_g[c]);
+      accompany_uva_msg::HumanLocations humanLocations;
+      for (unsigned c = 0; c != cam.size(); ++c)
+      {
+        cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
+        img2vec(cvt_vec[c], img_vec[c]);
+        bgModel[c].getBackground(img_vec[c], bg_vec[c]);
+        //cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c], sum_g[c]);
+      }
+      humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
+
+
+      if (!particles)
+      {
+        humanLocationsPub.publish(humanLocations);
+        markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+      }
+
     }
 
-    humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,logSumPixelFGProb, sumPixel);
-
-    // vector<FLOAT> helpSum;
-    // helpSum.push_back(sum);
-    // vector<vnl_vector<FLOAT> > helpSumPix;
-    // helpSumPix.push_back(sumPix);
-    // humanLocations = findPerson(0, src_vec, img_vec, bg_vec, helpSum, logSumPixelFGProb, helpSumPix);
-
-    cvReleaseImage(&src_vec[0]);
-
-    if (!particles)
-    {
-      humanLocationsPub.publish(humanLocations);
-      markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
-    }
 
     // publish human locations particles
     //        if (particles)
@@ -653,7 +650,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //        }
     //        cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
     //        cvDestroyWindow("view");
-
+    
+    //clean up
+    
+#if SHOW_FORGROUND
+    cvShowImage(dynbg, smooth);
+    //cvShowImage(dynNrGaus, nrGaus);
+    cvWaitKey(waitTime);
+#endif
+    cvReleaseImage(&smooth);
+    cvReleaseImage(&nrGaus);
+    cvReleaseImage(&src_vec[0]);
   }
   catch (cv_bridge::Exception& e)
   {
