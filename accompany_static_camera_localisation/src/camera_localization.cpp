@@ -1,6 +1,8 @@
+
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_broadcaster.h>
 
@@ -77,7 +79,6 @@ geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 ros::Publisher markerArrayPub;
-sensor_msgs::CvBridge bridge;
 unsigned int CAM_NUM = 1;
 unsigned int NUM_PERSONS;
 bool HAS_INIT = false;
@@ -571,7 +572,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   {
     frame_cnt ++ ;
     // load the first image to get image size
-    IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
+    cv_bridge::CvImageConstPtr cv_ptr;
+    cv_ptr=cv_bridge::toCvShare(msg,"bgr8");
+    IplImage helpConvert=(IplImage)(cv_ptr->image);
+    IplImage *oriImage=&helpConvert;
+
     if (!save_all.empty())
       save_image_frames(oriImage);
     src_vec[0] = cvCloneImage(oriImage);
@@ -613,13 +618,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,logSumPixelFGProb, sumPixel);
 
-    /*
-    vector<FLOAT> helpSum;
-    helpSum.push_back(sum);
-    vector<vnl_vector<FLOAT> > helpSumPix;
-    helpSumPix.push_back(sumPix);
-    humanLocations = findPerson(0, src_vec, img_vec, bg_vec, helpSum, logSumPixelFGProb, helpSumPix);
-    */
+    // vector<FLOAT> helpSum;
+    // helpSum.push_back(sum);
+    // vector<vnl_vector<FLOAT> > helpSumPix;
+    // helpSumPix.push_back(sumPix);
+    // humanLocations = findPerson(0, src_vec, img_vec, bg_vec, helpSum, logSumPixelFGProb, helpSumPix);
 
     cvReleaseImage(&src_vec[0]);
 
@@ -652,8 +655,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //        cvDestroyWindow("view");
 
   }
-
-  catch (sensor_msgs::CvBridgeException& e)
+  catch (cv_bridge::Exception& e)
   {
     ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
   }
