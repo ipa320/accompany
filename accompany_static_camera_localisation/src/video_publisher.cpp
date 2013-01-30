@@ -2,7 +2,7 @@
 #include <image_transport/image_transport.h>
 #include <string.h>
 #include <iostream>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
 #include <opencv/cvwimage.h>
 #include <sensor_msgs/image_encodings.h>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -60,10 +60,19 @@ int main(int argc, char **argv)
   {
     cap >> frame;
     cv::resize(frame, sframe,cv::Size((int) (frame.cols * scale), (int) (frame.rows * scale)));
+
+    // use new bridge method, this is untested !!! 
+    cv_bridge::CvImage out_msg;
+    out_msg.image    = sframe;
+    pub.publish(out_msg.toImageMsg());
+
+    /* // old deprecated bridge method
     IplImage ipl_im = sframe;
-    IplImage* ipl_ptr = &ipl_im;
+    IplImage* ipl_ptr = &ipl_im;    
     sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(ipl_ptr,"bgr8");
     pub.publish(msg);
+    */
+    
     ros::spinOnce();
     loop_rate.sleep();
   }
