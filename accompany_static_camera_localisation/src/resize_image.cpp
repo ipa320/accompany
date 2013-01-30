@@ -18,7 +18,6 @@ double scWidth,scHeight;
 
 cv::Mat resize;
 image_transport::Publisher *imagePub;
-cv_bridge::CvImagePtr cv_ptr;
 
 void callback(const sensor_msgs::ImageConstPtr& msg)
 {
