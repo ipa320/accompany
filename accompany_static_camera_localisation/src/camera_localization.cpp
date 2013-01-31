@@ -55,19 +55,18 @@ unsigned MAX_TRACK_AGE = 8;
 #define DYNBG_DIM 3
 #define DYNBG_MAXGAUS 3
 #define SHOW_FOREGROUND 1 // plot foreground for debugging purposes
-#define INIT_FIRST_FRAMES 2 // use first X frames to initializa the background model
+#define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
 GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
 DYNBG_TYPE decay=1/1000.0f;
 DYNBG_TYPE initVar=40;
 DYNBG_TYPE minWeight=0.2;
 DYNBG_TYPE squareMahanobisMatch=16;
 DYNBG_TYPE weightReduction=0.01;
-DYNBG_TYPE decisionBackground=1E-10;
-const char* dynbg = "dynamic background";
-const char* dynNrGaus = "nrGaussians";
-const char* dynBGProb = "bgProb";
+const char* dynBGProb = "Background Probability";
+#if SHOW_FOREGROUND
 vnl_vector<FLOAT> bgProb;
 FLOAT bgProbMin,bgProbMax;
+#endif
 // ---- dynamic background model ---- end
 
 extern unsigned w2;
@@ -476,7 +475,6 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
       cvSaveImage(ss.str().c_str(),src[c]);
     }
 
-    if (visualize) cvWaitKey(waitTime);
     //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
     //		cvSaveImage(buffer, src[c]);
   }
@@ -516,11 +514,16 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
   if (sumPix.size()!=imgSizeExtra)
     sumPix.set_size(imgSizeExtra);
 
-  int size=smooth->width*smooth->height;
-  if (bgProb.size()!=size)
-    bgProb.set_size(size);
-  bgProbMin=std::numeric_limits<float>::max();
-  bgProbMax=0;
+#if SHOW_FOREGROUND
+  if (visualize)
+  {
+    int size=smooth->width*smooth->height;
+    if (bgProb.size()!=size)
+      bgProb.set_size(size);
+    bgProbMin=std::numeric_limits<float>::max();
+    bgProbMax=-std::numeric_limits<float>::max();;
+  }
+#endif
 
   int updateGaussianID;
   DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
@@ -548,15 +551,11 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       sum+=logProbBG;
 
 #if SHOW_FOREGROUND
-      if (probBG<bgProbMin) bgProbMin=probBG;
-      if (probBG>bgProbMax) bgProbMax=probBG;
-      bgProb(pixelInd)=probBG;
-
-      if (probBG<decisionBackground)
+      if (visualize)
       {
-        smooth->imageData[channelInd+0]=255;
-        smooth->imageData[channelInd+1]=255;
-        smooth->imageData[channelInd+2]=255;
+        if (logProbBG<bgProbMin) bgProbMin=logProbBG;
+        if (logProbBG>bgProbMax) bgProbMax=logProbBG;
+        bgProb(pixelInd)=logProbBG;
       }
 #endif
       pixelInd+=1; // next pixel
@@ -611,19 +610,21 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     if (gaussianMixtures==NULL) // init on first pass
       gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[width*height];
     IplImage *smooth=cvCloneImage(oriImage);
-    IplImage *nrGaus=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
-    IplImage *bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
     unsigned c=0;
     getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
 
-    ROS_ERROR("bgProbMin: %0.20f bgProbMax: %0.20f",bgProbMin,bgProbMax);
-    int size=width*height;
-    for (int i=0;i<size;i++)
+#if SHOW_FOREGROUND
+    IplImage *bgProbImg;
+    if (visualize)
     {
-      nrGaus->imageData[i]=(gaussianMixtures[i].getNrGaussians()-1)*(255/(DYNBG_MAXGAUS-1));
-      bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+      bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+      int size=width*height;
+      for (int i=0;i<size;i++)
+        bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+      cvShowImage(dynBGProb,bgProbImg);
     }
+#endif
 
     if (frame_cnt>INIT_FIRST_FRAMES)
     {
@@ -645,7 +646,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       }
 
     }
-
 
     // publish human locations particles
     //        if (particles)
@@ -670,16 +670,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //        cvDestroyWindow("view");
     
     //clean up
-    
+
+    if (visualize) cvWaitKey(waitTime);
+
+
 #if SHOW_FOREGROUND
-    cvShowImage(dynbg, smooth);
-    //cvShowImage(dynNrGaus, nrGaus);
-    cvShowImage(dynBGProb,bgProbImg);
-    cvWaitKey(waitTime);
+    cvReleaseImage(&bgProbImg);
 #endif
     cvReleaseImage(&smooth);
-    cvReleaseImage(&nrGaus);
-    cvReleaseImage(&bgProbImg);
     cvReleaseImage(&src_vec[0]);
   }
   catch (cv_bridge::Exception& e)
