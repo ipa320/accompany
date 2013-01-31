@@ -542,14 +542,14 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
       // set log probabilities
-      if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity
+      if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity when taking log
       double logProbBG=log(probBG);
       sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
       sum+=logProbBG;
 
 #if SHOW_FOREGROUND
       if (probBG<bgProbMin) bgProbMin=probBG;
-      if (probBG<bgProbMax) bgProbMax=probBG;
+      if (probBG>bgProbMax) bgProbMax=probBG;
       bgProb(pixelInd)=probBG;
 
       if (probBG<decisionBackground)
@@ -617,6 +617,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     unsigned c=0;
     getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
 
+    ROS_ERROR("bgProbMin: %0.20f bgProbMax: %0.20f",bgProbMin,bgProbMax);
     int size=width*height;
     for (int i=0;i<size;i++)
     {
