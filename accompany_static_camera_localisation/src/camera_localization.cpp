@@ -54,7 +54,7 @@ unsigned MAX_TRACK_AGE = 8;
 #define DYNBG_TYPE float
 #define DYNBG_DIM 3
 #define DYNBG_MAXGAUS 3
-#define SHOW_FORGROUND 1 // plot forground for debugging purposes
+#define SHOW_FOREGROUND 1 // plot foreground for debugging purposes
 #define INIT_FIRST_FRAMES 2 // use first X frames to initializa the background model
 GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
 DYNBG_TYPE decay=1/1000.0f;
@@ -65,6 +65,9 @@ DYNBG_TYPE weightReduction=0.01;
 DYNBG_TYPE decisionBackground=1E-10;
 const char* dynbg = "dynamic background";
 const char* dynNrGaus = "nrGaussians";
+const char* dynBGProb = "bgProb";
+vnl_vector<FLOAT> bgProb;
+FLOAT bgProbMin,bgProbMax;
 // ---- dynamic background model ---- end
 
 extern unsigned w2;
@@ -513,6 +516,12 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
   if (sumPix.size()!=imgSizeExtra)
     sumPix.set_size(imgSizeExtra);
 
+  int size=smooth->width*smooth->height;
+  if (bgProb.size()!=size)
+    bgProb.set_size(size);
+  bgProbMin=std::numeric_limits<float>::max();
+  bgProbMax=0;
+
   int updateGaussianID;
   DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
   int pixelInd=0,channelInd=0;
@@ -535,10 +544,14 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       // set log probabilities
       if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity
       double logProbBG=log(probBG);
-      sumPix(i)=sumPix(i-1)+logProbBG;
+      sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
       sum+=logProbBG;
 
-#if SHOW_FORGROUND
+#if SHOW_FOREGROUND
+      if (probBG<bgProbMin) bgProbMin=probBG;
+      if (probBG<bgProbMax) bgProbMax=probBG;
+      bgProb(pixelInd)=probBG;
+
       if (probBG<decisionBackground)
       {
         smooth->imageData[channelInd+0]=255;
@@ -599,13 +612,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[width*height];
     IplImage *smooth=cvCloneImage(oriImage);
     IplImage *nrGaus=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+    IplImage *bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
     unsigned c=0;
     getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
 
     int size=width*height;
     for (int i=0;i<size;i++)
+    {
       nrGaus->imageData[i]=(gaussianMixtures[i].getNrGaussians()-1)*(255/(DYNBG_MAXGAUS-1));
+      bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+    }
 
     if (frame_cnt>INIT_FIRST_FRAMES)
     {
@@ -653,13 +670,15 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     
     //clean up
     
-#if SHOW_FORGROUND
+#if SHOW_FOREGROUND
     cvShowImage(dynbg, smooth);
     //cvShowImage(dynNrGaus, nrGaus);
+    cvShowImage(dynBGProb,bgProbImg);
     cvWaitKey(waitTime);
 #endif
     cvReleaseImage(&smooth);
     cvReleaseImage(&nrGaus);
+    cvReleaseImage(&bgProbImg);
     cvReleaseImage(&src_vec[0]);
   }
   catch (cv_bridge::Exception& e)
