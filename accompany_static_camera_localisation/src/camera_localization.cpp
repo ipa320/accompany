@@ -56,19 +56,18 @@ unsigned MAX_TRACK_AGE = 8;
 #define DYNBG_TYPE float
 #define DYNBG_DIM 3
 #define DYNBG_MAXGAUS 3
-#define SHOW_FOREGROUND 1 // plot foreground for debugging purposes
 #define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
 GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
 DYNBG_TYPE decay=1/1000.0f;
 DYNBG_TYPE initVar=40;
-DYNBG_TYPE minWeight=0.2;
+DYNBG_TYPE minWeight=0.1;
 DYNBG_TYPE squareMahanobisMatch=16;
-DYNBG_TYPE weightReduction=0.01;
+DYNBG_TYPE weightReduction=0.005;
 const char* dynBGProb = "Background Probability";
-#if SHOW_FOREGROUND
+
+// vizualize
 vnl_vector<FLOAT> bgProb;
 FLOAT bgProbMin,bgProbMax;
-#endif
 // ---- dynamic background model ---- end
 
 extern unsigned w2;
@@ -516,7 +515,6 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
   if (sumPix.size()!=imgSizeExtra)
     sumPix.set_size(imgSizeExtra);
 
-#if SHOW_FOREGROUND
   if (visualize)
   {
     int size=smooth->width*smooth->height;
@@ -525,7 +523,6 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
     bgProbMin=std::numeric_limits<float>::max();
     bgProbMax=-std::numeric_limits<float>::max();;
   }
-#endif
 
   int updateGaussianID;
   DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
@@ -552,14 +549,13 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
       sum+=logProbBG;
 
-#if SHOW_FOREGROUND
       if (visualize)
       {
         if (logProbBG<bgProbMin) bgProbMin=logProbBG;
         if (logProbBG>bgProbMax) bgProbMax=logProbBG;
         bgProb(pixelInd)=logProbBG;
       }
-#endif
+
       pixelInd+=1; // next pixel
       channelInd+=3;
     }
@@ -620,7 +616,6 @@ unsigned c=0;
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
     getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
 
-#if SHOW_FOREGROUND
     IplImage *bgProbImg;
     if (visualize)
     {
@@ -630,8 +625,6 @@ unsigned c=0;
         bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
       cvShowImage(dynBGProb,bgProbImg);
     }
-#endif
-
 #else
 
     cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
@@ -682,9 +675,8 @@ unsigned c=0;
     if (visualize) cvWaitKey(waitTime);
 
 #if USE_DYNAMIC_BACKGROUND
-#if SHOW_FOREGROUND
-    cvReleaseImage(&bgProbImg);
-#endif
+    if (visualize)
+      cvReleaseImage(&bgProbImg);
     cvReleaseImage(&smooth);
 #endif
     
