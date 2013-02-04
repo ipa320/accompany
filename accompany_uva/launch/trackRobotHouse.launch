@@ -8,38 +8,36 @@
 
 
   <!-- decode  camera1 -->
-  <node pkg="image_transport" type="republish" name="republishCamera1"
-   args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
+  <node pkg="image_transport" type="republish" name="republishCamera1" 
+        args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
 
-  <!-- decode  camera3 -->
+  <!-- decode  camera3  -->
   <node pkg="image_transport" type="republish" name="republishCamera3"
-   args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
+        args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
+ 
 
 
+  <!-- localise camera1 -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1" output="screen"
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 8 -v
+              image:=/camera1/gscam/image_raw"/>
+  
+  <!-- localise camera3 -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3" output="screen"
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 8 -v
+              image:=/camera3/gscam/image_raw"/>
+  
 
-   <!-- localise camera1 -->
-    <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
-    args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 8 -v
-          image:=/camera1/gscam/image_raw"/>
+  <!-- track humans using localisation data -->
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
+        args="-t 5"/> 
+  
 
-   
-
-   <!-- localise camera3 -->
-    <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3"
-    args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 8 -v
-          image:=/camera3/gscam/image_raw"/>
-
-
-   <!-- track humans using localisation data -->
-   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
-         args="-t 5"/> 
-
-   <!-- visualize tracks -->
-   <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/> 
-
-   
-   <!-- Map server -->
-   <node pkg="map_server" type="map_server" name="map_server" args="$(find accompany_uva)/res/testRobotHouse/map.yaml"/>
-
-
+  <!-- visualize tracks -->
+  <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/> 
+  
+  
+  <!-- Map server -->
+  <node pkg="map_server" type="map_server" name="map_server" args="$(find accompany_uva)/res/testRobotHouse/map.yaml"/>
+  
 </launch>
