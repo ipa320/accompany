@@ -1,0 +1,23 @@
+<launch>
+
+  <!-- Laser coordinate frame relative to base_link -->
+  <node pkg="tf" type="static_transform_publisher" name="laser_frame_broadcaster" args="0.11 0 0 0 0 0 /base_link /laser 100"/>
+
+  <!-- AMCL -->
+  <node pkg="amcl" type="amcl" name="acml"/>
+
+  <!-- laser scanner-->
+  <node name="hokuyo_node" pkg="hokuyo_node" type="hokuyo_node" />
+
+  <!-- joystick -->
+  <node name="joy" pkg="joy" type="joy" />
+  
+  <!-- FreedomJoystick -->
+  <node name="FreedomJoystick" pkg="FreedomJoystick" type="FreedomJoystick" />
+
+  <!-- Nomad -->
+  <node name="Nomad" pkg="Nomad" type="Nomad" >
+    <param name="scan" value="base_scan"/>
+  </node>
+
+</launch>

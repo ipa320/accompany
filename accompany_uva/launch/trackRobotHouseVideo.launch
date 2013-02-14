@@ -1,0 +1,48 @@
+<launch>
+
+  <node pkg="rosbag" type="play" name="playBags"
+        args="-d 1 -r 0.1
+              $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag 
+              $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
+              "/>
+
+
+  <!-- decode  camera1 -->
+  <node pkg="image_transport" type="republish" name="republishCamera1"
+        args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
+
+  <!-- decode  camera3 -->
+  <node pkg="image_transport" type="republish" name="republishCamera3"
+        args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
+
+
+
+  <!-- localise camera1 -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1"
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera1 
+              image:=/camera1/gscam/image_raw
+              -s $(find accompany_uva)/res/testRobotHouse
+              -i cam1 -n 2 -v" />
+
+
+  <!-- localise camera3 -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3"
+        args="-p $(find accompany_uva)/res/testRobotHouse/camera3 
+              image:=/camera3/gscam/image_raw
+              -s $(find accompany_uva)/res/testRobotHouse
+              -i cam3 -n 2 -v" />
+
+
+  <!-- track humans using localisation data -->
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
+         args="-t 8"/>
+
+
+  <!-- visualize tracks  -->
+  <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"
+        args="-s $(find accompany_uva)/res/testRobotHouse
+              -i track
+              -m $(find accompany_uva)/scripts/final.png"/>
+  <!-- use accompany_uva/scripts/makeMapImage.sh to make 'final.png' -->
+
+</launch>

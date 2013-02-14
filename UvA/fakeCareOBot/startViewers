@@ -1,0 +1,6 @@
+
+# start viewers
+rosrun image_view image_view image:=/cam3d/rgb/image_color &
+rosrun image_view image_view image:=/cob_people_detection/face_detection/face_detection_image &
+rosrun image_view image_view image:=/cob_people_detection/people_detection_image &
+

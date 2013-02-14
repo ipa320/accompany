@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- run nodes on 'machine'  -->
+  <arg name="machine" default="localhost" />
+  <include file="$(find accompany_uva)/launch/machines.launch"/>
+
+  <!-- play rosbag -->
+  <node machine="$(arg machine)" pkg="accompany_human_tracker" type="view_tracks" name="$(anon view_tracks)"/>
+
+</launch>

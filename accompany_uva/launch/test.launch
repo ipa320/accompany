@@ -1,0 +1,10 @@
+<launch>
+
+  <!-- publish prerecorded data -->
+  <node pkg="gscam" type="gscam" name="gscam" />
+
+  <!-- localise humans using image data -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization" 
+   args="-p $(find accompany_uva)/res/testUvA" image:=/gscam/image_raw" /> 
+
+</launch>
