@@ -1,0 +1,16 @@
+<launch>
+
+  <!-- run nodes on 'machine'  -->
+  <arg name="machine" default="localhost" />
+  <include file="$(find accompany_uva)/launch/machines.launch"/>
+
+  <arg name="gscam_config"/>
+  <arg name="topic_name" default="gscam"/>
+
+  <!-- start gstreamer based ros module gscam -->
+  <node machine="$(arg machine)" pkg="gscam" type="gscam" name="$(anon gscam)" 
+    args="-s 0 gscam:=$(arg topic_name) ">
+    <env name="GSCAM_CONFIG" value="$(arg gscam_config)" />
+  </node>
+
+</launch>

@@ -1,0 +1,11 @@
+<launch>
+
+  <!-- Fisheye_image_saver -->
+
+  <!-- start camera node -->
+  <node pkg="openni_camera" type="openni_camera" name="openni_node" />
+
+  <!-- visualize kinect frame -->
+  <node pkg="image_view" type="image_view" name="image_view" args="image:=/camera/rgb/image_color" />
+
+</launch>

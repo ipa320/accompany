@@ -1,0 +1,9 @@
+<launch>
+
+  <!-- start camera node -->
+  <node pkg="gscam" type="gscam" name="gscam" args="-s 0" />
+
+  <!-- start image viewer -->
+  <node pkg="image_view" type="image_view" name="image_view" args="image:=/gscam/image_raw" />
+
+</launch>
