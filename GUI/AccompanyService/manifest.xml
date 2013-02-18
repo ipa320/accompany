@@ -1,0 +1,18 @@
+<package>
+  <description brief="AccompanyService">
+
+     AccompanyService
+
+  </description>
+  <author>Patrizia Marti</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/AccompanyService</url>
+
+  <depend package="cob_script_server"/>
+  <depend package="dynamic_reconfigure"/>
+	
+
+</package>
+
+

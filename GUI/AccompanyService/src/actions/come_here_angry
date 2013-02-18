@@ -1,0 +1,5 @@
+say ['arrivo']
+move_base @user [0.5,0.5,0]
+move_torso front true
+move_arm folded true
+move_torso back true
