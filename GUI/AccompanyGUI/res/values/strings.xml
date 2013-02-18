@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">AccompanyGUI2.0</string>
+    <color name="user_bck_color">#375B81</color>
+    <color name="robot_bck_color">#bebebe</color>
+    <color name="actions_list_bck">#222222</color>
+    <color name="white">#FFFFFF</color>
+    <string name="actions_list_title">Actions list</string>
+    <string name="settings_title">AccompanyGUI Settings</string>
+    <string name="robot_ip_text">Robot Ip:</string>
+</resources>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/robot_global_layout"
+    android:background="@color/robot_bck_color" >
+
+    <ImageView android:id="@+id/robot_standard_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        /> 
+
+    <AbsoluteLayout
+        android:id="@+id/robot_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent">
+    </AbsoluteLayout>
+    
+    <ImageView 
+        android:id="@+id/mask_standard_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:src="@drawable/mask"
+        />
+     
+    <ImageButton
+        android:id="@+id/right_robot_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:src="@drawable/right_banner" 
+        android:background="@android:color/transparent"/>
+
+    <ImageButton
+        android:id="@+id/left_robot_button"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:src="@drawable/left_banner" 
+        android:background="@android:color/transparent"/>
+
+</FrameLayout>
