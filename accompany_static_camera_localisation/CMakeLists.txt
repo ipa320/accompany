@@ -28,7 +28,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv)
 # check cmn headers
 find_path(CMN_INCLUDE_DIR cmn/random.hh
   HINTS  /usr/include/cmn /usr/local/include/cmn
-  PATH_SUFFIXES cmn) 
+  PATH_SUFFIXES cmn)
 if (NOT CMN_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'cmn/random.hh', please install cmn from ssh://basterwijn.nl/home/bterwijn/git/cmnGwenn.git or set CMN_SRC_DIR")
 else (NOT CMN_INCLUDE_DIR)
@@ -38,7 +38,7 @@ endif (NOT CMN_INCLUDE_DIR)
 # check vxl headers
 find_path(VNL_INCLUDE_DIR vnl/vnl_vector.h
   HINTS  /usr/include/vxl/core /usr/local/include/vxl/core ${VXL_BASE_DIR}/core
-  PATH_SUFFIXES vnl) 
+  PATH_SUFFIXES vnl)
 if (NOT VNL_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'vnl/vnl_vector.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
 else (NOT VNL_INCLUDE_DIR)
@@ -48,7 +48,7 @@ endif (NOT VNL_INCLUDE_DIR)
 # check vcl headers
 find_path(VCL_INCLUDE_DIR vcl/vcl_iosfwd.h
   HINTS  /usr/include/vxl /usr/local/include/vxl
-  PATH_SUFFIXES vcl) 
+  PATH_SUFFIXES vcl)
 if (NOT VCL_INCLUDE_DIR)
   message(FATAL_ERROR "Could not find 'vcl/vcl_iosfwd.h', please install 'libvxl-dev' or set VXL_BASE_DIR")
 else (NOT VCL_INCLUDE_DIR)
@@ -106,9 +106,6 @@ TARGET_LINK_LIBRARIES( create_prior helpers calib opencv_calib3d opencv_highgui 
 rosbuild_add_executable(camera_localization src/camera_localization.cpp)
 target_link_libraries(camera_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS} MsgToMarkerArray)
 
-rosbuild_add_executable(kinect_localization src/kinect_localization.cpp)
-target_link_libraries(kinect_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
-
 rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
 target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc)
 
@@ -145,4 +142,14 @@ target_link_libraries(test_transform boost_program_options)
 rosbuild_add_executable(resize_image src/resize_image.cpp)
 target_link_libraries(resize_image opencv_core boost_program_options)
 
+rosbuild_add_executable(publish_image src/publish_image.cpp)
+target_link_libraries(publish_image opencv_core boost_program_options)
 
+rosbuild_add_executable(kinect_driver src/kinect_driver.cpp)
+target_link_libraries(kinect_driver boost_program_options)
+
+rosbuild_add_executable(publish_tf_from_extrinsic src/publish_tf_from_extrinsic.cpp)
+target_link_libraries(publish_tf_from_extrinsic boost_program_options)
+
+rosbuild_add_executable(project_tf_to_camera src/project_tf_to_camera.cpp)
+target_link_libraries(project_tf_to_camera boost_program_options opencv_highgui opencv_core)

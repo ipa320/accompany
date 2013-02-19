@@ -1,6 +1,8 @@
+
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <cv_bridge/CvBridge.h>
+#include <cv_bridge/cv_bridge.h>
+#include <sensor_msgs/image_encodings.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <tf/transform_broadcaster.h>
 
@@ -47,6 +49,27 @@ unsigned MIN_TRACK_LEN = 20;
 unsigned MAX_TRACK_JMP = 1000;
 unsigned MAX_TRACK_AGE = 8;
 
+#define USE_DYNAMIC_BACKGROUND 1 // switch between static (PCA) and dynamic (gaussian mixture) background model
+
+// ---- dynamic background model ---- start
+#include <GaussianMixture.h>
+#define DYNBG_TYPE float
+#define DYNBG_DIM 3
+#define DYNBG_MAXGAUS 3
+#define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
+GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
+DYNBG_TYPE decay=1/1000.0f;
+DYNBG_TYPE initVar=40;
+DYNBG_TYPE minWeight=0.1;
+DYNBG_TYPE squareMahanobisMatch=16;
+DYNBG_TYPE weightReduction=0.005;
+const char* dynBGProb = "Background Probability";
+
+// vizualize
+vnl_vector<FLOAT> bgProb;
+FLOAT bgProbMin,bgProbMax;
+// ---- dynamic background model ---- end
+
 extern unsigned w2;
 vector<Background> bgModel(0, 0);
 vector<FLOAT> logNumPrior;
@@ -61,9 +84,8 @@ geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 ros::Publisher markerArrayPub;
-sensor_msgs::CvBridge bridge;
 unsigned int CAM_NUM = 1;
-int NUM_PERSONS;
+unsigned int NUM_PERSONS;
 bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
@@ -73,7 +95,8 @@ vector<IplImage *> src_vec(CAM_NUM);
 bool particles = false;
 int nrParticles = 10;
 int max = 100;
-int count = 0;
+int frame_cnt = 0;
+int cum_cnt = 0;
 int direction = 1;
 
 ImgProducer *producer;
@@ -82,9 +105,16 @@ int waitTime = 30;
 const char* win = "foreground";
 const char* bgwin = "background";
 
+
 string saveImagesPath;
 string imagePostfix;
 int visualize;
+
+string save_all;
+char image_name[200];
+char data_file[200];
+Mat frame_id, cum_id, human_locations, human_templates; // buffer to store detection results
+FileStorage fs;
 
 void buildMasks()
 {
@@ -108,8 +138,7 @@ FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
   //      << logSumPixelBGProb.size() << ", mask.size()=" << mask.size() << endl;
   // cerr << "logSumPixelFGProb.size()=" << logSumPixelFGProb.size() << endl;
   FLOAT res = bgSum;
-  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
-      ++i)
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();++i)
   {
     unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     //cout << "offset=" << offset << ", start=" << i->start << ", end=" << i->end << ", size=" << logSumPixelBGProb.size() << endl;
@@ -118,7 +147,6 @@ FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
     // res += (logSumPixelFGProb(offset + i->end) - logSumPixelFGProb(offset + i->start - 1))
     //      - (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
   }
-
   return res;
 }
 
@@ -126,8 +154,7 @@ FLOAT logMaskProbDiff(const vnl_vector<FLOAT> &logSumPixelFGProb,
     const vnl_vector<FLOAT> &logSumPixelBGProb, const vector<scanline_t> &mask)
 {
   FLOAT res = 0;
-  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();
-      ++i)
+  for (vector<scanline_t>::const_iterator i = mask.begin(); i != mask.end();++i)
   {
     unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     res -= (logSumPixelBGProb(offset + i->end)
@@ -242,7 +269,6 @@ void scanRest(vector<unsigned> &existing,
             logSumPixelBGProb[c], lSum[c], masks[c][p]); // already includes lSum
       }
       lpp(p) = logPosProbCache[p] + logNP;
-
       logPosProbCache[p] -= logNumPrior[0];
       for (unsigned c = 0; c != cam.size(); ++c)
       {
@@ -286,6 +312,64 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
         CV_RGB(255,0,0), 2);
 }
 
+void save_detection_results(vector<unsigned> existing)
+{
+  cum_cnt += existing.size();
+  Mat increment_loc = Mat::zeros(existing.size(),1,CV_64FC2);
+  Mat increment_tplt = Mat::zeros(existing.size(),24,CV_64FC2);
+
+  for (unsigned i = 0; i != existing.size(); ++i)
+  {
+    WorldPoint wp = scanLocations[existing[i]];
+    Point2d human_location_2D = cam[0].project(scanLocations[existing[i]]);
+    increment_loc.at<Point2d>(i,0) =  human_location_2D;
+//    increment_loc.at<double>(i,0) =  wp.x/1000;
+//    increment_loc.at<double>(i,1) =  wp.y/1000;
+
+    vector<CvPoint> tplt;
+    cam[0].genTemplate(wp, tplt);
+
+    vector<Point2d> reload_tplt;
+    for (unsigned iter_tplt=0; iter_tplt != tplt.size(); iter_tplt++)
+    {
+      reload_tplt.push_back(tplt[iter_tplt]);
+    }
+//    cout << "---" << endl;
+
+    Mat iP(reload_tplt);
+    CV_Assert(iP.depth() == increment_tplt.depth());
+    iP = iP.t();
+    Mat temp=increment_tplt.row(i);
+    iP.copyTo(temp);
+    frame_id.push_back(frame_cnt);
+  }
+
+  if (cum_id.empty())
+    cum_id.push_back(0);
+  cum_id.push_back(cum_cnt);
+  human_locations.push_back(increment_loc);
+  human_templates.push_back(increment_tplt);
+
+  fs.open(data_file, FileStorage::WRITE);
+  fs << "frame_id" << frame_id;
+  fs << "cum_id" << cum_id;
+  fs << "human_locations" << human_locations;
+  fs << "human_templates" << human_templates;
+  fs.release();
+}
+
+void save_image_frames(IplImage* oriImage)
+{
+    sprintf(image_name,"%s/%04d.jpg",save_all.c_str(),frame_cnt);
+    imwrite(image_name,cvarrToMat(oriImage));
+}
+
+void save_background_frames(IplImage* oriImage)
+{
+    sprintf(image_name,"%s/bg%04d.jpg",save_all.c_str(),frame_cnt);
+    imwrite(image_name,cvarrToMat(oriImage));
+}
+
 accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
     vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
@@ -314,7 +398,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   // report locations
   cout << "locations found are" << endl;
   accompany_uva_msg::HumanLocations humanLocations;
-  
+
   geometry_msgs::PointStamped v;
   std_msgs::Header header;
   header.stamp=ros::Time::now();
@@ -347,6 +431,10 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     }
   }
 
+  // SAVE Locations and template points
+  if (!save_all.empty()) // save all images
+    save_detection_results(existing);
+
   static int number = 0;
   number++;
 //  static char buffer[1024];
@@ -354,28 +442,31 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   /* Visualize tracks */
   for (unsigned c = 0; c != cam.size(); ++c)
   {
-    IplImage *bg = vec2img((/*imgVec[c]-*/bgVec[c]).apply(fabs));
-    IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
-    cvCvtColor(bg, cvt, TO_IMG_FMT);
+    //IplImage *bg = vec2img((bgVec[c]).apply(fabs));
+    //IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
+    //cvCvtColor(bg, cvt, TO_IMG_FMT);
+
+    //if (!save_all.empty())
+    //  save_background_frames(cvt);
 
     plotHull(src[c], priorHull, c);
-    plotHull(cvt, priorHull, c);
+    //plotHull(cvt, priorHull, c);
     // For comparison:
     for (unsigned i = 0; i != existing.size(); ++i)
     {
       vector<CvPoint> tplt;
       cam[c].genTemplate(scanLocations[existing[i]], tplt);
-      plotTemplate(cvt, tplt, CV_RGB(255,255,255));
+      //plotTemplate(cvt, tplt, CV_RGB(255,255,255));
       plotTemplate(src[c], tplt, CV_RGB(0,255,255));
       cvCircle(src[c], cam[c].project(scanLocations[existing[i]]), 1,
           CV_RGB(255,255,0), 2);
     }
 
     //		cvShowImage(bgwin, cvt);
-    cvReleaseImage(&bg);
-    cvReleaseImage(&cvt);
+    //cvReleaseImage(&bg);
+    //cvReleaseImage(&cvt);
     if (visualize) cvShowImage(win, src[c]);
-    
+
     if (saveImagesPath!="")
     {
       ros::Time begin = ros::Time::now();
@@ -385,7 +476,6 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
       cvSaveImage(ss.str().c_str(),src[c]);
     }
 
-    if (visualize) cvWaitKey(waitTime);
     //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
     //		cvSaveImage(buffer, src[c]);
   }
@@ -417,15 +507,80 @@ void initStaticProbs()
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
+void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,FLOAT &sum)
+{
+  int widthExtra=smooth->width+1; // each line needs an extra leading zero
+  int imgSizeExtra=widthExtra*smooth->height;
+
+  if (sumPix.size()!=imgSizeExtra)
+    sumPix.set_size(imgSizeExtra);
+
+  if (visualize)
+  {
+    int size=smooth->width*smooth->height;
+    if (bgProb.size()!=size)
+      bgProb.set_size(size);
+    bgProbMin=std::numeric_limits<float>::max();
+    bgProbMax=-std::numeric_limits<float>::max();;
+  }
+
+  int updateGaussianID;
+  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
+  int pixelInd=0,channelInd=0;
+  for (int i=0;i<imgSizeExtra;i++)
+  {
+    if (i%widthExtra==0) // add leading zero
+    {
+      sumPix(i)=0;
+    }
+    else
+    {
+      data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
+      data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
+      data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
+      // compute background probablity for pixel
+      DYNBG_TYPE probBG=gaussianMixtures[pixelInd].probability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+      // update mixture of gaussians for pixel
+      gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
+     
+      // set log probabilities
+      if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity when taking log
+      double logProbBG=log(probBG);
+      sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
+      sum+=logProbBG;
+
+      if (visualize)
+      {
+        if (logProbBG<bgProbMin) bgProbMin=logProbBG;
+        if (logProbBG>bgProbMax) bgProbMax=logProbBG;
+        bgProb(pixelInd)=logProbBG;
+      }
+
+      pixelInd+=1; // next pixel
+      channelInd+=3;
+    }
+  }
+
+}
+
+
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
+  //ROS_INFO_STREAM("imageCallback");
   vector<vnl_vector<FLOAT> > sumPixel(cam.size());
   vector<FLOAT> sum_g(cam.size());
 
   try
   {
+    frame_cnt ++ ;
     // load the first image to get image size
-    IplImage* oriImage = bridge.imgMsgToCv(msg, "bgr8");
+    cv_bridge::CvImageConstPtr cv_ptr;
+    cv_ptr=cv_bridge::toCvShare(msg,"bgr8");
+    IplImage helpConvert=(IplImage)(cv_ptr->image);
+    IplImage *oriImage=&helpConvert;
+
+    if (!save_all.empty())
+      save_image_frames(oriImage);
     src_vec[0] = cvCloneImage(oriImage);
 
     if (!HAS_INIT)
@@ -451,23 +606,46 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       HAS_INIT = true;
     }
 
-    accompany_uva_msg::HumanLocations humanLocations;
-    for (unsigned c = 0; c != cam.size(); ++c)
+unsigned c=0;
+
+
+#if USE_DYNAMIC_BACKGROUND
+    if (gaussianMixtures==NULL) // init on first pass
+      gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[width*height];
+    IplImage *smooth=cvCloneImage(oriImage);
+    cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
+    getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
+
+    IplImage *bgProbImg;
+    if (visualize)
     {
-      cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
-      img2vec(cvt_vec[c], img_vec[c]);
-      bgModel[c].getBackground(img_vec[c], bg_vec[c]);
-      cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c], sum_g[c]);
+      bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
+      int size=width*height;
+      for (int i=0;i<size;i++)
+        bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+      cvShowImage(dynBGProb,bgProbImg);
     }
+#else
 
-    humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g,
-        logSumPixelFGProb, sumPixel);
-    cvReleaseImage(&src_vec[0]);
+    cvCvtColor(src_vec[c], cvt_vec[c], TO_INT_FMT);
+    img2vec(cvt_vec[c], img_vec[c]);
+    
+    bgModel[c].getBackground(img_vec[c], bg_vec[c]);
+    cam[c].computeBGProbDiff(img_vec[c], bg_vec[c], sumPixel[c], sum_g[c]);
 
-    if (!particles)
+#endif
+
+    if (frame_cnt>INIT_FIRST_FRAMES)
     {
-      humanLocationsPub.publish(humanLocations);
-      markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+      accompany_uva_msg::HumanLocations humanLocations;      
+      humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
+
+
+      if (!particles)
+      {
+        humanLocationsPub.publish(humanLocations);
+        markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
+      }
     }
 
     // publish human locations particles
@@ -491,10 +669,20 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //        }
     //        cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
     //        cvDestroyWindow("view");
+    
+    //clean up
 
+    if (visualize) cvWaitKey(waitTime);
+
+#if USE_DYNAMIC_BACKGROUND
+    if (visualize)
+      cvReleaseImage(&bgProbImg);
+    cvReleaseImage(&smooth);
+#endif
+    
+    cvReleaseImage(&src_vec[0]);
   }
-
-  catch (sensor_msgs::CvBridgeException& e)
+  catch (cv_bridge::Exception& e)
   {
     ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
   }
@@ -510,10 +698,11 @@ void timerCallback(const ros::TimerEvent& timerEvent)
   transformBroadcasterPtr->sendTransform(frame);
 }
 
+
 int main(int argc, char **argv)
 {
   string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file, frame_file;
-  
+
   // handling arguments
   po::options_description optionsDescription(
       "Human Detection main function\n"
@@ -526,10 +715,11 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
-    ("num_persons,n", po::value<int>(&NUM_PERSONS)->default_value(-1))
+    ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(0))
     ("saveImagePath,s", po::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
     ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n")
-    ("visualize,v","visualize detection\n");
+    ("visualize,v","visualize detection\n")
+    ("save_all,a", po::value<string>(&save_all)->default_value(""),"save all data\n");
 
   po::variables_map variablesMap;
 
@@ -550,6 +740,11 @@ int main(int argc, char **argv)
 
   visualize=variablesMap.count("visualize"); // are we visualizing the frames and detections?
 
+  if (!save_all.empty())
+  {
+    sprintf(data_file,"%s/data.xml",save_all.c_str());
+  }
+
   bgmodel_file = path + "/" + "bgmodel.xml";
   params_file = path + "/" + "params.xml";
   prior_file = path + "/" + "prior.txt";
@@ -557,7 +752,8 @@ int main(int argc, char **argv)
   extrinsic_file = path + "/" + "camera_extrinsic.xml";
   frame_file = path + "/" + "frame.dat";
 
-  cout<<"loading '"<<frame_file<<"'"<<endl;
+  
+  ROS_INFO_STREAM("loading '"<<bgmodel_file.c_str()<<"'");
   // load coordinate frame of camera
   if (!load_msg(frame,frame_file))
   {
@@ -565,22 +761,31 @@ int main(int argc, char **argv)
     exit(1);
   }
 
-  cout<<"loading '"<<bgmodel_file<<"'"<<endl;
+  ROS_INFO_STREAM("loading '"<<bgmodel_file.c_str()<<"'");
   // Initialize localization module
-  getBackground(bgmodel_file.c_str(), bgModel);
-  cout<<"loading '"<<intrinsic_file<<"'"<<endl;
-  cout<<"loading '"<<extrinsic_file<<"'"<<endl;
-  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
-      extrinsic_file.c_str());
-  cout<<"loading '"<<prior_file<<"'"<<endl;
+#if USE_DYNAMIC_BACKGROUND
+#else
+  getBackground(bgmodel_file.c_str(), bgModel); // load background model
+#endif
+  ROS_INFO_STREAM("loading '"<<params_file.c_str()<<"'");
+  ROS_INFO_STREAM("loading '"<<intrinsic_file.c_str()<<"'");
+  ROS_INFO_STREAM("loading '"<<extrinsic_file.c_str()<<"'");
+  loadCalibrations(params_file.c_str(),
+                   intrinsic_file.c_str(), 
+                   extrinsic_file.c_str()); // load calibration
+  ROS_INFO_STREAM("loading '"<<prior_file.c_str()<<"'");
   loadWorldPriorHull(prior_file.c_str(), priorHull);
+#if USE_DYNAMIC_BACKGROUND
+#else
   assert_eq(bgModel.size(), CAM_NUM);
   assert_eq(cam.size(), bgModel.size());
+#endif
+  ROS_INFO_STREAM("generate Scan locations"); 
   genScanLocations(priorHull, scanres, scanLocations);
 
   logLocPrior.set_size(scanLocations.size());
   logLocPrior.fill(-log(scanLocations.size()));
-  cout<<"loading done"<<endl;
+  ROS_INFO_STREAM("loading done\n"); 
 
   // ROS nodes, subscribers and publishers
   ros::init(argc, argv, "camera_localization");
@@ -597,7 +802,10 @@ int main(int argc, char **argv)
   humanLocationsPub = n.advertise<accompany_uva_msg::HumanLocations>(resolved_humanLocations, 10);
   //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
   markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
-  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback);
+
+  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback); // function of localization
+  
+  ROS_INFO_STREAM("wait for frames");
   ros::spin();
 
   return 0;

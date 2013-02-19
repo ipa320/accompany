@@ -5,6 +5,9 @@
   <machine name="ThinkpadX200" address="ThinkpadX200" />
   <machine name="bterwijnDesktop" address="bterwijn-desktop" />
 
+  <machine name="thinkpad-ninghang" address="192.168.0.105" />
+  <machine name="bterwijn-desktop" address="192.168.0.249" />
+
   <machine user="camera1" name="omni_cam1_pc" address="omni-cam1-pc" />
   <machine user="camera3" name="omni_cam2_pc" address="omni-cam2-pc" />  
   <machine user="camera2" name="kinect-pc" address="kinect-pc" />

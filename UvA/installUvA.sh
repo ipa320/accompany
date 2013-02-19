@@ -1,4 +1,4 @@
-sudo apt-get -y install aptitude emacs git gitk libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x gtk2-engines-pixbuf ros-electric-openni-kinect
+sudo apt-get -y install aptitude emacs git gitk mercurial libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x gtk2-engines-pixbuf ros-electric-openni-kinect
 
 cd
 mkdir -p ros
@@ -35,12 +35,22 @@ cmake ..
 make
 sudo make install
 
+# yaml-cpp
+cd ~/programs
+hg clone https://code.google.com/p/yaml-cpp.new-api yaml-cpp
+cd yaml-cpp
+mkdir build
+cd build
+cmake ../
+make -j 4
+sudo make install
+
 # gscam
-cd ~/ros/accompany/UvA/dependencies/gscam
 rosdep install gscam
-rosmake
+rosmake gscam
 
 # skeleton_marker
+cd ~/ros
 svn checkout http://pi-robot-ros-pkg.googlecode.com/svn/trunk/skeleton_markers
 rosdep install skeleton_markers
 rosmake skeleton_markers
@@ -68,8 +78,8 @@ rosmake accompany_static_camera_localisation
 
 # Test
 # downloads prerecorded video and does detection and tracking
-roscd accompany/UvA/startScripts/
-./startTestNonGSCam
+roscd accompany_uva/scripts
+./startTestRobotHouse.sh
 
 # tracks humans and identities using artificial data
 roslaunch accompany_human_tracker testTracker.launch

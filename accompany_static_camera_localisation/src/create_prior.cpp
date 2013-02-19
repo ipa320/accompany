@@ -57,6 +57,7 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
   switch (event) {
     case CV_EVENT_LBUTTONDOWN:
       cout << "Left button down at " << pt.x << "," << pt.y << endl;
+      cout << "image points at " << x << "," << y << endl;
       cout << "press 'q' to finish and save to file" << endl;
       down = true;
       for (unsigned i=0; i!=img.size(); ++i) {

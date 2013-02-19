@@ -32,17 +32,6 @@ and install using (this will take some time):
   cmake .. -DBUILD_BRL=OFF
   make -j 4
   sudo make install
-  
-and install yaml-cpp:
-
-  sudo apt-get install mercurial
-  hg clone https://code.google.com/p/yaml-cpp.new-api yaml-cpp
-  cd yaml-cpp
-  mkdir build
-  cd build
-  cmake ../
-  make -j 4
-  sudo make install
 
 Install ubuntu-restricted-extras
 
@@ -137,8 +126,17 @@ Start FISH-EYE
   export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 //  roslaunch accompany_static_camera_localisation fisheye_calib_image_saver.launch
   rosrun gscam gscam -s 0
-  roscd accompany_static_camera_localisation/res/calib_frames/
-  rosrun accompany_static_camera_localisation image_saver image:=/gscam/image_raw
+  roscd accompany_static_camera_localisation/res/calib_frames
+  rosrun image_view image_view image:=/gscam/image_raw
+  rosrun accompany_static_camera_localisation image_saver -n 5000 -p ./ -t /gscam/image_raw
+
+Remove similar checkerboard images
+  ./modPics.sh
+  mkdir OLD
+  mv *jpg_OLD OLD/
+
+Check checkerboard images if they are clear
+  eog *.jpg
 
 Create a image list:
   
@@ -148,7 +146,7 @@ Create a image list:
     
 Intrinsic calibration:
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -a -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml // TODO check parameters
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -m ../mask_large.png -k 5 -a 1 -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml
 
 Test:
 
@@ -210,7 +208,7 @@ roscd accompany_static_camera_localisation/scripts/
 
 FISHEYE:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 
   ./fisheye_capture_background_images.sh
 
@@ -250,17 +248,21 @@ Check the calibration results:
 
 FISHEYE:
 
-  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:sadmin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
+  export GSCAM_CONFIG="rtspsrc location=rtsp://admin:admin@192.168.111.10:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=1024, height=972, framerate=15/1 ! ffmpegcolorspace"
 
   roslaunch accompany_static_camera_localisation fisheye_localization.launch
 
 KINECT:
-   
-  roslaunch accompany_static_camera_localisation kinect_localization.launch
+  roslaunch openni_launch openni.launch   
+  rosrun accompany_static_camera_localisation camera_localization -p ./ image:=/camera/rgb/image_color -v -n 1
 
 Echo human localizations:
 
   rostopic echo /humanLocations
+
+----------------------------------------
+
+script ./fast_start.sh
 
 ----------------------------------------
 
@@ -269,3 +271,9 @@ Echo human localizations:
  - Adaptive background model
  
  - Multiple camera tracking
+ 
+-----------------------------------------
+
+OpenNI skeleton tracking on ROS Fuerte + Ubuntu 12.04
+
+In the default openni-dev package, the skeleton tracker binaries are out-of-date. To make it work, download OpenNI Compliant Middleware Binaries and do an uninstall and then install. This will replace/install some libraies and make it work

@@ -18,14 +18,13 @@ double scWidth,scHeight;
 
 cv::Mat resize;
 image_transport::Publisher *imagePub;
-cv_bridge::CvImagePtr cv_ptr;
 
 void callback(const sensor_msgs::ImageConstPtr& msg)
 {
   cv_bridge::CvImageConstPtr cv_ptr;
   try
   {
-    // conver to OpenCV Mat
+    // convert to OpenCV Mat
     cv_ptr=cv_bridge::toCvShare(msg,"bgr8");
     // compute new size
     if (!variablesMap.count("aw"))
@@ -58,7 +57,7 @@ int main(int argc,char **argv)
   optionsDescription.add_options()
     ("help,h","show help message")
     ("topic_in,i", value<string>(&topic_in)->required(),"name of input topic")
-    ("topic_out,o", value<string>(&topic_out)->required(),"name of input topic")
+    ("topic_out,o", value<string>(&topic_out)->required(),"name of output topic")
     ("aw", value<int>(&abWidth),"the absolute width of the output")
     ("ah", value<int>(&abHeight),"the absolute height of the output")
     ("sw", value<double>(&scWidth)->default_value(1.0),"the width scaling factor")

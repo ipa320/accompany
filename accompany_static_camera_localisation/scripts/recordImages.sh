@@ -1,4 +1,4 @@
-rosbag record -b 0 /gscam/image_raw/theora
+rosbag record -b 0 /gscam/image_raw/compressed /gscam/camera_info
 #
 # to play back use image_transport to convert from theora to raw images like so:
 #
@@ -7,3 +7,4 @@ rosbag record -b 0 /gscam/image_raw/theora
 # rosrun image_transport republish theora in:=/gscam/image_raw _image_transport:=theora raw out:=/gscam/image_raw
 # rosrun image_view image_view image:=/gscam/image_raw
 #
+# in Fuerte, use rosbag record -b 0 /gscam/image_raw/compressed
