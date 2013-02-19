@@ -10,6 +10,6 @@
 
   <!-- detect humans -->
   <node machine="$(arg machine)" pkg="accompany_static_camera_localisation" type="camera_localization" name="$(anon camera_localization)"
-        args="-p $(arg res_path) image:=$(arg image_topic) -n 8"/>
+        args="-p $(arg res_path) image:=$(arg image_topic) -n 3"/>
 
 </launch>
