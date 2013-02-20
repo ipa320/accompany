@@ -97,7 +97,7 @@ class Gaussian
   /**
    * Update gaussian.
    * @param data the new data point
-   * @param decay the decay facotor, the weight of the new point relative to all earlier points
+   * @param decay the decay factor, the weight of the new point relative to all earlier points
    * @param weightReduction extra weight reduction if point doesn't belongs to gaussian
    * @param ownership 1 if point belongs to gaussian, 0 if not and then weight decreases and the mean and variance are not updated
    */
