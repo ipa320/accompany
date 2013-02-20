@@ -159,6 +159,9 @@ void updateTrackedHumans()
       trackedHuman.location.point.x=mat.at<float>(0,0);
       trackedHuman.location.point.y=mat.at<float>(1,0);
       trackedHuman.location.point.z=0;
+      trackedHuman.speed.vector.x=mat.at<float>(2,0);
+      trackedHuman.speed.vector.y=mat.at<float>(3,0);
+      trackedHuman.speed.vector.z=0;
       trackedHuman.id=it->id;
       map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
       if (it!=idToIdentity.end())
@@ -199,7 +202,6 @@ void humanLocationsReceived(const accompany_uva_msg::HumanLocations::ConstPtr& h
     updateTrackedHumans();
   }
 #endif
-
   trackedHumansPub.publish(trackedHumans);
   markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
 }

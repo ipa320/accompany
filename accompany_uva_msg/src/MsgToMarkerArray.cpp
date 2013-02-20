@@ -1,6 +1,7 @@
 
 #include <accompany_uva_msg/MsgToMarkerArray.h>
 #include <boost/functional/hash.hpp>
+#include <tf/transform_datatypes.h>
 
 using namespace std;
 
@@ -33,57 +34,83 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
 visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
                                                                  std::string name)
 {
-  visualization_msgs::MarkerArray &markerArray=getMarkerArray(name,msg.trackedHumans.size()*2);
+  visualization_msgs::MarkerArray &markerArray=getMarkerArray(name,msg.trackedHumans.size()*3);
+  int ind=0;
   // sphere
   double radius=0.2;
   for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
-    markerArray.markers[i].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
-    markerArray.markers[i].header.stamp = ros::Time();
-    markerArray.markers[i].type = visualization_msgs::Marker::SPHERE;
-    markerArray.markers[i].pose.position.x = msg.trackedHumans[i].location.point.x;
-    markerArray.markers[i].pose.position.y = msg.trackedHumans[i].location.point.y;
-    markerArray.markers[i].pose.position.z = msg.trackedHumans[i].location.point.z+radius;
-    markerArray.markers[i].pose.orientation.x = 0.0;
-    markerArray.markers[i].pose.orientation.y = 0.0;
-    markerArray.markers[i].pose.orientation.z = 0.0;
-    markerArray.markers[i].pose.orientation.w = 1.0;
-    markerArray.markers[i].scale.x = radius*2;
-    markerArray.markers[i].scale.y = radius*2;
-    markerArray.markers[i].scale.z = radius*2;
-    markerArray.markers[i].color.r = 1.0;
-    markerArray.markers[i].color.g = 0.0;
-    markerArray.markers[i].color.b = 0.0;
-    markerArray.markers[i].color.a = 0.2;
-    markerArray.markers[i].lifetime = ros::Duration(10);
+    markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
+    markerArray.markers[ind].header.stamp = ros::Time();
+    markerArray.markers[ind].type = visualization_msgs::Marker::SPHERE;
+    markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
+    markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
+    markerArray.markers[ind].pose.position.z = msg.trackedHumans[i].location.point.z+radius;
+    markerArray.markers[ind].pose.orientation.x = 0.0;
+    markerArray.markers[ind].pose.orientation.y = 0.0;
+    markerArray.markers[ind].pose.orientation.z = 0.0;
+    markerArray.markers[ind].pose.orientation.w = 1.0;
+    markerArray.markers[ind].scale.x = radius*2;
+    markerArray.markers[ind].scale.y = radius*2;
+    markerArray.markers[ind].scale.z = radius*2;
+    markerArray.markers[ind].color.r = 1.0;
+    markerArray.markers[ind].color.g = 0.0;
+    markerArray.markers[ind].color.b = 0.0;
+    markerArray.markers[ind].color.a = 0.2;
+    markerArray.markers[ind].lifetime = ros::Duration(10);
+    ind++;
   }
-  // text
-  int ind=msg.trackedHumans.size();
+  // speed
   for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
-    markerArray.markers[ind+i].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
-    markerArray.markers[ind+i].header.stamp = ros::Time();
-    markerArray.markers[ind+i].type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    markerArray.markers[ind+i].pose.position.x = msg.trackedHumans[i].location.point.x;
-    markerArray.markers[ind+i].pose.position.y = msg.trackedHumans[i].location.point.y;
-    markerArray.markers[ind+i].pose.position.z = msg.trackedHumans[i].location.point.z+radius*2;
-    markerArray.markers[ind+i].pose.orientation.x = 0.0;
-    markerArray.markers[ind+i].pose.orientation.y = 0.0;
-    markerArray.markers[ind+i].pose.orientation.z = 0.0;
-    markerArray.markers[ind+i].pose.orientation.w = 1.0;
-    markerArray.markers[ind+i].scale.x = 0.2;
-    markerArray.markers[ind+i].scale.y = 0.2;
-    markerArray.markers[ind+i].scale.z = 0.2;
-    markerArray.markers[ind+i].color.r = 1.0;
-    markerArray.markers[ind+i].color.g = 0.0;
-    markerArray.markers[ind+i].color.b = 0.0;
-    markerArray.markers[ind+i].color.a = 0.2;
+    markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
+    markerArray.markers[ind].header.stamp = ros::Time();
+    markerArray.markers[ind].type = visualization_msgs::Marker::ARROW; 
+    markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
+    markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
+    markerArray.markers[ind].pose.position.z = msg.trackedHumans[i].location.point.z+radius;
+    double sx=msg.trackedHumans[i].speed.vector.x; // speed vector
+    double sy=msg.trackedHumans[i].speed.vector.y; 
+    double angle=atan2(sy,sx);
+    double length=sqrt(sx*sx+sy*sy); 
+    markerArray.markers[ind].pose.orientation=tf::createQuaternionMsgFromRollPitchYaw(0,0,angle);// yaw
+    markerArray.markers[ind].scale.x = .5;
+    markerArray.markers[ind].scale.y = .5;
+    markerArray.markers[ind].scale.z = length;
+    markerArray.markers[ind].color.r = 1.0;
+    markerArray.markers[ind].color.g = 0.0;
+    markerArray.markers[ind].color.b = 0.0;
+    markerArray.markers[ind].color.a = 0.2;
+    markerArray.markers[ind].lifetime = ros::Duration(10);
+    ind++;
+  }
+  // text
+  for (unsigned int i=0;i<msg.trackedHumans.size();i++)
+  {
+    markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
+    markerArray.markers[ind].header.stamp = ros::Time();
+    markerArray.markers[ind].type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
+    markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
+    markerArray.markers[ind].pose.position.z = msg.trackedHumans[i].location.point.z+radius*2;
+    markerArray.markers[ind].pose.orientation.x = 0.0;
+    markerArray.markers[ind].pose.orientation.y = 0.0;
+    markerArray.markers[ind].pose.orientation.z = 0.0;
+    markerArray.markers[ind].pose.orientation.w = 1.0;
+    markerArray.markers[ind].scale.x = 0.2;
+    markerArray.markers[ind].scale.y = 0.2;
+    markerArray.markers[ind].scale.z = 0.2;
+    markerArray.markers[ind].color.r = 1.0;
+    markerArray.markers[ind].color.g = 0.0;
+    markerArray.markers[ind].color.b = 0.0;
+    markerArray.markers[ind].color.a = 0.2;
     stringstream ss;
     ss<<msg.trackedHumans[i].id;
     if (msg.trackedHumans[i].identity.size()>0)
       ss<<","<<msg.trackedHumans[i].identity;
-    markerArray.markers[ind+i].text=ss.str();
-    markerArray.markers[ind+i].lifetime = ros::Duration(10);
+    markerArray.markers[ind].text=ss.str();
+    markerArray.markers[ind].lifetime = ros::Duration(10);
+    ind++;
   }
   return markerArray;
 }
@@ -107,7 +134,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
   }
   else
   { 
-    // requeted size in previous call
+    // requested size in previous call
     int prevSize=nameToSize[name];
     
     // reduce length after deleting in previous step
