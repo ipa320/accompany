@@ -1,0 +1,6 @@
+say ['acqua_gassata']
+move_arm folded true
+move_base kitchen
+move_tray up
+move_torso back False
+move_torso [[0.0,0.0,0.0]] False

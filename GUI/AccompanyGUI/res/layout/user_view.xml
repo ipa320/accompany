@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/user_bck_color"
+    android:id="@+id/global_user_layout" >
+
+    <AbsoluteLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:id="@+id/user_layout">
+    </AbsoluteLayout>
+
+        <ImageButton
+            android:id="@+id/right_user_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="right"
+            android:src="@drawable/right_banner" 
+            android:background="@android:color/transparent"/>
+
+        <ImageButton
+            android:id="@+id/left_user_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/left_banner" 
+            android:background="@android:color/transparent"/>
+
+</FrameLayout>
