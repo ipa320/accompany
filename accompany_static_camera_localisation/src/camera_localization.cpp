@@ -53,15 +53,20 @@ unsigned MAX_TRACK_AGE = 8;
 
 // ---- dynamic background model ---- start
 #include <GaussianMixture.h>
+#include <Gaussian.h>
+#include <GaussianSpherical.h>
+#include <GaussianSphericalCone.h>
+using namespace GausMix;
 #define DYNBG_TYPE float
 #define DYNBG_DIM 3
+#define DYNBG_GAUS GaussianSphericalCone<DYNBG_TYPE,DYNBG_DIM>
 #define DYNBG_MAXGAUS 3
 #define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
-GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
-DYNBG_TYPE decay=1/1000.0f;
-DYNBG_TYPE initVar=40;
+GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
+DYNBG_TYPE decay=1/500.0f;
+DYNBG_TYPE initVar=7;
 DYNBG_TYPE minWeight=0.1;
-DYNBG_TYPE squareMahanobisMatch=16;
+DYNBG_TYPE squareMahanobisMatch=12;
 DYNBG_TYPE weightReduction=0.005;
 const char* dynBGProb = "Background Probability";
 
@@ -521,7 +526,7 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
     if (bgProb.size()!=size)
       bgProb.set_size(size);
     bgProbMin=std::numeric_limits<float>::max();
-    bgProbMax=-std::numeric_limits<float>::max();;
+    bgProbMax=-std::numeric_limits<float>::max();
   }
 
   int updateGaussianID;
@@ -539,13 +544,10 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
       // compute background probablity for pixel
-      DYNBG_TYPE probBG=gaussianMixtures[pixelInd].probability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,squareMahanobisMatch,updateGaussianID);
       // update mixture of gaussians for pixel
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
-      // set log probabilities
-      if (probBG<std::numeric_limits<float>::min()) probBG=std::numeric_limits<float>::min(); // avoid -infinity when taking log
-      double logProbBG=log(probBG);
       sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
       sum+=logProbBG;
 
@@ -611,7 +613,7 @@ unsigned c=0;
 
 #if USE_DYNAMIC_BACKGROUND
     if (gaussianMixtures==NULL) // init on first pass
-      gaussianMixtures=new GaussianMixture<DYNBG_TYPE,DYNBG_DIM,DYNBG_MAXGAUS>[width*height];
+      gaussianMixtures=new GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS>[width*height];
     IplImage *smooth=cvCloneImage(oriImage);
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
     getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
