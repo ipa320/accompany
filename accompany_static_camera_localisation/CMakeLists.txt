@@ -142,6 +142,9 @@ target_link_libraries(test_transform boost_program_options)
 rosbuild_add_executable(resize_image src/resize_image.cpp)
 target_link_libraries(resize_image opencv_core boost_program_options)
 
+rosbuild_add_executable(add_camera_info src/add_camera_info.cpp)
+target_link_libraries(add_camera_info opencv_core boost_program_options boost_system boost_filesystem)
+
 rosbuild_add_executable(publish_image src/publish_image.cpp)
 target_link_libraries(publish_image opencv_core boost_program_options)
 

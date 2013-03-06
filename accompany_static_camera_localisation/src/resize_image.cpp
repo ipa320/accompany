@@ -38,7 +38,10 @@ void callback(const sensor_msgs::ImageConstPtr& msg)
     resizeRos.encoding = "bgr8";
     resizeRos.image = resize;
     // republish image
-    imagePub->publish(resizeRos.toImageMsg());
+    sensor_msgs::ImagePtr imagePtr=resizeRos.toImageMsg();
+    imagePtr->width=abWidth;
+    imagePtr->height=abHeight;
+    imagePub->publish(imagePtr);
   }
   catch (cv_bridge::Exception& e)
   {
