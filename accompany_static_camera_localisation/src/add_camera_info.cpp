@@ -25,6 +25,8 @@ void callback(const sensor_msgs::ImageConstPtr& msg)
 {
   sensor_msgs::Image image=*msg;
 
+  camera_info.width=image.width;
+  camera_info.height=image.height;
   camera_info.header.stamp = ros::Time::now();
   image.header.stamp = camera_info.header.stamp;
   image.header.frame_id = camera_info.header.frame_id;
@@ -81,10 +83,10 @@ int main(int argc,char **argv)
   options_description optionsDescription("Resize add frame and publish camera info on an existing image topic");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("topic_in,i", value<string>(&topic_in)->required(),"name of input topic")
-    ("topic_out,o", value<string>(&topic_out)->required(),"name of output topic")
+    ("topic_in,i", value<string>(&topic_in)->required(),"name of input image topic")
+    ("topic_out,o", value<string>(&topic_out)->required(),"name of output image topic")
     ("frame_id,f", value<string>(&frame_id)->default_value("optical_frame"),"the frame name of the stream")
-    ("intrinsic_xml,i", value<std::string>(&calib_xml)->default_value("camera_intrinsic.xml"),"load intrinsic parameters, use image_proc for image undistortion\n");
+    ("intrinsic_xml,n", value<std::string>(&calib_xml)->default_value("camera_intrinsic.xml"),"load intrinsic parameters, use image_proc for image undistortion\n");
 
   variables_map variablesMap;
   try
