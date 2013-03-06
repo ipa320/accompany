@@ -51,6 +51,8 @@ unsigned MAX_TRACK_AGE = 8;
 
 #define USE_DYNAMIC_BACKGROUND 1 // switch between static (PCA) and dynamic (gaussian mixture) background model
 
+unsigned int CAM_NUM = 1;
+
 // ---- dynamic background model ---- start
 #include <GaussianMixture.h>
 #include <Gaussian.h>
@@ -62,10 +64,10 @@ using namespace GausMix;
 #define DYNBG_GAUS GaussianSphericalCone<DYNBG_TYPE,DYNBG_DIM>
 #define DYNBG_MAXGAUS 3
 #define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
-GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures=NULL;
+vector<GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *> gaussianMixtures(CAM_NUM);
 DYNBG_TYPE decay=1/500.0f;
 DYNBG_TYPE initVar=7;
-DYNBG_TYPE minWeight=0.1;
+DYNBG_TYPE minWeight=.1;
 DYNBG_TYPE squareMahanobisMatch=12;
 DYNBG_TYPE weightReduction=0.005;
 const char* dynBGProb = "Background Probability";
@@ -89,7 +91,7 @@ geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
 ros::Publisher markerArrayPub;
-unsigned int CAM_NUM = 1;
+
 unsigned int NUM_PERSONS;
 bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
@@ -512,7 +514,10 @@ void initStaticProbs()
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
-void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,FLOAT &sum)
+void getDynamicBackgroundSumLogProb(IplImage *smooth,
+                                    GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures,
+                                    vnl_vector<FLOAT> &sumPix,
+                                    FLOAT &sum)
 {
   int widthExtra=smooth->width+1; // each line needs an extra leading zero
   int imgSizeExtra=widthExtra*smooth->height;
@@ -544,7 +549,7 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
       // compute background probablity for pixel
-      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,squareMahanobisMatch,updateGaussianID);
+      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
       // update mixture of gaussians for pixel
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
@@ -568,9 +573,10 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,vnl_vector<FLOAT> &sumPix,F
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
-  //ROS_INFO_STREAM("imageCallback");
+  ROS_INFO_STREAM("imageCallback frame:"<<msg->header.frame_id);
   vector<vnl_vector<FLOAT> > sumPixel(cam.size());
   vector<FLOAT> sum_g(cam.size());
+  unsigned c=0;
 
   try
   {
@@ -587,10 +593,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     if (!HAS_INIT)
     {
-      width = src_vec[0]->width;
-      height = src_vec[0]->height;
-      depth = src_vec[0]->depth;
-      channels = src_vec[0]->nChannels;
+      width = src_vec[c]->width;
+      height = src_vec[c]->height;
+      depth = src_vec[c]->depth;
+      channels = src_vec[c]->nChannels;
       halfresX = width / 2;
       halfresY = height / 2;
 
@@ -604,19 +610,16 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
           ROS_ERROR("empty image frame");
         }
         cvt_vec[c] = cvCreateImage(cvGetSize(src_vec[c]), IPL_DEPTH_8U, 3);
+        gaussianMixtures[c]=new GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS>[width*height];
       }
       HAS_INIT = true;
     }
 
-unsigned c=0;
-
 
 #if USE_DYNAMIC_BACKGROUND
-    if (gaussianMixtures==NULL) // init on first pass
-      gaussianMixtures=new GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS>[width*height];
     IplImage *smooth=cvCloneImage(oriImage);
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
-    getDynamicBackgroundSumLogProb(smooth,sumPixel[c],sum_g[c]);
+    getDynamicBackgroundSumLogProb(smooth,gaussianMixtures[c],sumPixel[c],sum_g[c]);
 
     IplImage *bgProbImg;
     if (visualize)
