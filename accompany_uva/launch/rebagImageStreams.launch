@@ -1,8 +1,9 @@
 <launch>
 
+  <!-- play -->
   <node pkg="rosbag" type="play" name="playBags"
    args="-d 2
-     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag 
+     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag
      $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
      "/>
 
@@ -17,16 +18,31 @@
   <!--<node pkg="image_view" type="image_view" name="$(anon image_view)" 
         args="image:=/camera1/gscam/image_raw_resize"/> -->
 
-  
-
-  <!-- camera3 
-  <node pkg="image_transport" type="republish" name="$(anon republish)"
+  <!-- camera3 -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
         args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw_large"/>
-  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)" 
-        args="-i /camera3/gscam/image_raw_large  -o /camera3/image_raw" />  -->
+  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
+        args="-i /camera3/gscam/image_raw_large -o /camera3/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
+  <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
+        args="-i /camera3/gscam/image_raw_resize -o /camera3/image_raw -f camera3 -n /home/bterwijn/projects/ros/accompany/accompany_uva/res/testRobotHouse/camera3/camera_intrinsic.xml "/>
  
 
   <!--<node pkg="image_view" type="image_view" name="$(anon image_view)" 
         args="image:=/camera3/gscam/image_raw_resize"/> -->
   
+  <!-- record -->
+  <node pkg="rosbag" type="record" name="$(anon record)" 
+        args="-b 0 -o robotHouse
+              /camera1/image_raw/compressed 
+              /camera1/camera_info
+              /camera3/image_raw/compressed 
+              /camera3/camera_info"
+        />
+
+<!--
+rosrun tf static_transform_publisher 0 0 0 0 0 0 /camera_depth_frame /openni_depth_frame 100
+rosrun accompany_static_camera_localisation publish_tf_from_extrinsic -p camera_rgb_optical_frame -c world -e camera_extrinsic.xml -r
+rosrun accompany_static_camera_localisation publish_tf_from_extrinsic -p world -c fisheye_optical_frame -e camera_extrinsic.xml
+-->
+
 </launch>
