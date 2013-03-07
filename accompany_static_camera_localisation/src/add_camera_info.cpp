@@ -25,8 +25,6 @@ void callback(const sensor_msgs::ImageConstPtr& msg)
 {
   sensor_msgs::Image image=*msg;
 
-  camera_info.width=image.width;
-  camera_info.height=image.height;
   camera_info.header.stamp = ros::Time::now();
   image.header.stamp = camera_info.header.stamp;
   image.header.frame_id = camera_info.header.frame_id;
