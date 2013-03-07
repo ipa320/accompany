@@ -1,0 +1,21 @@
+#list {
+	width: 360px;
+	margin: 0 auto;
+}
+
+#list a {
+	text-decoration: none;
+	color: black;
+	text-align:center;
+	display:block;
+	border: 2px solid black;
+	width: auto;
+	clear: both;
+	padding: 15px;
+	margin-bottom: 10px;
+	background-color:lightgrey;
+	border-radius: 25px;
+	overflow: auto;
+	font-size: 18pt;
+	vertical-align: middle;
+}

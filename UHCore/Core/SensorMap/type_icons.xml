@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<types>
+	<type name="small door" image="icons/smallDoor"/>
+	<type name="small drawer" image="icons/smallDrawer" />
+	<type name="large door" image="icons/largeDoor" />
+	<type name="temperature, hot" image="icons/temperature_hot" />
+	<type name="temperature, cold" image="icons/temperature_cold" />
+	<type name="small lamp" image="icons/lamp"/>
+	<type name="kettle" image="icons/kettle"/>
+	<type name="microwave" image="icons/microwave"/>
+	<type name="dishwasher" image="icons/dishwasher"/>
+	<type name="coffee maker" image="icons/coffee"/>
+	<type name="default" image="icons/default"/>
+	<type name="tv" image="icons/tv"/>
+	<type name="toaster" image="icons/toaster"/>
+	<type name="computer" image="icons/computer"/>
+	<type name="light" image="icons/light"/>
+	<type name="cooker" image="icons/cooker"/>
+	<type name="fridge" image="icons/fridge"/>
+	<type name="large chair" image="icons/largeChair"/>
+	<type name="doubleBed" image="icons/doubleBed"/>
+	<type name="table" image="icons/table"/>
+	<type name="small chair" image="icons/smallChair"/>
+	<type name="flush" image="icons/flush"/>
+	<type name="doorbell" image="icons/doorbell"/>
+	<type name="robot" image="icons/robot"/>
+	<type name="socket" />
+	<type name="mains" />
+</types>

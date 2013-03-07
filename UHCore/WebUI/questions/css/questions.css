@@ -1,0 +1,54 @@
+* {
+	box-sizing: border-box;
+}
+
+.center {
+	text-align: center;
+	vertical-align: middle;
+}
+
+.big {
+	font-size:20pt;
+	color: #0000bb;
+}
+
+.question {
+	border: 2px solid black;
+	width: auto;
+	clear: both;
+	padding: 15px;
+	margin-bottom: 10px;
+	background-color:lightgrey;
+	border-radius: 25px;
+	width:40%;
+	overflow: auto;
+	font-size: 12pt;
+	text-align: justify;
+	vertical-align: middle;
+}
+
+.question.odd {
+	float: right;
+}
+
+.question.even {
+	float: left;
+}
+
+.question[size=s] {
+	height: 19%;
+}
+
+.question[size=m] {
+	border: 4px solid black;
+	height: 22%;
+	width:48%;
+	font-size: 14pt;
+}
+
+.question[size=l] {
+	border: 6px solid black;
+	height: 29%;
+	width:62%;
+	font-size: 18pt;
+}

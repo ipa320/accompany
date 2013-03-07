@@ -1,0 +1,61 @@
+<sensors>
+	<sensor direction="270.0" id="1" type="temperature, hot" x="-3.7025" y="-2.15125" z="3" />
+	<sensor direction="270.0" id="2" type="temperature, cold" x="-3.7025" y="-1.87625" z="3" />
+	<sensor direction="270.0" id="3" type="small door" x="-2.685" y="-0.58375" z="7" />
+	<sensor direction="270.0" id="4" type="small door" x="-2.2725" y="-0.58375" z="7" />
+	<sensor direction="270.0" id="5" type="small door" x="-1.86" y="-0.58375" z="7" />
+	<sensor direction="270.0" id="6" type="small drawer" x="-2.2725" y="-1.065" z="3" />
+	<sensor direction="270.0" id="7" type="small drawer" x="-1.86" y="-1.065" z="3" />
+	<sensor direction="270.0" id="8" type="small door" x="-2.2725" y="-1.23" z="1" />
+	<sensor direction="270.0" id="9" type="small door" x="-1.86" y="-1.23" z="1" />
+	<sensor direction="270.0" id="10" type="small door" x="-2.685" y="-1.23" z="1" />
+	<sensor direction="270.0" id="11" type="temperature, hot" x="-0.85625" y="-5.08" z="3" />
+	<sensor direction="270.0" id="12" type="temperature, cold" x="-0.85625" y="-5.355" z="3" />
+	<sensor direction="270.0" id="13" type="large door" x="-1.29625" y="-3.766875" z="0" />
+	<sensor direction="270.0" id="14" type="flush" x="-1.68125" y="-6.08375" z="2" />
+	<sensor direction="90.0" group="1" id="15" type="large chair" x="3.54375" y="2.675" z="2" />
+	<sensor direction="90.0" group="1" id="16" type="large chair" x="4.23125" y="2.675" z="2" />
+	<sensor direction="90.0" group="1" id="17" type="large chair" x="4.91875" y="2.675" z="2" />
+	<sensor direction="180.0" group="2" id="18" type="large chair" x="6.225" y="1.685" z="2" />
+	<sensor direction="180.0" group="2" id="19" type="large chair" x="6.225" y="0.9975" z="0" />
+	<sensor direction="270.0" id="20" type="small chair" x="0.68375" y="2.235" z="2" />
+	<sensor direction="270.0" id="21" type="small chair" x="1.37125" y="2.235" z="2" />
+	<sensor direction="270.0" id="22" size="2,4" type="table" x="0.5875" y="2.785" z="4" />
+	<sensor direction="270.0" id="23" type="large door" x="-2.67125" y="0.59875" z="0" />
+	<sensor direction="180.0" id="24" type="small drawer" x="-1.2" y="2.71625" z="1" />
+	<sensor direction="180.0" id="25" type="small drawer" x="-1.37875" y="2.71625" z="2" />
+	<sensor direction="180.0" id="26" type="small door" x="-1.5575" y="1.42375" z="1" />
+	<sensor direction="180.0" id="27" type="small door" x="-1.5575" y="2.24875" z="1" />
+	<sensor direction="180.0" id="28" type="small drawer" x="-1.2" y="1.83625" z="1" />
+	<sensor direction="180.0" id="29" type="small drawer" x="-1.37875" y="1.83625" z="2" />
+	<sensor direction="180.0" id="30" type="small drawer" x="-1.5575" y="1.83625" z="3" />
+	<sensor direction="180.0" id="31" type="small drawer" x="4.06625" y="-5.42375" z="1" />
+	<sensor direction="180.0" id="32" type="small drawer" x="3.8875" y="-5.42375" z="2" />
+	<sensor direction="180.0" id="33" type="small drawer" x="3.70875" y="-5.42375" z="3" />
+	<sensor direction="180.0" id="34" type="small door" x="4.25875" y="-4.31" z="1" />
+	<sensor direction="180.0" id="35" type="small chair" x="4.50625" y="-4.8325" z="2" />
+	<sensor direction="0.0" id="36" type="large door" x="3.73625" y="-2.55" z="0" />
+	<sensor direction="270.0" id="37" size="double" type="doubleBed" x="5.675" y="-0.79" z="2" />
+	<sensor direction="0.0" id="38" type="small door" x="6.0875" y="-4.57125" z="1" />
+	<sensor direction="0.0" id="39" type="small door" x="6.0875" y="-4.98375" z="1" />
+	<sensor direction="0.0" id="40" type="small door" x="6.0875" y="-5.39625" z="1" />
+	<sensor direction="270.0" id="41" type="light" x="-1.75" y="3.34875" z="10" />
+	<sensor direction="270.0" id="42" type="light" x="-2.78125" y="0.9975" z="10" />
+	<sensor direction="270.0" id="43" type="light" x="1.34375" y="0.1175" z="10" />
+	<sensor direction="270.0" id="44" type="cooker" x="-3.125" y="-3.05875" z="0" />
+	<sensor direction="270.0" id="45" type="socket" x="-4.23875" y="2.3725" z="0" />
+	<sensor direction="270.0" id="46" type="socket" x="-4.23875" y="4.03625" z="0" />
+	<sensor direction="270.0" id="47" type="socket" x="-0.925" y="-6.88125" z="0" />
+	<sensor direction="270.0" id="48" type="mains" x="-4.23875" y="2.77125" z="0" />
+	<sensor direction="270.0" id="49" type="tv" x="4.4375" y="-0.30875" z="5" />
+	<sensor direction="270.0" id="50" type="fridge" x="-1.8875" y="-2.92125" z="0" />
+	<sensor direction="270.0" id="51" type="kettle" x="-2.91875" y="-0.845" z="4" />
+	<sensor direction="270.0" id="52" type="computer" x="3.95625" y="-4.26875" z="4" />
+	<sensor direction="270.0" id="53" type="small lamp" x="3.8875" y="-4.84625" z="4" />
+	<sensor direction="270.0" id="54" type="microwave" x="-1.75" y="-0.845" z="4" />
+	<sensor direction="180.0" id="55" type="dishwasher" x="-3.74375" y="-1.34" z="0" />
+	<sensor direction="270.0" id="56" type="toaster" x="-2.1625" y="-0.845" z="4" />
+	<sensor direction="270.0" id="57" type="light" x="1.1375" y="2.74375" z="10" />
+	<sensor direction="270.0" id="58" type="coffee maker" x="-2.50625" y="-0.845" z="4" />
+	<sensor direction="270.0" id="59" type="doorbell" x="-3.73" y="0.1725" z="5" />
+</sensors>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Live Sensor View</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+		<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>-->
+		<script src="js/jquery-1.8.2.min.js"></script>
+		<link rel="stylesheet" href="css/map.css" type="text/css" />
+		<script src="js/main.js"></script>
+		<script type="text/javascript">
+			function svgClick(evt) {
+				alert(evt);
+			};
+			$(function() {
+				var ui = new uiHelper();
+				ui.load('#map');
+			});
+			$(function() {
+				var width = window.innerWidth - 30;
+				var height = window.innerHeight - 30;
+				$('#map').css('height', height);
+				$('#map').css('width', width);
+			});
+		</script>
+	</head>
+	<body>
+		<div class="map"><img src="image" id="map" /></div>
+	<body>	
+	</body>
+</html>

@@ -1,6 +1,6 @@
 
 
-#include "/home/joe/ros_workspace/COBScheduler/include/COBScheduler/mainwindow.h"
+#include "../include/COBScheduler/mainwindow.h"
 #include "ui_mainwindow.h"
 
 #include <QSqlRelationalTableModel>

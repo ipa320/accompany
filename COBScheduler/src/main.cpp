@@ -1,5 +1,5 @@
 #include <QtGui/QApplication>
-#include "/home/joe/ros_workspace/COBScheduler/include/COBScheduler/mainwindow.h"
+#include "../include/COBScheduler/mainwindow.h"
 
 int main(int argc, char *argv[])
 {
