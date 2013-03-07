@@ -13,10 +13,11 @@
   <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
         args="-i /camera1/gscam/image_raw_large -o /camera1/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
   <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
-        args="-i /camera1/gscam/image_raw_resize -o /camera1/image_raw -f camera1 -n /home/bterwijn/projects/ros/accompany/accompany_uva/res/testRobotHouse/camera1/camera_intrinsic.xml "/>
+        args="-i /camera1/gscam/image_raw_resize -o /camera1/image_raw 
+              -f camera1 -n $(find accompany_uva)/res/testRobotHouse/camera1/camera_intrinsic.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        arg="-p camera_frame -c camera1 -e $(find accompany_uva)/res/testRobotHouse/camera1/camera_extrinsic.xml"/>
   
-  <!--<node pkg="image_view" type="image_view" name="$(anon image_view)" 
-        args="image:=/camera1/gscam/image_raw_resize"/> -->
 
   <!-- camera3 -->
   <node pkg="image_transport" type="republish" name="$(anon republish)" 
@@ -24,25 +25,20 @@
   <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
         args="-i /camera3/gscam/image_raw_large -o /camera3/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
   <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
-        args="-i /camera3/gscam/image_raw_resize -o /camera3/image_raw -f camera3 -n /home/bterwijn/projects/ros/accompany/accompany_uva/res/testRobotHouse/camera3/camera_intrinsic.xml "/>
+        args="-i /camera3/gscam/image_raw_resize -o /camera3/image_raw 
+              -f camera3 -n $(find accompany_uva)/res/testRobotHouse/camera3/camera_intrinsic.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        arg="-p camera_frame -c camera3 -e $(find accompany_uva)/res/testRobotHouse/camera3/camera_extrinsic.xml"/>
  
 
-  <!--<node pkg="image_view" type="image_view" name="$(anon image_view)" 
-        args="image:=/camera3/gscam/image_raw_resize"/> -->
-  
   <!-- record -->
   <node pkg="rosbag" type="record" name="$(anon record)" 
         args="-b 0 -o robotHouse
-              /camera1/image_raw/compressed 
+              /camera1/image_raw/compressed
               /camera1/camera_info
-              /camera3/image_raw/compressed 
-              /camera3/camera_info"
+              /camera3/image_raw/compressed
+              /camera3/camera_info
+              /tf"
         />
-
-<!--
-rosrun tf static_transform_publisher 0 0 0 0 0 0 /camera_depth_frame /openni_depth_frame 100
-rosrun accompany_static_camera_localisation publish_tf_from_extrinsic -p camera_rgb_optical_frame -c world -e camera_extrinsic.xml -r
-rosrun accompany_static_camera_localisation publish_tf_from_extrinsic -p world -c fisheye_optical_frame -e camera_extrinsic.xml
--->
 
 </launch>
