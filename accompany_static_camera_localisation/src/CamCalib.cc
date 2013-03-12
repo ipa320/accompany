@@ -63,6 +63,7 @@ void CamCalib::xmlUnpack(XmlFile &f)
   // initialize camera model 
   model.init(IntrinsicFile, ExtrinsicFile, scale);
   cout << "SCALE" << "," << scale << endl;
+  f.unpack("name", name);
   // f.unpack("w", w);
   // f.unpack("w2", w2);
   f.unpack("sigma1", stdev1);

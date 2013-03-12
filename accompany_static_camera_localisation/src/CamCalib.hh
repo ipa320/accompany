@@ -46,6 +46,7 @@ class CamCalib: public XmlPackable
   public:
     Hu::CameraModel model;
 
+    string name;
     FLOAT stdev1, pixelVar1, pv2_1, lpv2_1;FLOAT stdev2, pixelVar2, pv2_2,
         lpv2_2;FLOAT stdev3, pixelVar3, pv2_3, lpv2_3;FLOAT scale;
 

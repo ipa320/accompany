@@ -51,7 +51,7 @@ unsigned MAX_TRACK_AGE = 8;
 
 #define USE_DYNAMIC_BACKGROUND 1 // switch between static (PCA) and dynamic (gaussian mixture) background model
 
-unsigned int CAM_NUM = 1;
+unsigned int CAM_NUM = 2;
 
 // ---- dynamic background model ---- start
 #include <GaussianMixture.h>
@@ -97,6 +97,8 @@ bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
 vector<IplImage *> src_vec(CAM_NUM);
+vector<vnl_vector<FLOAT> > sumPixel(CAM_NUM);
+vector<FLOAT> sum_g(CAM_NUM);
 
 // particle options
 bool particles = false;
@@ -122,6 +124,46 @@ char image_name[200];
 char data_file[200];
 Mat frame_id, cum_id, human_locations, human_templates; // buffer to store detection results
 FileStorage fs;
+
+// publish debug frames
+image_transport::Publisher *backgroundsPub;
+image_transport::Publisher *detectionsPub;
+
+// counts the frames of each camera
+class FrameCounter
+{
+private:
+  vector<int> counters;
+  int currentCount;
+public:
+  FrameCounter(int camNum)
+  {
+    currentCount=0;
+    counters.resize(camNum);
+  }
+
+  // returns the smallest frame count when all cameras have provided a new frame since the last successful call
+  // otherwise return -1;
+  int count(int c)
+  {
+    if (counters[c]<=currentCount)
+      counters[c]=currentCount+1;
+    int upCount=currentCount+1; // try to add 1
+    for (vector<int>::iterator it=counters.begin();it!=counters.end();it++)
+    {
+      if (*it<upCount) // failed
+      {
+        upCount=-1;
+        break;
+      }
+    }
+    if (upCount>0) // success
+      currentCount=upCount;
+    return upCount;
+  }
+
+};
+FrameCounter *frameCounter;
 
 void buildMasks()
 {
@@ -149,8 +191,9 @@ FLOAT logMaskProb(const vnl_vector<FLOAT> &logSumPixelFGProb,
   {
     unsigned offset = i->line * (width + 1) + 1; // if start=0, offset-1 == 0
     //cout << "offset=" << offset << ", start=" << i->start << ", end=" << i->end << ", size=" << logSumPixelBGProb.size() << endl;
+    
     res -= (logSumPixelBGProb(offset + i->end)
-        - logSumPixelBGProb(offset + i->start - 1));
+            - logSumPixelBGProb(offset + i->start - 1));
     // res += (logSumPixelFGProb(offset + i->end) - logSumPixelFGProb(offset + i->start - 1))
     //      - (logSumPixelBGProb(offset + i->end) - logSumPixelBGProb(offset + i->start - 1));
   }
@@ -215,6 +258,7 @@ void scanRest(vector<unsigned> &existing,
     vector<vnl_vector<FLOAT> > &logPosProb, vector<FLOAT > &marginal,
     const vector<FLOAT> &lSum)
 {
+  cout<<"scanRest"<<endl;
   unsigned bestIdx = 0;
   FLOAT bestLogProb = -INFINITY, marginalLogProb = -INFINITY;
 
@@ -446,45 +490,56 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   number++;
 //  static char buffer[1024];
 
-  /* Visualize tracks */
-  for (unsigned c = 0; c != cam.size(); ++c)
+  if (visualize)
   {
-    //IplImage *bg = vec2img((bgVec[c]).apply(fabs));
-    //IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
-    //cvCvtColor(bg, cvt, TO_IMG_FMT);
-
-    //if (!save_all.empty())
-    //  save_background_frames(cvt);
-
-    plotHull(src[c], priorHull, c);
-    //plotHull(cvt, priorHull, c);
-    // For comparison:
-    for (unsigned i = 0; i != existing.size(); ++i)
+    /* Visualize tracks */
+    for (unsigned c = 0; c != cam.size(); ++c)
     {
-      vector<CvPoint> tplt;
-      cam[c].genTemplate(scanLocations[existing[i]], tplt);
-      //plotTemplate(cvt, tplt, CV_RGB(255,255,255));
-      plotTemplate(src[c], tplt, CV_RGB(0,255,255));
-      cvCircle(src[c], cam[c].project(scanLocations[existing[i]]), 1,
-          CV_RGB(255,255,0), 2);
+      //IplImage *bg = vec2img((bgVec[c]).apply(fabs));
+      //IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
+      //cvCvtColor(bg, cvt, TO_IMG_FMT);
+
+      //if (!save_all.empty())
+      //  save_background_frames(cvt);
+
+      plotHull(src[c], priorHull, c);
+      //plotHull(cvt, priorHull, c);
+      // For comparison:
+      for (unsigned i = 0; i != existing.size(); ++i)
+      {
+        vector<CvPoint> tplt;
+        cam[c].genTemplate(scanLocations[existing[i]], tplt);
+        //plotTemplate(cvt, tplt, CV_RGB(255,255,255));
+        plotTemplate(src[c], tplt, CV_RGB(0,255,255));
+        cvCircle(src[c], cam[c].project(scanLocations[existing[i]]), 1,
+                 CV_RGB(255,255,0), 2);
+      }
+
+      //		cvShowImage(bgwin, cvt);
+      //cvReleaseImage(&bg);
+      //cvReleaseImage(&cvt);
+    
+      
+      // convert to Ros image and publish
+      cv_bridge::CvImage detectImgRos;
+      detectImgRos.encoding = "rgb8";
+      detectImgRos.image = src[c];
+      sensor_msgs::ImagePtr imagePtr=detectImgRos.toImageMsg();
+      detectionsPub[c].publish(imagePtr);
+      //cvShowImage(win, src[c]);
+
+      if (saveImagesPath!="")
+      {
+        ros::Time begin = ros::Time::now();
+        stringstream ss;
+        ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
+          <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
+        cvSaveImage(ss.str().c_str(),src[c]);
+      }
+
+      //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
+      //		cvSaveImage(buffer, src[c]);
     }
-
-    //		cvShowImage(bgwin, cvt);
-    //cvReleaseImage(&bg);
-    //cvReleaseImage(&cvt);
-    if (visualize) cvShowImage(win, src[c]);
-
-    if (saveImagesPath!="")
-    {
-      ros::Time begin = ros::Time::now();
-      stringstream ss;
-      ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
-        <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
-      cvSaveImage(ss.str().c_str(),src[c]);
-    }
-
-    //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
-    //		cvSaveImage(buffer, src[c]);
   }
   /* End of Visualization */
 
@@ -519,15 +574,15 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
                                     vnl_vector<FLOAT> &sumPix,
                                     FLOAT &sum)
 {
-  int widthExtra=smooth->width+1; // each line needs an extra leading zero
-  int imgSizeExtra=widthExtra*smooth->height;
+  unsigned int widthExtra=smooth->width+1; // each line needs an extra leading zero
+  unsigned int imgSizeExtra=widthExtra*smooth->height;
 
   if (sumPix.size()!=imgSizeExtra)
     sumPix.set_size(imgSizeExtra);
 
   if (visualize)
   {
-    int size=smooth->width*smooth->height;
+    unsigned int size=smooth->width*smooth->height;
     if (bgProb.size()!=size)
       bgProb.set_size(size);
     bgProbMin=std::numeric_limits<float>::max();
@@ -537,7 +592,8 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
   int updateGaussianID;
   DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
   int pixelInd=0,channelInd=0;
-  for (int i=0;i<imgSizeExtra;i++)
+  sum=0;
+  for (unsigned int i=0;i<imgSizeExtra;i++)
   {
     if (i%widthExtra==0) // add leading zero
     {
@@ -549,7 +605,7 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
       // compute background probablity for pixel
-      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+      DYNBG_TYPE logProbBG=8+gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
       // update mixture of gaussians for pixel
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
@@ -570,26 +626,29 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
 
 }
 
-
-void imageCallback(const sensor_msgs::ImageConstPtr& msg)
+void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cameraInfo)
 {
-  ROS_INFO_STREAM("imageCallback frame:"<<msg->header.frame_id);
-  vector<vnl_vector<FLOAT> > sumPixel(cam.size());
-  vector<FLOAT> sum_g(cam.size());
+  ROS_INFO_STREAM("imageCallback frame:"<<image->header.frame_id);
   unsigned c=0;
+
+  for (unsigned int i=0;i<cam.size();i++)
+    if (image->header.frame_id.compare(cam[i].name)==0)
+      c=i;
+
+  ROS_INFO_STREAM("camera:"<<c);
 
   try
   {
     frame_cnt ++ ;
     // load the first image to get image size
     cv_bridge::CvImageConstPtr cv_ptr;
-    cv_ptr=cv_bridge::toCvShare(msg,"bgr8");
+    cv_ptr=cv_bridge::toCvShare(image,"bgr8");
     IplImage helpConvert=(IplImage)(cv_ptr->image);
     IplImage *oriImage=&helpConvert;
 
     if (!save_all.empty())
       save_image_frames(oriImage);
-    src_vec[0] = cvCloneImage(oriImage);
+    src_vec[c] = cvCloneImage(oriImage);
 
     if (!HAS_INIT)
     {
@@ -603,14 +662,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       initStaticProbs();
       buildMasks();
 
-      for (unsigned c = 0; c != cam.size(); ++c)
+      for (unsigned cc=0; cc!=cam.size(); cc++)
       {
         if (!src_vec[c])
         {
           ROS_ERROR("empty image frame");
         }
-        cvt_vec[c] = cvCreateImage(cvGetSize(src_vec[c]), IPL_DEPTH_8U, 3);
-        gaussianMixtures[c]=new GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS>[width*height];
+        cvt_vec[cc] = cvCreateImage(cvGetSize(src_vec[c]), IPL_DEPTH_8U, 3);
+        gaussianMixtures[cc]=new GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS>[width*height];
       }
       HAS_INIT = true;
     }
@@ -628,7 +687,13 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
       int size=width*height;
       for (int i=0;i<size;i++)
         bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
-      cvShowImage(dynBGProb,bgProbImg);
+      // convert to Ros image and publish
+      cv_bridge::CvImage bgProbImgRos;
+      bgProbImgRos.encoding = "mono8";
+      bgProbImgRos.image = bgProbImg;
+      sensor_msgs::ImagePtr imagePtr=bgProbImgRos.toImageMsg();
+      backgroundsPub[c].publish(imagePtr);
+      //cvShowImage(dynBGProb,bgProbImg);
     }
 #else
 
@@ -640,11 +705,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 #endif
 
-    if (frame_cnt>INIT_FIRST_FRAMES)
+    if (frameCounter->count(c)>INIT_FIRST_FRAMES)
     {
+      ROS_INFO_STREAM("detect");
       accompany_uva_msg::HumanLocations humanLocations;      
-      humanLocations = findPerson(0, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
-
+      humanLocations = findPerson(c, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
 
       if (!particles)
       {
@@ -652,6 +717,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
         markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
       }
     }
+    else
+      ROS_INFO_STREAM("wait for other frames");
 
     // publish human locations particles
     //        if (particles)
@@ -672,7 +739,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //          }
     //          humanLocationsParticlesPub.publish(humanLocationsParticles);
     //        }
-    //        cvShowImage("view", bridge.imgMsgToCv(msg, "bgr8"));
+    //        cvShowImage("view", bridge.imgMsgToCv(image, "bgr8"));
     //        cvDestroyWindow("view");
     
     //clean up
@@ -685,11 +752,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     cvReleaseImage(&smooth);
 #endif
     
-    cvReleaseImage(&src_vec[0]);
+    cvReleaseImage(&src_vec[c]);
   }
   catch (cv_bridge::Exception& e)
   {
-    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+    ROS_ERROR("Could not convert from '%s' to 'bgr8'.", image->encoding.c_str());
   }
 }
 
@@ -775,11 +842,13 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("loading '"<<params_file.c_str()<<"'");
   ROS_INFO_STREAM("loading '"<<intrinsic_file.c_str()<<"'");
   ROS_INFO_STREAM("loading '"<<extrinsic_file.c_str()<<"'");
+
+  ROS_INFO_STREAM("cam.size:"<<cam.size());
   loadCalibrations(params_file.c_str(),
                    intrinsic_file.c_str(), 
                    extrinsic_file.c_str()); // load calibration
-  ROS_INFO_STREAM("loading '"<<prior_file.c_str()<<"'");
-  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  ROS_INFO_STREAM("cam.size:"<<cam.size());
+
 #if USE_DYNAMIC_BACKGROUND
 #else
   assert_eq(bgModel.size(), CAM_NUM);
@@ -797,7 +866,6 @@ int main(int argc, char **argv)
   ros::NodeHandle n;
   std::string resolved_image=n.resolveName("image");
   std::string resolved_humanLocations=n.resolveName("humanLocations");
-  cout<<"subscribe to image topic: "<<resolved_image<<endl;
   cout<<"publish to location topic: "<<resolved_humanLocations<<endl;
 
   tf::TransformBroadcaster transformBroadcaster;
@@ -808,7 +876,27 @@ int main(int argc, char **argv)
   //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
   markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
 
-  image_transport::Subscriber sub = it.subscribe(resolved_image, 1,imageCallback); // function of localization
+  frameCounter=new FrameCounter(cam.size());
+  backgroundsPub=new image_transport::Publisher[cam.size()];
+  detectionsPub=new image_transport::Publisher[cam.size()];
+  for (unsigned int i=0;i<cam.size();i++)
+  {
+    // subscribe to images
+    string topicName=cam[i].name+"/image_raw";
+    ROS_INFO_STREAM("subscribe to '"<<topicName<<"'");
+    image_transport::CameraSubscriber sub = it.subscribeCamera(topicName,1,imageCallback);
+    
+    // init publishers for background images
+    string backgroundTopicName=cam[i].name+"/background/image_raw";
+    ROS_INFO_STREAM("publish to '"<<backgroundTopicName<<"'");
+    backgroundsPub[i]=it.advertise(backgroundTopicName,1);
+
+    // init publishers for detection images
+    string detectTopicName=cam[i].name+"/detect/image_raw";
+    ROS_INFO_STREAM("publish to '"<<detectTopicName<<"'");
+    detectionsPub[i]=it.advertise(detectTopicName,1);
+
+  }
   
   ROS_INFO_STREAM("wait for frames");
   ros::spin();
