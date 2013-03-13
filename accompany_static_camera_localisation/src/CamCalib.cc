@@ -8,13 +8,13 @@
 #include <iostream>
 // #include
 // // #include <opencv/cv.h>
-
 using namespace std;
 
 std::vector<CamCalib> cam;
 double personHeight = 0, wg = 0, wm = 0, wt = 0, midRatio = 0;
 double minX, maxX, minY, maxY;
-string ExtrinsicFile, IntrinsicFile;
+string extrinsicFile, intrinsicFile;
+const char *calibLoadPath=NULL;
 
 #define OCTAGON 1
 
@@ -53,15 +53,24 @@ void CamCalib::xmlUnpack(XmlFile &f)
   double scale;
   f.unpack("SCALE", scale);
 
-  ifstream ifs(ExtrinsicFile.c_str());
+  // if set load from params.xml, otherwise use preset intrinsicFile extrinsicFile
+  if (calibLoadPath!=NULL) 
+  {
+    f.unpack("intrinsicFile",intrinsicFile);
+    f.unpack("extrinsicFile",extrinsicFile);
+    intrinsicFile=((string)calibLoadPath)+"/"+intrinsicFile;
+    extrinsicFile=((string)calibLoadPath)+"/"+extrinsicFile;
+  }
+
+  ifstream ifs(extrinsicFile.c_str());
   if (!ifs)
   {
-    cerr << "Could not load file " << ExtrinsicFile << endl;
+    cerr << "Could not load file " << extrinsicFile << endl;
     exit(1);
   }
   
   // initialize camera model 
-  model.init(IntrinsicFile, ExtrinsicFile, scale);
+  model.init(intrinsicFile,extrinsicFile, scale);
   cout << "SCALE" << "," << scale << endl;
   f.unpack("name", name);
   // f.unpack("w", w);
@@ -452,13 +461,9 @@ void plotTemplate(IplImage *img, const vector<CvPoint> &points,
 }
 #endif
 
-void loadCalibrations(const char *filename,const char* intrinsic,const char* extrinsic)
+void loadCalibrationsHelper(const char *filename)
 {
-  ExtrinsicFile = extrinsic;
-  IntrinsicFile = intrinsic;
-
   XmlReader rd(filename);
-
   rd.unpack("PersonHeight", personHeight);
   rd.unpack("wg", wg);
   rd.unpack("wm", wm);
@@ -470,6 +475,20 @@ void loadCalibrations(const char *filename,const char* intrinsic,const char* ext
 
   rd.unpack("Cameras", cam);
   //cam[0].init(); // TODO
+}
+
+void loadCalibrations(const char *filename, const char* intrinsic, const char* extrinsic)
+{
+  calibLoadPath=NULL;
+  intrinsicFile=intrinsic;
+  extrinsicFile=extrinsic;
+  loadCalibrationsHelper(filename);
+}
+
+void loadCalibrations(const char *filename, const char *path)
+{
+  calibLoadPath=path;
+  loadCalibrationsHelper(filename);
 }
 
 float loadWorldPriorHull(const char *file, vector<WorldPoint> &polygon)

@@ -522,7 +522,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
       
       // convert to Ros image and publish
       cv_bridge::CvImage detectImgRos;
-      detectImgRos.encoding = "rgb8";
+      detectImgRos.encoding = "bgr8";
       detectImgRos.image = src[c];
       sensor_msgs::ImagePtr imagePtr=detectImgRos.toImageMsg();
       detectionsPub[c].publish(imagePtr);
@@ -842,12 +842,11 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("loading '"<<params_file.c_str()<<"'");
   ROS_INFO_STREAM("loading '"<<intrinsic_file.c_str()<<"'");
   ROS_INFO_STREAM("loading '"<<extrinsic_file.c_str()<<"'");
-
   ROS_INFO_STREAM("cam.size:"<<cam.size());
-  loadCalibrations(params_file.c_str(),
-                   intrinsic_file.c_str(), 
-                   extrinsic_file.c_str()); // load calibration
+  loadCalibrations(params_file.c_str(),path.c_str()); // load calibration
   ROS_INFO_STREAM("cam.size:"<<cam.size());
+  ROS_INFO_STREAM("loading '"<<prior_file.c_str()<<"'");
+  loadWorldPriorHull(prior_file.c_str(), priorHull);
 
 #if USE_DYNAMIC_BACKGROUND
 #else
