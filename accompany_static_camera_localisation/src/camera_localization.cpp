@@ -65,11 +65,11 @@ using namespace GausMix;
 #define DYNBG_MAXGAUS 3
 #define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
 vector<GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *> gaussianMixtures(CAM_NUM);
-DYNBG_TYPE decay=1/500.0f;
-DYNBG_TYPE initVar=7;
-DYNBG_TYPE minWeight=.1;
-DYNBG_TYPE squareMahanobisMatch=12;
-DYNBG_TYPE weightReduction=0.005;
+DYNBG_TYPE decay=1/800.0f;
+DYNBG_TYPE initVar=5;
+DYNBG_TYPE minWeight=.2;
+DYNBG_TYPE squareMahanobisMatch=10;
+DYNBG_TYPE weightReduction=0.008;
 const char* dynBGProb = "Background Probability";
 
 // vizualize
@@ -468,7 +468,6 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
 
   for (unsigned i = 0; i != marginal.size(); ++i)
     lSum = log_sum_exp(lSum, marginal[i]);
-  unsigned mlnp = 0; // most likely number of people
   FLOAT mlprob = -INFINITY;
   for (unsigned i = 0; i != marginal.size(); ++i)
   {
@@ -476,10 +475,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     //      << " (log = " << marginal[i] << ")"
     //      << endl;
     if (marginal[i] > mlprob)
-    {
-      mlnp = i;
       mlprob = marginal[i];
-    }
   }
 
   // SAVE Locations and template points
@@ -623,7 +619,6 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
       channelInd+=3;
     }
   }
-
 }
 
 void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::CameraInfoConstPtr& cameraInfo)
@@ -688,8 +683,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
     {
       bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
       int size=width*height;
+      bgProbMin=-1000;// improves visualisation
       for (int i=0;i<size;i++)
-        bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+      {
+        if (bgProb(i)<bgProbMin)
+          bgProbImg->imageData[i]=bgProbMin;// improves visualisation
+        else
+          bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+      }
       // convert to Ros image and publish
       cv_bridge::CvImage bgProbImgRos;
       bgProbImgRos.encoding = "mono8";
@@ -899,7 +900,7 @@ int main(int argc, char **argv)
     detectionsPub[i]=it.advertise(detectTopicName,1);
 
     // init images
-    src_vec[c]=NULL;
+    src_vec[i]=NULL;
   }
   
   ROS_INFO_STREAM("wait for frames");
