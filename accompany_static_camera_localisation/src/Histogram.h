@@ -4,7 +4,6 @@
 #include <vector>
 #include <iostream>
 
-
 template <unsigned BASE,unsigned EXP>
 class Power
 {
@@ -35,17 +34,17 @@ public:
 
 };
 
-template <class TYPE,unsigned BINS,unsigned DIM> // Histogram with min and max as any type
+template <class TYPE_DATA,class TYPE_WEIGHT,unsigned BINS,unsigned DIM> // Histogram with min and max as any type
 class Histogram
 {
 protected:
-  TYPE min,max;
-  unsigned count;
-  std::vector<unsigned> hist;
+  TYPE_DATA min,max;
+  TYPE_WEIGHT count;
+  std::vector<TYPE_WEIGHT> hist;
   static Power<BINS,DIM> power;
 
  public:
-  Histogram(TYPE min,TYPE max)
+  Histogram(TYPE_DATA min,TYPE_DATA max)
   {
     this->min=min;
     this->max=max;
@@ -60,44 +59,44 @@ protected:
       hist[i]=0;
   }
 
-  virtual unsigned bin(TYPE d)
+  virtual unsigned bin(TYPE_DATA d)
   {
     return BINS*(d-min)/(max-min);
   }
 
-  void add(const std::vector<TYPE>& data)
+  void add(const std::vector<TYPE_DATA>& data,const TYPE_WEIGHT weight)
   {
     unsigned ind=0;
     for (unsigned i=0;i<DIM;i++)
     {
       ind+=bin(data[i])*power(i);
     }
-    count++;
-    hist[ind]++;
+    count+=weight;
+    hist[ind]+=weight;
   }
 
-  std::vector<float> normalize()
+  std::vector<TYPE_WEIGHT> normalize()
   {
-    std::vector<float> h(hist.size());
+    std::vector<TYPE_WEIGHT> h(hist.size());
     for (unsigned i=0;i<hist.size();i++)
-      h[i]=hist[i]/((float)count);
+      h[i]=hist[i]/(count);
     return h;
   }
 
 };
 
-template <class TYPE,unsigned BINS,unsigned DIM,int MIN,int MAX> // Histogram with min and max as int
-class HistogramInt : public Histogram<TYPE,BINS,DIM>
+template <class TYPE_DATA,class TYPE_WEIGHT,unsigned BINS,unsigned DIM,int MIN,int MAX> // Histogram with min and max as int
+class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
 {
 
  public:
 
   HistogramInt()
-    : Histogram<TYPE,BINS,DIM>(MIN,MAX)
+    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>(MIN,MAX)
   {
   }
 
-  unsigned bin(TYPE d)
+  unsigned bin(TYPE_DATA d)
   {
     return BINS*(d-MIN)/(MAX-MIN);
   }
@@ -105,7 +104,7 @@ class HistogramInt : public Histogram<TYPE,BINS,DIM>
 };
 
 // init static member
-template <class TYPE,unsigned BINS,unsigned DIM>
-Power<BINS,DIM> Histogram<TYPE,BINS,DIM>::power=Power<BINS,DIM>();
+template <class TYPE_DATA,class TYPE_WEIGHT,unsigned BINS,unsigned DIM>
+Power<BINS,DIM> Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>::power=Power<BINS,DIM>();
 
 #endif
