@@ -73,7 +73,7 @@ DYNBG_TYPE weightReduction=0.008;
 const char* dynBGProb = "Background Probability";
 
 // vizualize
-vnl_vector<FLOAT> bgProb;
+//vnl_vector<FLOAT> bgProb;
 FLOAT bgProbMin,bgProbMax;
 // ---- dynamic background model ---- end
 
@@ -97,6 +97,7 @@ bool HAS_INIT = false;
 vector<IplImage*> cvt_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > img_vec(CAM_NUM), bg_vec(CAM_NUM);
 vector<IplImage *> src_vec(CAM_NUM);
+vector<vnl_vector<FLOAT> > bgProb(CAM_NUM);
 vector<vnl_vector<FLOAT> > sumPixel(CAM_NUM);
 vector<FLOAT> sum_g(CAM_NUM);
 
@@ -531,8 +532,35 @@ void initStaticProbs()
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
+void getDynamicBackgroundLogProb(IplImage *smooth,
+                                 GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures,
+                                 vnl_vector<FLOAT> &bgProb)
+{
+  unsigned int size=smooth->width*smooth->height;
+  if (bgProb.size()!=size)
+    bgProb.set_size(size);
+
+  int updateGaussianID;
+  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
+  bgProbMin=std::numeric_limits<float>::max();
+  bgProbMax=-std::numeric_limits<float>::max();
+  int channelInd=0;
+  for (unsigned int i=0;i<size;i++)
+  {
+    data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
+    data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
+    data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
+    DYNBG_TYPE logProbBG=gaussianMixtures[i].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+    gaussianMixtures[i].update(data,initVar,decay,weightReduction,updateGaussianID);
+    bgProb(i)=logProbBG;
+    if (logProbBG<bgProbMin) bgProbMin=logProbBG;
+    if (logProbBG>bgProbMax) bgProbMax=logProbBG;
+    channelInd+=3; // next pixel
+  }
+}
+
 void getDynamicBackgroundSumLogProb(IplImage *smooth,
-                                    GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures,
+                                    const vnl_vector<FLOAT> &bgProb,
                                     vnl_vector<FLOAT> &sumPix,
                                     FLOAT &sum)
 {
@@ -542,47 +570,17 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
   if (sumPix.size()!=imgSizeExtra)
     sumPix.set_size(imgSizeExtra);
 
-  if (visualize)
-  {
-    unsigned int size=smooth->width*smooth->height;
-    if (bgProb.size()!=size)
-      bgProb.set_size(size);
-    bgProbMin=std::numeric_limits<float>::max();
-    bgProbMax=-std::numeric_limits<float>::max();
-  }
-
-  int updateGaussianID;
-  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
   int pixelInd=0,channelInd=0;
   sum=0;
   for (unsigned int i=0;i<imgSizeExtra;i++)
   {
     if (i%widthExtra==0) // add leading zero
-    {
       sumPix(i)=0;
-    }
     else
     {
-      data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
-      data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
-      data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
-      // compute background probablity for pixel
-      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
-      // update mixture of gaussians for pixel
-      gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
-     
-      sumPix(i)=sumPix(i-1)+logProbBG+3.0*log(256); // - (-log ...) , something to do with foreground probablity
-      sum+=logProbBG;
-
-      if (visualize)
-      {
-        if (logProbBG<bgProbMin) bgProbMin=logProbBG;
-        if (logProbBG>bgProbMax) bgProbMax=logProbBG;
-        bgProb(pixelInd)=logProbBG;
-      }
-
-      pixelInd+=1; // next pixel
-      channelInd+=3;
+      sumPix(i)=sumPix(i-1)+bgProb(pixelInd)+3.0*log(256); // - (-log ...) , something to do with foreground probablity
+      sum+=bgProb(pixelInd);
+      pixelInd+=1;channelInd+=3; // next pixel
     }
   }
 }
@@ -642,7 +640,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
 #if USE_DYNAMIC_BACKGROUND
     IplImage *smooth=cvCloneImage(oriImage);
     cvSmooth(smooth, smooth, CV_GAUSSIAN, 7, 7, 0, 0); // smooth to improve background estimation
-    getDynamicBackgroundSumLogProb(smooth,gaussianMixtures[c],sumPixel[c],sum_g[c]);
+    getDynamicBackgroundLogProb(smooth,gaussianMixtures[c],bgProb[c]); // compute bgProb
+    getDynamicBackgroundSumLogProb(smooth,bgProb[c],sumPixel[c],sum_g[c]); // compute the sums
 
     IplImage *bgProbImg;
     if (visualize)
@@ -652,10 +651,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
       bgProbMin=-1000;// improves visualisation
       for (int i=0;i<size;i++)
       {
-        if (bgProb(i)<bgProbMin)
+        if (bgProb[c](i)<bgProbMin)
           bgProbImg->imageData[i]=bgProbMin;// improves visualisation
         else
-          bgProbImg->imageData[i]=(bgProb(i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
+          bgProbImg->imageData[i]=(bgProb[c](i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
       }
       // convert to Ros image and publish
       cv_bridge::CvImage bgProbImgRos;
