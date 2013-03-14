@@ -111,12 +111,6 @@ int direction = 1;
 ImgProducer *producer;
 
 int waitTime = 30;
-const char* win = "foreground";
-const char* bgwin = "background";
-
-
-string saveImagesPath;
-string imagePostfix;
 int visualize;
 
 string save_all;
@@ -484,23 +478,13 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
 
   static int number = 0;
   number++;
-//  static char buffer[1024];
 
   if (visualize)
   {
     /* Visualize tracks */
     for (unsigned c = 0; c != cam.size(); ++c)
     {
-      //IplImage *bg = vec2img((bgVec[c]).apply(fabs));
-      //IplImage *cvt = cvCreateImage(cvGetSize(bg), IPL_DEPTH_8U, 3);
-      //cvCvtColor(bg, cvt, TO_IMG_FMT);
-
-      //if (!save_all.empty())
-      //  save_background_frames(cvt);
-
       plotHull(src[c], priorHull, c);
-      //plotHull(cvt, priorHull, c);
-      // For comparison:
       for (unsigned i = 0; i != existing.size(); ++i)
       {
         vector<CvPoint> tplt;
@@ -511,30 +495,12 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
                  CV_RGB(255,255,0), 2);
       }
 
-      //		cvShowImage(bgwin, cvt);
-      //cvReleaseImage(&bg);
-      //cvReleaseImage(&cvt);
-    
-      
       // convert to Ros image and publish
       cv_bridge::CvImage detectImgRos;
       detectImgRos.encoding = "bgr8";
       detectImgRos.image = src[c];
       sensor_msgs::ImagePtr imagePtr=detectImgRos.toImageMsg();
       detectionsPub[c].publish(imagePtr);
-      //cvShowImage(win, src[c]);
-
-      if (saveImagesPath!="")
-      {
-        ros::Time begin = ros::Time::now();
-        stringstream ss;
-        ss<<saveImagesPath<<"/"<<setfill('0')<<setw(12)<<begin.sec
-          <<setfill('0')<<setw(9)<<begin.nsec<<imagePostfix<<".png";
-        cvSaveImage(ss.str().c_str(),src[c]);
-      }
-
-      //		snprintf(buffer, sizeof(buffer), "movie/%04d.jpg",number); //"movie/%08d-%d.jpg",number,c);
-      //		cvSaveImage(buffer, src[c]);
     }
   }
   /* End of Visualization */
@@ -601,7 +567,7 @@ void getDynamicBackgroundSumLogProb(IplImage *smooth,
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
       // compute background probablity for pixel
-      DYNBG_TYPE logProbBG=8+gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+      DYNBG_TYPE logProbBG=gaussianMixtures[pixelInd].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
       // update mixture of gaussians for pixel
       gaussianMixtures[pixelInd].update(data,initVar,decay,weightReduction,updateGaussianID);
      
@@ -792,8 +758,6 @@ int main(int argc, char **argv)
     ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
      "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
     ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(0))
-    ("saveImagePath,s", po::value<string>(&saveImagesPath)->default_value(""),"path to save images to\n")
-    ("imagePostfix,i", po::value<string>(&imagePostfix)->default_value(""),"postfix of image name\n")
     ("visualize,v","visualize detection\n")
     ("save_all,a", po::value<string>(&save_all)->default_value(""),"save all data\n");
 
