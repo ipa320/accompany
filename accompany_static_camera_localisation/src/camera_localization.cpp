@@ -478,7 +478,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     v.point.x = wp.x/1000; // millimeters to meters
     v.point.y = wp.y/1000;
     v.point.z = 0;
-    getAppearance(i,existing,src);
+    //getAppearance(i,existing,src);
     humanLocations.locations.push_back(v);
   }
   cout << endl << "===========" << endl;
