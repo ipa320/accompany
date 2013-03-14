@@ -253,7 +253,6 @@ void scanRest(vector<unsigned> &existing,
     vector<vnl_vector<FLOAT> > &logPosProb, vector<FLOAT > &marginal,
     const vector<FLOAT> &lSum)
 {
-  cout<<"scanRest"<<endl;
   unsigned bestIdx = 0;
   FLOAT bestLogProb = -INFINITY, marginalLogProb = -INFINITY;
 
@@ -416,6 +415,28 @@ void save_background_frames(IplImage* oriImage)
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
+void getAppearance(int person,vector<unsigned> &existing,vector<IplImage *> src)
+{
+  for (unsigned c = 0; c != cam.size(); ++c) // each camera
+  {
+    IplImage *image=src[c];
+    vector<scanline_t> mask=masks[c][existing[person]];
+    for (vector<scanline_t>::const_iterator it = mask.begin(); it != mask.end();++it) // each scanline
+    {
+      unsigned offset = it->line*image->width;
+      unsigned start=offset+it->start;
+      unsigned end=offset+it->end;
+      for (unsigned p=start;p<end;p++) // each pixel
+      {
+        unsigned ind=p*3;
+        image->imageData[ind+0]=0;
+        image->imageData[ind+1]=0;
+        image->imageData[ind+2]=0;
+      }
+    }
+  }
+}
+
 accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
     vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
@@ -457,6 +478,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
     v.point.x = wp.x/1000; // millimeters to meters
     v.point.y = wp.y/1000;
     v.point.z = 0;
+    getAppearance(i,existing,src);
     humanLocations.locations.push_back(v);
   }
   cout << endl << "===========" << endl;
