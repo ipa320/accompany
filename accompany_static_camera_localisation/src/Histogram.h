@@ -38,7 +38,7 @@ public:
 template <class TYPE,unsigned BINS,unsigned DIM> // Histogram with min and max as any type
 class Histogram
 {
-private:
+protected:
   TYPE min,max;
   unsigned count;
   std::vector<unsigned> hist;
@@ -60,13 +60,17 @@ private:
       hist[i]=0;
   }
 
+  virtual unsigned bin(TYPE d)
+  {
+    return BINS*(d-min)/(max-min);
+  }
+
   void add(const std::vector<TYPE>& data)
   {
     unsigned ind=0;
     for (unsigned i=0;i<DIM;i++)
     {
-      unsigned b=BINS*(data[i]-min)/(max-min);
-      ind+=b*power(i);
+      ind+=bin(data[i])*power(i);
     }
     count++;
     hist[ind]++;
@@ -78,6 +82,24 @@ private:
     for (unsigned i=0;i<hist.size();i++)
       h[i]=hist[i]/((float)count);
     return h;
+  }
+
+};
+
+template <class TYPE,unsigned BINS,unsigned DIM,int MIN,int MAX> // Histogram with min and max as int
+class HistogramInt : public Histogram<TYPE,BINS,DIM>
+{
+
+ public:
+
+  HistogramInt()
+    : Histogram<TYPE,BINS,DIM>(MIN,MAX)
+  {
+  }
+
+  unsigned bin(TYPE d)
+  {
+    return BINS*(d-MIN)/(MAX-MIN);
   }
 
 };
@@ -85,55 +107,5 @@ private:
 // init static member
 template <class TYPE,unsigned BINS,unsigned DIM>
 Power<BINS,DIM> Histogram<TYPE,BINS,DIM>::power=Power<BINS,DIM>();
-
-
-template <class TYPE,unsigned BINS,unsigned DIM,int MIN,int MAX> // Histogram with min and max as int
-class HistogramInt
-{
-private:
-  unsigned count;
-  std::vector<unsigned> hist;
-  static Power<BINS,DIM> power;
-
- public:
-  HistogramInt()
-  {
-    hist.resize(power(DIM));
-    clear();
-  }
-
-  void clear()
-  {
-    count=0;
-    for (unsigned i=0;i<hist.size();i++)
-      hist[i]=0;
-  }
-
-  void add(const std::vector<TYPE>& data)
-  {
-    unsigned ind=0;
-    for (unsigned i=0;i<DIM;i++)
-    {
-      unsigned b=BINS*(data[i]-MIN)/(MAX-MIN);
-      ind+=b*power(i);
-    }
-    count++;
-    hist[ind]++;
-  }
-
-  std::vector<float> normalize()
-  {
-    std::vector<float> h(hist.size());
-    for (unsigned i=0;i<hist.size();i++)
-      h[i]=hist[i]/((float)count);
-    return h;
-  }
-
-};
-
-// init static member
-template <class TYPE,unsigned BINS,unsigned DIM,int MIN,int MAX>
-Power<BINS,DIM> HistogramInt<TYPE,BINS,DIM,MIN,MAX>::power=Power<BINS,DIM>();
-
 
 #endif

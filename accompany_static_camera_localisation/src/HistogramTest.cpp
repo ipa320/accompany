@@ -21,7 +21,7 @@ int main()
     for (int j=0;j<DIM;j++)
     {
       data[j]=(rand()%(MAX*100))/100;
-      cout<<data[j]<<" ";
+      cout<<data[j]<<",";
     }
     cout<<endl;
     histogram.add(data);
