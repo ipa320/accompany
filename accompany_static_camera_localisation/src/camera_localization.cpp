@@ -648,6 +648,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
 
     if (!save_all.empty())
       save_image_frames(oriImage);
+
+    if (src_vec[c]!=NULL)
+      cvReleaseImage(&src_vec[c]);
     src_vec[c] = cvCloneImage(oriImage);
 
     if (!HAS_INIT)
@@ -752,7 +755,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
     cvReleaseImage(&smooth);
 #endif
     
-    cvReleaseImage(&src_vec[c]);
+    //cvReleaseImage(&src_vec[c]);
   }
   catch (cv_bridge::Exception& e)
   {
@@ -895,10 +898,16 @@ int main(int argc, char **argv)
     ROS_INFO_STREAM("publish to '"<<detectTopicName<<"'");
     detectionsPub[i]=it.advertise(detectTopicName,1);
 
+    // init images
+    src_vec[c]=NULL;
   }
   
   ROS_INFO_STREAM("wait for frames");
   ros::spin();
+
+  for (unsigned int c=0;c<cam.size();c++)
+    if (src_vec[c]!=NULL)
+      cvReleaseImage(&src_vec[c]);
 
   return 0;
 }
