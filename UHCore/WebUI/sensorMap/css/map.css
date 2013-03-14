@@ -1,0 +1,11 @@
+.map {
+	border: 2px solid black;
+	border-radius: 25px;
+	overflow: auto;
+	vertical-align: middle;
+}
+
+.map img {	
+	width: auto;
+	height: 100%;
+}

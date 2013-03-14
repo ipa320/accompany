@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="30"
+   height="30"
+   version="1.1">
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     width="29.039371"
+     height="25.039371"
+     x="0.58060586"
+     y="4.364624"/>
+  <rect
+     style="fill:#ffffff;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     width="1.7685633"
+     height="1.7685634"
+     x="1.6942039"
+     y="0.5"/>
+  <rect
+     style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+     width="29.205986"
+     height="1.2059865"
+     x="0.5"
+     y="1.78125"/>
+  <path
+     style="fill:none;stroke:#00ffff;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+     d="M 9.080127,15.267258 10.696152,14.46822 10.580127,12.669182 M 7.3480762,14.267258 8.9641016,13.46822 8.8480762,11.669182 M 5.6160254,13.267258 7.2320508,12.46822 7.1160254,10.669182 m 5.3121776,4.799038 -6.928203,-4 m 5.080127,9.5 0.116025,-1.799038 -1.616025,-0.799038 M 8.8480762,21.96822 8.9641016,20.169182 7.3480762,19.370144 M 7.1160254,22.96822 7.2320508,21.169182 5.6160254,20.370144 m 6.8121776,-2.200962 -6.928203,4 m 13.848076,-9.5 -0.116026,1.799038 1.616026,0.799038 m 0.232051,-3.598076 -0.116026,1.799038 1.616026,0.799038 m 0.23205,-3.598076 -0.116025,1.799038 1.616025,0.799038 M 17.5,15.46822 l 6.928203,-4 m -3.580127,7.151924 -1.616026,0.799038 0.116026,1.799038 m 3.232051,-1.598076 -1.616026,0.799038 0.116026,1.799038 m 3.23205,-1.598076 -1.616025,0.799038 0.116025,1.799038 M 17.5,18.419182 l 6.928203,4 M 16.491525,22 l -1.5,-1 -1.5,1 m 3,2 -1.5,-1 -1.5,1 m 3,2 -1.5,-1 -1.5,1 m 1.5,-7 0,8 m -1.5,-15.5 1.5,1 1.5,-1 m -3,-2.0000005 1.5,1.0000005 1.5,-1.0000005 m -3,-2 1.5,1 1.5,-1 m -1.5,7.0000005 0,-8.0000005 m -1.578389,8.1652545 3,0 1.5,2.25 -1.5,2.25 -3,0 -1.5,-2.25 z" />
+</svg>

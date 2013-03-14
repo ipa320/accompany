@@ -1,0 +1,17 @@
+body {
+	background-image: url('../images/background.png');
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: fixed center; 
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+td, th {
+	padding: 5px;
+}
+
+table {
+	border: none;
+	border-spacing: 5px;
+	font-size: 20px;
+}
