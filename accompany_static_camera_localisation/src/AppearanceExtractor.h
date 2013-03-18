@@ -10,7 +10,11 @@ using namespace std;
 class PixelsClaimed
 {
  public:
-  PixelsClaimed(IplImage *image)
+  PixelsClaimed()
+  {
+  }
+
+  void clear(IplImage *image)
   {
     int size=image->width*image->height;
     pixels.resize(size);
@@ -20,7 +24,7 @@ class PixelsClaimed
   void clear()
   {
     for (unsigned i=0;i<pixels.size();i++)
-      pixels[i]=1;
+      pixels[i]=0;
   }
   
   unsigned char& operator[](int i)
@@ -30,7 +34,6 @@ class PixelsClaimed
   
  private:
   std::vector<unsigned char> pixels;
-
 };
 
 // extract the appearance of each detection
@@ -48,17 +51,19 @@ class AppearanceExtractor
                          std::vector<IplImage *> images,
                          const std::vector<vnl_vector<FLOAT> >& bgProb)
   {
+    IplImage *image=images[c];
+    //vnl_vector<FLOAT> bg=bgProb[c];
+    pixelsClaimed.clear(image);
+    
     cout<<"computeAppearance: "<<c<<endl;
     std::vector<int> order=orderDetections(cam[c],existing,scanLocations);
     cout<<"order ";
     for (std::vector<int>::iterator it=order.begin();it!=order.end();it++)
       cout<<*it<<" ";
     cout<<endl;
-    IplImage *image=images[c];
+    
     for (unsigned person=0;person<existing.size();person++)
     {      
-      //vnl_vector<FLOAT> bg=bgProb[c];
-      cout<<"index: "<<order[person]<<endl;
       vector<scanline_t> mask=masks[c][existing[order[person]]];
       for (vector<scanline_t>::const_iterator it = mask.begin(); it != mask.end();++it) // each scanline
       {
@@ -67,13 +72,14 @@ class AppearanceExtractor
         unsigned end=offset+it->end;
         for (unsigned p=start;p<end;p++) // each pixel
         {
-          //if (bg[p]>-500)
+          if (pixelsClaimed[p]==0) // if unclaimed
           {
             unsigned ind=p*3;
-            image->imageData[ind+0]=order[person]*40;
-            image->imageData[ind+1]=order[person]*40;
-            image->imageData[ind+2]=order[person]*40;
+            image->imageData[ind+0]=255-order[person]*50;
+            image->imageData[ind+1]=255-order[person]*50;
+            image->imageData[ind+2]=255-order[person]*50;
           }
+          pixelsClaimed[p]=1; // claim pixel
         }
       }
     }
@@ -88,37 +94,13 @@ class AppearanceExtractor
                           const std::vector<vnl_vector<FLOAT> >& bgProb)
   {
     cout<<"computeAppearances"<<endl;
-    if (pixelsClaimed.size()<images.size())
-      initPixelsClaimed(images);
-    clearPixelsClaimed();
-    
     for (signed c=0;c<cam.size();c++)
       computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
   }
 
  private:
 
-  std::vector<PixelsClaimed> pixelsClaimed;
-
-  void initPixelsClaimed(std::vector<IplImage *> images)
-  {
-    cout<<"initPixelsClaimed"<<endl;
-    pixelsClaimed.clear();
-    for (std::vector<IplImage *>::iterator it=images.begin();it!=images.end();it++)
-    {
-      cout<<"-"<<endl;
-      pixelsClaimed.push_back(PixelsClaimed(*it));
-    }
-  }
-
-  void clearPixelsClaimed()
-  {
-    cout<<"clearPixelsClaimed"<<endl;
-    for (std::vector<PixelsClaimed>::iterator it=pixelsClaimed.begin();it!=pixelsClaimed.end();it++)
-    {
-      it->clear();
-    }
-  }
+  PixelsClaimed pixelsClaimed;
 
   // return indices that order 'existing' on distance to the camera
   std::vector<int> orderDetections(const CamCalib& cam,
@@ -154,11 +136,19 @@ class AppearanceExtractor
   double squareDistance(const CamCalib& cam,
                         const WorldPoint& point)
   {
-    cout<<"squareDistance"<<endl;
+    
     cv::Mat camPos=cam.model.tvec;
-    double dx=camPos.at<double>(0)-point.x/1000;
-    double dy=camPos.at<double>(1)-point.y/1000;
-    double dz=camPos.at<double>(2)-point.z/1000;
+    double dx=camPos.at<double>(0)-point.x;
+    double dy=camPos.at<double>(1)-point.y;
+    double dz=camPos.at<double>(2)-point.z;
+    cout<<"squareDistance ("
+        <<camPos.at<double>(0)<<" "
+        <<camPos.at<double>(1)<<" "
+        <<camPos.at<double>(2)<<") ("
+        <<point.x<<" "
+        <<point.y<<" "
+        <<point.z<<")"
+        <<endl;
     return dx*dx+dy*dy+dz*dz;
   }
 
