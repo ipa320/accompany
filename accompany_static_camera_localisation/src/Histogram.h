@@ -2,8 +2,10 @@
 #define Histogram_INCLUDED
 
 #include <vector>
-#include <iostream>
 
+/**
+ * Precomputes al the exponents of BASE from BASE^0 through BASE^EXP.
+ */
 template <unsigned BASE,unsigned EXP>
 class Power
 {
@@ -19,11 +21,17 @@ public:
       powCache[e]=pow(e);
   }
 
+  /**
+   * Take BASE to exp exponent
+   * @param exp the exponent
+   * @returns BASE^exp
+   */
   unsigned operator()(unsigned exp)
   {
     return powCache[exp];
   }
 
+ private:
   unsigned pow(unsigned exp)
   {
     unsigned ret=1;
@@ -34,6 +42,13 @@ public:
 
 };
 
+/**
+ * Builds a histrogram of multidimensional incomming data
+ * @param TYPE_DATA type of data elements
+ * @param TYPE_WEIGHT type of weights
+ * @param BINS number of bins in each dimension
+ * @param DIM dimension of data
+ */
 template <class TYPE_DATA,class TYPE_WEIGHT,unsigned BINS,unsigned DIM> // Histogram with min and max as any type
 class Histogram
 {
@@ -44,6 +59,12 @@ protected:
   static Power<BINS,DIM> power;
 
  public:
+  
+  /**
+   * Constructor
+   * @param min minimal value in each dimension
+   * @param max value higher than the maximum value in each dimension
+   */
   Histogram(TYPE_DATA min,TYPE_DATA max)
   {
     this->min=min;
@@ -52,6 +73,9 @@ protected:
     clear();
   }
 
+  /**
+   * Forget previously received data
+   */
   void clear()
   {
     count=0;
@@ -59,12 +83,26 @@ protected:
       hist[i]=0;
   }
 
-  virtual unsigned bin(TYPE_DATA d)
+  /**
+   * Constructor
+   * @param data multidimensional data point to add
+   * @param weight the weight of the data point
+   */
+  void add(const std::vector<TYPE_DATA>& data,const TYPE_WEIGHT weight)
   {
-    return BINS*(d-min)/(max-min);
+    unsigned ind=0;
+    for (unsigned i=0;i<DIM;i++)
+      ind+=bin(data[i])*power(i);
+    count+=weight;
+    hist[ind]+=weight;
   }
 
-  void add(const std::vector<TYPE_DATA>& data,const TYPE_WEIGHT weight)
+  /**
+   * Constructor
+   * @param data multidimensional data point to add
+   * @param weight the weight of the data point
+   */
+  void add(TYPE_DATA *data,const TYPE_WEIGHT weight)
   {
     unsigned ind=0;
     for (unsigned i=0;i<DIM;i++)
@@ -75,6 +113,9 @@ protected:
     hist[ind]+=weight;
   }
 
+  /**
+   * Normalize the received data counts and return the histogram
+   */
   std::vector<TYPE_WEIGHT> normalize()
   {
     std::vector<TYPE_WEIGHT> h(hist.size());
@@ -83,8 +124,25 @@ protected:
     return h;
   }
 
+ private:
+  
+  virtual unsigned bin(TYPE_DATA d)
+  {
+    return (BINS*(d-min))/(max-min);
+  }
+
 };
 
+/**
+ * Builds a histrogram of multidimensional incomming data. It differs from class Histogram in that the min and max 
+ * are now template variables so the compiler can optimize computation in the bin() method
+ * @param TYPE_DATA type of data elements
+ * @param TYPE_WEIGHT type of weights
+ * @param BINS number of bins in each dimension
+ * @param DIM dimension of data
+ * @param MIN minimal value in each dimension
+ * @param MAX value higher than the maximum value in each dimension (max+1)
+ */
 template <class TYPE_DATA,class TYPE_WEIGHT,unsigned BINS,unsigned DIM,int MIN,int MAX> // Histogram with min and max as int
 class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
 {
@@ -96,9 +154,11 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
   {
   }
 
+ private:
+
   unsigned bin(TYPE_DATA d)
   {
-    return BINS*(d-MIN)/(MAX-MIN);
+    return (BINS*(d-MIN))/(MAX-MIN);
   }
 
 };

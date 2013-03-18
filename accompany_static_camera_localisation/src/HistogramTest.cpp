@@ -4,10 +4,10 @@
 #include <iostream>
 using namespace std;
 
-#define TYPE_DATA float
+#define TYPE_DATA int
 #define TYPE_WEIGHT double
-#define DIM 3
-#define BINS 4
+#define DIM 2
+#define BINS 3
 #define MIN 0
 #define MAX 10
 
