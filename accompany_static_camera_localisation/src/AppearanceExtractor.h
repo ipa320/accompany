@@ -94,7 +94,7 @@ class AppearanceExtractor
                           const std::vector<vnl_vector<FLOAT> >& bgProb)
   {
     cout<<"computeAppearances"<<endl;
-    for (signed c=0;c<cam.size();c++)
+    for (unsigned c=0;c<cam.size();c++)
       computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
   }
 
@@ -137,7 +137,7 @@ class AppearanceExtractor
                         const WorldPoint& point)
   {
     
-    cv::Mat camPos=cam.model.tvec;
+    cv::Mat camPos=cam.model.getImage2WorldTransMatrix();
     double dx=camPos.at<double>(0)-point.x;
     double dy=camPos.at<double>(1)-point.y;
     double dz=camPos.at<double>(2)-point.z;

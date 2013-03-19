@@ -161,3 +161,9 @@ target_link_libraries(project_tf_to_camera boost_program_options opencv_highgui 
 rosbuild_add_executable(HistogramTest 
   src/Histogram.h
   src/HistogramTest.cpp)
+
+rosbuild_add_executable(cameraModelTest 
+  src/cameraModel.h
+  src/cameraModel.cpp
+  src/cameraModelTest.cpp)
+
