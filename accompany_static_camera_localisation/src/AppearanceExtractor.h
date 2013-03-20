@@ -15,11 +15,12 @@ class PixelsClaimed
 {
  public:
   
-  void clear(IplImage *image);
+  PixelsClaimed(IplImage *image);
   unsigned char& operator[](int i);
   
  private:
   std::vector<unsigned char> pixels;
+
   void clear();
 };
 
@@ -47,14 +48,10 @@ class AppearanceExtractor
 
  private:
 
-  PixelsClaimed pixelsClaimed;
-
-  // return indices that order 'existing' on distance to the camera
   std::vector<int> orderDetections(const CamCalib& cam,
                                    const std::vector<unsigned>& existing,
                                    const vector<WorldPoint>& scanLocations);
 
-  // compute square distance of camera position to world point
   double squareDistance(const CamCalib& cam,
                         const WorldPoint& point);
 

@@ -3,18 +3,17 @@
 using namespace std;
 
 /**
- * Resize pixels and unclaim
+ * Constructor, resize pixels and unclaim
  * @param image use image size
  */
-void PixelsClaimed::clear(IplImage *image)
+PixelsClaimed::PixelsClaimed(IplImage *image)
 {
-  int size=image->width*image->height;
-  pixels.resize(size);
+  pixels.resize(image->width*image->height);
   clear();
 }
 
 /**
- * Claim a pixel by setting to a value other than '0'
+ * Claim a pixel by setting to a value other than '0', A pixel can be claimed only ones.
  * @param i the pixel to claim
  */
 unsigned char& PixelsClaimed::operator[](int i)
@@ -22,6 +21,9 @@ unsigned char& PixelsClaimed::operator[](int i)
   return pixels[i];
 }
 
+/**
+ * Unclaim all pixels
+ */
 void PixelsClaimed::clear()
 {
   for (unsigned i=0;i<pixels.size();i++)
@@ -30,7 +32,7 @@ void PixelsClaimed::clear()
   
 
 /**
- * Compute combined appearance of all detections over the images of camera c
+ * Compute combined appearance of all detections over the image of camera c
  * @param c the camera to use
  * @param cam each cameras
  * @param existing each detection
@@ -50,7 +52,7 @@ void AppearanceExtractor::computeAppearance(int c,
 {
   IplImage *image=images[c];
   //vnl_vector<FLOAT> bg=bgProb[c];
-  pixelsClaimed.clear(image);
+  PixelsClaimed pixelsClaimed(image);
     
   cout<<"computeAppearance: "<<c<<endl;
   vector<int> order=orderDetections(cam[c],existing,scanLocations);
@@ -110,7 +112,7 @@ void AppearanceExtractor::computeAppearances(const vector<CamCalib>& cam,
  * @param cam the camera
  * @param existing the detections
  * @param scanLocations locations of detections
- * @returns vector of indices of existing
+ * @returns vector of indices of existing that determine the order
  */
 vector<int> AppearanceExtractor::orderDetections(const CamCalib& cam,
                                                  const vector<unsigned>& existing,
