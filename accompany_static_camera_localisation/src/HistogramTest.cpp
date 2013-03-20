@@ -4,26 +4,26 @@
 #include <iostream>
 using namespace std;
 
-#define TYPE_DATA int
+#define TYPE_DATA  char
 #define TYPE_WEIGHT double
 #define DIM 2
-#define BINS 3
-#define MIN 0
-#define MAX 10
+#define BINS 4
+#define MIN -128
+#define MAX 127
 
 int main()
 {
   srand(time(0));
   HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX> histogram;
-  
+
   cout<<"=== add some data"<<endl;
   vector<TYPE_DATA> data(DIM);
   for (int i=0;i<100;i++)
   {
     for (int j=0;j<DIM;j++)
     {
-      data[j]=((TYPE_DATA)((rand()%(MAX*100))))/100;
-      cout<<data[j]<<" ";
+      data[j]=(TYPE_DATA)((((rand()%1000))/1000.0)*(MAX-MIN)+MIN);
+      cout<<(double)(data[j])<<" ";
     }
     cout<<endl;
     histogram.add(data,(rand()/(TYPE_WEIGHT)RAND_MAX));

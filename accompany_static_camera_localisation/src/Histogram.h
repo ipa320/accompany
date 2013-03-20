@@ -102,11 +102,7 @@ protected:
    */
   void add(const std::vector<TYPE_DATA>& data,const TYPE_WEIGHT weight)
   {
-    unsigned ind=0;
-    for (unsigned i=0;i<DIM;i++)
-      ind+=bin(data[i])*power(i);
-    count+=weight;
-    hist[ind]+=weight;
+    add(&data[0],weight);
   }
 
   /**
@@ -114,13 +110,11 @@ protected:
    * @param data multidimensional data point to add
    * @param weight the weight of the data point
    */
-  void add(TYPE_DATA *data,const TYPE_WEIGHT weight)
+  void add(const TYPE_DATA *data,const TYPE_WEIGHT weight)
   {
     unsigned ind=0;
     for (unsigned i=0;i<DIM;i++)
-    {
       ind+=bin(data[i])*power(i);
-    }
     count+=weight;
     hist[ind]+=weight;
   }
@@ -200,7 +194,7 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
    * Constructor
    */
   HistogramInt()
-    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>(MIN,MAX)
+    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>((TYPE_DATA)MIN,(TYPE_DATA)MAX)
   {
   }
 
@@ -208,7 +202,7 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
    * Copy Constructor
    */
   HistogramInt(const HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX>& histogram)
-    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>(MIN,MAX)
+    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>((TYPE_DATA)MIN,(TYPE_DATA)MAX)
   {
     this->min=histogram.min;
     this->max=histogram.max;
