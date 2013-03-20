@@ -29,7 +29,16 @@ void PixelsClaimed::clear()
   for (unsigned i=0;i<pixels.size();i++)
     pixels[i]=0;
 }
-  
+
+CvScalar getcolor(int p,double weight)
+{
+  CvScalar scalar;
+  p++;// start at 1
+  scalar.val[0]=(p&1)?(255*weight):0; // define color using bitmask op p
+  scalar.val[1]=(p&2)?(255*weight):0;
+  scalar.val[2]=(p&4)?(255*weight):0;
+  return scalar;
+}
 
 /**
  * Compute combined appearance of all detections over the image of camera c
@@ -40,16 +49,17 @@ void PixelsClaimed::clear()
  * @param masks the masks for each camera, for each position
  * @param images current images of each cameras
  * @param bgProb log background probablities for each image
- * @returns 
+ * @returns color histogram
  */
-void AppearanceExtractor::computeAppearance(int c,
-                                            const vector<CamCalib>& cam,
-                                            const vector<unsigned>& existing,
-                                            const vector<WorldPoint>& scanLocations,
-                                            const vector<vector<vector<scanline_t> > > masks,
-                                            vector<IplImage *> images,
-                                            const vector<vnl_vector<FLOAT> >& bgProb)
+vector<HISTOGRAM > AppearanceExtractor::computeAppearance(int c,
+                                                          const vector<CamCalib>& cam,
+                                                          const vector<unsigned>& existing,
+                                                          const vector<WorldPoint>& scanLocations,
+                                                          const vector<vector<vector<scanline_t> > > masks,
+                                                          vector<IplImage *> images,
+                                                          const vector<vnl_vector<FLOAT> >& bgProb)
 {
+  vector<HISTOGRAM > histograms(existing.size());
   IplImage *image=images[c];
   //vnl_vector<FLOAT> bg=bgProb[c];
   PixelsClaimed pixelsClaimed(image);
@@ -74,14 +84,22 @@ void AppearanceExtractor::computeAppearance(int c,
         if (pixelsClaimed[p]==0) // if unclaimed
         {
           unsigned ind=p*3;
-          image->imageData[ind+0]=255-order[person]*50;
-          image->imageData[ind+1]=255-order[person]*50;
-          image->imageData[ind+2]=255-order[person]*50;
+          HIST_TYPE_WEIGHT weight=1-exp(bgProb[c](p));
+          if (weight<0)
+            weight=0;
+          //histograms[order[person]].add(image->imageData+ind,weight);
+          // visualize
+          cout<<"weight:"<<bgProb[c](p)<<endl;
+          CvScalar color=getcolor(order[person],weight);
+          image->imageData[ind+0]=color.val[0];
+          image->imageData[ind+1]=color.val[1];
+          image->imageData[ind+2]=color.val[2];
         }
-        pixelsClaimed[p]=1; // claim pixel
+        pixelsClaimed[p]=person+1; // claim pixel
       }
     }
   }
+  return histograms;
 }
 
 /**
@@ -92,20 +110,25 @@ void AppearanceExtractor::computeAppearance(int c,
  * @param masks the masks for each camera, for each position
  * @param images current images of each cameras
  * @param bgProb log background probablities for each image
- * @returns 
+ * @returns color histogram
  */
-void AppearanceExtractor::computeAppearances(const vector<CamCalib>& cam,
-                                             const vector<unsigned>& existing,
-                                             const vector<WorldPoint>& scanLocations,
-                                             const vector<vector<vector<scanline_t> > > masks,
-                                             vector<IplImage *> images,
-                                             const vector<vnl_vector<FLOAT> >& bgProb)
+vector<HISTOGRAM > AppearanceExtractor::computeAppearances(const vector<CamCalib>& cam,
+                                                                  const vector<unsigned>& existing,
+                                                                  const vector<WorldPoint>& scanLocations,
+                                                                  const vector<vector<vector<scanline_t> > > masks,
+                                                                  vector<IplImage *> images,
+                                                                  const vector<vnl_vector<FLOAT> >& bgProb)
 {
   cout<<"computeAppearances"<<endl;
+  vector<HISTOGRAM > histograms(existing.size());
   for (unsigned c=0;c<cam.size();c++)
-    computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
+  {
+    vector<HISTOGRAM > hists=computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
+    //for (int h=0;h<histograms.size();h++)
+    //  histograms[h]+=hists[h];
+  }
+  return histograms;
 }
-
 
 /**
  * Order the detections ascending by order of distance to the camera

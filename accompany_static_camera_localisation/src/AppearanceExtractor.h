@@ -3,10 +3,20 @@
 
 #include <CamCalib.hh>
 #include <Helpers.hh>
+#include <Histogram.h>
 
 #include <vector>
 #include <vnl/vnl_vector.h>
 #include <opencv/cv.h>
+
+// Histogram template data
+#define HIST_TYPE_DATA   char
+#define HIST_TYPE_WEIGHT double
+#define HIST_DIM    3
+#define HIST_BINS   5
+#define HIST_MIN -128
+#define HIST_MAX  127
+#define HISTOGRAM HistogramInt<HIST_TYPE_DATA,HIST_TYPE_WEIGHT,HIST_BINS,HIST_DIM,HIST_MIN,HIST_MAX>
 
 /**
  * Deal with occulsions by foreground, allow detections that are closer to the camera to claim the pixels
@@ -31,20 +41,20 @@ class AppearanceExtractor
 {
  public:
 
-  void computeAppearance(int c,
-                         const std::vector<CamCalib>& cam,
-                         const std::vector<unsigned>& existing,
-                         const vector<WorldPoint>& scanLocations,
-                         const std::vector<std::vector<std::vector<scanline_t> > > masks,
-                         std::vector<IplImage *> images,
-                         const std::vector<vnl_vector<FLOAT> >& bgProb);
-
-  void computeAppearances(const std::vector<CamCalib>& cam,
-                          const std::vector<unsigned>& existing,
-                          const vector<WorldPoint>& scanLocations,
-                          const std::vector<std::vector<std::vector<scanline_t> > > masks,
-                          std::vector<IplImage *> images,
-                          const std::vector<vnl_vector<FLOAT> >& bgProb);
+  vector<HISTOGRAM > computeAppearance(int c,
+                                       const std::vector<CamCalib>& cam,
+                                       const std::vector<unsigned>& existing,
+                                       const vector<WorldPoint>& scanLocations,
+                                       const std::vector<std::vector<std::vector<scanline_t> > > masks,
+                                       std::vector<IplImage *> images,
+                                       const std::vector<vnl_vector<FLOAT> >& bgProb);
+  
+  vector<HISTOGRAM > computeAppearances(const std::vector<CamCalib>& cam,
+                                        const std::vector<unsigned>& existing,
+                                        const vector<WorldPoint>& scanLocations,
+                                        const std::vector<std::vector<std::vector<scanline_t> > > masks,
+                                        std::vector<IplImage *> images,
+                                        const std::vector<vnl_vector<FLOAT> >& bgProb);
 
  private:
 
