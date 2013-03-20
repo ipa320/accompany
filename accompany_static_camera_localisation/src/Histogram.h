@@ -2,6 +2,7 @@
 #define Histogram_INCLUDED
 
 #include <vector>
+#include <iostream>
 
 /**
  * Precomputes al the exponents of BASE from BASE^0 through BASE^EXP.
@@ -74,6 +75,17 @@ protected:
   }
 
   /**
+   * Copy Constructor
+   */
+  Histogram(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
+  {
+    this->min=histogram.min;
+    this->max=histogram.max;
+    this->count=histogram.count;
+    this->hist=histogram.hist;
+  }
+
+  /**
    * Forget previously received data
    */
   void clear()
@@ -84,7 +96,7 @@ protected:
   }
 
   /**
-   * Constructor
+   * Add data to the histogram
    * @param data multidimensional data point to add
    * @param weight the weight of the data point
    */
@@ -98,7 +110,7 @@ protected:
   }
 
   /**
-   * Constructor
+   * Add data to the histogram
    * @param data multidimensional data point to add
    * @param weight the weight of the data point
    */
@@ -114,7 +126,30 @@ protected:
   }
 
   /**
-   * Normalize the received data counts and return the histogram
+   * Add histogram to this histogram
+   * @param histogram the histogram to add
+   */
+  void operator+=(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
+  {
+    for (unsigned i=0;i<hist.size();i++)
+      hist[i]+=histogram.hist[i];
+    count+=histogram.count;
+  }
+
+  /**
+   * Add histogram to this histogram
+   * @param histogram the histogram to add
+   */
+  Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM> operator+(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
+  {
+    Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM> ret(*this);
+    ret+=histogram;
+    return ret;
+  }
+
+  /**
+   * Normalize the received data and return the histogram
+   * @returns normalized histogram data
    */
   std::vector<TYPE_WEIGHT> normalize()
   {
@@ -122,6 +157,17 @@ protected:
     for (unsigned i=0;i<hist.size();i++)
       h[i]=hist[i]/(count);
     return h;
+  }
+
+  /**
+   * Allows histogram to be io streamed
+   */
+  friend std::ostream &operator<<(std::ostream &out,const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
+  {
+    out<<histogram.count<<": ";
+    for (unsigned i=0;i<histogram.hist.size();i++)
+      out<<histogram.hist[i]<<" ";
+    return out;
   }
 
  private:
@@ -149,9 +195,44 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
 
  public:
 
+  /**
+   * Constructor
+   */
   HistogramInt()
     : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>(MIN,MAX)
   {
+  }
+
+  /**
+   * Copy Constructor
+   */
+  HistogramInt(const HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX>& histogram)
+    : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>(MIN,MAX)
+  {
+    this->min=histogram.min;
+    this->max=histogram.max;
+    this->count=histogram.count;
+    this->hist=histogram.hist;
+  }
+
+  /**
+   * Add histogram to this histogram
+   * @param histogram the histogram to add
+   */
+  void operator+=(const HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX>& histogram)
+  {
+    *((Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>*)this)+=(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>)histogram;
+  }
+
+  /**
+   * Add histogram to this histogram
+   * @param histogram the histogram to add
+   */
+  HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX> operator+(const HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX>& histogram)
+  {
+    HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX> ret(*this);
+    ret+=histogram;
+    return ret;
   }
 
  private:
