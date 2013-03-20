@@ -64,7 +64,7 @@ protected:
   /**
    * Constructor
    * @param min minimal value in each dimension
-   * @param max value higher than the maximum value in each dimension
+   * @param max maximum value in each dimension
    */
   Histogram(TYPE_DATA min,TYPE_DATA max)
   {
@@ -174,7 +174,8 @@ protected:
   
   virtual unsigned bin(TYPE_DATA d)
   {
-    return (BINS*(d-min))/(max-min);
+    unsigned ret=(BINS*(d-min))/(max-min);
+    return ret<BINS?ret:BINS-1;
   }
 
 };
