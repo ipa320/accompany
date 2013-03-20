@@ -64,7 +64,7 @@ ADD_LIBRARY( helpers
   ${PROJECT_SOURCE_DIR}/src/Background.cc
   ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
   ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
-#  ${PROJECT_SOURCE_DIR}/src/AppearanceExtractor.cc
+  ${PROJECT_SOURCE_DIR}/src/AppearanceExtractor.cpp
   )
 
 ADD_LIBRARY( calib
