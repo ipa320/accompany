@@ -1,5 +1,7 @@
 #include <AppearanceExtractor.h>
 
+#include <LogProbOp.h>
+
 using namespace std;
 
 /**
@@ -83,14 +85,13 @@ vector<HISTOGRAM > AppearanceExtractor::computeAppearance(int c,
       {
         if (pixelsClaimed[p]==0) // if unclaimed
         {
-          unsigned ind=p*3;
-          HIST_TYPE_WEIGHT weight=1-exp(bgProb[c](p));
-          if (weight<0)
-            weight=0;
+          // weight= P(B=0|P)= P(P|B=0) / (P(P|B=0) + P(P|B=1))
+          //                 = (1/pow(256,3)) / (1/(pow(256,3)) + exp(bgProb[c](p)));
+          HIST_TYPE_WEIGHT weight=exp(-3*log(256)-LogProbOp<HIST_TYPE_WEIGHT>::add(-3*log(256),bgProb[c](p)));
           //histograms[order[person]].add(image->imageData+ind,weight);
           // visualize
-          cout<<"weight:"<<bgProb[c](p)<<endl;
           CvScalar color=getcolor(order[person],weight);
+          unsigned ind=p*3;
           image->imageData[ind+0]=color.val[0];
           image->imageData[ind+1]=color.val[1];
           image->imageData[ind+2]=color.val[2];
@@ -123,9 +124,9 @@ vector<HISTOGRAM > AppearanceExtractor::computeAppearances(const vector<CamCalib
   vector<HISTOGRAM > histograms(existing.size());
   for (unsigned c=0;c<cam.size();c++)
   {
-    vector<HISTOGRAM > hists=computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
+    vector<HISTOGRAM > histsOnCam=computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
     //for (int h=0;h<histograms.size();h++)
-    //  histograms[h]+=hists[h];
+    //  histograms[h]+=histsOnCam[h];
   }
   return histograms;
 }
