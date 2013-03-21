@@ -4,12 +4,12 @@
 #include <iostream>
 using namespace std;
 
-#define TYPE_DATA  char
+#define TYPE_DATA  unsigned char
 #define TYPE_WEIGHT double
 #define DIM 2
-#define BINS 4
-#define MIN -128
-#define MAX 127
+#define BINS 3
+#define MIN 0
+#define MAX 255
 
 int main()
 {
@@ -53,8 +53,10 @@ int main()
     data[j]=MAX/2;
   for (int i=0;i<100;i++)
     histogram.add(data,1); // add alot of data to original
-  cout<<"histogram (should be effected by add):"<<histogram<<endl;
-  cout<<"histogram+histogram (should be uneffected):"<<hh<<endl;
+  cout<<"should be effected by add:"<<endl;
+  cout<<"  histogram:"<<histogram<<endl;
+  cout<<"should be uneffected:"<<endl;
+  cout<<"  histogram+histogram:"<<hh<<endl;
   cout<<endl;
 
 }

@@ -55,7 +55,8 @@ class Histogram
 {
 protected:
   TYPE_DATA min,max;
-  TYPE_WEIGHT count;
+  unsigned addCount; // counts each call of the add() method
+  TYPE_WEIGHT weightCount; // counts the weights of each call of the add() method
   std::vector<TYPE_WEIGHT> hist;
   static Power<BINS,DIM> power;
 
@@ -81,7 +82,8 @@ protected:
   {
     this->min=histogram.min;
     this->max=histogram.max;
-    this->count=histogram.count;
+    this->addCount=histogram.addCount;
+    this->weightCount=histogram.weightCount;
     this->hist=histogram.hist;
   }
 
@@ -90,7 +92,8 @@ protected:
    */
   void clear()
   {
-    count=0;
+    addCount=0;
+    weightCount=0;
     for (unsigned i=0;i<hist.size();i++)
       hist[i]=0;
   }
@@ -112,10 +115,11 @@ protected:
    */
   void add(const TYPE_DATA *data,const TYPE_WEIGHT weight)
   {
+    addCount++;
+    weightCount+=weight;
     unsigned ind=0;
     for (unsigned i=0;i<DIM;i++)
       ind+=bin(data[i])*power(i);
-    count+=weight;
     hist[ind]+=weight;
   }
 
@@ -125,14 +129,16 @@ protected:
    */
   void operator+=(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
   {
+    addCount+=histogram.addCount;
+    weightCount+=histogram.weightCount;
     for (unsigned i=0;i<hist.size();i++)
       hist[i]+=histogram.hist[i];
-    count+=histogram.count;
   }
 
   /**
-   * Add histogram to this histogram
+   * Creates a new histogram by adding two together
    * @param histogram the histogram to add
+   * @returns new histogram which is the sum of the two histograms
    */
   Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM> operator+(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
   {
@@ -149,8 +155,26 @@ protected:
   {
     std::vector<TYPE_WEIGHT> h(hist.size());
     for (unsigned i=0;i<hist.size();i++)
-      h[i]=hist[i]/(count);
+      h[i]=hist[i]/(weightCount);
     return h;
+  }
+
+  /**
+   * Return the number of times data was added since last clear() call
+   * @returns the number of times data was added
+   */
+  unsigned getAddCount()
+  {
+    return addCount;
+  }
+
+  /**
+   * Return the sum of weight that was added since last clear() call
+   * @returns the sum of weight that was added
+   */
+  TYPE_WEIGHT getWeightCount()
+  {
+    return weightCount;
   }
 
   /**
@@ -158,7 +182,8 @@ protected:
    */
   friend std::ostream &operator<<(std::ostream &out,const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
   {
-    out<<histogram.count<<": ";
+    out<<"addCount="<<histogram.addCount<<" ";
+    out<<"weightCount="<<histogram.weightCount<<" ";
     for (unsigned i=0;i<histogram.hist.size();i++)
       out<<histogram.hist[i]<<" ";
     return out;
@@ -204,9 +229,10 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
   HistogramInt(const HistogramInt<TYPE_DATA,TYPE_WEIGHT,BINS,DIM,MIN,MAX>& histogram)
     : Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>((TYPE_DATA)MIN,(TYPE_DATA)MAX)
   {
-    this->min=histogram.min;
-    this->max=histogram.max;
-    this->count=histogram.count;
+    this->min=histogram.min;// not used
+    this->max=histogram.max;// not used
+    this->addCount=histogram.addCount;
+    this->weightCount=histogram.weightCount;
     this->hist=histogram.hist;
   }
 
