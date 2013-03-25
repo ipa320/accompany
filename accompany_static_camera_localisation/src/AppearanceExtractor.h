@@ -35,13 +35,13 @@ class PixelsClaimed
 };
 
 /**
- * Extract the appearance of each detection using images from all cameras and weighted by the background probablity
+ * Extract the appearance of each detection using last images of each cameras weighted by the background probablity
  */
 class AppearanceExtractor
 {
  public:
 
-  vector<HISTOGRAM > computeAppearance(int c,
+  vector<HISTOGRAM > computeAppearances(int c,
                                        const std::vector<CamCalib>& cam,
                                        const std::vector<unsigned>& existing,
                                        const vector<WorldPoint>& scanLocations,

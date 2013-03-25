@@ -43,7 +43,7 @@ CvScalar getcolor(int p,double weight)
 }
 
 /**
- * Compute combined appearance of all detections over the image of camera c
+ * Compute combined appearance of all detections over the last image of camera c
  * @param c the camera to use
  * @param cam each cameras
  * @param existing each detection
@@ -53,7 +53,7 @@ CvScalar getcolor(int p,double weight)
  * @param bgProb log background probablities for each image
  * @returns color histogram
  */
-vector<HISTOGRAM > AppearanceExtractor::computeAppearance(int c,
+vector<HISTOGRAM > AppearanceExtractor::computeAppearances(int c,
                                                           const vector<CamCalib>& cam,
                                                           const vector<unsigned>& existing,
                                                           const vector<WorldPoint>& scanLocations,
@@ -104,7 +104,7 @@ vector<HISTOGRAM > AppearanceExtractor::computeAppearance(int c,
 }
 
 /**
- * Compute combined appearance of all detections over current images of each cameras
+ * Compute combined appearance of all detections over the last image of each camera
  * @param cam each cameras
  * @param existing each detection
  * @param scanLocations locations of detections
@@ -124,8 +124,8 @@ vector<HISTOGRAM > AppearanceExtractor::computeAppearances(const vector<CamCalib
   vector<HISTOGRAM > histograms(existing.size());
   for (unsigned c=0;c<cam.size();c++)
   {
-    vector<HISTOGRAM > histsOnCam=computeAppearance(c,cam,existing,scanLocations,masks,images,bgProb);
-    for (int h=0;h<histograms.size();h++)
+    vector<HISTOGRAM > histsOnCam=computeAppearances(c,cam,existing,scanLocations,masks,images,bgProb);
+    for (unsigned h=0;h<histograms.size();h++)
       histograms[h]+=histsOnCam[h];
   }
   return histograms;

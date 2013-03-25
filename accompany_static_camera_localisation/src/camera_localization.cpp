@@ -448,12 +448,17 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   cout << "locations found are" << endl;
   accompany_uva_msg::HumanLocations humanLocations;
 
-  appearanceExtractor.computeAppearances(cam,
-                                         existing,
-                                         scanLocations,
-                                         masks,
-                                         src,
-                                         bgProb);
+  vector<HISTOGRAM > appearances=appearanceExtractor.computeAppearances(cam,
+                                                                        existing,
+                                                                        scanLocations,
+                                                                        masks,
+                                                                        src,
+                                                                        bgProb);
+  
+  for (unsigned i=0;i<appearances.size();i++)
+  {
+    cout<<"appearance "<<i<<" "<<appearances[i]<<endl;
+  }
 
   geometry_msgs::PointStamped v;
   std_msgs::Header header;
