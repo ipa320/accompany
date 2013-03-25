@@ -17,6 +17,7 @@ class ImageMask
   void plot(IplImage *img);
 
   friend std::ostream &operator<<(std::ostream &out,const ImageMask& imageMask);
+  friend std::istream &operator>>(std::istream &in,ImageMask& imageMask);
 
  private:
   

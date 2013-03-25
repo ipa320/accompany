@@ -4,6 +4,7 @@
 #include <ImageMask.h>
 
 #include <iostream>
+#include <fstream>
 #include <boost/program_options.hpp>
 
 #include <opencv/cv.h>
@@ -68,7 +69,7 @@ void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
 
 int main(int argc, char **argv) 
 {
-  string imageName,paramsPath,cameraName;
+  string imageName,paramsPath,cameraName,maskName;
 
   // handling arguments
   options_description optionsDescription("Select occlusion by background mask to indicate where the static background occludes the eara of interest\n");
@@ -76,7 +77,8 @@ int main(int argc, char **argv)
     ("help,h","show help message")
     ("image-name,i", value<string>(&imageName)->required(),"filename of image to select occlusion by background mask in")
     ("params-path,p", value<string>(&paramsPath)->required(),"the path to the params.xml")
-    ("camera-name,c", value<string>(&cameraName)->required(),"the camera name which took the image")    
+    ("camera-name,c", value<string>(&cameraName)->required(),"the camera name which took the image")
+    ("mask-name,m", value<string>(&maskName)->default_value("occlusionBGMask.txt"),"the name of the mask")
     ;
 
   variables_map variablesMap;
@@ -96,11 +98,24 @@ int main(int argc, char **argv)
   }
 
   // load data from file
+  string mask_file = paramsPath + "/" + maskName;
   string params_file = paramsPath + "/" + "params.xml";
   string prior_file = paramsPath + "/" + "prior.txt";
   loadCalibrations(params_file.c_str(),paramsPath.c_str());
   vector<WorldPoint> priorHull;
   loadWorldPriorHull(prior_file.c_str(),priorHull);
+
+  // load existing mask
+  ifstream maskin(mask_file.c_str());
+  if (maskin.is_open())
+  {
+    cout<<"read existing mask '"<<mask_file<<"'."<<endl;
+    maskin>>imageMask;
+    maskin.close();
+    cout<<imageMask<<endl;
+  }
+  else
+    cout<<"no existing mask '"<<mask_file<<"' found, start new mask"<<endl;
 
   // search for camera
   cout<<"known cameras:"<<endl;
@@ -125,9 +140,9 @@ int main(int argc, char **argv)
   plotHull(image,priorHull,camIndex);
   imageDraw=cvCloneImage(image);
   cvNamedWindow(imageWindow.c_str());
-  cvShowImage(imageWindow.c_str(),imageDraw);
   cvSetMouseCallback(imageWindow.c_str(),mouseHandler,NULL);
 
+  updateMask();
   printManual();
 
   int key = 0;
@@ -135,6 +150,16 @@ int main(int argc, char **argv)
     // cvShowImage("image", src);
     key = cvWaitKey(32);
   }
+  
+  ofstream maskout(mask_file.c_str());
+  if (maskout.is_open())
+  {
+    cout<<"writing mask to '"<<mask_file<<"'"<<endl;
+    maskout<<imageMask;
+    maskout.close();
+  }
+  else
+    cout<<"fails to save mask to '"<<mask_file<<"'"<<endl;
 
   return 0;
 }
