@@ -60,11 +60,14 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_D
 LINK_DIRECTORIES(${VXL_BASE_DIR}/lib ${CMN_LIB_DIR})
 
 ADD_LIBRARY( helpers
+  ${PROJECT_SOURCE_DIR}/src/Helpers.hh
   ${PROJECT_SOURCE_DIR}/src/Helpers.cc
+  ${PROJECT_SOURCE_DIR}/src/Background.hh
   ${PROJECT_SOURCE_DIR}/src/Background.cc
+  ${PROJECT_SOURCE_DIR}/src/ImgProducer.hh
   ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
+  ${PROJECT_SOURCE_DIR}/src/CamCalib.hh
   ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
-  ${PROJECT_SOURCE_DIR}/src/AppearanceExtractor.cpp
   )
 
 ADD_LIBRARY( calib
@@ -104,7 +107,12 @@ TARGET_LINK_LIBRARIES(build_background_model helpers calib opencv_calib3d opencv
 rosbuild_add_executable(create_prior src/create_prior.cpp)
 TARGET_LINK_LIBRARIES( create_prior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
 
-rosbuild_add_executable(camera_localization src/camera_localization.cpp)
+rosbuild_add_executable(camera_localization 
+  src/camera_localization.cpp
+  src/Histogram.h
+  src/AppearanceExtractor.h
+  src/AppearanceExtractor.cpp
+ )
 target_link_libraries(camera_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS} MsgToMarkerArray)
 
 rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
