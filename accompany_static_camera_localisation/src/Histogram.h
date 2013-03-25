@@ -84,7 +84,7 @@ protected:
     this->max=histogram.max;
     this->addCount=histogram.addCount;
     this->weightCount=histogram.weightCount;
-    this->hist=histogram.hist;
+    this->hist=std::vector<TYPE_WEIGHT>(histogram.hist);// deep copy
   }
 
   /**
@@ -260,7 +260,8 @@ class HistogramInt : public Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>
 
   unsigned bin(TYPE_DATA d)
   {
-    return (BINS*(d-MIN))/(MAX-MIN);
+    unsigned ret=(BINS*((d)-MIN))/(MAX-MIN);
+    return ret<BINS?ret:BINS-1;
   }
 
 };
