@@ -84,7 +84,7 @@ protected:
     this->max=histogram.max;
     this->addCount=histogram.addCount;
     this->weightCount=histogram.weightCount;
-    this->hist=std::vector<TYPE_WEIGHT>(histogram.hist);// deep copy
+    this->hist=histogram.hist;
   }
 
   /**
