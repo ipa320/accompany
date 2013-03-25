@@ -175,3 +175,8 @@ rosbuild_add_executable(cameraModelTest
   src/cameraModel.cpp
   src/cameraModelTest.cpp)
 
+rosbuild_add_executable(create_occlusion_by_background_mask 
+  src/create_occlusion_by_background_mask.cpp
+  src/ImageMask.h
+  src/ImageMask.cpp)
+target_link_libraries(create_occlusion_by_background_mask helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
