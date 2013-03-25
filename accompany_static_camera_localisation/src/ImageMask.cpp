@@ -34,17 +34,20 @@ void ImageMask::undo()
 
 void ImageMask::plot(IplImage *img)
 {
-  CvScalar color=cvScalar(0,255,0);
-  for (unsigned i=0;i<regions.size();i++)
+  CvScalar color[2];
+  color[0]=cvScalar(0,255,0);
+  color[1]=cvScalar(255,0,0);
+  unsigned i;
+  for (i=0;i<regions.size();i++)
   {
     CvPoint *points=&(regions[i][0]);
     int size=regions[i].size();
     bool closed=(i<regions.size()-1);
-    cvPolyLine(img,&points,&size,1,closed,color);
+    cvPolyLine(img,&points,&size,1,closed,color[i%2],2);
   }
   vector<CvPoint>& cr=currentRegion();
   if (cr.size()>0)
-    cvCircle(img,cr[cr.size()-1],10,color);
+    cvCircle(img,cr[cr.size()-1],10,color[(i+1)%2],2);
 }
 
 vector<CvPoint>& ImageMask::currentRegion()

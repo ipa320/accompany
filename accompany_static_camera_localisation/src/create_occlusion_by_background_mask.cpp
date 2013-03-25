@@ -22,9 +22,12 @@ ImageMask imageMask;
 void printManual()
 {
   cout<<"-------- manual ----------"<<endl;
-  cout<<" left-click   = add point to current region"<<endl;
-  cout<<" right-click  = end region"<<endl;
-  cout<<" middle-click = undo last operation"<<endl;
+  cout<<"first draw green region to indicate the region of the prior that is occluded by static background"<<endl;
+  cout<<"then draw blue region to indicate the static background that occludes"<<endl;
+  cout<<"draw using:"<<endl;
+  cout<<"  left-click   = add point to current region"<<endl;
+  cout<<"  right-click  = end region"<<endl;
+  cout<<"  middle-click = undo last operation"<<endl;
   cout<<"--------------------------"<<endl<<endl;
 }
 
@@ -150,7 +153,6 @@ int main(int argc, char **argv)
   cvSetMouseCallback(imageWindow.c_str(),mouseHandler,NULL);
 
   updateMask();
-  printManual();
 
   int key = 0;
   while ((char)key != 'q') {
