@@ -68,6 +68,8 @@ ADD_LIBRARY( helpers
   ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
   ${PROJECT_SOURCE_DIR}/src/CamCalib.hh
   ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
+  ${PROJECT_SOURCE_DIR}/src/ImageMask.h
+  ${PROJECT_SOURCE_DIR}/src/ImageMask.cpp
   )
 
 ADD_LIBRARY( calib

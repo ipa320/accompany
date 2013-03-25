@@ -11,6 +11,8 @@
 #include <vnl/vnl_vector.h>
 #include <vnl/vnl_matrix.h>
 
+#include <ImageMask.h>
+
 // struct CvPoint;
 
 extern double minX, maxX, minY, maxY;
@@ -47,6 +49,8 @@ class CamCalib: public XmlPackable
     Hu::CameraModel model;
 
     string name;
+    string occlusionBGMaskFile;
+    ImageMask occlusionBGMask;
     FLOAT stdev1, pixelVar1, pv2_1, lpv2_1;FLOAT stdev2, pixelVar2, pv2_2,
         lpv2_2;FLOAT stdev3, pixelVar3, pv2_3, lpv2_3;FLOAT scale;
 

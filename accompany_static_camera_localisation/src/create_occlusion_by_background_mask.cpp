@@ -98,24 +98,11 @@ int main(int argc, char **argv)
   }
 
   // load data from file
-  string mask_file = paramsPath + "/" + maskName;
   string params_file = paramsPath + "/" + "params.xml";
   string prior_file = paramsPath + "/" + "prior.txt";
   loadCalibrations(params_file.c_str(),paramsPath.c_str());
   vector<WorldPoint> priorHull;
   loadWorldPriorHull(prior_file.c_str(),priorHull);
-
-  // load existing mask
-  ifstream maskin(mask_file.c_str());
-  if (maskin.is_open())
-  {
-    cout<<"read existing mask '"<<mask_file<<"'."<<endl;
-    maskin>>imageMask;
-    maskin.close();
-    cout<<imageMask<<endl;
-  }
-  else
-    cout<<"no existing mask '"<<mask_file<<"' found, start new mask"<<endl;
 
   // search for camera
   cout<<"known cameras:"<<endl;
@@ -134,6 +121,26 @@ int main(int argc, char **argv)
     cout<<"camera name '"<<cameraName<<"' not found, use '-c' to select the camera that toke the image"<<endl;
     return 1;
   }
+
+  if (cam[camIndex].occlusionBGMaskFile.compare("")!=0 /*&& !variablesMap.count("mask-name")*/)
+  {
+    maskName=cam[camIndex].occlusionBGMaskFile;
+    cout<<"use existing mask name'"<<maskName<<"'."<<endl;
+  }
+
+  // load existing mask
+  string mask_file = paramsPath + "/" + maskName;
+  ifstream maskin(mask_file.c_str());
+  if (maskin.is_open())
+  {
+    cout<<"read existing mask '"<<mask_file<<"'."<<endl;
+    maskin>>imageMask;
+    maskin.close();
+    cout<<imageMask<<endl;
+  }
+  else
+    cout<<"no existing mask '"<<mask_file<<"' found, start new mask"<<endl;
+
   
   // load image
   image=loadImage(imageName.c_str());

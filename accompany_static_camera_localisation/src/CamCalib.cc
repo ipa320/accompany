@@ -34,6 +34,7 @@ CamCalib::CamCalib() :
     stdev1(9), stdev2(9), stdev3(9), scale(1.0)
 {
   updateCache();
+  occlusionBGMaskFile="";
 }
 
 void CamCalib::xmlPack(XmlFile &f) const
@@ -42,6 +43,8 @@ void CamCalib::xmlPack(XmlFile &f) const
   //     f.pack("ModelFile", modelFile);
   // f.pack("w", w);
   // f.pack("w2", w2);
+  f.pack("name", name);
+  f.pack("occlusionBGMaskFile",occlusionBGMaskFile);
   f.pack("sigma1", stdev1);
   f.pack("sigma2", stdev2);
   f.pack("sigma3", stdev3);
@@ -60,6 +63,29 @@ void CamCalib::xmlUnpack(XmlFile &f)
     f.unpack("extrinsicFile",extrinsicFile);
     intrinsicFile=((string)calibLoadPath)+"/"+intrinsicFile;
     extrinsicFile=((string)calibLoadPath)+"/"+extrinsicFile;
+  }
+
+  try
+  {
+    f.unpack("occlusionBGMaskFile",occlusionBGMaskFile);
+    if (occlusionBGMaskFile.compare("")!=0)
+    {
+      string fullName=((string)calibLoadPath)+"/"+occlusionBGMaskFile;
+      ifstream maskin(fullName.c_str());
+      if (maskin.is_open())
+      {
+        cout<<"read existing mask '"<<fullName<<"'."<<endl;
+        maskin>>occlusionBGMask;
+        maskin.close();
+        cout<<occlusionBGMask<<endl;
+      }
+      else
+        cout<<"no existing mask '"<<fullName<<"' found"<<endl;
+    }
+  } 
+  catch (const std::exception& ex) 
+  {
+    cout<<"could not unpack 'occlusionBGMaskFile'"<<endl;
   }
 
   ifstream ifs(extrinsicFile.c_str());

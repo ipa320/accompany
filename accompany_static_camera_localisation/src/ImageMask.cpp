@@ -55,41 +55,41 @@ vector<CvPoint>& ImageMask::currentRegion()
 /**
  * Allows ImageMask to be io streamed out
  */
-std::ostream &operator<<(std::ostream &out,const CvPoint& point)
+/*
+std::ostream &operator<<(std::ostream &out,const CvPoint& point) // not used this because of name clash in annotate_pos.cpp
 {
   out<<point.x<<","<<point.y;
   return out;
 }
-
-std::ostream &operator<<(std::ostream &out,const vector<CvPoint>& region)
+*/
+std::ostream& operator<<(std::ostream &out,const vector<CvPoint>& region)
 {
   for (unsigned j=0;j<region.size();j++)
   {
-    out<<region[j]<<" ";
+    out<<region[j].x<<","<<region[j].y<<" ";
   }
   return out;
 }
 
-
-std::ostream &operator<<(std::ostream &out,const ImageMask& imageMask)
+std::ostream& operator<<(std::ostream &out,const ImageMask& imageMask)
 {
   out<<"ImageMask("<<imageMask.regions.size()<<"):"<<endl;
   for (unsigned i=0;i<imageMask.regions.size();i++)
-    out<<imageMask.regions[i].size()<<" "<<imageMask.regions[i]<<endl;
+    out<<"  "<<imageMask.regions[i].size()<<" "<<imageMask.regions[i]<<endl;
   return out;
 }
 
 /**
  * Allows ImageMask to be io streamed in
  */
-std::istream &operator>>(std::istream &in,CvPoint& point)
+std::istream& operator>>(std::istream &in,CvPoint& point)
 {
   char comma;
   in>>point.x>>comma>>point.y;
   return in;
 }
 
-std::istream &operator>>(std::istream &in,vector<CvPoint>& region)
+std::istream& operator>>(std::istream &in,vector<CvPoint>& region)
 {
   int size;
   in>>size;
@@ -103,7 +103,7 @@ std::istream &operator>>(std::istream &in,vector<CvPoint>& region)
   return in;
 }
 
-std::istream &operator>>(std::istream &in,ImageMask& imageMask)
+std::istream& operator>>(std::istream &in,ImageMask& imageMask)
 {
   if (imageMask.currentRegion().size()==0)
     imageMask.regions.resize(imageMask.regions.size()-1);
