@@ -115,14 +115,14 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
   return markerArray;
 }
 
-visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string name,int size)
+visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string name,unsigned size)
 {
   std::map<std::string,visualization_msgs::MarkerArray>::iterator it=nameToMarkerArray.find(name);
   if (it==nameToMarkerArray.end())
   {
     // create new MarkerArray
     visualization_msgs::MarkerArray markerArray;
-    for (int i=0;i<size;i++)
+    for (unsigned i=0;i<size;i++)
     {
       visualization_msgs::Marker marker;
       marker.ns = name;
@@ -135,21 +135,21 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
   else
   { 
     // requested size in previous call
-    int prevSize=nameToSize[name];
+    unsigned prevSize=nameToSize[name];
     
     // reduce length after deleting in previous step
-    int reduce=prevSize;
+    unsigned reduce=prevSize;
     if (size>reduce)
       reduce=size;
     if (reduce<it->second.markers.size())
       it->second.markers.resize(reduce);
 
     // delete unused markers
-    for (unsigned int i=size;i<it->second.markers.size();i++)
+    for (unsigned i=size;i<it->second.markers.size();i++)
       it->second.markers[i].action = visualization_msgs::Marker::DELETE;
 
     // add markers
-    for (unsigned int i=it->second.markers.size();i<size;i++)
+    for (unsigned i=it->second.markers.size();i<size;i++)
     {
       visualization_msgs::Marker marker;
       marker.ns = name;
@@ -159,7 +159,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
     }
 
     // reactivate previously deleted markers
-    for (unsigned int i=prevSize;i<size;i++)
+    for (unsigned i=prevSize;i<size;i++)
       it->second.markers[i].action=visualization_msgs::Marker::ADD;
   }
   nameToSize[name]=size;
@@ -173,7 +173,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
 size_t MsgToMarkerArray::hashString(string data)
 {
   size_t h=0;
-  for (unsigned int i=0;i<data.size();i++)
+  for (unsigned i=0;i<data.size();i++)
   {
     int cut=h>>(sizeof(size_t)*7);
     h=((h<<7)^cut)^data[i];
@@ -184,7 +184,7 @@ size_t MsgToMarkerArray::hashString(string data)
 size_t MsgToMarkerArray::reverseBits(size_t data)
 {
   size_t ret=0;
-  for (unsigned int i=0;i<sizeof(size_t)*8;i++)
+  for (unsigned i=0;i<sizeof(size_t)*8;i++)
   {
     if (((1<<i)&data)>0)
       ret|=1<<(sizeof(size_t)*8-i-1);

@@ -26,7 +26,7 @@ class MsgToMarkerArray
    // removes the markers that are not used compared to previous call with same name
    //int removeUnusedMarkers(std::string name,visualization_msgs::MarkerArray &markerArra);
 
-   visualization_msgs::MarkerArray &getMarkerArray(std::string name,int size);
+   visualization_msgs::MarkerArray &getMarkerArray(std::string name,unsigned size);
 
   // members
    std::map<std::string,std_msgs::ColorRGBA> nameToColor;
