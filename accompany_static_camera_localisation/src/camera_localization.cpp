@@ -445,9 +445,9 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   /*logLocPrior, */logPosProb, marginal, logBGProb);
 
   // report locations
-  cout << "locations found are" << endl;
-  accompany_uva_msg::HumanLocations humanLocations;
-
+  accompany_uva_msg::HumanLocations humanLocations; // deprecated
+  accompany_uva_msg::HumanDetections humanDetections;
+  
   vector<HISTOGRAM > appearances=appearanceExtractor.computeAppearances(cam,
                                                                         existing,
                                                                         scanLocations,
@@ -465,6 +465,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   header.stamp=ros::Time::now();
   header.frame_id=frame.child_frame_id;
   v.header=header;// set current time and frame name to the vector
+  cout << "locations found are" << endl;
   for (unsigned i = 0; i != existing.size(); ++i)
   {
     WorldPoint wp = scanLocations[existing[i]];

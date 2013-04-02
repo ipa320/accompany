@@ -31,6 +31,32 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
   return markerArray;
 }
 
+visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany_uva_msg::HumanDetections& msg,
+                                                                 std::string name)
+{
+  visualization_msgs::MarkerArray &markerArray=getMarkerArray(name,msg.detections.size());
+  double radius=0.05;
+  for (unsigned int i=0;i<msg.detections.size();i++)
+  {
+    markerArray.markers[i].header.frame_id = msg.detections[0].location.header.frame_id;
+    markerArray.markers[i].header.stamp = ros::Time();
+    markerArray.markers[i].type = visualization_msgs::Marker::SPHERE;
+    markerArray.markers[i].pose.position.x = msg.detections[i].location.point.x;
+    markerArray.markers[i].pose.position.y = msg.detections[i].location.point.y;
+    markerArray.markers[i].pose.position.z = msg.detections[i].location.point.z+radius;
+    markerArray.markers[i].pose.orientation.x = 0.0;
+    markerArray.markers[i].pose.orientation.y = 0.0;
+    markerArray.markers[i].pose.orientation.z = 0.0;
+    markerArray.markers[i].pose.orientation.w = 1.0;
+    markerArray.markers[i].scale.x = radius*2;
+    markerArray.markers[i].scale.y = radius*2;
+    markerArray.markers[i].scale.z = radius*2;
+    markerArray.markers[i].color=getColorByName(msg.detections[0].location.header.frame_id,0.5);
+    markerArray.markers[i].lifetime = ros::Duration(10);
+  }
+  return markerArray;
+}
+
 visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany_uva_msg::TrackedHumans& msg,
                                                                  std::string name)
 {
