@@ -1,3 +1,3 @@
 int32      sumTemplatePixelSize
-float32    sumPixelWeights
-float32[]  histogram
+float64    sumPixelWeights
+float64[]  histogram

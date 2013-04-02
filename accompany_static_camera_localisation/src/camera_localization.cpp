@@ -26,9 +26,7 @@
 #include <opencv/cvwimage.h>
 
 #include <accompany_uva_utils/uva_utils.h>
-#include <accompany_uva_msg/HumanLocations.h>
-#include <accompany_uva_msg/HumanLocationsParticle.h>
-#include <accompany_uva_msg/HumanLocationsParticles.h>
+#include <accompany_uva_msg/HumanDetections.h>
 #include <accompany_uva_msg/MsgToMarkerArray.h>
 
 #include "cmn/FastMath.hh"
@@ -91,8 +89,9 @@ MsgToMarkerArray msgToMarkerArray;
 
 geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
-ros::Publisher humanLocationsPub, humanLocationsParticlesPub;
-ros::Publisher markerArrayPub;
+ros::Publisher humanDetectionsPub,
+                    humanLocationsParticlesPub,
+                    markerArrayPub;
 
 unsigned int NUM_PERSONS;
 bool HAS_INIT = false;
@@ -419,7 +418,7 @@ void save_background_frames(IplImage* oriImage)
     imwrite(image_name,cvarrToMat(oriImage));
 }
 
-accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
+accompany_uva_msg::HumanDetections findPerson(unsigned imgNum,
     vector<IplImage *> src, const vector<vnl_vector<FLOAT> > &imgVec,
     vector<vnl_vector<FLOAT> > &bgVec, const vector<FLOAT> logBGProb,
     const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
@@ -444,38 +443,42 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   scanRest(existing, mask, logSumPixelFGProb, logSumPixelBGProb, logNumPrior,
   /*logLocPrior, */logPosProb, marginal, logBGProb);
 
-  // report locations
-  accompany_uva_msg::HumanLocations humanLocations; // deprecated
-  accompany_uva_msg::HumanDetections humanDetections;
-  
+  // compute histograms
   vector<HISTOGRAM > appearances=appearanceExtractor.computeAppearances(cam,
                                                                         existing,
                                                                         scanLocations,
                                                                         masks,
                                                                         src,
                                                                         bgProb);
-  
   for (unsigned i=0;i<appearances.size();i++)
   {
     cout<<"appearance "<<i<<" "<<appearances[i]<<endl;
   }
-
+  // report detections
+  accompany_uva_msg::HumanDetections humanDetections;
   geometry_msgs::PointStamped v;
   std_msgs::Header header;
-  header.stamp=ros::Time::now();
+  header.stamp=ros::Time::now(); 
   header.frame_id=frame.child_frame_id;
-  v.header=header;// set current time and frame name to the vector
-  cout << "locations found are" << endl;
+  v.header=header;// set current time and frame name to the point
+
+  cout<<"locations found are:"<<endl;
   for (unsigned i = 0; i != existing.size(); ++i)
   {
+    // add human detection
+    accompany_uva_msg::HumanDetection humanDetection;
     WorldPoint wp = scanLocations[existing[i]];
-    cout << " " << scanLocations[existing[i]];
+    cout<<" "<<scanLocations[existing[i]];
     v.point.x = wp.x/1000; // millimeters to meters
     v.point.y = wp.y/1000;
     v.point.z = 0;
-    humanLocations.locations.push_back(v);
+    humanDetection.location=v;
+    humanDetection.appearance.sumTemplatePixelSize=appearances[i].getAddCount();
+    humanDetection.appearance.sumPixelWeights=appearances[i].getWeightCount();
+    humanDetection.appearance.histogram=appearances[i].normalize();
+    humanDetections.detections.push_back(humanDetection);
   }
-  cout << endl << "===========" << endl;
+  cout<<endl<<"==========="<<endl;
 
   for (unsigned i = 0; i != marginal.size(); ++i)
     lSum = log_sum_exp(lSum, marginal[i]);
@@ -522,7 +525,7 @@ accompany_uva_msg::HumanLocations findPerson(unsigned imgNum,
   }
   /* End of Visualization */
 
-  return humanLocations;
+  return humanDetections;
 }
 
 void initStaticProbs()
@@ -693,41 +696,14 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
     if (frameCounter->count(c)>INIT_FIRST_FRAMES)
     {
       ROS_INFO_STREAM("detect");
-      accompany_uva_msg::HumanLocations humanLocations;      
-      humanLocations = findPerson(c, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
+      accompany_uva_msg::HumanDetections humanDetections;   
+      humanDetections = findPerson(c, src_vec, img_vec, bg_vec, sum_g, logSumPixelFGProb, sumPixel);
+      humanDetectionsPub.publish(humanDetections);
+      markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanDetections,frame.child_frame_id)); // publish visualisation
 
-      if (!particles)
-      {
-        humanLocationsPub.publish(humanLocations);
-        markerArrayPub.publish(msgToMarkerArray.toMarkerArray(humanLocations,frame.child_frame_id)); // publish visualisation
-      }
     }
     else
       ROS_INFO_STREAM("wait for other frames");
-
-    // publish human locations particles
-    //        if (particles)
-    //        {
-    //            accompany_uva_msg::HumanLocationsParticles humanLocationsParticles;
-    //            for (int i=0;i<nrParticles;i++)
-    //            {
-    //            accompany_uva_msg::HumanLocationsParticle humanLocationsParticle;
-    //            int numberOfLocations=(rand()%humanLocations.locations.size())+1;
-    //            for (int l=0;l<numberOfLocations;l++)
-    //            {
-    //              int randomLoc=(rand()%humanLocations.locations.size());// random location index
-    //              geometry_msgs::PointStamped v=humanLocations.locations[randomLoc];// random location vector
-    //              humanLocationsParticle.locations.push_back(v);// add location to particle
-    //            }
-    //            humanLocationsParticle.weight=rand()/((double)RAND_MAX);// set random weight
-    //            humanLocationsParticles.particles.push_back(humanLocationsParticle);
-    //          }
-    //          humanLocationsParticlesPub.publish(humanLocationsParticles);
-    //        }
-    //        cvShowImage("view", bridge.imgMsgToCv(image, "bgr8"));
-    //        cvDestroyWindow("view");
-    
-    //clean up
 
     if (visualize) cvWaitKey(waitTime);
 
@@ -765,7 +741,7 @@ int main(int argc, char **argv)
       "Human Detection main function\n"
       "Available remappings:\n"
       "  image:=<image-topic>\n"
-      "  humanLocations:=<humanLocations-topic>\n"
+      "  humanDetections:=<humanDetections-topic>\n"
       "\n"
       "Allowed options");
   optionsDescription.add_options()
@@ -847,15 +823,14 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "camera_localization");
   ros::NodeHandle n;
   std::string resolved_image=n.resolveName("image");
-  std::string resolved_humanLocations=n.resolveName("humanLocations");
-  cout<<"publish to location topic: "<<resolved_humanLocations<<endl;
+  std::string resolved_humanDetections=n.resolveName("humanDetections");
+  cout<<"publish to detection topic: "<<resolved_humanDetections<<endl;
 
   tf::TransformBroadcaster transformBroadcaster;
   transformBroadcasterPtr=&transformBroadcaster;
   ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
   image_transport::ImageTransport it(n);
-  humanLocationsPub = n.advertise<accompany_uva_msg::HumanLocations>(resolved_humanLocations, 10);
-  //humanLocationsParticlesPub=n.advertise<accompany_uva_msg::HumanLocationsParticles>("/humanLocationsParticles",10);
+  humanDetectionsPub = n.advertise<accompany_uva_msg::HumanDetections>(resolved_humanDetections, 10);
   markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
 
   frameCounter=new FrameCounter(cam.size());
