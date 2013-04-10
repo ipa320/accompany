@@ -19,6 +19,10 @@ class DataAssociation
   
   std::vector<std::vector<double> > associations;
   unsigned size1,size2;
+  std::vector<int> assign1,assign2;
+  
+  std::pair<int,int> getMax(int order);
+
 };
 
 #endif

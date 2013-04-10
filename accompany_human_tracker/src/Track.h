@@ -15,20 +15,31 @@ class Track
   
   static vnl_vector<double> getState(const accompany_uva_msg::HumanDetection& humanDetection);
   static vnl_matrix<double> getCovariance(const accompany_uva_msg::HumanDetection& humanDetection);
-  void setSpeed(vnl_vector<double>& detection);
 
-  double match(const accompany_uva_msg::HumanDetection& humanDetection);
-  double matchState(const accompany_uva_msg::HumanDetection& humanDetection);
+  double match(const accompany_uva_msg::HumanDetection& humanDetection,
+               const vnl_matrix<double>& obsModel);
+  double matchState(const accompany_uva_msg::HumanDetection& humanDetection,
+                    const vnl_matrix<double>& obsModel);
   double matchAppearance(const accompany_uva_msg::HumanDetection& humanDetection);
-  void update(const accompany_uva_msg::HumanDetection& humanDetection);
+
+  void transition(const vnl_matrix<double>& transModel,
+                  const vnl_matrix<double>& transCovariance);
+  void observation(const accompany_uva_msg::HumanDetection& humanDetection,
+                   const vnl_matrix<double>& obsModel,
+                   const vnl_matrix<double>& obsCovariance);
+
+  void writeMessage(accompany_uva_msg::TrackedHuman& trackedHuman);
 
   friend std::ostream& operator<<(std::ostream& out,const Track& track);
 
  private:
+  static unsigned nextID;
+  unsigned id;
   KalmanFilter<double> kalmanFilter;
   accompany_uva_msg::Appearance appearance;
 
+  void updateAppearance(double weight,const accompany_uva_msg::Appearance& newAppearance);
   
-}; 
+};
 
 #endif
