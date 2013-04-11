@@ -18,7 +18,6 @@ using namespace std;
 using namespace boost;
 
 // globals
-
 ros::Time prevNow;
 tf::TransformListener *listener=NULL;
 //map<string,int> identityToID; // map of identities to id's
@@ -28,7 +27,7 @@ int main(int argc,char **argv)
 {
   ros::init(argc, argv, "human_tracker");
 
-  // handling arguments
+  // handling command line arguments
   program_options::options_description optionsDescription("Tracks humans using human detections");
   optionsDescription.add_options()
     ("help,h","show help message");
@@ -45,8 +44,6 @@ int main(int argc,char **argv)
     cerr<<""<<e.what()<<endl;    
     return 1;
   }
-  
-  
 
   // create publisher and subscribers
   ros::NodeHandle n;

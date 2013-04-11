@@ -2,6 +2,11 @@
 
 using namespace std;
 
+/**
+ * Constructor
+ * @param trackedHumansPub 'trackedHuman' publisher
+ * @param markerArrayPub 'markerArray' publisher for visualization purposes
+ */
 Tracker::Tracker(ros::Publisher trackedHumansPub,
                  ros::Publisher markerArrayPub)
 {
@@ -33,6 +38,10 @@ double timeDiff(const struct timeval& time,
   return (time.tv_sec-prevTime.tv_sec)+(time.tv_usec-prevTime.tv_usec)/((double)1E6);
 }
 
+/**
+ * Processes detections, assign detections to known tracks or create new tracks
+ * @param humanDetections the detections
+ */
 void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections)
 {
   // transition based on elapsed time
@@ -81,6 +90,9 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   publishTracks();
 }
 
+/**
+ * Publish the known detections.
+ */
 void Tracker::publishTracks()
 {
   accompany_uva_msg::TrackedHumans trackedHumans;
@@ -104,6 +116,9 @@ void Tracker::publishTracks()
   markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
 }
 
+/**
+ * ostream a tracker
+ */
 std::ostream& operator<<(std::ostream& out,const Tracker& tracker)
 {
   out<<"Tracker ("<<tracker.tracks.size()<<"):"<<endl;

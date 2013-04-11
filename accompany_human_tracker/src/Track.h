@@ -7,15 +7,15 @@
 #include <KalmanFilter.h>
 #include <vector>
 
+/**
+ *  Represents a tracked person with kalman filter and histogram
+ */
 class Track
 {
  public:
   
   Track(const accompany_uva_msg::HumanDetection& humanDetection);
   
-  static vnl_vector<double> getState(const accompany_uva_msg::HumanDetection& humanDetection);
-  static vnl_matrix<double> getCovariance(const accompany_uva_msg::HumanDetection& humanDetection);
-
   double match(const accompany_uva_msg::HumanDetection& humanDetection,
                const vnl_matrix<double>& obsModel);
   double matchState(const accompany_uva_msg::HumanDetection& humanDetection,
@@ -38,6 +38,8 @@ class Track
   KalmanFilter<double> kalmanFilter;
   accompany_uva_msg::Appearance appearance;
 
+  static vnl_vector<double> getObs(const accompany_uva_msg::HumanDetection& humanDetection);
+  static vnl_matrix<double> getObsCovariance(const accompany_uva_msg::HumanDetection& humanDetection);
   void updateAppearance(double weight,const accompany_uva_msg::Appearance& newAppearance);
   
 };

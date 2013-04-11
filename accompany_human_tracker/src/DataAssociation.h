@@ -4,6 +4,9 @@
 #include <vector>
 #include <iostream>
 
+/**
+ * Associate detections with tracks
+ */
 class DataAssociation
 {
  public:

@@ -35,37 +35,24 @@ vnl_matrix<double> addSpeed(vnl_matrix<double> m)
   return s;
 }
 
+/**
+ * Constructor
+ * @param humanDetection detection info to initialize a track
+ */
 Track::Track(const accompany_uva_msg::HumanDetection& humanDetection)
-  : kalmanFilter(addSpeed(getState(humanDetection)),
-                 addSpeed(getCovariance(humanDetection)))
+  : kalmanFilter(addSpeed(getObs(humanDetection)),
+                 addSpeed(getObsCovariance(humanDetection)))
 {
   appearance=humanDetection.appearance;
   id=++nextID;
 }
 
-vnl_vector<double> Track::getState(const accompany_uva_msg::HumanDetection& humanDetection)
-{
-  vnl_vector<double> state(DIMENSION);
-  state[0]=humanDetection.location.point.x;
-  state[1]=humanDetection.location.point.y;
-  return state;
-}
-
-vnl_matrix<double> Track::getCovariance(const accompany_uva_msg::HumanDetection& humanDetection)
-{
-  vnl_matrix<double> covariance(DIMENSION,DIMENSION);
-  covariance.set_identity();
-  return covariance;
-}
-
-/*
-void Track::setSpeed(vnl_vector<double>& detection)
-{
-  detection[2]=detection[0]-kalmanFilter.getState()[0];
-  detection[3]=detection[1]-kalmanFilter.getState()[1];
-}
-*/
-
+/**
+ * Compute the match of this track with the detection
+ * @param humanDetection human detection
+ * @param obsModel observation model that maps the kalman state to the kalman observation space
+ * @return the match value
+ */
 double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
                     const vnl_matrix<double>& obsModel)
 {
@@ -75,15 +62,21 @@ double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
   return state+appearance;
 }
 
+/**
+ * Compute the match of this track with the detection based on the kalman state
+ * @param humanDetection human detection information
+ * @param obsModel observation model that maps the kalman state to the kalman observation space
+ * @return the match value
+ */
 double Track::matchState(const accompany_uva_msg::HumanDetection& humanDetection,
                          const vnl_matrix<double>& obsModel)
 {
-  vnl_vector<double> obs=getState(humanDetection);
-  // setSpeed(obs); // determine speed
-  double det=vnl_determinant(kalmanFilter.getCovariance());
+  vnl_vector<double> obs=getObs(humanDetection);
+  vnl_matrix<double> covariance=kalmanFilter.getCovariance();
+  double det=vnl_determinant(covariance);
   vnl_matrix<double> diff=toMatrix(obs-obsModel*kalmanFilter.getState());
   //cout<<"diff:"<<diff<<endl;
-  vnl_matrix<double> covar=obsModel*kalmanFilter.getCovariance()*obsModel.transpose();
+  vnl_matrix<double> covar=obsModel*covariance*obsModel.transpose();
   //cout<<"covar:"<<covar<<endl;
   vnl_matrix<double> inv=vnl_matrix_inverse<double>(covar);
   //cout<<"inv:"<<inv<<endl;
@@ -92,6 +85,12 @@ double Track::matchState(const accompany_uva_msg::HumanDetection& humanDetection
   return -(DIMENSION*log(2*M_PI) + log(det) + exp[0][0])/2; // multivariate gaussian distribution
 }
 
+/**
+ * Compute the match of this track with the detection based on the appearance
+ * @param humanDetection human detection
+ * @param obsModel observation model that maps the kalman state to the kalman observation space
+ * @return the match value
+ */
 double Track::matchAppearance(const accompany_uva_msg::HumanDetection& humanDetection)
 {
   unsigned dim=appearance.histogram.size();
@@ -103,6 +102,11 @@ double Track::matchAppearance(const accompany_uva_msg::HumanDetection& humanDete
   return -(DIMENSION*(log(2*M_PI) + log(var)) + exp[0][0])/2; // multivariate gaussian distribution
 }
 
+/**
+ * Kalman prediction step, moves track forward based on known speed. The appearance is unchanged.
+ * @param transModel kalman transition model 
+ * @param transCovariance kalman transition covariance
+ */
 void Track::transition(const vnl_matrix<double>& transModel,
                        const vnl_matrix<double>& transCovariance)
 {
@@ -110,17 +114,28 @@ void Track::transition(const vnl_matrix<double>& transModel,
                           transCovariance);
 }
 
+/**
+ * Updates the track with a detection. This includes a Kalman observation update step and updating the appearance
+ * @param humanDetection human detection information
+ * @param obsModel kalman observation model
+ * @param obsCovariance kalman observation covariance
+ */
 void Track::observation(const accompany_uva_msg::HumanDetection& humanDetection,
                         const vnl_matrix<double>& obsModel,
                         const vnl_matrix<double>& obsCovariance)
 {
-  vnl_vector<double> obs=getState(humanDetection);
+  vnl_vector<double> obs=getObs(humanDetection);
   kalmanFilter.observation(obs,
                            obsModel,
                            obsCovariance);
   updateAppearance(0.1,humanDetection.appearance);
 }
 
+/**
+ * Updates the appearance of the track
+ * @param weight the weight of the new appearance relative to the old
+ * @param newAppearance the new appearance
+ */
 void Track::updateAppearance(double weight,const accompany_uva_msg::Appearance& newAppearance)
 {
   weight=1;
@@ -145,6 +160,10 @@ void Track::updateAppearance(double weight,const accompany_uva_msg::Appearance& 
     newAppearance.sumTemplatePixelSize*weight;
 }
 
+/**
+ * Convert the track information to a TrackedHuman message
+ * @param trackedHuman the message to write to
+ */
 void Track::writeMessage(accompany_uva_msg::TrackedHuman& trackedHuman)
 {
   trackedHuman.location.point.x=kalmanFilter.getState()[0];
@@ -156,6 +175,32 @@ void Track::writeMessage(accompany_uva_msg::TrackedHuman& trackedHuman)
   trackedHuman.id=id;
 }
 
+/**
+ * Get the kalman observation from a detection
+ * @param humanDetection human detection information
+ */
+vnl_vector<double> Track::getObs(const accompany_uva_msg::HumanDetection& humanDetection)
+{
+  vnl_vector<double> state(DIMENSION);
+  state[0]=humanDetection.location.point.x;
+  state[1]=humanDetection.location.point.y;
+  return state;
+}
+
+/**
+ * Get the kalman observation covariance based on the detection dimensionality
+ * @param humanDetection human detection information
+ */
+vnl_matrix<double> Track::getObsCovariance(const accompany_uva_msg::HumanDetection& humanDetection)
+{
+  vnl_matrix<double> covariance(DIMENSION,DIMENSION);
+  covariance.set_identity();
+  return covariance;
+}
+
+/**
+ * ostreams a track
+ */
 std::ostream& operator<<(std::ostream& out,const Track& track)
 {
   out<<"Track:"<<endl;
@@ -169,3 +214,4 @@ std::ostream& operator<<(std::ostream& out,const Track& track)
   out<<endl;
   return out;
 }
+

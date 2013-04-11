@@ -3,15 +3,23 @@
 #include <limits>
 using namespace std;
 
+/**
+ * Constructor
+ */
 DataAssociation::DataAssociation()
 {
   clear(0,0);
 }
 
-void DataAssociation::clear(unsigned s1,unsigned s2)
+/**
+ * Allocate for matching e1 against e2 entities
+ * @param e1 number of entities
+ * @param e2 number of entities
+ */
+void DataAssociation::clear(unsigned e1,unsigned e2)
 {
-  size1=s1;
-  size2=s2;
+  size1=e1;
+  size2=e2;
   associations.resize(size1);
   for (unsigned i=0;i<size1;i++)
   {
@@ -29,11 +37,22 @@ void DataAssociation::clear(unsigned s1,unsigned s2)
     assign2[i]=-1;
 }
 
-void DataAssociation::set(unsigned d1,unsigned d2,double association)
+/**
+ * Set the association value for entity e1 and entity e2
+ * @param e1 number of entities
+ * @param e2 number of entities
+ * @param association association value
+ */
+void DataAssociation::set(unsigned e1,unsigned e2,double association)
 {
-  associations[d1][d2]=association;
+  associations[e1][e2]=association;
 }
   
+/**
+ * Associate entities after all association values are set
+ * @param order 1 if higher association values are better -1 if lower association are better
+ * @returns vector of length e2 which holds indexes to the associated e1 entities or -1 if it could not be associated
+ */
 std::vector<int> DataAssociation::associate(int order)
 {
   std::vector<int> association(size2);
@@ -50,6 +69,9 @@ std::vector<int> DataAssociation::associate(int order)
   return association;
 }
 
+/**
+ * ostreams DataAssociation
+ */
 std::ostream& operator<<(std::ostream& out,const DataAssociation& dataAssociation)
 {
   out<<"DataAssociation:"<<endl;
@@ -64,6 +86,9 @@ std::ostream& operator<<(std::ostream& out,const DataAssociation& dataAssociatio
   return out;
 }
 
+/**
+ * Get the next association based on the best remaining association value
+ */
 std::pair<int,int> DataAssociation::getMax(int order)
 {
   std::pair<int,int> ret;

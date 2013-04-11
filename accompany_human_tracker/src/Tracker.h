@@ -9,6 +9,9 @@
 
 #include <vector>
 
+/**
+ *  Tracks detections based on position and color
+ */
 class Tracker
 {
  public:
