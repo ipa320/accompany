@@ -1,7 +1,7 @@
 <launch>
 
   <node pkg="rosbag" type="play" name="playBags"
-   args="--skip-empty=1 -l -d 2 -r 0.2
+   args="-l -d 1 -r 0.2
      $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag
      $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
      "/>
@@ -36,10 +36,10 @@
         args="-p $(find accompany_uva)/res/testRobotHouse/bothCameras -n 4 -v"/>
 
 
-  <!-- track humans using localisation data -->
+  <!-- track humans using localisation data 
   <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
         args=""/>
- 
+ -->
   
   <!-- Map server -->
   <node pkg="map_server" type="map_server" name="map_server" args="$(find accompany_uva)/res/testRobotHouse/map.yaml"/>

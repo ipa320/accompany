@@ -17,12 +17,17 @@ int main(int argc,char **argv)
 {
   ros::init(argc, argv, "human_tracker");
 
+  double stateThreshold,appearanceThreshold,totalThreshold;
+
   // handling command line arguments
   program_options::options_description optionsDescription("Tracks humans using human detections");
   optionsDescription.add_options()
-    ("help,h","show help message");
+    ("help,h","show help message")
+    ("stateThreshold,s",program_options::value<double>(&stateThreshold)->default_value(-6),"threshold on the kalman filter state")
+    ("appearanceThreshold,a",program_options::value<double>(&appearanceThreshold)->default_value(-0),"threshold on the appearance")
+    ("totalThreshold,t",program_options::value<double>(&totalThreshold)->default_value(-6),"combined threshold on state and appearance");
 
-  program_options::variables_map variablesMap;
+program_options::variables_map variablesMap;
   try
   {
     program_options::store(program_options::parse_command_line(argc, argv, optionsDescription),variablesMap);
@@ -38,9 +43,13 @@ int main(int argc,char **argv)
   // create publisher and subscribers
   ros::NodeHandle n;
   ros::Publisher trackedHumansPub=n.advertise<accompany_uva_msg::TrackedHumans>("/trackedHumans",10);
-  ros::Publisher markerArrayPub  =n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
+ros::Publisher markerArrayPub  =n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
 
-  Tracker tracker(trackedHumansPub,markerArrayPub);// create Tracker
+// create Tracker
+  Tracker tracker(trackedHumansPub,markerArrayPub,
+                  stateThreshold,
+                  appearanceThreshold,
+                  totalThreshold);
   
   ros::Subscriber humanDetectionsSub=n.subscribe<accompany_uva_msg::HumanDetections>("/humanDetections",10,
                                                                                      &Tracker::processDetections,&tracker);

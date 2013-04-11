@@ -17,7 +17,9 @@ class Track
   Track(const accompany_uva_msg::HumanDetection& humanDetection);
   
   double match(const accompany_uva_msg::HumanDetection& humanDetection,
-               const vnl_matrix<double>& obsModel);
+               const vnl_matrix<double>& obsModel,
+               double stateThreshold,
+               double appearanceThreshold);
   double matchState(const accompany_uva_msg::HumanDetection& humanDetection,
                     const vnl_matrix<double>& obsModel);
   double matchAppearance(const accompany_uva_msg::HumanDetection& humanDetection);

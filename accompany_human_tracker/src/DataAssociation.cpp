@@ -50,17 +50,18 @@ void DataAssociation::set(unsigned e1,unsigned e2,double association)
   
 /**
  * Associate entities after all association values are set
+ * @param threshold threshold of the association values
  * @param order 1 if higher association values are better -1 if lower association are better
  * @returns vector of length e2 which holds indexes to the associated e1 entities or -1 if it could not be associated
  */
-std::vector<int> DataAssociation::associate(int order)
+std::vector<int> DataAssociation::associate(double threshold,int order)
 {
   std::vector<int> association(size2);
   for (unsigned i=0;i<size2;i++)
     association[i]=-1;
   while (true)
   {
-    std::pair<int,int> p=getMax(order);
+    std::pair<int,int> p=getMax(threshold,order);
     if (p.first<0)
       break;
     association[p.second]=p.first;
@@ -88,13 +89,15 @@ std::ostream& operator<<(std::ostream& out,const DataAssociation& dataAssociatio
 
 /**
  * Get the next association based on the best remaining association value
+ * @param threshold threshold of the association values
+ * @param order 1 if higher association values are better -1 if lower association are better
  */
-std::pair<int,int> DataAssociation::getMax(int order)
+std::pair<int,int> DataAssociation::getMax(double threshold,int order)
 {
   std::pair<int,int> ret;
   ret.first=-1;
   ret.second=-1;
-  double max=numeric_limits<double>::max()*-order;
+  double max=(numeric_limits<double>::max()/2)*-order;
   //cout<<"max:"<<max<<endl;
   //cout<<"size1:"<<size1<<" size2:"<<size2<<endl;
   for (unsigned i=0;i<size1;i++)
@@ -106,11 +109,14 @@ std::pair<int,int> DataAssociation::getMax(int order)
         if (assign2[j]<0) // unassigned 2
         {
           //cout<<"i:"<<i<<" j:"<<j<<endl;
-          if (associations[i][j]*order>max*order)
+          if (associations[i][j]*order>threshold*order &&
+              associations[i][j]*order>max*order)
           {
+            cout<<associations[i][j]<<" * "<<order<<endl;
             max=associations[i][j]*order;
             ret.first=i;
             ret.second=j;
+            //cout<<"max:"<<max<<" first:"<<ret.first<<" second:"<<ret.second<<endl;
           }
         }
       }

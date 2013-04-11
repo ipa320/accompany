@@ -14,7 +14,7 @@ class DataAssociation
   void clear(unsigned s1,unsigned s2);
 
   void set(unsigned d1,unsigned d2,double association);  
-  std::vector<int> associate(int order=1);
+  std::vector<int> associate(double threshold,int order=1);
   
   friend std::ostream& operator<<(std::ostream& out,const DataAssociation& dataAssociation);
 
@@ -24,7 +24,7 @@ class DataAssociation
   unsigned size1,size2;
   std::vector<int> assign1,assign2;
   
-  std::pair<int,int> getMax(int order);
+  std::pair<int,int> getMax(double threshold,int order);
 
 };
 

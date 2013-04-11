@@ -51,14 +51,28 @@ Track::Track(const accompany_uva_msg::HumanDetection& humanDetection)
  * Compute the match of this track with the detection
  * @param humanDetection human detection
  * @param obsModel observation model that maps the kalman state to the kalman observation space
+ * @param stateThreshold a threshold on the kalman state
+ * @param appearanceThreshold a threshold on the appearance
  * @return the match value
  */
 double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
-                    const vnl_matrix<double>& obsModel)
+                    const vnl_matrix<double>& obsModel,
+                    double stateThreshold,
+                    double appearanceThreshold)
 {
   double state=matchState(humanDetection,obsModel);
+  if (state<stateThreshold)
+  {
+    cout<<"state="<<state<<" < stateThreshold="<<stateThreshold<<endl;
+    return -numeric_limits<double>::max();
+  }
   double appearance=matchAppearance(humanDetection);
-  cout<<"state: "<<state<<" appearance: "<<appearance<<endl;
+  if (appearance<appearanceThreshold)
+  {
+    cout<<"appearance="<<appearance<<" < appearanceThreshold="<<appearanceThreshold<<endl;
+    return -numeric_limits<double>::max();
+  }
+  cout<<"*** state: "<<state<<" appearance: "<<appearance<<endl;
   return state+appearance;
 }
 
@@ -71,17 +85,22 @@ double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
 double Track::matchState(const accompany_uva_msg::HumanDetection& humanDetection,
                          const vnl_matrix<double>& obsModel)
 {
+  vnl_vector<double> state=obsModel*kalmanFilter.getState();
+  vnl_matrix<double> covar=obsModel*kalmanFilter.getCovariance()*obsModel.transpose();
   vnl_vector<double> obs=getObs(humanDetection);
-  vnl_matrix<double> covariance=kalmanFilter.getCovariance();
-  double det=vnl_determinant(covariance);
-  vnl_matrix<double> diff=toMatrix(obs-obsModel*kalmanFilter.getState());
-  //cout<<"diff:"<<diff<<endl;
-  vnl_matrix<double> covar=obsModel*covariance*obsModel.transpose();
-  //cout<<"covar:"<<covar<<endl;
+  vnl_matrix<double> diff=toMatrix(obs-state);
+  /*
+  cout<<endl;
+  cout<<"state:"<<state<<endl;
+  cout<<"covar:"<<endl<<covar;
+  cout<<"obs:"<<obs<<endl;
+  cout<<"diff:"<<endl<<diff;
+  */
+  double det=vnl_determinant(covar);
   vnl_matrix<double> inv=vnl_matrix_inverse<double>(covar);
-  //cout<<"inv:"<<inv<<endl;
+  //cout<<"inv:"<<endl<<inv;
   vnl_matrix<double> exp=diff.transpose()*inv*diff;
-  //cout<<"exp:"<<exp<<endl;
+  //cout<<"exp:"<<endl<<exp;
   return -(DIMENSION*log(2*M_PI) + log(det) + exp[0][0])/2; // multivariate gaussian distribution
 }
 

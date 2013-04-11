@@ -17,14 +17,19 @@ class Tracker
 {
  public:
   Tracker(const ros::Publisher& trackedHumansPub,
-          const ros::Publisher& markerArrayPub);
+          const ros::Publisher& markerArrayPub,
+          double stateThreshold,
+          double appearanceThreshold,
+          double totalThreshold);
   void processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections);
   
   friend std::ostream& operator<<(std::ostream& out,const Tracker& tracker);
 
  private:
   std::vector<Track> tracks;
+
   DataAssociation dataAssociation;
+  double stateThreshold,appearanceThreshold,totalThreshold;
 
   vnl_matrix<double>
     transModel, transCovariance,
@@ -39,6 +44,7 @@ class Tracker
 
   accompany_uva_msg::HumanDetections transform(const accompany_uva_msg::HumanDetections& humanDetections);
   void publishTracks();
+
 
 };
 

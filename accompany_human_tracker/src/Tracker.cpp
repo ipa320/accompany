@@ -9,10 +9,16 @@ using namespace std;
  * @param transformListener used to transform to world coordinates
  */
 Tracker::Tracker(const ros::Publisher& trackedHumansPub,
-                 const ros::Publisher& markerArrayPub)
+                 const ros::Publisher& markerArrayPub,
+                 double stateThreshold,
+                 double appearanceThreshold,
+                 double totalThreshold)
 {
   this->trackedHumansPub=trackedHumansPub;
   this->markerArrayPub=markerArrayPub;
+  this->stateThreshold=stateThreshold;
+  this->appearanceThreshold=appearanceThreshold;
+  this->totalThreshold=totalThreshold;
 
   // kalman motion and observation model
   const double tm[]={1,0,1,0,
@@ -64,14 +70,21 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   dataAssociation.clear(tracks.size(),transHumanDetections.detections.size());
   for (unsigned i=0;i<tracks.size();i++)
     for (unsigned j=0;j<transHumanDetections.detections.size();j++)
-      dataAssociation.set(i,j,tracks[i].match(transHumanDetections.detections[j],obsModel));
+    {
+      double match=tracks[i].match(transHumanDetections.detections[j],
+                                   obsModel,
+                                   stateThreshold,
+                                   appearanceThreshold);
+      dataAssociation.set(i,j,match);
+    }
 
-  vector<int> associations=dataAssociation.associate();
+  vector<int> associations=dataAssociation.associate(totalThreshold);
 
   cout<<"associations:"<<endl;
   for (unsigned i=0;i<associations.size();i++)
     cout<<associations[i]<<" ";
   cout<<endl;
+
 
   // update or create tracks
   for (unsigned i=0;i<associations.size();i++)
