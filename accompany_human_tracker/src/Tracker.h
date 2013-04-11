@@ -6,6 +6,7 @@
 
 #include <ros/ros.h>
 #include <accompany_uva_msg/MsgToMarkerArray.h>
+#include <tf/transform_listener.h>
 
 #include <vector>
 
@@ -15,8 +16,8 @@
 class Tracker
 {
  public:
-  Tracker(ros::Publisher trackedHumansPub,
-          ros::Publisher markerArrayPub);
+  Tracker(const ros::Publisher& trackedHumansPub,
+          const ros::Publisher& markerArrayPub);
   void processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections);
   
   friend std::ostream& operator<<(std::ostream& out,const Tracker& tracker);
@@ -34,6 +35,9 @@ class Tracker
   ros::Publisher trackedHumansPub;
   MsgToMarkerArray msgToMarkerArray;
   ros::Publisher markerArrayPub;
+  tf::TransformListener transformListener;
+
+  accompany_uva_msg::HumanDetections transform(const accompany_uva_msg::HumanDetections& humanDetections);
   void publishTracks();
 
 };

@@ -1,13 +1,6 @@
 
 #include <Tracker.h>
 
-
-//#include <cob_people_detection_msgs/Detection.h>
-//#include <cob_people_detection_msgs/DetectionArray.h>
-#include <tf/transform_listener.h>
-
-//#include <DataAssociation.h>
-
 #include <boost/program_options.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/foreach.hpp>
@@ -17,9 +10,6 @@
 using namespace std;
 using namespace boost;
 
-// globals
-ros::Time prevNow;
-tf::TransformListener *listener=NULL;
 //map<string,int> identityToID; // map of identities to id's
 //map<int,string> idToIdentity; // map of id's to identities
 
@@ -47,20 +37,14 @@ int main(int argc,char **argv)
 
   // create publisher and subscribers
   ros::NodeHandle n;
-
-  prevNow=ros::Time::now();
-  tf::TransformListener initListener;
-  listener=&initListener;
-
   ros::Publisher trackedHumansPub=n.advertise<accompany_uva_msg::TrackedHumans>("/trackedHumans",10);
   ros::Publisher markerArrayPub  =n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
-  // create Tracker
-  Tracker tracker(trackedHumansPub,markerArrayPub);
 
+  Tracker tracker(trackedHumansPub,markerArrayPub);// create Tracker
+  
   ros::Subscriber humanDetectionsSub=n.subscribe<accompany_uva_msg::HumanDetections>("/humanDetections",10,
                                                                                      &Tracker::processDetections,&tracker);
   //ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
-  
 
   ros::spin();
 

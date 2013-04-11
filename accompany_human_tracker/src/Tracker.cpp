@@ -6,9 +6,10 @@ using namespace std;
  * Constructor
  * @param trackedHumansPub 'trackedHuman' publisher
  * @param markerArrayPub 'markerArray' publisher for visualization purposes
+ * @param transformListener used to transform to world coordinates
  */
-Tracker::Tracker(ros::Publisher trackedHumansPub,
-                 ros::Publisher markerArrayPub)
+Tracker::Tracker(const ros::Publisher& trackedHumansPub,
+                 const ros::Publisher& markerArrayPub)
 {
   this->trackedHumansPub=trackedHumansPub;
   this->markerArrayPub=markerArrayPub;
@@ -44,6 +45,9 @@ double timeDiff(const struct timeval& time,
  */
 void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections)
 {
+  // transform to world coordinates
+  accompany_uva_msg::HumanDetections transHumanDetections=transform(*humanDetections);
+
   // transition based on elapsed time
   struct timeval time;
   gettimeofday(&time, NULL);
@@ -57,10 +61,10 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
     tracks[i].transition(transModel,transCovariance);
 
   // associate observations with tracks
-  dataAssociation.clear(tracks.size(),humanDetections->detections.size());
+  dataAssociation.clear(tracks.size(),transHumanDetections.detections.size());
   for (unsigned i=0;i<tracks.size();i++)
-    for (unsigned j=0;j<humanDetections->detections.size();j++)
-      dataAssociation.set(i,j,tracks[i].match(humanDetections->detections[j],obsModel));
+    for (unsigned j=0;j<transHumanDetections.detections.size();j++)
+      dataAssociation.set(i,j,tracks[i].match(transHumanDetections.detections[j],obsModel));
 
   vector<int> associations=dataAssociation.associate();
 
@@ -74,11 +78,11 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   {
     if (associations[i]<0) // not assigned
     {
-      tracks.push_back(Track(humanDetections->detections[i]));
+      tracks.push_back(Track(transHumanDetections.detections[i]));
     }
     else // assigned
     {
-      tracks[associations[i]].observation(humanDetections->detections[i],
+      tracks[associations[i]].observation(transHumanDetections.detections[i],
                                           obsModel,
                                           obsCovariance);
     }
@@ -88,6 +92,32 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   prevTime=time;
   
   publishTracks();
+}
+
+/**
+ * Transform human detections to world coordinates
+ */
+accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::HumanDetections& humanDetections)
+{
+  accompany_uva_msg::HumanDetections transformedHumanDetections;
+  for (unsigned i=0;i<humanDetections.detections.size();i++)
+  {
+    try// transform to map coordinate system
+    {
+      geometry_msgs::PointStamped transPoint;
+      transformListener.transformPoint("/map",
+                                       humanDetections.detections[i].location,
+                                       transPoint);
+      transformedHumanDetections.detections.push_back(humanDetections.detections[i]);
+      transformedHumanDetections.detections.back().location=transPoint;
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      break;
+    }
+  }
+  return transformedHumanDetections;
 }
 
 /**
