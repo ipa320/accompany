@@ -740,7 +740,6 @@ int main(int argc, char **argv)
   po::options_description optionsDescription(
       "Human Detection main function\n"
       "Available remappings:\n"
-      "  image:=<image-topic>\n"
       "  humanDetections:=<humanDetections-topic>\n"
       "\n"
       "Allowed options");
@@ -822,7 +821,6 @@ int main(int argc, char **argv)
   // ROS nodes, subscribers and publishers
   ros::init(argc, argv, "camera_localization");
   ros::NodeHandle n;
-  std::string resolved_image=n.resolveName("image");
   std::string resolved_humanDetections=n.resolveName("humanDetections");
   cout<<"publish to detection topic: "<<resolved_humanDetections<<endl;
 
