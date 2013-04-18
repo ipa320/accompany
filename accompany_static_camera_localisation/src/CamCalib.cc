@@ -672,12 +672,15 @@ void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, 
   vector<CvPoint> proj;
   for (unsigned i=0; i!=priorHull.size(); ++i)
     proj.push_back(cam[idx].project(priorHull[i]));
-  proj.push_back(proj.front());
+  if (proj.size()>0)
+  {
+    proj.push_back(proj.front());
 
-  cvCircle(img, proj[0],2, color, 1);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,color,3);
-    cvLine(img, proj[i-1],proj[i],color,2);
+    cvCircle(img, proj[0],2, color, 1);
+    for (unsigned i=1; i<proj.size(); ++i) {
+      cvCircle(img,proj[i],5,color,3);
+      cvLine(img, proj[i-1],proj[i],color,2);
+    }
   }
 }
 
@@ -686,9 +689,10 @@ void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, 
   vector<CvPoint> proj;
   for (unsigned i=0; i!=priorHull.size(); ++i)
     proj.push_back(cam[idx].project(priorHull[i]));
+  
   proj.push_back(cam[idx].project(pt));
   proj.push_back(proj.front());
-
+  
   cvCircle(img, proj[0],5, CV_RGB(0,255,0), 3);
   for (unsigned i=1; i<proj.size(); ++i) {
     cvCircle(img,proj[i],5,color,3);

@@ -9,14 +9,56 @@
 #include "Helpers.hh"
 #include "CamCalib.hh"
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 namespace po = boost::program_options;
 using namespace std;
 
-CvScalar CLR = CV_RGB(0,255,0);
+CvScalar CLR=CV_RGB(0,255,0), CLR2=CV_RGB(0,255,255);
 vector<IplImage *> img;
+vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
+vector< vector<WorldPoint> > entryExitHulls(1);
 
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
+
+void refreshPlot()
+{
+  for (unsigned i=0; i!=img.size(); ++i)
+  {
+    if (imgPlot.size()>i)
+      cvCopy(img[i],imgPlot[i]);
+    else
+      imgPlot.push_back(cvCloneImage(img[i]));
+  }
+}
+
+void plotPriorHull()
+{
+  for (unsigned i=0; i!=img.size(); ++i) 
+  {
+    plotHull(imgPlot[i],priorHull,i,CLR);
+    cvShowImage(win[i],imgPlot[i]);
+  }
+}
+
+void plotEntryExitHulls()
+{
+  for (unsigned j=0;j<entryExitHulls.size();j++)
+  {
+    for (unsigned i=0; i!=img.size(); ++i) 
+    {
+      plotHull(imgPlot[i],entryExitHulls[j],i,CLR2);
+      cvShowImage(win[i],imgPlot[i]);
+    }
+  }
+}
+
+void plot()
+{
+  refreshPlot();
+  plotPriorHull();
+  plotEntryExitHulls();
+}
 
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 {
@@ -26,48 +68,41 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
   static bool redraw=false;
   static bool drawMouse=false;
 
-  switch (event) {
-    case CV_EVENT_LBUTTONDOWN:
-      cout << "Left button down at " << pt.x << "," << pt.y << endl;
-      cout << "image points at " << x << "," << y << endl;
-      cout << "press 'q' to finish and save to file" << endl;
-      down = true;
+  switch (event) 
+  {
+  case CV_EVENT_LBUTTONDOWN:
+    down = true;
+    redraw = true;
+    drawMouse = true;
+    break;
+  case CV_EVENT_MOUSEMOVE:
+    if (down)
+    {
       redraw = true;
       drawMouse = true;
-      break;
-    case CV_EVENT_MOUSEMOVE:
-      if (down)
-      {
-        redraw = true;
-        drawMouse = true;
-      }
-      break;
-    case CV_EVENT_LBUTTONUP:
-      down = false;
-      priorHull.push_back(pt);
-      cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
-      redraw = true;
-      break;
-  case CV_EVENT_RBUTTONDOWN:
-      priorHull.pop_back();
-      redraw = true;
-      break;
+    }
+    break;
+  case CV_EVENT_LBUTTONUP:
+    down = false;
+    entryExitHulls.back().push_back(pt);
+    cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
+    redraw = true;
+    break;
+  case CV_EVENT_RBUTTONDOWN: // remove
+    if (entryExitHulls.size()>0 && entryExitHulls.back().size()==0)
+      entryExitHulls.pop_back();
+    else
+      entryExitHulls.back().pop_back();
+    redraw = true;
+    break;
+  case CV_EVENT_MBUTTONDOWN: // add new hull
+    vector<WorldPoint> hull;
+    entryExitHulls.push_back(hull);
+    break;
   }
 
   if (redraw)
-  {
-    for (unsigned i=0; i!=img.size(); ++i) 
-    {
-      IplImage *tmp = cvCloneImage(img[i]);
-      if (drawMouse)
-        plotHull(tmp,priorHull,i,CLR,pt);
-      else
-        plotHull(tmp,priorHull,i,CLR);
-      cvShowImage(win[i],tmp);
-      cvReleaseImage(&tmp);
-    }
-  }
-  
+    plot();
 }
 
 #define DEF(IDX) void mh##IDX(int e, int x, int y, int f, void *p) { return mouseHandler(IDX,e,x,y,f,p); }
@@ -80,7 +115,7 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv) {
 
-  string imagelist_file, params_file, outputPrior_file;
+  string imagelist_file, params_file;
 
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
@@ -88,7 +123,6 @@ int main(int argc, char **argv) {
     ("help,h","show help message")
     ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
     ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
-    ("outputPrior,o", po::value<string>(&outputPrior_file)->required(),"the output filename of the prior\n")
     ;
 
   po::variables_map variablesMap;
@@ -108,11 +142,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+
   vector< vector<string> > imgs;
   listImages(imagelist_file.c_str(),imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage *>(imgs[0].size());
-
+    
   unsigned index = 0;
   for (unsigned i=0; i!=imgs[index].size(); ++i)
   {
@@ -129,7 +164,13 @@ int main(int argc, char **argv) {
   halfresX = width/2;
   halfresY = height/2;
 
+  boost::filesystem::path p(params_file);
+  string path = p.parent_path().string().c_str();
+  string prior_file = path + "/" + "prior.txt";
+
   loadCalibrations(params_file.c_str());
+  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  plot();
 
   int key = 0;
   while ((char)key != 'q') {
@@ -137,6 +178,7 @@ int main(int argc, char **argv) {
     key = cvWaitKey(0);
   }
 
+  /*
   cout << "1" << endl;
   for (unsigned i=0; i!=priorHull.size(); ++i)
     cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
@@ -152,7 +194,12 @@ int main(int argc, char **argv) {
   outfile.close();
   cout << endl;
   cout << "prior saved to " << outputPrior_file << endl;
+  */
+
   for (unsigned i=0; i!=img.size(); ++i)
+  {
     cvReleaseImage(&img[i]);
+    cvReleaseImage(&imgPlot[i]);
+  }
   return 0;
 }

@@ -9,6 +9,7 @@
 #include "Helpers.hh"
 #include "CamCalib.hh"
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 namespace po = boost::program_options;
 using namespace std;
 
@@ -80,7 +81,7 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv) {
 
-  string imagelist_file, params_file, outputPrior_file;
+  string imagelist_file, params_file;
 
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
@@ -88,7 +89,6 @@ int main(int argc, char **argv) {
     ("help,h","show help message")
     ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
     ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
-    ("outputPrior,o", po::value<string>(&outputPrior_file)->required(),"the output filename of the prior\n")
     ;
 
   po::variables_map variablesMap;
@@ -128,6 +128,10 @@ int main(int argc, char **argv) {
   channels = img[0]->nChannels;
   halfresX = width/2;
   halfresY = height/2;
+
+  boost::filesystem::path p(params_file);
+  string path = p.parent_path().string().c_str();
+  string outputPrior_file = path + "/" + "prior.txt";
 
   loadCalibrations(params_file.c_str());
 
