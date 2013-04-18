@@ -96,18 +96,44 @@ LINK_DIRECTORIES(${OPENCV_LIB_DIR})
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
+SET( MY_STANDARD_LIBS 
+  helpers
+  calib
+  boost_program_options 
+  boost_system 
+  boost_filesystem
+  opencv_core
+  opencv_highgui
+  opencv_features2d
+  opencv_calib3d
+  opencv_imgproc
+  cmn 
+  tools 
+  iberty 
+  vnl_algo 
+  vnl 
+  v3p_netlib 
+  boost_date_time-mt 
+  ${XML2_LDFLAGS}
+  yaml-cpp
+  MsgToMarkerArray
+  )
+
 # rosbuild
 rosbuild_add_executable(calibration_intrinsic src/calibration_intrinsic.cpp)
-TARGET_LINK_LIBRARIES(calibration_intrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui opencv_features2d boost_program_options)
+TARGET_LINK_LIBRARIES(calibration_intrinsic ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(calibration_extrinsic src/calibration_extrinsic.cpp)
-TARGET_LINK_LIBRARIES(calibration_extrinsic opencv_core opencv_calib3d opencv_imgproc opencv_highgui boost_program_options)
+TARGET_LINK_LIBRARIES(calibration_extrinsic ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(build_background_model src/build_background_model.cpp)
-TARGET_LINK_LIBRARIES(build_background_model helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+TARGET_LINK_LIBRARIES(build_background_model ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(create_prior src/create_prior.cpp)
-TARGET_LINK_LIBRARIES( create_prior helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+TARGET_LINK_LIBRARIES( create_prior ${MY_STANDARD_LIBS})
+
+rosbuild_add_executable(create_entry_exit_areas src/create_entry_exit_areas.cpp)
+TARGET_LINK_LIBRARIES(create_entry_exit_areas ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(camera_localization 
   src/camera_localization.cpp
@@ -115,58 +141,59 @@ rosbuild_add_executable(camera_localization
   src/AppearanceExtractor.h
   src/AppearanceExtractor.cpp
  )
-target_link_libraries(camera_localization helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS} MsgToMarkerArray)
+target_link_libraries(camera_localization ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(create_calibration_list src/create_calibration_list.cpp)
-target_link_libraries(create_calibration_list opencv_highgui opencv_core opencv_imgproc)
+target_link_libraries(create_calibration_list ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(create_background_list src/create_background_list.cpp)
-target_link_libraries(create_background_list opencv_highgui opencv_core opencv_imgproc)
+target_link_libraries(create_background_list ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(annotate_image_points src/annotate_image_points.cpp)
-target_link_libraries(annotate_image_points opencv_highgui opencv_core opencv_imgproc helpers calib cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt ${XML2_LDFLAGS})
+target_link_libraries(annotate_image_points ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable( annotate_pos src/annotate_pos.cpp )
-target_link_libraries( annotate_pos helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+target_link_libraries( annotate_pos ${MY_STANDARD_LIBS} )
+
 
 rosbuild_add_executable(image_saver src/image_saver.cpp)
-target_link_libraries(image_saver opencv_highgui opencv_core opencv_imgproc boost_program_options)
+target_link_libraries(image_saver ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(video_publisher src/video_publisher.cpp)
-target_link_libraries(video_publisher opencv_highgui opencv_core opencv_imgproc boost_program_options)
+target_link_libraries(video_publisher ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(create_frame src/create_frame.cpp)
-target_link_libraries(create_frame boost_program_options)
+target_link_libraries(create_frame ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(create_tf_room2world src/create_tf_room2world.cpp)
-target_link_libraries(create_tf_room2world opencv_highgui opencv_core opencv_imgproc boost_program_options yaml-cpp)
+target_link_libraries(create_tf_room2world ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(undistortion_test src/undistortion_test.cpp)
-target_link_libraries(undistortion_test opencv_highgui opencv_core opencv_imgproc opencv_calib3d boost_program_options)
+target_link_libraries(undistortion_test ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(testCameraModel src/testCameraModel.cpp)
-target_link_libraries(testCameraModel opencv_highgui opencv_core opencv_imgproc opencv_calib3d helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+target_link_libraries(testCameraModel ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(test_transform src/test_transform.cpp)
-target_link_libraries(test_transform boost_program_options)
+target_link_libraries(test_transform ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(resize_image src/resize_image.cpp)
-target_link_libraries(resize_image opencv_core boost_program_options)
+target_link_libraries(resize_image ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(add_camera_info src/add_camera_info.cpp)
-target_link_libraries(add_camera_info opencv_core boost_program_options boost_system boost_filesystem)
+target_link_libraries(add_camera_info ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(publish_image src/publish_image.cpp)
-target_link_libraries(publish_image opencv_core boost_program_options)
+target_link_libraries(publish_image ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(kinect_driver src/kinect_driver.cpp)
-target_link_libraries(kinect_driver boost_program_options)
+target_link_libraries(kinect_driver ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(publish_tf_from_extrinsic src/publish_tf_from_extrinsic.cpp)
-target_link_libraries(publish_tf_from_extrinsic boost_program_options)
+target_link_libraries(publish_tf_from_extrinsic ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(project_tf_to_camera src/project_tf_to_camera.cpp)
-target_link_libraries(project_tf_to_camera boost_program_options opencv_highgui opencv_core)
+target_link_libraries(project_tf_to_camera ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(HistogramTest 
   src/Histogram.h
@@ -181,4 +208,4 @@ rosbuild_add_executable(create_occlusion_by_background_mask
   src/create_occlusion_by_background_mask.cpp
   src/ImageMask.h
   src/ImageMask.cpp)
-target_link_libraries(create_occlusion_by_background_mask helpers calib opencv_calib3d opencv_highgui opencv_core opencv_imgproc cmn tools iberty vnl_algo vnl v3p_netlib boost_date_time-mt boost_program_options ${XML2_LDFLAGS})
+target_link_libraries(create_occlusion_by_background_mask ${MY_STANDARD_LIBS})

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -18,6 +19,7 @@ IplImage *image=NULL;
 IplImage *imageDraw=NULL;
 int camIndex=-1;
 ImageMask imageMask;
+CvScalar CLR = CV_RGB(0,255,0);
 
 void printManual()
 {
@@ -62,24 +64,16 @@ void mouseHandler(int event, int x, int y, int flags, void *param)
     updateMask();
 }
 
-void plotHull(IplImage *img, vector<WorldPoint> &hull, unsigned c)
-{
-  hull.push_back(hull.front());
-  for (unsigned i = 1; i < hull.size(); ++i)
-    cvLine(img, cam[c].project(hull[i - 1]), cam[c].project(hull[i]),
-        CV_RGB(255,0,0), 2);
-}
-
 int main(int argc, char **argv) 
 {
-  string imageName,paramsPath,cameraName,maskName;
+  string imageName,params_file,cameraName,maskName;
 
   // handling arguments
   options_description optionsDescription("Select occlusion by background mask to indicate where the static background occludes the eara of interest\n");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("image-name,i", value<string>(&imageName)->required(),"filename of image to select occlusion by background mask in")
-    ("params-path,p", value<string>(&paramsPath)->required(),"the path to the params.xml")
+    ("params,p", value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
     ("camera-name,c", value<string>(&cameraName)->required(),"the camera name which took the image")
     ("mask-name,m", value<string>(&maskName)->default_value("occlusionBGMask.txt"),"the name of the mask")
     ;
@@ -101,9 +95,10 @@ int main(int argc, char **argv)
   }
 
   // load data from file
-  string params_file = paramsPath + "/" + "params.xml";
-  string prior_file = paramsPath + "/" + "prior.txt";
-  loadCalibrations(params_file.c_str(),paramsPath.c_str());
+  boost::filesystem::path p(params_file);
+  string path = p.parent_path().string().c_str();
+  string prior_file = path + "/" + "prior.txt";
+  loadCalibrations(params_file.c_str());
   vector<WorldPoint> priorHull;
   loadWorldPriorHull(prior_file.c_str(),priorHull);
 
@@ -132,7 +127,7 @@ int main(int argc, char **argv)
   }
 
   // load existing mask
-  string mask_file = paramsPath + "/" + maskName;
+  string mask_file = path + "/" + maskName;
   ifstream maskin(mask_file.c_str());
   if (maskin.is_open())
   {
@@ -147,7 +142,7 @@ int main(int argc, char **argv)
   
   // load image
   image=loadImage(imageName.c_str());
-  plotHull(image,priorHull,camIndex);
+  plotHull(image,priorHull,camIndex,CLR);
   imageDraw=cvCloneImage(image);
   cvNamedWindow(imageWindow.c_str());
   cvSetMouseCallback(imageWindow.c_str(),mouseHandler,NULL);

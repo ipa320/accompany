@@ -17,6 +17,7 @@
 #include <boost/thread.hpp>
 #include <boost/version.hpp>
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 #if BOOST_VERSION < 103500
 #include <boost/thread/detail/lock.hpp>
 #endif
@@ -734,7 +735,7 @@ void timerCallback(const ros::TimerEvent& timerEvent)
 
 int main(int argc, char **argv)
 {
-  string path, bgmodel_file, params_file, prior_file, intrinsic_file, extrinsic_file, frame_file;
+  string params_file;
 
   // handling arguments
   po::options_description optionsDescription(
@@ -745,8 +746,7 @@ int main(int argc, char **argv)
       "Allowed options");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("path_param,p", po::value<string>(&path)->required(),"path where you put all files, including bgmodel.xml,"
-     "param.xml, prior.txt, camera_intrinsic.xml, camera_extrinsic.xml\n")
+    ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
     ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(0))
     ("visualize,v","visualize detection\n")
     ("save_all,a", po::value<string>(&save_all)->default_value(""),"save all data\n");
@@ -775,11 +775,11 @@ int main(int argc, char **argv)
     sprintf(data_file,"%s/data.xml",save_all.c_str());
   }
 
+  string path, bgmodel_file, prior_file, frame_file;
+  boost::filesystem::path p(params_file);
+  path = p.parent_path().string().c_str();
   bgmodel_file = path + "/" + "bgmodel.xml";
-  params_file = path + "/" + "params.xml";
   prior_file = path + "/" + "prior.txt";
-  intrinsic_file = path + "/" + "camera_intrinsic.xml";
-  extrinsic_file = path + "/" + "camera_extrinsic.xml";
   frame_file = path + "/" + "frame.dat";
 
   
@@ -798,11 +798,7 @@ int main(int argc, char **argv)
   getBackground(bgmodel_file.c_str(), bgModel); // load background model
 #endif
   ROS_INFO_STREAM("loading '"<<params_file.c_str()<<"'");
-  ROS_INFO_STREAM("loading '"<<intrinsic_file.c_str()<<"'");
-  ROS_INFO_STREAM("loading '"<<extrinsic_file.c_str()<<"'");
-  ROS_INFO_STREAM("cam.size:"<<cam.size());
-  loadCalibrations(params_file.c_str(),path.c_str()); // load calibration
-  ROS_INFO_STREAM("cam.size:"<<cam.size());
+  loadCalibrations(params_file.c_str()); // load calibration
   ROS_INFO_STREAM("loading '"<<prior_file.c_str()<<"'");
   loadWorldPriorHull(prior_file.c_str(), priorHull);
 

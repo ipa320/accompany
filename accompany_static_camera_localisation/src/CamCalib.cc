@@ -6,6 +6,8 @@
 #include <err.h>
 #include "Helpers.hh"
 #include <iostream>
+
+#include <boost/filesystem/path.hpp>
 // #include
 // // #include <opencv/cv.h>
 using namespace std;
@@ -503,17 +505,11 @@ void loadCalibrationsHelper(const char *filename)
   //cam[0].init(); // TODO
 }
 
-void loadCalibrations(const char *filename, const char* intrinsic, const char* extrinsic)
+void loadCalibrations(const char *filename)
 {
-  calibLoadPath=NULL;
-  intrinsicFile=intrinsic;
-  extrinsicFile=extrinsic;
-  loadCalibrationsHelper(filename);
-}
-
-void loadCalibrations(const char *filename, const char *path)
-{
-  calibLoadPath=path;
+  boost::filesystem::path p(filename);
+  boost::filesystem::path path=p.parent_path();
+  calibLoadPath=path.string().c_str();
   loadCalibrationsHelper(filename);
 }
 
@@ -668,4 +664,34 @@ void genScanLocations(const vector<WorldPoint> &prior, double scanRes,
   // cout << "Grid is " << r << "x" << c << endl;
   gridWidth = c;
   gridHeight = r;
+}
+
+
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color)
+{
+  vector<CvPoint> proj;
+  for (unsigned i=0; i!=priorHull.size(); ++i)
+    proj.push_back(cam[idx].project(priorHull[i]));
+  proj.push_back(proj.front());
+
+  cvCircle(img, proj[0],2, color, 1);
+  for (unsigned i=1; i<proj.size(); ++i) {
+    cvCircle(img,proj[i],5,color,3);
+    cvLine(img, proj[i-1],proj[i],color,2);
+  }
+}
+
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color, const WorldPoint &pt)
+{
+  vector<CvPoint> proj;
+  for (unsigned i=0; i!=priorHull.size(); ++i)
+    proj.push_back(cam[idx].project(priorHull[i]));
+  proj.push_back(cam[idx].project(pt));
+  proj.push_back(proj.front());
+
+  cvCircle(img, proj[0],5, CV_RGB(0,255,0), 3);
+  for (unsigned i=1; i<proj.size(); ++i) {
+    cvCircle(img,proj[i],5,color,3);
+    cvLine(img,proj[i-1],proj[i],color,2);
+  }
 }

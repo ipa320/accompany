@@ -18,41 +18,13 @@ vector<WorldPoint> priorHull;
 
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
 
-void plotHull(IplImage *img, unsigned idx)
-{
-  vector<CvPoint> proj;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    proj.push_back(cam[idx].project(priorHull[i]));
-  proj.push_back(proj.front());
-
-  cvCircle(img, proj[0],2, CLR, 1);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,CLR,3);
-    cvLine(img, proj[i-1],proj[i],CLR,2);
-  }
-}
-
-void plotHull(IplImage *img, unsigned idx, const WorldPoint &pt)
-{
-  vector<CvPoint> proj;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    proj.push_back(cam[idx].project(priorHull[i]));
-  proj.push_back(cam[idx].project(pt));
-  proj.push_back(proj.front());
-
-  cvCircle(img, proj[0],5, CV_RGB(0,255,0), 3);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,CLR,3);
-    cvLine(img,proj[i-1],proj[i],CLR,2);
-  }
-
-}
-
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 {
   WorldPoint pt = cam[idx].getGroundPos(cvPoint(x,y));
 
   static bool down=false;
+  static bool redraw=false;
+  static bool drawMouse=false;
 
   switch (event) {
     case CV_EVENT_LBUTTONDOWN:
@@ -60,39 +32,42 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
       cout << "image points at " << x << "," << y << endl;
       cout << "press 'q' to finish and save to file" << endl;
       down = true;
-      for (unsigned i=0; i!=img.size(); ++i) {
-        IplImage
-        *tmp = cvCloneImage(img[i]);
-        plotHull(tmp,i,pt);
-        cvShowImage(win[i], tmp);
-        cvReleaseImage(&tmp);
-      }
+      redraw = true;
+      drawMouse = true;
       break;
     case CV_EVENT_MOUSEMOVE:
       if (down)
-        for (unsigned i=0; i!=img.size(); ++i) {
-          IplImage
-          *tmp = cvCloneImage(img[i]);
-          plotHull(tmp,i,pt);
-
-          cvShowImage(win[i],tmp);
-          cvReleaseImage(&tmp);
-        }
+      {
+        redraw = true;
+        drawMouse = true;
+      }
       break;
     case CV_EVENT_LBUTTONUP:
       down = false;
       priorHull.push_back(pt);
       cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
-      for (unsigned i=0; i!=img.size(); ++i) {
-        IplImage
-        *tmp = cvCloneImage(img[i]);
-        plotHull(tmp,i);
-        cvShowImage(win[i],tmp);
-        cvReleaseImage(&tmp);
-      }
-
+      redraw = true;
+      break;
+  case CV_EVENT_RBUTTONDOWN:
+      priorHull.pop_back();
+      redraw = true;
       break;
   }
+
+  if (redraw)
+  {
+    for (unsigned i=0; i!=img.size(); ++i) 
+    {
+      IplImage *tmp = cvCloneImage(img[i]);
+      if (drawMouse)
+        plotHull(tmp,priorHull,i,CLR,pt);
+      else
+        plotHull(tmp,priorHull,i,CLR);
+      cvShowImage(win[i],tmp);
+      cvReleaseImage(&tmp);
+    }
+  }
+  
 }
 
 #define DEF(IDX) void mh##IDX(int e, int x, int y, int f, void *p) { return mouseHandler(IDX,e,x,y,f,p); }
@@ -105,17 +80,15 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv) {
 
-  string imagelist_file, params_file, outputPrior_file, intrinsic_file, extrinsic_file;
+  string imagelist_file, params_file, outputPrior_file;
 
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
-    ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
+    ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
     ("outputPrior,o", po::value<string>(&outputPrior_file)->required(),"the output filename of the prior\n")
-    ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
-    ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
     ;
 
   po::variables_map variablesMap;
@@ -135,16 +108,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  vector< vector<string> >
-  imgs;
+  vector< vector<string> > imgs;
   listImages(imagelist_file.c_str(),imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage *>(imgs[0].size());
 
-  unsigned
-  index = 0;
-
-  for (unsigned i=0; i!=imgs[index].size(); ++i) {
+  unsigned index = 0;
+  for (unsigned i=0; i!=imgs[index].size(); ++i)
+  {
     img[i] = loadImage(imgs[index][i].c_str());
 
     cvNamedWindow(win[i]);
@@ -158,7 +129,7 @@ int main(int argc, char **argv) {
   halfresX = width/2;
   halfresY = height/2;
 
-  loadCalibrations(params_file.c_str(),intrinsic_file.c_str(),extrinsic_file.c_str());
+  loadCalibrations(params_file.c_str());
 
   //     if (argc == 4) {
   //          loadWorldPriorHull(argv[3],priorHull);
