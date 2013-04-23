@@ -172,6 +172,7 @@ int main(int argc, char **argv) {
 
   loadCalibrations(params_file.c_str());
   loadHull(prior_file.c_str(), priorHull);
+  loadHulls(entryExit_file.c_str(),entryExitHulls);
   plot();
 
   int key = 0;
