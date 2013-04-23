@@ -15,59 +15,75 @@ using namespace std;
 
 CvScalar CLR = CV_RGB(0,255,0);
 vector<IplImage *> img;
+vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
 
+WorldPoint pt;
+bool ptValid=false;
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
+
+void refreshPlot()
+{
+  for (unsigned i=0; i!=img.size(); ++i)
+  {
+    if (imgPlot.size()>i)
+      cvCopy(img[i],imgPlot[i]);
+    else
+      imgPlot.push_back(cvCloneImage(img[i]));
+  }
+}
+
+void plotPriorHull()
+{
+  for (unsigned i=0; i!=img.size(); ++i) 
+  {
+    if (ptValid)
+      plotHull(imgPlot[i],priorHull,i,CLR,pt);
+    else
+      plotHull(imgPlot[i],priorHull,i,CLR);
+    cvShowImage(win[i],imgPlot[i]);
+  }
+}
+
+void plot()
+{
+  refreshPlot();
+  plotPriorHull();
+}
 
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 {
-  WorldPoint pt = cam[idx].getGroundPos(cvPoint(x,y));
+  pt = cam[idx].getGroundPos(cvPoint(x,y));
+  ptValid=true;
 
   static bool down=false;
   static bool redraw=false;
-  static bool drawMouse=false;
 
-  switch (event) {
-    case CV_EVENT_LBUTTONDOWN:
-      cout << "Left button down at " << pt.x << "," << pt.y << endl;
-      cout << "image points at " << x << "," << y << endl;
-      cout << "press 'q' to finish and save to file" << endl;
-      down = true;
-      redraw = true;
-      drawMouse = true;
-      break;
-    case CV_EVENT_MOUSEMOVE:
-      if (down)
-      {
-        redraw = true;
-        drawMouse = true;
-      }
-      break;
-    case CV_EVENT_LBUTTONUP:
-      down = false;
-      priorHull.push_back(pt);
-      cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
-      redraw = true;
-      break;
-  case CV_EVENT_RBUTTONDOWN:
-      priorHull.pop_back();
-      redraw = true;
-      break;
-  }
-
-  if (redraw)
+  switch (event) 
   {
-    for (unsigned i=0; i!=img.size(); ++i) 
-    {
-      IplImage *tmp = cvCloneImage(img[i]);
-      if (drawMouse)
-        plotHull(tmp,priorHull,i,CLR,pt);
-      else
-        plotHull(tmp,priorHull,i,CLR);
-      cvShowImage(win[i],tmp);
-      cvReleaseImage(&tmp);
-    }
+  case CV_EVENT_LBUTTONDOWN:
+    //cout << "Left button down at " << pt.x << "," << pt.y << endl;
+    //cout << "image points at " << x << "," << y << endl;
+    //cout << "press 'q' to finish and save to file" << endl;
+    down = true;
+    redraw = true;
+    break;
+  case CV_EVENT_MOUSEMOVE:
+    if (down) redraw = true;
+    break;
+  case CV_EVENT_LBUTTONUP:
+    down = false;
+    priorHull.push_back(pt);
+    //cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
+    redraw = true;
+    break;
+  case CV_EVENT_RBUTTONDOWN:
+    if (priorHull.size()>0) priorHull.pop_back();
+    redraw = true;
+    break;
   }
+
+  if (redraw) plot();
   
 }
 
@@ -131,52 +147,18 @@ int main(int argc, char **argv) {
 
   boost::filesystem::path p(params_file);
   string path = p.parent_path().string().c_str();
-  string outputPrior_file = path + "/" + "prior.txt";
+  string prior_file = path + "/" + "prior.txt";
 
+  loadHull(prior_file.c_str(),priorHull);
   loadCalibrations(params_file.c_str());
+  plot();
 
-  //     if (argc == 4) {
-  //          loadHull(argv[3],priorHull);
-  //          for (unsigned i=0; i!=img.size(); ++i)
-  //               plotHull(img[i],i);
-
-  //          vector<WorldPoint>
-  //               scan;
-  //          genScanLocations(priorHull, 100, scan);
-  //          for (unsigned j=0; j!=img.size(); ++j) {
-  //               for (unsigned i=0; i!=scan.size(); ++i) {
-  //                    cvCircle(img[j], cam[j].project(scan[i]), 1, CLR, 1);
-  //                    vector<CvPoint> tplt;
-  //                    cam[j].genTemplate(scan[i],tplt);
-  //                    unsigned
-  //                         minX = (unsigned)-1, maxX = 0,
-  //                         minY = (unsigned)-1, maxY = 0;
-  //                    for (unsigned u=0; u!=tplt.size(); ++u) {
-  //                         if (tplt[u].x < minX)
-  //                              minX = tplt[u].x;
-  //                         if (tplt[u].x > maxX)
-  //                              maxX = tplt[u].x;
-  //                         if (tplt[u].y < minY)
-  //                              minY = tplt[u].y;
-  //                         if (tplt[u].y > maxY)
-  //                              maxY = tplt[u].y;
-  //                    }
-  //                    if (minX > width-1)
-  //                         minX = 0;
-  //                    if (maxX > width-1)
-  //                         maxX = width-1;
-  //                    if (minY > height-1)
-  //                         minY = height-1;
-  //                    if (maxY>height-1)
-  //                         maxY = height-1;
-  //                    cout << "RECTANGLE " << j << " " << i << " " << minX << " " << minY << " "
-  //                         << maxX << " " << maxY << endl;
-  //               }
-  //
-  //               cvShowImage(win[j],img[j]);
-  //          }
-  //     }
-
+  cout<<"================================"<<endl;
+  cout<<"left button : add point"<<endl;
+  cout<<"right button: remove point"<<endl;
+  cout<<"key 'q'     : save and quit"<<endl;
+  cout<<"key Ctrl-C  : quit without saving"<<endl;
+  cout<<"================================"<<endl;
 
   int key = 0;
   while ((char)key != 'q') {
@@ -188,12 +170,15 @@ int main(int argc, char **argv) {
   for (unsigned i=0; i!=priorHull.size(); ++i)
     cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
 
-  saveHull(outputPrior_file.c_str(),priorHull);
+  saveHull(prior_file.c_str(),priorHull);
 
   cout << endl;
-  cout << "prior saved to " << outputPrior_file << endl;
+  cout << "prior saved to " << prior_file << endl;
 
   for (unsigned i=0; i!=img.size(); ++i)
+  {
     cvReleaseImage(&img[i]);
+    cvReleaseImage(&imgPlot[i]);
+  }
   return 0;
 }

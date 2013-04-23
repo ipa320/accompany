@@ -17,11 +17,10 @@ CvScalar CLR=CV_RGB(0,255,0), CLR2=CV_RGB(0,255,255);
 vector<IplImage *> img;
 vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
-vector< vector<WorldPoint> > entryExitHulls(1);
+vector< vector<WorldPoint> > entryExitHulls;
 
 WorldPoint pt;
 bool ptValid=false;
-
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
 
 void refreshPlot()
@@ -173,7 +172,21 @@ int main(int argc, char **argv) {
   loadCalibrations(params_file.c_str());
   loadHull(prior_file.c_str(), priorHull);
   loadHulls(entryExit_file.c_str(),entryExitHulls);
+  if (entryExitHulls.size()==0)
+  {
+    vector<WorldPoint> init;
+    entryExitHulls.push_back(init);
+  }
   plot();
+
+  cout<<"================================"<<endl;
+  cout<<"left button  : add point"<<endl;
+  cout<<"right button : remove point"<<endl;
+  cout<<"middle button: start new area"<<endl;
+  cout<<"key 'q'      : save and quit"<<endl;
+  cout<<"key Ctrl-C   : quit without saving"<<endl;
+  cout<<"================================"<<endl;
+
 
   int key = 0;
   while ((char)key != 'q') 

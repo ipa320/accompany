@@ -513,10 +513,28 @@ void loadCalibrations(const char *filename)
   loadCalibrationsHelper(filename);
 }
 
+bool same(const WorldPoint& p1,const WorldPoint& p2)
+{
+  double diff;
+  diff=p1.x-p2.x;
+  if (diff*diff>0.001)
+    return false;
+   diff=p1.y-p2.y;
+  if (diff*diff>0.001)
+    return false;
+   diff=p1.z-p2.z;
+  if (diff*diff>0.001)
+    return false;
+  return true;
+}
+
 void saveHull(ofstream& outfile, std::vector<WorldPoint>& polygon)
 {
   for (unsigned i=0; i!=polygon.size(); ++i)
-    outfile << polygon[i].x << " " << polygon[i].y << " " << polygon[i].z << endl;
+  {
+    if (i==0 || !same(polygon[i-1],polygon[i])) // avoid saving same WorldPoint twice as loadHull adds a worldpoint
+        outfile << polygon[i].x << " " << polygon[i].y << " " << polygon[i].z << endl;
+  }
   outfile<<endl;
 }
 
@@ -536,7 +554,6 @@ void saveHulls(const char *file, std::vector< std::vector<WorldPoint> >& polygon
     saveHull(outfile,polygons[i]);
   outfile.close();
 }
-
 
 void loadHull(ifstream& ifs, vector<WorldPoint>& polygon)
 {
@@ -568,25 +585,33 @@ void loadHull(ifstream& ifs, vector<WorldPoint>& polygon)
 void loadHull(const char *file, vector<WorldPoint>& polygon)
 {
   ifstream ifs(file);
-  if (!ifs) errx(1, "Cannot open file '%s'", file);
-  loadHull(ifs,polygon);
-  ifs.close();
+  if (!ifs) 
+    warnx("Cannot open file '%s'", file);
+  else
+  {
+    loadHull(ifs,polygon);
+    ifs.close();
+  }
 }
 
 void loadHulls(const char *file, vector< vector<WorldPoint> >& polygons)
 {
   ifstream ifs(file);
-  if (!ifs) errx(1, "Cannot open file '%s'", file);
-  while(true)
+  if (!ifs)
+    warnx("Cannot open file '%s'", file);
+  else
   {
-    vector<WorldPoint> pol;
-    loadHull(ifs,pol);
-    if (pol.size()>0)
-      polygons.push_back(pol);
-    else
-      break;
+    while(true)
+    {
+      vector<WorldPoint> pol;
+      loadHull(ifs,pol);
+      if (pol.size()>0)
+        polygons.push_back(pol);
+      else
+        break;
+    }
+    ifs.close();
   }
-  ifs.close();
 }
 
 bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)
