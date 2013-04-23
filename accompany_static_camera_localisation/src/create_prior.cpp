@@ -56,35 +56,18 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
   pt = cam[idx].getGroundPos(cvPoint(x,y));
   ptValid=true;
 
-  static bool down=false;
-  static bool redraw=false;
-
   switch (event) 
   {
-  case CV_EVENT_LBUTTONDOWN:
-    //cout << "Left button down at " << pt.x << "," << pt.y << endl;
-    //cout << "image points at " << x << "," << y << endl;
-    //cout << "press 'q' to finish and save to file" << endl;
-    down = true;
-    redraw = true;
-    break;
   case CV_EVENT_MOUSEMOVE:
-    if (down) redraw = true;
     break;
   case CV_EVENT_LBUTTONUP:
-    down = false;
     priorHull.push_back(pt);
-    //cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
-    redraw = true;
     break;
   case CV_EVENT_RBUTTONDOWN:
     if (priorHull.size()>0) priorHull.pop_back();
-    redraw = true;
     break;
   }
-
-  if (redraw) plot();
-  
+  plot();
 }
 
 #define DEF(IDX) void mh##IDX(int e, int x, int y, int f, void *p) { return mouseHandler(IDX,e,x,y,f,p); }

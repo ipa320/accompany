@@ -70,38 +70,23 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
   pt = cam[idx].getGroundPos(cvPoint(x,y));
   ptValid=true;
 
-  static bool down=false;
-  static bool redraw=false;
-
   switch (event) 
   {
-  case CV_EVENT_LBUTTONDOWN:
-    down = true;
-    redraw = true;
-    break;
-  case CV_EVENT_MOUSEMOVE:
-    if (down) redraw = true;
-    break;
   case CV_EVENT_LBUTTONUP:
-    down = false;
     entryExitHulls.back().push_back(pt);
-    redraw = true;
     break;
   case CV_EVENT_RBUTTONDOWN: // remove
     if (entryExitHulls.size()>0 && entryExitHulls.back().size()==0)
       entryExitHulls.pop_back();
     else
       entryExitHulls.back().pop_back();
-    redraw = true;
     break;
   case CV_EVENT_MBUTTONDOWN: // add new hull
     vector<WorldPoint> hull;
     entryExitHulls.push_back(hull);
     break;
   }
-
-  if (redraw)
-    plot();
+  plot();
 }
 
 #define DEF(IDX) void mh##IDX(int e, int x, int y, int f, void *p) { return mouseHandler(IDX,e,x,y,f,p); }
@@ -112,8 +97,8 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv) 
+{
   string imagelist_file, params_file;
 
   // handling arguments
