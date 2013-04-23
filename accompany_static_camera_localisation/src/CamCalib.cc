@@ -513,38 +513,80 @@ void loadCalibrations(const char *filename)
   loadCalibrationsHelper(filename);
 }
 
-float loadWorldPriorHull(const char *file, vector<WorldPoint> &polygon)
+void saveHull(ofstream& outfile, std::vector<WorldPoint>& polygon)
 {
-  ifstream ifs(file);
-  if (!ifs)
-    errx(1, "Cannot open file '%s'", file);
+  for (unsigned i=0; i!=polygon.size(); ++i)
+    outfile << polygon[i].x << " " << polygon[i].y << " " << polygon[i].z << endl;
+  outfile<<endl;
+}
 
+void saveHull(const char *file, std::vector<WorldPoint>& polygon)
+{
+  ofstream outfile;
+  outfile.open(file);
+  saveHull(outfile,polygon);
+  outfile.close();
+}
+
+void saveHulls(const char *file, std::vector< std::vector<WorldPoint> >& polygons)
+{
+  ofstream outfile;
+  outfile.open(file);
+  for (unsigned i=0;i<polygons.size();i++)
+    saveHull(outfile,polygons[i]);
+  outfile.close();
+}
+
+
+void loadHull(ifstream& ifs, vector<WorldPoint>& polygon)
+{
   char buffer[1024];
-  ifs.getline(buffer, sizeof(buffer));
-  float logInside = atof(buffer);
   ifs.getline(buffer, sizeof(buffer));
   while (!ifs.eof())
   {
     vector<char *> s = splitwhite(buffer, true);
+    
     if (s.size() == 3)
       polygon.push_back(WorldPoint(atoi(s[0]), atoi(s[1]), atoi(s[2])));
     else if (s.size() == 2)
       polygon.push_back(WorldPoint(atoi(s[0]), atoi(s[1]), 0));
+    else if (s.size() == 0)
+      break;
     else
     {
-      cout << "ERROR " << __PRETTY_FUNCTION__ << " Split size=" << s.size()
-          << flush;
+      cout << "ERROR " << __PRETTY_FUNCTION__ << " Split size=" << s.size() << flush;
       for (unsigned j = 0; j != s.size(); ++j)
         cout << ":" << s[j];
       cout << endl;
     }
-
     ifs.getline(buffer, sizeof(buffer));
-
   }
-  polygon.push_back(polygon.front());
+  if (polygon.size()>0)
+    polygon.push_back(polygon.front());
+}
 
-  return logInside;
+void loadHull(const char *file, vector<WorldPoint>& polygon)
+{
+  ifstream ifs(file);
+  if (!ifs) errx(1, "Cannot open file '%s'", file);
+  loadHull(ifs,polygon);
+  ifs.close();
+}
+
+void loadHulls(const char *file, vector< vector<WorldPoint> >& polygons)
+{
+  ifstream ifs(file);
+  if (!ifs) errx(1, "Cannot open file '%s'", file);
+  while(true)
+  {
+    vector<WorldPoint> pol;
+    loadHull(ifs,pol);
+    if (pol.size()>0)
+      polygons.push_back(pol);
+    else
+      break;
+  }
+  ifs.close();
 }
 
 bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)

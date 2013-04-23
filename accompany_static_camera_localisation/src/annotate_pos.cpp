@@ -234,7 +234,7 @@ int main(int argc, char **argv)
   loadCalibrations(params_file.c_str());
   index++;
 
-  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  loadHull(prior_file.c_str(), priorHull);
 
   ofstream ofs(annotated_file.c_str());
   if (!ofs)

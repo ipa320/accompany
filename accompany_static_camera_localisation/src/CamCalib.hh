@@ -98,7 +98,12 @@ void plotTemplate(IplImage *img, const std::vector<CvPoint> &points,
     const CvScalar &colour, unsigned lw = 1);
 void loadCalibrations(const char *filename);
 bool inside(const WorldPoint &p, const std::vector<WorldPoint> &prior);
-float loadWorldPriorHull(const char *file, std::vector<WorldPoint> &polygon);
+
+void saveHull(const char *file, std::vector<WorldPoint> &polygon);
+void saveHulls(const char *file, std::vector< std::vector<WorldPoint> >& polygons);
+void loadHull(const char *file, std::vector<WorldPoint> &polygon);
+void loadHulls(const char *file, vector< vector<WorldPoint> >& polygons);
+
 void genScanLocations(const std::vector<WorldPoint> &prior, double scanRes,
     std::vector<WorldPoint> &sl);
 void gridMatrix(const vnl_vector<FLOAT> &probs, vnl_matrix<FLOAT> &grid);

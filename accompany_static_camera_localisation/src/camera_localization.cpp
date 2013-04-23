@@ -800,7 +800,7 @@ int main(int argc, char **argv)
   ROS_INFO_STREAM("loading '"<<params_file.c_str()<<"'");
   loadCalibrations(params_file.c_str()); // load calibration
   ROS_INFO_STREAM("loading '"<<prior_file.c_str()<<"'");
-  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  loadHull(prior_file.c_str(), priorHull);
 
 #if USE_DYNAMIC_BACKGROUND
 #else

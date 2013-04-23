@@ -100,7 +100,7 @@ int main(int argc, char **argv)
   string prior_file = path + "/" + "prior.txt";
   loadCalibrations(params_file.c_str());
   vector<WorldPoint> priorHull;
-  loadWorldPriorHull(prior_file.c_str(),priorHull);
+  loadHull(prior_file.c_str(),priorHull);
 
   // search for camera
   cout<<"known cameras:"<<endl;

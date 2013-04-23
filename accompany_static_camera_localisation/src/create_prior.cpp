@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   loadCalibrations(params_file.c_str());
 
   //     if (argc == 4) {
-  //          loadWorldPriorHull(argv[3],priorHull);
+  //          loadHull(argv[3],priorHull);
   //          for (unsigned i=0; i!=img.size(); ++i)
   //               plotHull(img[i],i);
 
@@ -188,17 +188,11 @@ int main(int argc, char **argv) {
   for (unsigned i=0; i!=priorHull.size(); ++i)
     cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
 
-  ofstream outfile;
-  outfile.open(outputPrior_file.c_str());
-  outfile << ("1\n");
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-  {
-    outfile << priorHull[i].x << " " << priorHull[i].y
-        << " " << priorHull[i].z << endl;
-  }
-  outfile.close();
+  saveHull(outputPrior_file.c_str(),priorHull);
+
   cout << endl;
   cout << "prior saved to " << outputPrior_file << endl;
+
   for (unsigned i=0; i!=img.size(); ++i)
     cvReleaseImage(&img[i]);
   return 0;

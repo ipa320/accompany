@@ -19,6 +19,9 @@ vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
 vector< vector<WorldPoint> > entryExitHulls(1);
 
+WorldPoint pt;
+bool ptValid=false;
+
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
 
 void refreshPlot()
@@ -47,7 +50,10 @@ void plotEntryExitHulls()
   {
     for (unsigned i=0; i!=img.size(); ++i) 
     {
-      plotHull(imgPlot[i],entryExitHulls[j],i,CLR2);
+      if (j==entryExitHulls.size()-1 && ptValid)
+        plotHull(imgPlot[i],entryExitHulls[j],i,CLR2,pt);
+      else
+        plotHull(imgPlot[i],entryExitHulls[j],i,CLR2);
       cvShowImage(win[i],imgPlot[i]);
     }
   }
@@ -62,25 +68,20 @@ void plot()
 
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 {
-  WorldPoint pt = cam[idx].getGroundPos(cvPoint(x,y));
+  pt = cam[idx].getGroundPos(cvPoint(x,y));
+  ptValid=true;
 
   static bool down=false;
   static bool redraw=false;
-  static bool drawMouse=false;
 
   switch (event) 
   {
   case CV_EVENT_LBUTTONDOWN:
     down = true;
     redraw = true;
-    drawMouse = true;
     break;
   case CV_EVENT_MOUSEMOVE:
-    if (down)
-    {
-      redraw = true;
-      drawMouse = true;
-    }
+    if (down) redraw = true;
     break;
   case CV_EVENT_LBUTTONUP:
     down = false;
@@ -167,34 +168,19 @@ int main(int argc, char **argv) {
   boost::filesystem::path p(params_file);
   string path = p.parent_path().string().c_str();
   string prior_file = path + "/" + "prior.txt";
+  string entryExit_file = path + "/" + "entryExit.txt";
 
   loadCalibrations(params_file.c_str());
-  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  loadHull(prior_file.c_str(), priorHull);
   plot();
 
   int key = 0;
-  while ((char)key != 'q') {
-    // cvShowImage("image", src);
+  while ((char)key != 'q') 
+  {
     key = cvWaitKey(0);
   }
-
-  /*
-  cout << "1" << endl;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
-
-  ofstream outfile;
-  outfile.open(outputPrior_file.c_str());
-  outfile << ("1\n");
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-  {
-    outfile << priorHull[i].x << " " << priorHull[i].y
-        << " " << priorHull[i].z << endl;
-  }
-  outfile.close();
-  cout << endl;
-  cout << "prior saved to " << outputPrior_file << endl;
-  */
+  
+  saveHulls(entryExit_file.c_str(),entryExitHulls);
 
   for (unsigned i=0; i!=img.size(); ++i)
   {
