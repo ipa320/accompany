@@ -85,7 +85,6 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
   case CV_EVENT_LBUTTONUP:
     down = false;
     entryExitHulls.back().push_back(pt);
-    cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
     redraw = true;
     break;
   case CV_EVENT_RBUTTONDOWN: // remove
