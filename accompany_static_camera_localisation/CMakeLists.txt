@@ -20,9 +20,8 @@ INCLUDE(FindPkgConfig)
 pkg_check_modules(XML2 REQUIRED libxml-2.0)
 SET( CMAKE_CXX_FLAGS ${XML2_CFLAGS})
 
-
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv)
-
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/accompany_static_camera_localisation)
 # now search for required headers in usual places instead of relying on set paths above
 
 # check cmn headers
@@ -59,8 +58,13 @@ endif (NOT VCL_INCLUDE_DIR)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} /usr/include/opencv ${VXL_BASE_DIR}/core ${VXL_BASE_DIR} ${VXL_BASE_DIR}/vcl )
 LINK_DIRECTORIES(${VXL_BASE_DIR}/lib ${CMN_LIB_DIR})
 
-ADD_LIBRARY( helpers
-  ${PROJECT_SOURCE_DIR}/src/Helpers.hh
+rosbuild_add_library( hull
+  include/accompany_static_camera_localisation/Hull.h
+  ${PROJECT_SOURCE_DIR}/src/Hull.cpp
+  )
+
+ADD_LIBRARY( staticCam
+  ${PROJECT_SOURCE_DIR}/src//Helpers.hh
   ${PROJECT_SOURCE_DIR}/src/Helpers.cc
   ${PROJECT_SOURCE_DIR}/src/Background.hh
   ${PROJECT_SOURCE_DIR}/src/Background.cc
@@ -97,7 +101,8 @@ LINK_DIRECTORIES(${OPENCV_LIB_DIR})
 #target_link_libraries(example ${PROJECT_NAME})
 
 SET( MY_STANDARD_LIBS 
-  helpers
+  staticCam
+  hull
   calib
   boost_program_options 
   boost_system 
@@ -154,7 +159,6 @@ target_link_libraries(annotate_image_points ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable( annotate_pos src/annotate_pos.cpp )
 target_link_libraries( annotate_pos ${MY_STANDARD_LIBS} )
-
 
 rosbuild_add_executable(image_saver src/image_saver.cpp)
 target_link_libraries(image_saver ${MY_STANDARD_LIBS} )

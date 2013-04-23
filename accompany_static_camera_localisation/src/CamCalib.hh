@@ -12,36 +12,11 @@
 #include <vnl/vnl_matrix.h>
 
 #include <ImageMask.h>
+#include <Hull.h>
 
 // struct CvPoint;
 
 extern double minX, maxX, minY, maxY;
-
-struct WorldPoint
-{
-    double x, y, z;
-    WorldPoint(double x = 0, double y = 0, double z = 0) :
-        x(x), y(y), z(z)
-    {
-    }
-    WorldPoint &operator+=(const WorldPoint &p)
-    {
-      x += p.x;
-      y += p.y;
-      z += p.z;
-      return *this;
-    }
-    WorldPoint &operator/=(const double &d)
-    {
-      x /= d;
-      y /= d;
-      z /= d;
-      return *this;
-    }
-};
-std::ostream &operator<<(std::ostream &os, const WorldPoint &wp);
-
-double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2);
 
 class CamCalib: public XmlPackable
 {
@@ -97,12 +72,6 @@ extern double personHeight, wg, wm, wt;
 void plotTemplate(IplImage *img, const std::vector<CvPoint> &points,
     const CvScalar &colour, unsigned lw = 1);
 void loadCalibrations(const char *filename);
-bool inside(const WorldPoint &p, const std::vector<WorldPoint> &prior);
-
-void saveHull(const char *file, std::vector<WorldPoint> &polygon);
-void saveHulls(const char *file, std::vector< std::vector<WorldPoint> >& polygons);
-void loadHull(const char *file, std::vector<WorldPoint> &polygon);
-void loadHulls(const char *file, vector< vector<WorldPoint> >& polygons);
 
 void genScanLocations(const std::vector<WorldPoint> &prior, double scanRes,
     std::vector<WorldPoint> &sl);

@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <accompany_static_camera_localisation/Hull.h>
+
 /**
  *  Tracks detections based on position and color
  */
@@ -18,6 +20,7 @@ class Tracker
  public:
   Tracker(const ros::Publisher& trackedHumansPub,
           const ros::Publisher& markerArrayPub,
+          const std::vector< std::vector<WorldPoint> >& entryExitHulls,
           double stateThreshold,
           double appearanceThreshold,
           double totalThreshold);
@@ -29,6 +32,7 @@ class Tracker
   std::vector<Track> tracks;
 
   DataAssociation dataAssociation;
+  std::vector< std::vector<WorldPoint> > entryExitHulls;
   double stateThreshold,appearanceThreshold,totalThreshold;
 
   vnl_matrix<double>

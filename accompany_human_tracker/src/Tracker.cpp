@@ -10,12 +10,14 @@ using namespace std;
  */
 Tracker::Tracker(const ros::Publisher& trackedHumansPub,
                  const ros::Publisher& markerArrayPub,
+                 const std::vector< std::vector<WorldPoint> >& entryExitHulls,
                  double stateThreshold,
                  double appearanceThreshold,
                  double totalThreshold)
 {
   this->trackedHumansPub=trackedHumansPub;
   this->markerArrayPub=markerArrayPub;
+  this->entryExitHulls=entryExitHulls;
   this->stateThreshold=stateThreshold;
   this->appearanceThreshold=appearanceThreshold;
   this->totalThreshold=totalThreshold;

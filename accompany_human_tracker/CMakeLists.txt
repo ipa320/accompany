@@ -46,7 +46,7 @@ rosbuild_add_executable(human_tracker
   src/Track.cpp
   src/DataAssociation.h
   src/DataAssociation.cpp)
-target_link_libraries(human_tracker boost_program_options MsgToMarkerArray vnl vnl_algo)
+target_link_libraries(human_tracker hull MsgToMarkerArray boost_program_options vnl vnl_algo)
 
 #rosbuild_add_executable(view_tracks src/view_tracks.cpp)
 #target_link_libraries(view_tracks ${OpenCV_LIBS} boost_program_options)

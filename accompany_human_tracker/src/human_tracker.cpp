@@ -12,17 +12,20 @@ using namespace boost;
 
 //map<string,int> identityToID; // map of identities to id's
 //map<int,string> idToIdentity; // map of id's to identities
+vector< vector<WorldPoint> > entryExitHulls;
 
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "human_tracker");
 
+  string entryExit_file;
   double stateThreshold,appearanceThreshold,totalThreshold;
 
   // handling command line arguments
   program_options::options_description optionsDescription("Tracks humans using human detections");
   optionsDescription.add_options()
     ("help,h","show help message")
+    ("entryExit,e", program_options::value<string>(&entryExit_file)->required(),"filename of entryExit.txt")
     ("stateThreshold,s",program_options::value<double>(&stateThreshold)->default_value(-6),"threshold on the kalman filter state")
     ("appearanceThreshold,a",program_options::value<double>(&appearanceThreshold)->default_value(-0),"threshold on the appearance")
     ("totalThreshold,t",program_options::value<double>(&totalThreshold)->default_value(-6),"combined threshold on state and appearance");
@@ -40,13 +43,16 @@ program_options::variables_map variablesMap;
     return 1;
   }
 
+  loadHulls(entryExit_file.c_str(),entryExitHulls);
+
   // create publisher and subscribers
   ros::NodeHandle n;
   ros::Publisher trackedHumansPub=n.advertise<accompany_uva_msg::TrackedHumans>("/trackedHumans",10);
-ros::Publisher markerArrayPub  =n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
+  ros::Publisher markerArrayPub  =n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
 
-// create Tracker
+  // create Tracker
   Tracker tracker(trackedHumansPub,markerArrayPub,
+                  entryExitHulls,
                   stateThreshold,
                   appearanceThreshold,
                   totalThreshold);

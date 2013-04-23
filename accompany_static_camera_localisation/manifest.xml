@@ -18,5 +18,8 @@
   <depend package="accompany_uva_msg"/>
   <depend package="accompany_uva_utils"/>
 
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export> 
 
 </package>
