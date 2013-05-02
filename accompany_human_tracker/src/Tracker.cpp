@@ -51,11 +51,22 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
  * Test if a detection is in an entry area
  */
 bool Tracker::insideEntry(const accompany_uva_msg::HumanDetection& detection)
-{
-  WorldPoint wp(detection.location.point.x*1000,
-                detection.location.point.y*1000,
-                detection.location.point.z*1000);
-  return inside(wp,priorHull);
+{  
+  WorldPoint wp(detection.location.point.x,
+                detection.location.point.y,
+                detection.location.point.z);
+  wp*=1000.0; // from meters to millimeters
+  //cout<<"insideEntry: "<<wp<<endl;
+  //cout<<"entryExitHulls:"<<endl<<entryExitHulls;
+  bool ret=false; // assume outside
+  for (unsigned i=0;i<entryExitHulls.size();i++)
+    if (inside(wp,entryExitHulls[i]))
+    {
+      ret=true; // inside
+      break;
+    }
+  //cout<<"inside: "<<ret<<endl;
+  return ret;
 }
 
 double timeDiff(const struct timeval& time,
@@ -113,7 +124,12 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
     if (associations[i]<0) // not assigned
     {
       if (insideEntry(humanDetections->detections[i]))
+      {
+        cout<<"unassociated detection in entryExitHulls, new track started"<<endl;
         tracks.push_back(Track(humanDetections->detections[i]));
+      }
+      else
+        cout<<"dunassociated etection NOT in entryExitHulls, ignore"<<endl;
     }
     else // assigned
     {
