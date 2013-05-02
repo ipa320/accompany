@@ -45,10 +45,12 @@ program_options::variables_map variablesMap;
   }
   
   string prior_file = param_path + "/" + "prior.txt";
-  string entryExit_file = param_path + "/" + "entryExit.dat";
+  string entryExit_file = param_path + "/" + "entryExit.txt";
   
   loadHull(prior_file.c_str(),priorHull);
+  cout<<"priorHull:"<<endl<<priorHull<<endl;
   loadHulls(entryExit_file.c_str(),entryExitHulls);
+  cout<<"entryExitHulls:"<<endl<<entryExitHulls<<endl;
 
   // create publisher and subscribers
   ros::NodeHandle n;
