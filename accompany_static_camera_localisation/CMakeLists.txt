@@ -120,8 +120,8 @@ SET( MY_STANDARD_LIBS
   v3p_netlib 
   boost_date_time-mt 
   ${XML2_LDFLAGS}
-  yaml-cpp
   MsgToMarkerArray
+  # yaml-cpp # *!*!*!* causes errors in readCalibrationYml() *!*!*!*
   )
 
 # rosbuild
@@ -170,7 +170,7 @@ rosbuild_add_executable(create_frame src/create_frame.cpp)
 target_link_libraries(create_frame ${MY_STANDARD_LIBS} )
 
 rosbuild_add_executable(create_tf_room2world src/create_tf_room2world.cpp)
-target_link_libraries(create_tf_room2world ${MY_STANDARD_LIBS} )
+target_link_libraries(create_tf_room2world ${MY_STANDARD_LIBS} yaml-cpp )
 
 rosbuild_add_executable(undistortion_test src/undistortion_test.cpp)
 target_link_libraries(undistortion_test ${MY_STANDARD_LIBS} )
