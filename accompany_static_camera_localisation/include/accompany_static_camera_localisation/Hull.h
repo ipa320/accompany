@@ -42,7 +42,8 @@ std::ostream &operator<<(std::ostream &os, const std::vector<std::vector<WorldPo
 std::vector<char *> splitWhite(char *str, bool dropEmpty);
 double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2);
 
-bool inside(const WorldPoint &p, const std::vector<WorldPoint> &prior);
+bool inside(const WorldPoint &p, const std::vector<WorldPoint> &hull);
+bool inside(const WorldPoint &p, const std::vector<std::vector<WorldPoint> > &hulls);
 
 void saveHull(const char *file, std::vector<WorldPoint> &polygon);
 void saveHulls(const char *file, std::vector< std::vector<WorldPoint> >& polygons);

@@ -14,14 +14,14 @@ std::ostream &operator<<(std::ostream &os, const WorldPoint &wp)
 
 std::ostream &operator<<(std::ostream &os, const std::vector<WorldPoint> &hull)
 {
-  for (int i=0;i<hull.size();i++)
+  for (unsigned i=0;i<hull.size();i++)
     os<<hull[i]<<endl;
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const std::vector<std::vector<WorldPoint> > &hulls)
 {
-  for (int i=0;i<hulls.size();i++)
+  for (unsigned i=0;i<hulls.size();i++)
     os<<hulls[i]<<endl;
   return os;
 }
@@ -33,19 +33,19 @@ double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2)
   return dx * dx + dy * dy;
 }
 
-bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)
+bool inside(const WorldPoint &p, const vector<WorldPoint> &hull)
 {
   unsigned nLeft = 0, nRight = 0;
-  for (unsigned i = 1; i < prior.size(); ++i)
+  for (unsigned i = 1; i < hull.size(); ++i)
   {
-    if ((p.y >= prior[i - 1].y && p.y < prior[i].y)
-        || (p.y >= prior[i].y && p.y < prior[i - 1].y))
+    if ((p.y >= hull[i - 1].y && p.y < hull[i].y)
+        || (p.y >= hull[i].y && p.y < hull[i - 1].y))
     {
-      double deltaX = prior[i].x - prior[i - 1].x, deltaY = prior[i].y
-          - prior[i - 1].y;
+      double deltaX = hull[i].x - hull[i - 1].x, deltaY = hull[i].y
+          - hull[i - 1].y;
       if (fabs(deltaX) > fabs(deltaY))
       {
-        double a = deltaY / deltaX, b = prior[i].y - a * prior[i].x, x = (p.y
+        double a = deltaY / deltaX, b = hull[i].y - a * hull[i].x, x = (p.y
             - b) / a;
         if (x < p.x)
           nLeft++;
@@ -55,7 +55,7 @@ bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)
       }
       else
       {
-        double a = deltaX / deltaY, b = prior[i].x - a * prior[i].y, x = a * p.y
+        double a = deltaX / deltaY, b = hull[i].x - a * hull[i].y, x = a * p.y
             + b;
         if (x < p.x)
           nLeft++;
@@ -67,6 +67,21 @@ bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)
   }
   return (nLeft % 2 == 1 && nRight % 2 == 1);
 }
+
+bool inside(const WorldPoint &p, const vector<vector<WorldPoint> > &hulls)
+{
+  bool ret=false;
+  for (std::vector<vector<WorldPoint> >::const_iterator it=hulls.begin();it!=hulls.end();it++)
+  {
+    if (inside(p,*it))
+    {
+      ret=true;
+      break;
+    }
+  }
+  return ret;
+}
+
 
 /**
  * \brief Split a (CSV-separated) string
