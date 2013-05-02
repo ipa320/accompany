@@ -7,9 +7,23 @@
 #include <err.h>
 using namespace std;
 
-ostream &operator<<(ostream &os, const WorldPoint &wp)
+std::ostream &operator<<(std::ostream &os, const WorldPoint &wp)
 {
   return os << "(" << wp.x << "," << wp.y << "," << wp.z << ")";
+}
+
+std::ostream &operator<<(std::ostream &os, const std::vector<WorldPoint> &hull)
+{
+  for (int i=0;i<hull.size();i++)
+    os<<hull[i]<<endl;
+  return os;
+}
+
+std::ostream &operator<<(std::ostream &os, const std::vector<std::vector<WorldPoint> > &hulls)
+{
+  for (int i=0;i<hulls.size();i++)
+    os<<hulls[i]<<endl;
+  return os;
 }
 
 double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2)
