@@ -10,8 +10,6 @@
 
 #include <vector>
 
-#include <accompany_static_camera_localisation/Hull.h>
-
 /**
  *  Tracks detections based on position and color
  */
@@ -24,7 +22,10 @@ class Tracker
           const std::vector< std::vector<WorldPoint> >& entryExitHulls,
           double stateThreshold,
           double appearanceThreshold,
-          double totalThreshold);
+          double totalThreshold,
+          unsigned minMatchCount=10,
+          unsigned maxUnmatchCount=20);
+  
   void processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections);
   
   friend std::ostream& operator<<(std::ostream& out,const Tracker& tracker);
@@ -35,7 +36,9 @@ class Tracker
   DataAssociation dataAssociation;
   std::vector<WorldPoint> priorHull;
   std::vector< std::vector<WorldPoint> > entryExitHulls;
+  
   double stateThreshold,appearanceThreshold,totalThreshold;
+  unsigned minMatchCount,maxUnmatchCount;
 
   vnl_matrix<double>
     transModel, transCovariance,
@@ -49,10 +52,11 @@ class Tracker
   ros::Publisher markerArrayPub;
   tf::TransformListener transformListener;
 
-  bool insideEntry(const accompany_uva_msg::HumanDetection& detection);
   accompany_uva_msg::HumanDetections transform(const accompany_uva_msg::HumanDetections& humanDetections);
-  void publishTracks();
 
+  void reduceSpeed();
+  void removeTracks();
+  void publishTracks();
 
 };
 

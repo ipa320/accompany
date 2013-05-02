@@ -7,6 +7,8 @@
 #include <KalmanFilter.h>
 #include <vector>
 
+#include <accompany_static_camera_localisation/Hull.h>
+
 /**
  *  Represents a tracked person with kalman filter and histogram
  */
@@ -29,21 +31,32 @@ class Track
   void observation(const accompany_uva_msg::HumanDetection& humanDetection,
                    const vnl_matrix<double>& obsModel,
                    const vnl_matrix<double>& obsCovariance);
+  
+  void addUnmatchCount();
+
+  WorldPoint toWorldPoint();
+
+  void reduceSpeed(double reduction=0.8);
 
   void writeMessage(accompany_uva_msg::TrackedHuman& trackedHuman);
 
   friend std::ostream& operator<<(std::ostream& out,const Track& track);
+
+  unsigned matchCount; // number of times matched by observation
+  unsigned unmatchedCount; // number consecutive unmatched
 
  private:
   static unsigned nextID;
   unsigned id;
   KalmanFilter<double> kalmanFilter;
   accompany_uva_msg::Appearance appearance;
-
+  
   static vnl_vector<double> getObs(const accompany_uva_msg::HumanDetection& humanDetection);
   static vnl_matrix<double> getObsCovariance(const accompany_uva_msg::HumanDetection& humanDetection);
   void updateAppearance(double weight,const accompany_uva_msg::Appearance& newAppearance);
   
+  
+
 };
 
 #endif

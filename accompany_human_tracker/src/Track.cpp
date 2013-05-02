@@ -45,6 +45,8 @@ Track::Track(const accompany_uva_msg::HumanDetection& humanDetection)
 {
   appearance=humanDetection.appearance;
   id=++nextID;
+  matchCount=0;
+  unmatchedCount=0;
 }
 
 /**
@@ -148,6 +150,35 @@ void Track::observation(const accompany_uva_msg::HumanDetection& humanDetection,
                            obsModel,
                            obsCovariance);
   updateAppearance(0.1,humanDetection.appearance);
+  matchCount++;
+  unmatchedCount=0;
+}
+
+/**
+ * Increase consecutive unmatch count. This count it set to '0' in function observation() when a match is found.
+ */
+void Track::addUnmatchCount()
+{
+  unmatchedCount++;
+}
+
+/**
+ * Convert position to WorldPoint
+ * @returns position in WorldPoint format
+ */
+WorldPoint Track::toWorldPoint()
+{
+  WorldPoint wp(kalmanFilter.getState()[0],
+                kalmanFilter.getState()[1],
+                0);
+  wp*=1000.0; // from meters to millimeters
+  return wp;
+}
+
+void Track::reduceSpeed(double reduction)
+{
+  kalmanFilter.getState()[2]*=reduction;
+  kalmanFilter.getState()[3]*=reduction;
 }
 
 /**
@@ -227,6 +258,8 @@ std::ostream& operator<<(std::ostream& out,const Track& track)
   out<<"appearance:"<<endl;
   out<<"  sumTemplatePixelSize:"<<track.appearance.sumTemplatePixelSize<<endl;
   out<<"  sumPixelWeights:"<<track.appearance.sumPixelWeights<<endl;
+  out<<"  matchCount:"<<track.matchCount<<endl;
+  out<<"  unmatchedCount:"<<track.unmatchedCount<<endl;
   out<<"  ";
   for (unsigned i=0;i<track.appearance.histogram.size();i++)
     out<<track.appearance.histogram[i]<<" ";

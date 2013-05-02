@@ -10,7 +10,9 @@ using namespace std;
  * @param entryExitHulls the entry and exit areas of the scene
  * @param stateThreshold matching threshold on distance
  * @param appearanceThreshold matching threshold on appearance
- * @param totalThreshold combined threshold on distance and appearance
+ * @param totalThreshold combined threshold on distance and appearance 
+ * @param minMatchCount the minimum number of matches before a track is published
+ * @param maxUnmatchCount the maximum number of consecutive non-matches before a track might be removed 
  */
 Tracker::Tracker(const ros::Publisher& trackedHumansPub,
                  const ros::Publisher& markerArrayPub,
@@ -18,7 +20,9 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
                  const std::vector< std::vector<WorldPoint> >& entryExitHulls,
                  double stateThreshold,
                  double appearanceThreshold,
-                 double totalThreshold)
+                 double totalThreshold,
+                 unsigned minMatchCount,
+                 unsigned maxUnmatchCount)
 {
   this->trackedHumansPub=trackedHumansPub;
   this->markerArrayPub=markerArrayPub;
@@ -27,7 +31,8 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
   this->stateThreshold=stateThreshold;
   this->appearanceThreshold=appearanceThreshold;
   this->totalThreshold=totalThreshold;
-
+  this->minMatchCount=minMatchCount;
+  this->maxUnmatchCount=maxUnmatchCount;
   // kalman motion and observation model
   const double tm[]={1,0,1,0,
                      0,1,0,1,
@@ -47,26 +52,13 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
   obsCovariance=vnl_matrix<double>(oc,2,2);
 }
 
-/**
- * Test if a detection is in an entry area
- */
-bool Tracker::insideEntry(const accompany_uva_msg::HumanDetection& detection)
-{  
+WorldPoint toWorldPoint(const accompany_uva_msg::HumanDetection& detection)
+{
   WorldPoint wp(detection.location.point.x,
                 detection.location.point.y,
                 detection.location.point.z);
   wp*=1000.0; // from meters to millimeters
-  //cout<<"insideEntry: "<<wp<<endl;
-  //cout<<"entryExitHulls:"<<endl<<entryExitHulls;
-  bool ret=false; // assume outside
-  for (unsigned i=0;i<entryExitHulls.size();i++)
-    if (inside(wp,entryExitHulls[i]))
-    {
-      ret=true; // inside
-      break;
-    }
-  //cout<<"inside: "<<ret<<endl;
-  return ret;
+  return wp;
 }
 
 double timeDiff(const struct timeval& time,
@@ -113,23 +105,28 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
 
   vector<int> associations=dataAssociation.associate(totalThreshold);
 
+  // print associations
   cout<<"associations:"<<endl;
   for (unsigned i=0;i<associations.size();i++)
     cout<<associations[i]<<" ";
   cout<<endl;
+
+  // add unmatch count of tracks
+  for (unsigned i=0;i<tracks.size();i++)
+    tracks[i].addUnmatchCount();
 
   // update or create tracks
   for (unsigned i=0;i<associations.size();i++)
   {
     if (associations[i]<0) // not assigned
     {
-      if (insideEntry(humanDetections->detections[i]))
+      if (inside(toWorldPoint(humanDetections->detections[i]),entryExitHulls))
       {
         cout<<"unassociated detection in entryExitHulls, new track started"<<endl;
         tracks.push_back(Track(humanDetections->detections[i]));
       }
       else
-        cout<<"dunassociated etection NOT in entryExitHulls, ignore"<<endl;
+        cout<<"unassociated detection NOT in entryExitHulls, ignore"<<endl;
     }
     else // assigned
     {
@@ -139,6 +136,9 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
     }
   }
   
+  removeTracks();
+  reduceSpeed();
+
   cout<<*this<<endl;
   prevTime=time;
   
@@ -175,6 +175,51 @@ accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::H
 }
 */
 
+
+/**
+ * Reduce speed when unmatched so not to move far away from last matching observation
+ */
+void Tracker::reduceSpeed()
+{
+  for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();it++)
+  {
+    cout<<"unmatchedCount:"<<it->unmatchedCount<<endl;
+    if (it->unmatchedCount>0) // if not matched in last cycle
+    {
+      cout<<"reducedSpeed1:"<<*it<<endl;
+      it->reduceSpeed();
+      cout<<"reducedSpeed2:"<<*it<<endl;
+    }
+  }
+}
+
+/**
+ * Remove tracks when unmatched for more than maxUnmatchCount and (in entryExitHulls or not in priorHull);
+ */
+void Tracker::removeTracks()
+{
+  for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();)
+  {
+    bool remove=false;
+    if (it->unmatchedCount>=maxUnmatchCount) // if not matched for some time
+    {
+      if (inside(it->toWorldPoint(),entryExitHulls)) // if in entryExitHulls
+      {
+        cout<<"remove track because unmatched="<<it->unmatchedCount<<" and is in entryExitHulls"<<endl;
+        tracks.erase(it);
+        remove=true;
+      }
+      if (!inside(it->toWorldPoint(),priorHull)) // if not in priorHull
+      {
+        cout<<"remove track because unmatched="<<it->unmatchedCount<<" and is out of priorHull"<<endl;
+        tracks.erase(it);
+        remove=true;
+      }
+    }
+    if (!remove) it++;
+  }
+}
+
 /**
  * Publish the known tracks.
  */
@@ -186,20 +231,23 @@ void Tracker::publishTracks()
   trackedHuman.location.header.frame_id=coordFrame;
   for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();it++)
   {
-    it->writeMessage(trackedHuman);
-    /*
-    map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
-    if (it!=idToIdentity.end())
-      trackedHuman.identity=it->second;
-    else
-      trackedHuman.identity="";
-    */
-    trackedHumans.trackedHumans.push_back(trackedHuman);
+    if (it->matchCount>=minMatchCount)
+    {
+      it->writeMessage(trackedHuman);
+      trackedHumans.trackedHumans.push_back(trackedHuman);
+      /*
+        map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
+        if (it!=idToIdentity.end())
+        trackedHuman.identity=it->second;
+        else
+        trackedHuman.identity="";
+      */
+    }
   }
-  
   trackedHumansPub.publish(trackedHumans);
   markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
 }
+
 
 /**
  * ostream a tracker
