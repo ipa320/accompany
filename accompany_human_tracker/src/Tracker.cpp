@@ -6,10 +6,15 @@ using namespace std;
  * Constructor
  * @param trackedHumansPub 'trackedHuman' publisher
  * @param markerArrayPub 'markerArray' publisher for visualization purposes
- * @param transformListener used to transform to world coordinates
+ * @param priorHull the area where people are detected
+ * @param entryExitHulls the entry and exit areas of the scene
+ * @param stateThreshold matching threshold on distance
+ * @param appearanceThreshold matching threshold on appearance
+ * @param totalThreshold combined threshold on distance and appearance
  */
 Tracker::Tracker(const ros::Publisher& trackedHumansPub,
                  const ros::Publisher& markerArrayPub,
+                 const std::vector<WorldPoint>& priorHull,
                  const std::vector< std::vector<WorldPoint> >& entryExitHulls,
                  double stateThreshold,
                  double appearanceThreshold,
@@ -17,6 +22,7 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
 {
   this->trackedHumansPub=trackedHumansPub;
   this->markerArrayPub=markerArrayPub;
+  this->priorHull=priorHull;
   this->entryExitHulls=entryExitHulls;
   this->stateThreshold=stateThreshold;
   this->appearanceThreshold=appearanceThreshold;
@@ -41,6 +47,17 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
   obsCovariance=vnl_matrix<double>(oc,2,2);
 }
 
+/**
+ * Test if a detection is in an entry area
+ */
+bool Tracker::insideEntry(const accompany_uva_msg::HumanDetection& detection)
+{
+  WorldPoint wp(detection.location.point.x*1000,
+                detection.location.point.y*1000,
+                detection.location.point.z*1000);
+  return inside(wp,priorHull);
+}
+
 double timeDiff(const struct timeval& time,
                 const struct timeval& prevTime)
 {
@@ -53,8 +70,11 @@ double timeDiff(const struct timeval& time,
  */
 void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections)
 {
+  if (humanDetections->detections.size()>0)
+    coordFrame=humanDetections->detections[0].location.header.frame_id;
+
   // transform to world coordinates
-  accompany_uva_msg::HumanDetections transHumanDetections=transform(*humanDetections);
+  //accompany_uva_msg::HumanDetections transHumanDetections=transform(*humanDetections);
 
   // transition based on elapsed time
   struct timeval time;
@@ -69,11 +89,11 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
     tracks[i].transition(transModel,transCovariance);
 
   // associate observations with tracks
-  dataAssociation.clear(tracks.size(),transHumanDetections.detections.size());
+  dataAssociation.clear(tracks.size(),humanDetections->detections.size());
   for (unsigned i=0;i<tracks.size();i++)
-    for (unsigned j=0;j<transHumanDetections.detections.size();j++)
+    for (unsigned j=0;j<humanDetections->detections.size();j++)
     {
-      double match=tracks[i].match(transHumanDetections.detections[j],
+      double match=tracks[i].match(humanDetections->detections[j],
                                    obsModel,
                                    stateThreshold,
                                    appearanceThreshold);
@@ -87,17 +107,17 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
     cout<<associations[i]<<" ";
   cout<<endl;
 
-
   // update or create tracks
   for (unsigned i=0;i<associations.size();i++)
   {
     if (associations[i]<0) // not assigned
     {
-      tracks.push_back(Track(transHumanDetections.detections[i]));
+      if (insideEntry(humanDetections->detections[i]))
+        tracks.push_back(Track(humanDetections->detections[i]));
     }
     else // assigned
     {
-      tracks[associations[i]].observation(transHumanDetections.detections[i],
+      tracks[associations[i]].observation(humanDetections->detections[i],
                                           obsModel,
                                           obsCovariance);
     }
@@ -111,7 +131,10 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
 
 /**
  * Transform human detections to world coordinates
+ * @param humanDetections humanDetections to transform
+ * @returns trasnfomed humanDetections
  */
+/*
 accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::HumanDetections& humanDetections)
 {
   accompany_uva_msg::HumanDetections transformedHumanDetections;
@@ -134,16 +157,17 @@ accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::H
   }
   return transformedHumanDetections;
 }
+*/
 
 /**
- * Publish the known detections.
+ * Publish the known tracks.
  */
 void Tracker::publishTracks()
 {
   accompany_uva_msg::TrackedHumans trackedHumans;
   accompany_uva_msg::TrackedHuman trackedHuman;
   trackedHuman.location.header.stamp=ros::Time::now();
-  trackedHuman.location.header.frame_id="/map";
+  trackedHuman.location.header.frame_id=coordFrame;
   for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();it++)
   {
     it->writeMessage(trackedHuman);

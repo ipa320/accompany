@@ -20,6 +20,7 @@ class Tracker
  public:
   Tracker(const ros::Publisher& trackedHumansPub,
           const ros::Publisher& markerArrayPub,
+          const std::vector<WorldPoint>& priorHull,
           const std::vector< std::vector<WorldPoint> >& entryExitHulls,
           double stateThreshold,
           double appearanceThreshold,
@@ -32,6 +33,7 @@ class Tracker
   std::vector<Track> tracks;
 
   DataAssociation dataAssociation;
+  std::vector<WorldPoint> priorHull;
   std::vector< std::vector<WorldPoint> > entryExitHulls;
   double stateThreshold,appearanceThreshold,totalThreshold;
 
@@ -41,11 +43,13 @@ class Tracker
 
   struct timeval prevTime;
 
+  std::string coordFrame;
   ros::Publisher trackedHumansPub;
   MsgToMarkerArray msgToMarkerArray;
   ros::Publisher markerArrayPub;
   tf::TransformListener transformListener;
 
+  bool insideEntry(const accompany_uva_msg::HumanDetection& detection);
   accompany_uva_msg::HumanDetections transform(const accompany_uva_msg::HumanDetections& humanDetections);
   void publishTracks();
 

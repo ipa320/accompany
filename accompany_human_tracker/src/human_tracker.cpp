@@ -12,20 +12,21 @@ using namespace boost;
 
 //map<string,int> identityToID; // map of identities to id's
 //map<int,string> idToIdentity; // map of id's to identities
+vector<WorldPoint> priorHull;
 vector< vector<WorldPoint> > entryExitHulls;
 
 int main(int argc,char **argv)
 {
   ros::init(argc, argv, "human_tracker");
 
-  string entryExit_file;
+  string param_path;
   double stateThreshold,appearanceThreshold,totalThreshold;
 
   // handling command line arguments
   program_options::options_description optionsDescription("Tracks humans using human detections");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("entryExit,e", program_options::value<string>(&entryExit_file)->required(),"filename of entryExit.txt")
+    ("path,p", program_options::value<string>(&param_path)->required(),"path to pior.txt and entryExit.txt")
     ("stateThreshold,s",program_options::value<double>(&stateThreshold)->default_value(-6),"threshold on the kalman filter state")
     ("appearanceThreshold,a",program_options::value<double>(&appearanceThreshold)->default_value(-0),"threshold on the appearance")
     ("totalThreshold,t",program_options::value<double>(&totalThreshold)->default_value(-6),"combined threshold on state and appearance");
@@ -42,7 +43,11 @@ program_options::variables_map variablesMap;
     cerr<<""<<e.what()<<endl;    
     return 1;
   }
-
+  
+  string prior_file = param_path + "/" + "prior.txt";
+  string entryExit_file = param_path + "/" + "entryExit.dat";
+  
+  loadHull(prior_file.c_str(),priorHull);
   loadHulls(entryExit_file.c_str(),entryExitHulls);
 
   // create publisher and subscribers
@@ -52,6 +57,7 @@ program_options::variables_map variablesMap;
 
   // create Tracker
   Tracker tracker(trackedHumansPub,markerArrayPub,
+                  priorHull,
                   entryExitHulls,
                   stateThreshold,
                   appearanceThreshold,
