@@ -45,7 +45,9 @@ rosbuild_add_executable(human_tracker
   src/Track.h
   src/Track.cpp
   src/DataAssociation.h
-  src/DataAssociation.cpp)
+  src/DataAssociation.cpp
+  src/IDToName.h
+  src/IDToName.cpp)
 target_link_libraries(human_tracker hull MsgToMarkerArray boost_program_options vnl vnl_algo)
 
 #rosbuild_add_executable(view_tracks src/view_tracks.cpp)
