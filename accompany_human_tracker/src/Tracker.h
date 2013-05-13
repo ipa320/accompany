@@ -8,6 +8,9 @@
 #include <accompany_uva_msg/MsgToMarkerArray.h>
 #include <tf/transform_listener.h>
 
+#include <cob_people_detection_msgs/Detection.h>
+#include <cob_people_detection_msgs/DetectionArray.h>
+
 #include <vector>
 
 /**
@@ -27,7 +30,9 @@ class Tracker
           unsigned maxUnmatchCount=20);
   
   void processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections);
-  
+  void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray);
+  void tfCallBack(const tf::tfMessage& tf);
+
   friend std::ostream& operator<<(std::ostream& out,const Tracker& tracker);
 
  private:
@@ -61,3 +66,4 @@ class Tracker
 };
 
 #endif
+

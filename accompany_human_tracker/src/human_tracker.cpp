@@ -10,8 +10,7 @@
 using namespace std;
 using namespace boost;
 
-//map<string,int> identityToID; // map of identities to id's
-//map<int,string> idToIdentity; // map of id's to identities
+
 vector<WorldPoint> priorHull;
 vector< vector<WorldPoint> > entryExitHulls;
 
@@ -65,10 +64,13 @@ program_options::variables_map variablesMap;
                   appearanceThreshold,
                   totalThreshold);
   
+  // subscribers
   ros::Subscriber humanDetectionsSub=n.subscribe<accompany_uva_msg::HumanDetections>("/humanDetections",10,
                                                                                      &Tracker::processDetections,&tracker);
-  //ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,identityReceived);
-
+  ros::Subscriber identitySub=n.subscribe<cob_people_detection_msgs::DetectionArray>("/face_recognitions",10,
+                                                                                     &Tracker::identityReceived,&tracker);
+  ros::Subscriber tfSub= n.subscribe("tf", 100,
+                                     &Tracker::tfCallBack,&tracker);
   ros::spin();
 
   return 0;

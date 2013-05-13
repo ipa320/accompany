@@ -145,6 +145,37 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   publishTracks();
 }
 
+void Tracker::identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray)
+{
+  
+}
+
+void Tracker::tfCallBack(const tf::tfMessage& tf)
+{
+  if (tf.transforms[0].child_frame_id=="/base_link")
+  {
+    cout<<"tf) "<<tf<<endl;
+    try// transform to /camera_frame coordinate system
+    {
+      geometry_msgs::PointStamped tfPoint,transTFPoint;
+      tfPoint.header=tf.transforms[0].header;
+      tfPoint.point.x=tf.transforms[0].transform.translation.x;
+      tfPoint.point.y=tf.transforms[0].transform.translation.y;
+      tfPoint.point.z=tf.transforms[0].transform.translation.z;
+      cout<<"1) "<<tfPoint<<endl;
+      transformListener.waitForTransform(tfPoint.header.frame_id, "/omni_camera1",tfPoint.header.stamp,ros::Duration(1.0));
+      transformListener.transformPoint("/omni_camera1",
+                                       tfPoint,
+                                       transTFPoint);
+      cout<<"****************** 2) "<<transTFPoint<<endl;
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+    }
+  }
+}
+
 /**
  * Transform human detections to world coordinates
  * @param humanDetections humanDetections to transform
@@ -174,7 +205,6 @@ accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::H
   return transformedHumanDetections;
 }
 */
-
 
 /**
  * Reduce speed when unmatched so not to move far away from last matching observation
