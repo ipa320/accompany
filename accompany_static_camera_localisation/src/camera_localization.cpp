@@ -21,6 +21,8 @@
 #if BOOST_VERSION < 103500
 #include <boost/thread/detail/lock.hpp>
 #endif
+#include <boost/thread.hpp>  
+#include <boost/date_time.hpp> 
 
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
@@ -88,6 +90,7 @@ vector<vector<vector<scanline_t> > > masks; // camera, id, lines
 vector<WorldPoint> scanLocations;
 MsgToMarkerArray msgToMarkerArray;
 
+bool running=true;
 geometry_msgs::TransformStamped frame;
 tf::TransformBroadcaster *transformBroadcasterPtr;
 ros::Publisher humanDetectionsPub,
@@ -722,16 +725,22 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
   }
 }
 
+void publishTF()
+{
+  while (running)
+  {
+    frame.header.stamp=ros::Time::now();
+    transformBroadcasterPtr->sendTransform(frame);
+    usleep(50*1000); // sleep 50ms for +-20Hz thread
+  }
+}
+
 void timerCallback(const ros::TimerEvent& timerEvent)
 {
   // publish transform
   frame.header.stamp=ros::Time::now();
   transformBroadcasterPtr->sendTransform(frame);
-  // also publish transform with time in the future so that tf always has a 'current' transform
-  frame.header.stamp=ros::Time::now()+ros::Duration(2);
-  transformBroadcasterPtr->sendTransform(frame);
 }
-
 
 int main(int argc, char **argv)
 {
@@ -822,7 +831,7 @@ int main(int argc, char **argv)
 
   tf::TransformBroadcaster transformBroadcaster;
   transformBroadcasterPtr=&transformBroadcaster;
-  ros::Timer timer=n.createTimer(ros::Duration(0.1),timerCallback);
+  
   image_transport::ImageTransport it(n);
   humanDetectionsPub = n.advertise<accompany_uva_msg::HumanDetections>(resolved_humanDetections, 10);
   markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
@@ -851,8 +860,14 @@ int main(int argc, char **argv)
     src_vec[i]=NULL;
   }
   
+  boost::thread publishTFThread(publishTF);
+  //ros::Timer timer=n.createTimer(ros::Duration(0.01),timerCallback); // use thread to avoid waiting on processing frames
+
   ROS_INFO_STREAM("wait for frames");
   ros::spin();
+  
+  running=false;
+  publishTFThread.join();
 
   for (unsigned int c=0;c<cam.size();c++)
     if (src_vec[c]!=NULL)
