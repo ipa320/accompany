@@ -3,6 +3,7 @@
 
 #include <Track.h>
 #include <DataAssociation.h>
+#include <IDToName.h>
 
 #include <ros/ros.h>
 #include <accompany_uva_msg/MsgToMarkerArray.h>
@@ -57,7 +58,8 @@ class Tracker
   ros::Publisher markerArrayPub;
   tf::TransformListener transformListener;
 
-  accompany_uva_msg::HumanDetections transform(const accompany_uva_msg::HumanDetections& humanDetections);
+  void label(geometry_msgs::PointStamped point,std::string label);
+  IDToName idToName;
 
   void reduceSpeed();
   void removeTracks();

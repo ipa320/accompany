@@ -76,9 +76,6 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   if (humanDetections->detections.size()>0)
     coordFrame=humanDetections->detections[0].location.header.frame_id;
 
-  // transform to world coordinates
-  //accompany_uva_msg::HumanDetections transHumanDetections=transform(*humanDetections);
-
   // transition based on elapsed time
   struct timeval time;
   gettimeofday(&time, NULL);
@@ -147,27 +144,45 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
 
 void Tracker::identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray)
 {
-  
+  for (unsigned i=0;i<detectionArray->detections.size();i++)
+  {
+    geometry_msgs::PoseStamped pose=detectionArray->detections[i].pose;
+    try// transform to /camera_frame coordinate system
+    {
+      transformListener.waitForTransform(pose.header.frame_id,coordFrame,pose.header.stamp,ros::Duration(.3));
+      geometry_msgs::PoseStamped transPose;
+      transformListener.transformPose(coordFrame,
+                                      pose,
+                                      transPose);
+      geometry_msgs::PointStamped transTFPoint;
+      transTFPoint.header=transPose.header;
+      transTFPoint.point=transPose.pose.position;
+      label(transTFPoint,detectionArray->detections[i].label);
+    }
+    catch (tf::TransformException e)
+    {
+      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+    }
+  }
 }
 
 void Tracker::tfCallBack(const tf::tfMessage& tf)
 {
   if (tf.transforms[0].child_frame_id=="/base_link")
   {
-    cout<<"tf) "<<tf<<endl;
     try// transform to /camera_frame coordinate system
     {
-      geometry_msgs::PointStamped tfPoint,transTFPoint;
+      geometry_msgs::PointStamped tfPoint;
       tfPoint.header=tf.transforms[0].header;
       tfPoint.point.x=tf.transforms[0].transform.translation.x;
       tfPoint.point.y=tf.transforms[0].transform.translation.y;
       tfPoint.point.z=tf.transforms[0].transform.translation.z;
-      cout<<"1) "<<tfPoint<<endl;
-      transformListener.waitForTransform(tfPoint.header.frame_id, "/omni_camera1",tfPoint.header.stamp,ros::Duration(1.0));
-      transformListener.transformPoint("/omni_camera1",
+      transformListener.waitForTransform(tfPoint.header.frame_id,coordFrame,tfPoint.header.stamp,ros::Duration(.3));
+      geometry_msgs::PointStamped transTFPoint;
+      transformListener.transformPoint(coordFrame,
                                        tfPoint,
                                        transTFPoint);
-      cout<<"****************** 2) "<<transTFPoint<<endl;
+      label(transTFPoint,"robot");
     }
     catch (tf::TransformException e)
     {
@@ -176,35 +191,14 @@ void Tracker::tfCallBack(const tf::tfMessage& tf)
   }
 }
 
-/**
- * Transform human detections to world coordinates
- * @param humanDetections humanDetections to transform
- * @returns trasnfomed humanDetections
- */
-/*
-accompany_uva_msg::HumanDetections Tracker::transform(const accompany_uva_msg::HumanDetections& humanDetections)
+void Tracker::label(geometry_msgs::PointStamped point,string label)
 {
-  accompany_uva_msg::HumanDetections transformedHumanDetections;
-  for (unsigned i=0;i<humanDetections.detections.size();i++)
-  {
-    try// transform to map coordinate system
-    {
-      geometry_msgs::PointStamped transPoint;
-      transformListener.transformPoint("/map",
-                                       humanDetections.detections[i].location,
-                                       transPoint);
-      transformedHumanDetections.detections.push_back(humanDetections.detections[i]);
-      transformedHumanDetections.detections.back().location=transPoint;
-    }
-    catch (tf::TransformException e)
-    {
-      cerr<<"error while tranforming human location: "<<e.what()<<endl;
-      break;
-    }
-  }
-  return transformedHumanDetections;
+  WorldPoint wp(point.point.x,
+                point.point.y,
+                point.point.z);
+  wp*=1000.0; // from meters to millimeters
+  
 }
-*/
 
 /**
  * Reduce speed when unmatched so not to move far away from last matching observation
