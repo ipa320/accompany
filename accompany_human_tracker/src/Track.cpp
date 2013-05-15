@@ -79,6 +79,15 @@ double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
 }
 
 /**
+ * Return unique ID associated with this track
+ * @return the ID
+ */
+unsigned Track::getID()
+{
+  return id;
+}
+
+/**
  * Compute the match of this track with the detection based on the kalman state
  * @param humanDetection human detection information
  * @param obsModel observation model that maps the kalman state to the kalman observation space

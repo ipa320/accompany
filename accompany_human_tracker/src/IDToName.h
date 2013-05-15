@@ -7,7 +7,8 @@
 class IDToName
 {
  public:
-  
+  static const char unkown[];
+
   void setIDName(unsigned id,std::string name);
   std::string getIDName(unsigned id);
 

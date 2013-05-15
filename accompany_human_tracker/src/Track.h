@@ -18,6 +18,8 @@ class Track
   
   Track(const accompany_uva_msg::HumanDetection& humanDetection);
   
+  unsigned getID();
+
   double match(const accompany_uva_msg::HumanDetection& humanDetection,
                const vnl_matrix<double>& obsModel,
                double stateThreshold,
@@ -44,6 +46,7 @@ class Track
 
   unsigned matchCount; // number of times matched by observation
   unsigned unmatchedCount; // number consecutive unmatched
+  
 
  private:
   static unsigned nextID;

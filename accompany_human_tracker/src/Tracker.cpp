@@ -50,7 +50,9 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
   const double oc[]={1,0,
                      0,1};
   obsCovariance=vnl_matrix<double>(oc,2,2);
+  coordFrame="";// set coordinate frame of HumanDetections to unkown
 }
+
 
 WorldPoint toWorldPoint(const accompany_uva_msg::HumanDetection& detection)
 {
@@ -142,62 +144,96 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   publishTracks();
 }
 
+/**
+ * Processes people face dections. Assign names of people to closest track.
+ * @param detectionArray people face dections
+ */
 void Tracker::identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray)
 {
-  for (unsigned i=0;i<detectionArray->detections.size();i++)
+  if (coordFrame.size()>0) // if HumanDetections coordinate frame is known
   {
-    geometry_msgs::PoseStamped pose=detectionArray->detections[i].pose;
-    try// transform to /camera_frame coordinate system
+    for (unsigned i=0;i<detectionArray->detections.size();i++)
     {
-      transformListener.waitForTransform(pose.header.frame_id,coordFrame,pose.header.stamp,ros::Duration(.3));
-      geometry_msgs::PoseStamped transPose;
-      transformListener.transformPose(coordFrame,
-                                      pose,
-                                      transPose);
-      geometry_msgs::PointStamped transTFPoint;
-      transTFPoint.header=transPose.header;
-      transTFPoint.point=transPose.pose.position;
-      label(transTFPoint,detectionArray->detections[i].label);
-    }
-    catch (tf::TransformException e)
-    {
-      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      geometry_msgs::PoseStamped pose=detectionArray->detections[i].pose;
+      try// transform to HumanDetections coordinate system
+      {
+        transformListener.waitForTransform(pose.header.frame_id,coordFrame,pose.header.stamp,ros::Duration(.3));
+        geometry_msgs::PoseStamped transPose;
+        transformListener.transformPose(coordFrame,
+                                        pose,
+                                        transPose);
+        geometry_msgs::PointStamped transTFPoint;
+        transTFPoint.header=transPose.header;
+        transTFPoint.point=transPose.pose.position;
+        label(transTFPoint,detectionArray->detections[i].label);
+      }
+      catch (tf::TransformException e)
+      {
+        cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      }
     }
   }
 }
 
+/**
+ * Processes robot position. Assign name 'robot' to closest track.
+ * @param tf tf coordinate frame
+ */
 void Tracker::tfCallBack(const tf::tfMessage& tf)
 {
-  if (tf.transforms[0].child_frame_id=="/base_link")
+  if (coordFrame.size()>0) // if HumanDetections coordinate frame is known
   {
-    try// transform to /camera_frame coordinate system
+    if (tf.transforms[0].child_frame_id=="/base_link") // if robot
     {
-      geometry_msgs::PointStamped tfPoint;
-      tfPoint.header=tf.transforms[0].header;
-      tfPoint.point.x=tf.transforms[0].transform.translation.x;
-      tfPoint.point.y=tf.transforms[0].transform.translation.y;
-      tfPoint.point.z=tf.transforms[0].transform.translation.z;
-      transformListener.waitForTransform(tfPoint.header.frame_id,coordFrame,tfPoint.header.stamp,ros::Duration(.3));
-      geometry_msgs::PointStamped transTFPoint;
-      transformListener.transformPoint(coordFrame,
-                                       tfPoint,
-                                       transTFPoint);
-      label(transTFPoint,"robot");
-    }
-    catch (tf::TransformException e)
-    {
-      cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      try// transform to HumanDetections coordinate system
+      {
+        geometry_msgs::PointStamped tfPoint;
+        tfPoint.header=tf.transforms[0].header;
+        tfPoint.point.x=tf.transforms[0].transform.translation.x;
+        tfPoint.point.y=tf.transforms[0].transform.translation.y;
+        tfPoint.point.z=tf.transforms[0].transform.translation.z;
+        transformListener.waitForTransform(tfPoint.header.frame_id,coordFrame,tfPoint.header.stamp,ros::Duration(.3));
+        geometry_msgs::PointStamped transTFPoint;
+        transformListener.transformPoint(coordFrame,
+                                         tfPoint,
+                                         transTFPoint);
+        label(transTFPoint,"robot");
+      }
+      catch (tf::TransformException e)
+      {
+        cerr<<"error while tranforming human location: "<<e.what()<<endl;
+      }
     }
   }
 }
 
+/**
+ * Label the track that is closest to point with label.
+ * @param point position of object
+ * @param label name of object
+ */
 void Tracker::label(geometry_msgs::PointStamped point,string label)
 {
   WorldPoint wp(point.point.x,
                 point.point.y,
                 point.point.z);
   wp*=1000.0; // from meters to millimeters
-  
+  double maxDistance=numeric_limits<double>::max();
+  int best=-1;
+  for (unsigned i=0;i<tracks.size();i++)
+  {
+    if (tracks[i].matchCount>=minMatchCount) // only tracks with proper match count
+    {
+      double distance=wp.squareDistance(tracks[i].toWorldPoint());
+      if (distance<maxDistance)
+      {
+        maxDistance=distance;
+        best=(int)(i);
+      }
+    }
+  }
+  if (best>=0)
+    idToName.setIDName(tracks[best].getID(),label);
 }
 
 /**
@@ -207,13 +243,8 @@ void Tracker::reduceSpeed()
 {
   for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();it++)
   {
-    cout<<"unmatchedCount:"<<it->unmatchedCount<<endl;
     if (it->unmatchedCount>0) // if not matched in last cycle
-    {
-      cout<<"reducedSpeed1:"<<*it<<endl;
       it->reduceSpeed();
-      cout<<"reducedSpeed2:"<<*it<<endl;
-    }
   }
 }
 
@@ -255,17 +286,15 @@ void Tracker::publishTracks()
   trackedHuman.location.header.frame_id=coordFrame;
   for (vector<Track>::iterator it=tracks.begin();it!=tracks.end();it++)
   {
-    if (it->matchCount>=minMatchCount)
+    if (it->matchCount>=minMatchCount) // only tracks with proper match count
     {
       it->writeMessage(trackedHuman);
-      trackedHumans.trackedHumans.push_back(trackedHuman);
-      /*
-        map<int,string>::iterator it=idToIdentity.find(trackedHuman.id);
-        if (it!=idToIdentity.end())
-        trackedHuman.identity=it->second;
-        else
+      string name=idToName.getIDName(it->getID());
+      if (name.compare(IDToName::unkown)!=0)
+        trackedHuman.identity=name;
+      else
         trackedHuman.identity="";
-      */
+      trackedHumans.trackedHumans.push_back(trackedHuman);
     }
   }
   trackedHumansPub.publish(trackedHumans);

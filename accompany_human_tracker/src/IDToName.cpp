@@ -3,6 +3,9 @@
 #include <stdexcept> 
 using namespace std;
 
+// static member init
+const char IDToName::unkown[]="unkown";
+
 void IDToName::setIDName(unsigned id,string name)
 {
   try
@@ -22,7 +25,7 @@ void IDToName::setIDName(unsigned id,string name)
 
 string IDToName::getIDName(unsigned id)
 {
-  string name="unkown";
+  string name=IDToName::unkown;
   try
   {
     name=idToName.at(id);

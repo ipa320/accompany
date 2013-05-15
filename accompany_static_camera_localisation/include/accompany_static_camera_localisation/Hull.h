@@ -33,6 +33,14 @@ struct WorldPoint
     z /= d;
     return *this;
   }
+  
+  double squareDistance(const WorldPoint &p) const
+  {
+    double dx=x-p.x;
+    double dy=y-p.y;
+    double dz=z-p.z;
+    return dx*dx+dy*dy+dz*dz;
+  }
 };
 
 std::ostream &operator<<(std::ostream &os, const WorldPoint &wp);
