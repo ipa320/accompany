@@ -56,6 +56,7 @@ void DataAssociation::set(unsigned e1,unsigned e2,double association)
  */
 std::vector<int> DataAssociation::associate(double threshold,int order)
 {
+  cout<<"associate "<<size1<<" tracks with "<<size2<<" detections"<<endl;
   std::vector<int> association(size2);
   for (unsigned i=0;i<size2;i++)
     association[i]=-1;
@@ -98,8 +99,6 @@ std::pair<int,int> DataAssociation::getMax(double threshold,int order)
   ret.first=-1;
   ret.second=-1;
   double max=(numeric_limits<double>::max()/2)*-order;
-  //cout<<"max:"<<max<<endl;
-  //cout<<"size1:"<<size1<<" size2:"<<size2<<endl;
   for (unsigned i=0;i<size1;i++)
   {
     if (assign1[i]<0) // unassigned 1
@@ -108,22 +107,17 @@ std::pair<int,int> DataAssociation::getMax(double threshold,int order)
       {
         if (assign2[j]<0) // unassigned 2
         {
-          //cout<<"i:"<<i<<" j:"<<j<<endl;
           if (associations[i][j]*order>threshold*order &&
               associations[i][j]*order>max*order)
           {
-            cout<<associations[i][j]<<" * "<<order<<endl;
             max=associations[i][j]*order;
             ret.first=i;
             ret.second=j;
-            //cout<<"max:"<<max<<" first:"<<ret.first<<" second:"<<ret.second<<endl;
           }
         }
       }
     }
   }
-  //cout<<"ret.first:"<<ret.first<<endl;
-  //cout<<"ret.second:"<<ret.second<<endl;
   if (ret.first>=0)
     assign1[ret.first]=ret.second;
   if (ret.second>=0)

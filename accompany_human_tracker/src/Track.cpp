@@ -74,7 +74,6 @@ double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
     cout<<"appearance="<<appearance<<" < appearanceThreshold="<<appearanceThreshold<<endl;
     return -numeric_limits<double>::max();
   }
-  cout<<"*** state: "<<state<<" appearance: "<<appearance<<endl;
   return state+appearance;
 }
 

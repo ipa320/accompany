@@ -70,11 +70,12 @@ double timeDiff(const struct timeval& time,
 }
 
 /**
- * Processes detections, assign detections to known tracks or create new tracks
+ * Processes human detections, assign detections to known tracks or create new tracks
  * @param humanDetections the detections
  */
 void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections)
 {
+  cout<<"-received "<<humanDetections->detections.size()<<" HumanDetections"<<endl;
   if (humanDetections->detections.size()>0)
     coordFrame=humanDetections->detections[0].location.header.frame_id;
 
@@ -105,10 +106,12 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
   vector<int> associations=dataAssociation.associate(totalThreshold);
 
   // print associations
+  /*
   cout<<"associations:"<<endl;
   for (unsigned i=0;i<associations.size();i++)
     cout<<associations[i]<<" ";
   cout<<endl;
+  */
 
   // add unmatch count of tracks
   for (unsigned i=0;i<tracks.size();i++)
@@ -150,6 +153,7 @@ void Tracker::processDetections(const accompany_uva_msg::HumanDetections::ConstP
  */
 void Tracker::identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray)
 {
+  cout<<"-received "<<detectionArray->detections.size()<<" face detections"<<endl;
   if (coordFrame.size()>0) // if HumanDetections coordinate frame is known
   {
     for (unsigned i=0;i<detectionArray->detections.size();i++)
@@ -180,10 +184,11 @@ void Tracker::identityReceived(const cob_people_detection_msgs::DetectionArray::
  * @param tf tf coordinate frame
  */
 void Tracker::tfCallBack(const tf::tfMessage& tf)
-{
-  if (coordFrame.size()>0) // if HumanDetections coordinate frame is known
+{  
+  if (tf.transforms[0].child_frame_id=="/base_link") // if robot
   {
-    if (tf.transforms[0].child_frame_id=="/base_link") // if robot
+    cout<<"-received robot position"<<endl;
+    if (coordFrame.size()>0) // if HumanDetections coordinate frame is known
     {
       try// transform to HumanDetections coordinate system
       {
@@ -233,7 +238,10 @@ void Tracker::label(geometry_msgs::PointStamped point,string label)
     }
   }
   if (best>=0)
+  {
     idToName.setIDName(tracks[best].getID(),label);
+    cout<<"label track "<<tracks[best].getID()<<" '"<<label<<"'"<<endl;
+  }
 }
 
 /**
