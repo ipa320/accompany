@@ -15,6 +15,7 @@
 
 #include <boost/thread/xtime.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/future.hpp>
 #include <boost/version.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/path.hpp>
@@ -105,6 +106,8 @@ vector<IplImage *> src_vec(CAM_NUM);
 vector<vnl_vector<FLOAT> > bgProb(CAM_NUM);
 vector<vnl_vector<FLOAT> > sumPixel(CAM_NUM);
 vector<FLOAT> sum_g(CAM_NUM);
+
+unsigned nrThreads;
 
 // particle options
 bool particles = false;
@@ -238,6 +241,142 @@ FLOAT logMaskProbDiff(const vnl_vector<FLOAT> &logSumPixelFGProb,
   return false;
 }
 
+class ScanResResult
+{
+public:
+  ScanResResult()
+  {
+    bestIdx = 0;
+    bestLogProb = -INFINITY;
+  }
+  
+  FLOAT bestLogProb;
+  unsigned bestIdx;
+};
+
+class ScanRestHelperThreadSuper
+{
+public:
+  ScanRestHelperThreadSuper(unsigned begin,
+                            unsigned end,
+                            vector<unsigned> &existing,
+                            vector<vector<scanline_t> > &existingMask,
+                            const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
+                            const vector<vnl_vector<FLOAT> > &logSumPixelBGProb,
+                            const vector<FLOAT> &lSum,
+                            vector<FLOAT> &logPosProbCache,
+                            FLOAT logNP,
+                            vnl_vector<FLOAT> &lpp)
+    : begin(begin),end(end),existing(existing),existingMask(existingMask),
+      logSumPixelFGProb(logSumPixelFGProb),logSumPixelBGProb(logSumPixelBGProb),
+      lSum(lSum),logPosProbCache(logPosProbCache),logNP(logNP),lpp(lpp)
+  {
+  }
+
+protected:
+  unsigned begin;
+  unsigned end;
+  vector<unsigned>& existing;
+  vector<vector<scanline_t> >& existingMask;
+  const vector<vnl_vector<FLOAT> >& logSumPixelFGProb;
+  const vector<vnl_vector<FLOAT> >& logSumPixelBGProb;
+  const vector<FLOAT>& lSum;
+  vector<FLOAT>& logPosProbCache;
+  FLOAT logNP;
+  vnl_vector<FLOAT>& lpp;
+};
+
+class ScanRestHelper1Thread : public ScanRestHelperThreadSuper
+{
+public:
+  ScanRestHelper1Thread(unsigned begin,
+                        unsigned end,
+                        vector<unsigned> &existing,
+                        vector<vector<scanline_t> > &existingMask,
+                        const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
+                        const vector<vnl_vector<FLOAT> > &logSumPixelBGProb,
+                        const vector<FLOAT> &lSum,
+                        vector<FLOAT> &logPosProbCache,
+                        FLOAT logNP,
+                        vnl_vector<FLOAT> &lpp)
+    : ScanRestHelperThreadSuper(begin,end,existing,existingMask,logSumPixelFGProb,logSumPixelBGProb,
+                                lSum,logPosProbCache,logNP,lpp)
+  {
+  }
+
+  ScanResResult operator()()
+  {
+    ScanResResult scanResResult;
+    for (unsigned p = begin; p<end; ++p)
+    {
+      if (!overlap(existing, p) && logPosProbCache[p] > 0)
+      {
+        lpp(p) = logLocPrior(p) + logNP;
+        for (unsigned c = 0; c != cam.size(); ++c)
+        {
+          vector<scanline_t> mask = existingMask[c];
+          mergeMasks(mask, masks[c][p]);
+          lpp(p) += logMaskProb(logSumPixelFGProb[c], logSumPixelBGProb[c],
+                                   lSum[c], mask);
+        }
+        if (lpp(p) > scanResResult.bestLogProb)
+        {
+          scanResResult.bestLogProb = lpp(p);
+          scanResResult.bestIdx = p;
+        }
+      }
+    }
+    return scanResResult;
+  }
+
+};
+
+class ScanRestHelper2Thread : public ScanRestHelperThreadSuper
+{
+public:
+  ScanRestHelper2Thread(unsigned begin,
+                        unsigned end,
+                        vector<unsigned> &existing,
+                        vector<vector<scanline_t> > &existingMask,
+                        const vector<vnl_vector<FLOAT> > &logSumPixelFGProb,
+                        const vector<vnl_vector<FLOAT> > &logSumPixelBGProb,
+                        const vector<FLOAT> &lSum,
+                        vector<FLOAT> &logPosProbCache,
+                        FLOAT logNP,
+                        vnl_vector<FLOAT> &lpp)
+    : ScanRestHelperThreadSuper(begin,end,existing,existingMask,logSumPixelFGProb,logSumPixelBGProb,
+                                lSum,logPosProbCache,logNP,lpp)
+  {
+  }
+
+  ScanResResult operator()()
+  {
+    ScanResResult scanResResult;
+    for (unsigned p = begin; p<end; ++p)
+    {
+      logPosProbCache[p] = logLocPrior(p);
+      for (unsigned c = 0; c != cam.size(); ++c)
+      {
+        logPosProbCache[p] += logMaskProb(logSumPixelFGProb[c],
+                                          logSumPixelBGProb[c], lSum[c], masks[c][p]); // already includes lSum
+      }
+      lpp(p) = logPosProbCache[p] + logNP;
+      logPosProbCache[p] -= logNumPrior[0];
+      for (unsigned c = 0; c != cam.size(); ++c)
+      {
+        logPosProbCache[p] -= lSum[c]; // hack -> if pos, increases lik; if neg, doesn't
+      }
+      if (lpp(p) > scanResResult.bestLogProb)
+      {
+        scanResResult.bestLogProb = lpp(p);
+        scanResResult.bestIdx = p;
+      }
+    }
+    return scanResResult;
+  }
+
+};
+
 /**
  * \brief Recursively scan the image for a number of people
  * \param existing How many people have been scanned for yet
@@ -261,7 +400,7 @@ void scanRest(vector<unsigned> &existing,
     const vector<FLOAT> &lSum)
 {
   unsigned bestIdx = 0;
-  FLOAT bestLogProb = -INFINITY, marginalLogProb = -INFINITY;
+  FLOAT bestLogProb = -INFINITY;//, marginalLogProb = -INFINITY; //not used?
 
   logPosProb.push_back(vnl_vector<FLOAT>(scanLocations.size(), -INFINITY));
   vnl_vector<FLOAT> &lpp = logPosProb.back();
@@ -272,6 +411,7 @@ void scanRest(vector<unsigned> &existing,
   // for (unsigned i=0; i!=marginal.size(); ++i)
   //      cout << marginal[i] << " ";
   // cout << "]" << endl;
+
   if (existing.size())
   {
     unsigned &hereIdx = existing.back();
@@ -280,9 +420,36 @@ void scanRest(vector<unsigned> &existing,
 
     FLOAT logNP = logNumPrior[existing.size() + 1];
 
+    // threaded version
+    boost::unique_future<ScanResResult> futures[nrThreads];
+    for (unsigned i=0;i<nrThreads;i++)
+    {
+      unsigned begin=i*(scanLocations.size()/nrThreads);
+      unsigned end=(i+1)*(scanLocations.size()/nrThreads);
+      if (i==nrThreads-1)
+        end=scanLocations.size();
+      //helpers[i]=.
+      ScanRestHelper1Thread helper(begin,end,existing,existingMask,logSumPixelFGProb,logSumPixelBGProb,lSum,
+                                   logPosProbCache,logNP,lpp);
+
+      boost::packaged_task<ScanResResult> pt(helper);
+      futures[i]=pt.get_future();
+      boost::thread thread(boost::move(pt)); // start thread
+    }
+    for (unsigned i=0;i<nrThreads;i++)
+    {
+      futures[i].wait(); // join thread
+      ScanResResult scanResResult=futures[i].get();
+      if (scanResResult.bestLogProb>bestLogProb)
+      {
+        bestLogProb=scanResResult.bestLogProb;
+        bestIdx=scanResResult.bestIdx;
+      }
+    }
+
+    /* // non-threaded version
     for (unsigned p = 0; p != scanLocations.size(); ++p)
     {
-
       if (!overlap(existing, p) && logPosProbCache[p] > 0)
       {
         // cout << "Considering position " << p << ": (" << scanLocations[p].x << "," << scanLocations[p].y << ")" <<endl;
@@ -294,9 +461,9 @@ void scanRest(vector<unsigned> &existing,
           vector<scanline_t> mask = existingMask[c];
           mergeMasks(mask, masks[c][p]);
           lpp(p) += logMaskProb(logSumPixelFGProb[c], logSumPixelBGProb[c],
-              lSum[c], mask);
+                                lSum[c], mask);
         }
-        marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
+        //marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
         if (lpp(p) > bestLogProb)
         {
           bestLogProb = lpp(p);
@@ -304,11 +471,42 @@ void scanRest(vector<unsigned> &existing,
         }
       }
     }
+    */
   }
   else
   {
     FLOAT logNP = logNumPrior[1];
 
+    
+    // threaded version
+    boost::unique_future<ScanResResult> futures[nrThreads];
+    for (unsigned i=0;i<nrThreads;i++)
+    {
+      unsigned begin=i*(scanLocations.size()/nrThreads);
+      unsigned end=(i+1)*(scanLocations.size()/nrThreads);
+      if (i==nrThreads-1)
+        end=scanLocations.size();
+      //helpers[i]=
+      ScanRestHelper2Thread helper(begin,end,existing,existingMask,logSumPixelFGProb,logSumPixelBGProb,lSum,
+                                   logPosProbCache,logNP,lpp);
+
+      boost::packaged_task<ScanResResult> pt(helper);
+      futures[i]=pt.get_future();
+      boost::thread thread(boost::move(pt)); // start thread
+    }
+    for (unsigned i=0;i<nrThreads;i++)
+    {
+      futures[i].wait(); // join thread
+      ScanResResult scanResResult=futures[i].get();
+      cout<<"=== bestLogProb:"<<scanResResult.bestLogProb<<endl;
+      if (scanResResult.bestLogProb>bestLogProb)
+      {
+        bestLogProb=scanResResult.bestLogProb;
+        bestIdx=scanResResult.bestIdx;
+      }
+    }
+
+    /* // non-threaded version
     for (unsigned p = 0; p != scanLocations.size(); ++p)
     {
       // if (logLocPrior(p) < -5000) --> Not part of scanLocations anymore
@@ -326,14 +524,14 @@ void scanRest(vector<unsigned> &existing,
       {
         logPosProbCache[p] -= lSum[c]; // hack -> if pos, increases lik; if neg, doesn't
       }
-      marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
+      //marginalLogProb = log_sum_exp(marginalLogProb, lpp(p));
       if (lpp(p) > bestLogProb)
       {
         bestLogProb = lpp(p);
         bestIdx = p;
       }
     }
-
+    */
   }
   // cout << "bestIdx=" << bestIdx << ", bestLogProb=" << bestLogProb << endl;
   //      if (marginalLogProb > marginal.back()) {
@@ -555,6 +753,47 @@ void initStaticProbs()
     logSumPixelFGProb[c] = logSumPixelFGProb[0];
 }
 
+class DynBackGroundThread
+{
+public:
+  DynBackGroundThread(unsigned begin,unsigned end,
+                      IplImage *smooth,
+                      GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures,
+                      vnl_vector<FLOAT> &bgProbRef)
+  : bgProb(bgProbRef)
+  {
+    this->begin=begin;
+    this->end=end;
+    this->smooth=smooth;
+    this->gaussianMixtures=gaussianMixtures;
+  }
+
+  void operator()()
+  {
+    int updateGaussianID;
+    DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
+    int channelInd=begin*3;
+    for (unsigned int i=begin;i<end;i++)
+    {
+      data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
+      data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
+      data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
+      DYNBG_TYPE logProbBG=gaussianMixtures[i].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
+      gaussianMixtures[i].update(data,initVar,decay,weightReduction,updateGaussianID);
+      bgProb(i)=logProbBG;
+      if (logProbBG<bgProbMin) bgProbMin=logProbBG;
+      if (logProbBG>bgProbMax) bgProbMax=logProbBG;
+      channelInd+=3; // next pixel
+    }
+  }
+
+private:
+  unsigned begin,end;
+  IplImage *smooth;
+  GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures;
+  vnl_vector<FLOAT> &bgProb;
+};
+
 void getDynamicBackgroundLogProb(IplImage *smooth,
                                  GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *gaussianMixtures,
                                  vnl_vector<FLOAT> &bgProb)
@@ -562,11 +801,26 @@ void getDynamicBackgroundLogProb(IplImage *smooth,
   unsigned int size=smooth->width*smooth->height;
   if (bgProb.size()!=size)
     bgProb.set_size(size);
-
-  int updateGaussianID;
-  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
   bgProbMin=std::numeric_limits<float>::max();
   bgProbMax=-std::numeric_limits<float>::max();
+
+  // threaded version
+  boost::thread threads[nrThreads];
+  for (unsigned i=0;i<nrThreads;i++)
+  {
+    unsigned begin=i*(size/nrThreads);
+    unsigned end=(i+1)*(size/nrThreads);
+    if (i==nrThreads-1) // is last
+      end=size;
+    threads[i]=boost::thread(DynBackGroundThread(begin,end,
+                                                 smooth,gaussianMixtures,bgProb));
+  }
+  for (unsigned i=0;i<nrThreads;i++)
+    threads[i].join();
+
+  /* // non-threaded version
+  int updateGaussianID;
+  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
   int channelInd=0;
   for (unsigned int i=0;i<size;i++)
   {
@@ -580,6 +834,7 @@ void getDynamicBackgroundLogProb(IplImage *smooth,
     if (logProbBG>bgProbMax) bgProbMax=logProbBG;
     channelInd+=3; // next pixel
   }
+  */
 }
 
 void getDynamicBackgroundSumLogProb(IplImage *smooth,
@@ -756,8 +1011,9 @@ int main(int argc, char **argv)
   optionsDescription.add_options()
     ("help,h","show help message")
     ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
-    ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(0))
+    ("num_persons,n", po::value<unsigned int>(&NUM_PERSONS)->default_value(4))
     ("visualize,v","visualize detection\n")
+    ("threads,t", po::value<unsigned int>(&nrThreads)->default_value(4),"number of threads used");
     ("save_all,a", po::value<string>(&save_all)->default_value(""),"save all data\n");
 
   po::variables_map variablesMap;

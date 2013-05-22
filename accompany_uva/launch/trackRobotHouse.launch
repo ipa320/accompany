@@ -33,7 +33,7 @@
 
   <!-- detect -->
   <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization" output="screen"
-        args="-p $(find accompany_uva)/res/testRobotHouse/bothCameras/params.xml -n 4 -v"/>
+        args="-p $(find accompany_uva)/res/testRobotHouse/bothCameras/params.xml -n 4 -t 4 -v"/>
 
 
   <!-- track humans using localisation data -->

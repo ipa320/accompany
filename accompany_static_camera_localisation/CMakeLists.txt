@@ -107,6 +107,7 @@ SET( MY_STANDARD_LIBS
   boost_program_options 
   boost_system 
   boost_filesystem
+  boost_thread
   opencv_core
   opencv_highgui
   opencv_features2d
