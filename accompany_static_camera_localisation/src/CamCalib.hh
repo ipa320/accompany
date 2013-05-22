@@ -11,41 +11,21 @@
 #include <vnl/vnl_vector.h>
 #include <vnl/vnl_matrix.h>
 
+#include <ImageMask.h>
+#include <Hull.h>
+
 // struct CvPoint;
 
 extern double minX, maxX, minY, maxY;
-
-struct WorldPoint
-{
-    double x, y, z;
-    WorldPoint(double x = 0, double y = 0, double z = 0) :
-        x(x), y(y), z(z)
-    {
-    }
-    WorldPoint &operator+=(const WorldPoint &p)
-    {
-      x += p.x;
-      y += p.y;
-      z += p.z;
-      return *this;
-    }
-    WorldPoint &operator/=(const double &d)
-    {
-      x /= d;
-      y /= d;
-      z /= d;
-      return *this;
-    }
-};
-std::ostream &operator<<(std::ostream &os, const WorldPoint &wp);
-
-double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2);
 
 class CamCalib: public XmlPackable
 {
   public:
     Hu::CameraModel model;
 
+    string name;
+    string occlusionBGMaskFile;
+    ImageMask occlusionBGMask;
     FLOAT stdev1, pixelVar1, pv2_1, lpv2_1;FLOAT stdev2, pixelVar2, pv2_2,
         lpv2_2;FLOAT stdev3, pixelVar3, pv2_3, lpv2_3;FLOAT scale;
 
@@ -91,12 +71,15 @@ extern double personHeight, wg, wm, wt;
 
 void plotTemplate(IplImage *img, const std::vector<CvPoint> &points,
     const CvScalar &colour, unsigned lw = 1);
-void loadCalibrations(const char *filename, const char* intrinsic, const char* extrinsic);
-bool inside(const WorldPoint &p, const std::vector<WorldPoint> &prior);
-float loadWorldPriorHull(const char *file, std::vector<WorldPoint> &polygon);
+void loadCalibrations(const char *filename);
+
 void genScanLocations(const std::vector<WorldPoint> &prior, double scanRes,
     std::vector<WorldPoint> &sl);
 void gridMatrix(const vnl_vector<FLOAT> &probs, vnl_matrix<FLOAT> &grid);
 unsigned shiftedGridElt(unsigned elt, int shiftRow, int shiftCol);
+
+// draw hull
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color);
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color, const WorldPoint &pt);
 
 #endif  // CAM_CALIB_HH

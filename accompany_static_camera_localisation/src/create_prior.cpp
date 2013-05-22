@@ -9,90 +9,65 @@
 #include "Helpers.hh"
 #include "CamCalib.hh"
 #include <boost/program_options.hpp>
+#include <boost/filesystem/path.hpp>
 namespace po = boost::program_options;
 using namespace std;
 
 CvScalar CLR = CV_RGB(0,255,0);
 vector<IplImage *> img;
+vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
 
+WorldPoint pt;
+bool ptValid=false;
 const char *win[] = { "1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"};
 
-void plotHull(IplImage *img, unsigned idx)
+void refreshPlot()
 {
-  vector<CvPoint> proj;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    proj.push_back(cam[idx].project(priorHull[i]));
-  proj.push_back(proj.front());
-
-  cvCircle(img, proj[0],2, CLR, 1);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,CLR,3);
-    cvLine(img, proj[i-1],proj[i],CLR,2);
+  for (unsigned i=0; i!=img.size(); ++i)
+  {
+    if (imgPlot.size()>i)
+      cvCopy(img[i],imgPlot[i]);
+    else
+      imgPlot.push_back(cvCloneImage(img[i]));
   }
 }
 
-void plotHull(IplImage *img, unsigned idx, const WorldPoint &pt)
+void plotPriorHull()
 {
-  vector<CvPoint> proj;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    proj.push_back(cam[idx].project(priorHull[i]));
-  proj.push_back(cam[idx].project(pt));
-  proj.push_back(proj.front());
-
-  cvCircle(img, proj[0],5, CV_RGB(0,255,0), 3);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,CLR,3);
-    cvLine(img,proj[i-1],proj[i],CLR,2);
+  for (unsigned i=0; i!=img.size(); ++i) 
+  {
+    if (ptValid)
+      plotHull(imgPlot[i],priorHull,i,CLR,pt);
+    else
+      plotHull(imgPlot[i],priorHull,i,CLR);
+    cvShowImage(win[i],imgPlot[i]);
   }
+}
 
+void plot()
+{
+  refreshPlot();
+  plotPriorHull();
 }
 
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 {
-  WorldPoint pt = cam[idx].getGroundPos(cvPoint(x,y));
+  pt = cam[idx].getGroundPos(cvPoint(x,y));
+  ptValid=true;
 
-  static bool down=false;
-
-  switch (event) {
-    case CV_EVENT_LBUTTONDOWN:
-      cout << "Left button down at " << pt.x << "," << pt.y << endl;
-      cout << "image points at " << x << "," << y << endl;
-      cout << "press 'q' to finish and save to file" << endl;
-      down = true;
-      for (unsigned i=0; i!=img.size(); ++i) {
-        IplImage
-        *tmp = cvCloneImage(img[i]);
-        plotHull(tmp,i,pt);
-        cvShowImage(win[i], tmp);
-        cvReleaseImage(&tmp);
-      }
-      break;
-    case CV_EVENT_MOUSEMOVE:
-      if (down)
-        for (unsigned i=0; i!=img.size(); ++i) {
-          IplImage
-          *tmp = cvCloneImage(img[i]);
-          plotHull(tmp,i,pt);
-
-          cvShowImage(win[i],tmp);
-          cvReleaseImage(&tmp);
-        }
-      break;
-    case CV_EVENT_LBUTTONUP:
-      down = false;
-      priorHull.push_back(pt);
-      cout << "Up at (" << pt.x << "," << pt.y << ")" << endl;
-      for (unsigned i=0; i!=img.size(); ++i) {
-        IplImage
-        *tmp = cvCloneImage(img[i]);
-        plotHull(tmp,i);
-        cvShowImage(win[i],tmp);
-        cvReleaseImage(&tmp);
-      }
-
-      break;
+  switch (event) 
+  {
+  case CV_EVENT_MOUSEMOVE:
+    break;
+  case CV_EVENT_LBUTTONUP:
+    priorHull.push_back(pt);
+    break;
+  case CV_EVENT_RBUTTONDOWN:
+    if (priorHull.size()>0) priorHull.pop_back();
+    break;
   }
+  plot();
 }
 
 #define DEF(IDX) void mh##IDX(int e, int x, int y, int f, void *p) { return mouseHandler(IDX,e,x,y,f,p); }
@@ -105,17 +80,14 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 int main(int argc, char **argv) {
 
-  string imagelist_file, params_file, outputPrior_file, intrinsic_file, extrinsic_file;
+  string imagelist_file, params_file;
 
   // handling arguments
   po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")
-    ("params,p", po::value<string>(&params_file)->required(),"the input xml file containing all parameters\n")
-    ("outputPrior,o", po::value<string>(&outputPrior_file)->required(),"the output filename of the prior\n")
-    ("intrinsic,i", po::value<string>(&intrinsic_file)->required(),"camera intrinsic parameter \"intrinsic.xml\"\n")
-    ("extrinsic,e", po::value<string>(&extrinsic_file)->required(),"camera extrinsic parameter \"extrinsic.xml\"\n")
+    ("params_file,p", po::value<string>(&params_file)->required(),"filename of params.xml")
     ;
 
   po::variables_map variablesMap;
@@ -135,16 +107,14 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  vector< vector<string> >
-  imgs;
+  vector< vector<string> > imgs;
   listImages(imagelist_file.c_str(),imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage *>(imgs[0].size());
 
-  unsigned
-  index = 0;
-
-  for (unsigned i=0; i!=imgs[index].size(); ++i) {
+  unsigned index = 0;
+  for (unsigned i=0; i!=imgs[index].size(); ++i)
+  {
     img[i] = loadImage(imgs[index][i].c_str());
 
     cvNamedWindow(win[i]);
@@ -158,50 +128,20 @@ int main(int argc, char **argv) {
   halfresX = width/2;
   halfresY = height/2;
 
-  loadCalibrations(params_file.c_str(),intrinsic_file.c_str(),extrinsic_file.c_str());
+  boost::filesystem::path p(params_file);
+  string path = p.parent_path().string().c_str();
+  string prior_file = path + "/" + "prior.txt";
 
-  //     if (argc == 4) {
-  //          loadWorldPriorHull(argv[3],priorHull);
-  //          for (unsigned i=0; i!=img.size(); ++i)
-  //               plotHull(img[i],i);
+  loadHull(prior_file.c_str(),priorHull);
+  loadCalibrations(params_file.c_str());
+  plot();
 
-  //          vector<WorldPoint>
-  //               scan;
-  //          genScanLocations(priorHull, 100, scan);
-  //          for (unsigned j=0; j!=img.size(); ++j) {
-  //               for (unsigned i=0; i!=scan.size(); ++i) {
-  //                    cvCircle(img[j], cam[j].project(scan[i]), 1, CLR, 1);
-  //                    vector<CvPoint> tplt;
-  //                    cam[j].genTemplate(scan[i],tplt);
-  //                    unsigned
-  //                         minX = (unsigned)-1, maxX = 0,
-  //                         minY = (unsigned)-1, maxY = 0;
-  //                    for (unsigned u=0; u!=tplt.size(); ++u) {
-  //                         if (tplt[u].x < minX)
-  //                              minX = tplt[u].x;
-  //                         if (tplt[u].x > maxX)
-  //                              maxX = tplt[u].x;
-  //                         if (tplt[u].y < minY)
-  //                              minY = tplt[u].y;
-  //                         if (tplt[u].y > maxY)
-  //                              maxY = tplt[u].y;
-  //                    }
-  //                    if (minX > width-1)
-  //                         minX = 0;
-  //                    if (maxX > width-1)
-  //                         maxX = width-1;
-  //                    if (minY > height-1)
-  //                         minY = height-1;
-  //                    if (maxY>height-1)
-  //                         maxY = height-1;
-  //                    cout << "RECTANGLE " << j << " " << i << " " << minX << " " << minY << " "
-  //                         << maxX << " " << maxY << endl;
-  //               }
-  //
-  //               cvShowImage(win[j],img[j]);
-  //          }
-  //     }
-
+  cout<<"================================"<<endl;
+  cout<<"left button : add point"<<endl;
+  cout<<"right button: remove point"<<endl;
+  cout<<"key 'q'     : save and quit"<<endl;
+  cout<<"key Ctrl-C  : quit without saving"<<endl;
+  cout<<"================================"<<endl;
 
   int key = 0;
   while ((char)key != 'q') {
@@ -213,18 +153,15 @@ int main(int argc, char **argv) {
   for (unsigned i=0; i!=priorHull.size(); ++i)
     cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
 
-  ofstream outfile;
-  outfile.open(outputPrior_file.c_str());
-  outfile << ("1\n");
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-  {
-    outfile << priorHull[i].x << " " << priorHull[i].y
-        << " " << priorHull[i].z << endl;
-  }
-  outfile.close();
+  saveHull(prior_file.c_str(),priorHull);
+
   cout << endl;
-  cout << "prior saved to " << outputPrior_file << endl;
+  cout << "prior saved to " << prior_file << endl;
+
   for (unsigned i=0; i!=img.size(); ++i)
+  {
     cvReleaseImage(&img[i]);
+    cvReleaseImage(&imgPlot[i]);
+  }
   return 0;
 }

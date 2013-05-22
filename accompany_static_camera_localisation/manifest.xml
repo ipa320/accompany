@@ -11,7 +11,6 @@
   <depend package="roscpp"/>
   <depend package="geometry_msgs"/>
   <depend package="image_geometry"/>
-  <depend package="accompany_human_tracker"/>
   <depend package="cv_bridge"/>
   <depend package="image_transport"/>
   <depend package="gscam"/>
@@ -19,5 +18,8 @@
   <depend package="accompany_uva_msg"/>
   <depend package="accompany_uva_utils"/>
 
+  <export>
+    <cpp cflags="-I${prefix}/include" lflags="-L${prefix}/lib"/>
+  </export> 
 
 </package>

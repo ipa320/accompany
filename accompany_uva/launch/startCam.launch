@@ -4,12 +4,13 @@
   <arg name="machine" default="localhost" />
   <include file="$(find accompany_uva)/launch/machines.launch"/>
 
-  <arg name="gscam_config"/>
-  <arg name="topic_name" default="gscam"/>
+  <arg name="gscam_config" />
+  <arg name="topic_name" default="gscam" />
+  <arg name="intrinsic" default="$(find accompany_static_camera_localisation)/res/camera_intrinsic.xml" />
 
   <!-- start gstreamer based ros module gscam -->
   <node machine="$(arg machine)" pkg="gscam" type="gscam" name="$(anon gscam)" 
-    args="-s 0 gscam:=$(arg topic_name) ">
+    args="-s 0 -i $(arg intrinsic) gscam:=$(arg topic_name)">
     <env name="GSCAM_CONFIG" value="$(arg gscam_config)" />
   </node>
 

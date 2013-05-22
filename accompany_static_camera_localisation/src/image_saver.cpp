@@ -114,7 +114,7 @@ int main(int argc, char** argv)
   image_transport::ImageTransport it(nh);
 
   vector<image_transport::Subscriber> subs;
-  for (int i=0;i<nrTopics;i++)
+  for (unsigned i=0;i<nrTopics;i++)
   {
     ImageSaver *imageSaver=new ImageSaver(paths[i]);
     cout<<"subscribe to topic: "<<topics[i]<<endl;
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
   }
 
   ros::spin();
-  for (int i=0;i<nrTopics;i++)
+  for (unsigned i=0;i<nrTopics;i++)
     delete imageSavers[i]; // close files
 
   return 0;

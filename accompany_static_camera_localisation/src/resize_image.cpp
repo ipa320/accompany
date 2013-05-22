@@ -38,7 +38,10 @@ void callback(const sensor_msgs::ImageConstPtr& msg)
     resizeRos.encoding = "bgr8";
     resizeRos.image = resize;
     // republish image
-    imagePub->publish(resizeRos.toImageMsg());
+    sensor_msgs::ImagePtr imagePtr=resizeRos.toImageMsg();
+    imagePtr->width=abWidth;
+    imagePtr->height=abHeight;
+    imagePub->publish(imagePtr);
   }
   catch (cv_bridge::Exception& e)
   {
@@ -56,8 +59,8 @@ int main(int argc,char **argv)
                                          "To resize set either the absolute or scales width or height for the output");
   optionsDescription.add_options()
     ("help,h","show help message")
-    ("topic_in,i", value<string>(&topic_in)->required(),"name of input topic")
-    ("topic_out,o", value<string>(&topic_out)->required(),"name of output topic")
+    ("topic_in,i", value<string>(&topic_in)->required(),"name of input image topic")
+    ("topic_out,o", value<string>(&topic_out)->required(),"name of output image topic")
     ("aw", value<int>(&abWidth),"the absolute width of the output")
     ("ah", value<int>(&abHeight),"the absolute height of the output")
     ("sw", value<double>(&scWidth)->default_value(1.0),"the width scaling factor")

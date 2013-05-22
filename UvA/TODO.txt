@@ -17,12 +17,24 @@ reviewers standing in safe zone -> send to UH
 
 
 = BAS =
-*scripts to start UvA module in all computers
-*only one roscore in UvA module, change topic names in UH
-*tracker
--dynamic background
-resize the current rosbags for testing
-*demo video for UvA detection and tracking module
+- dynamic background model will use log probabilities
+- dynamic background model models shadow by adding to each gaussian a cone shape pointing to the origin
+- dynamic background model builds a new model when most of the frame is classified as forground in contract to waiting for the model to adapt over time
+- detect people using all overlapping cameras in a single process in contrast to detecting people for each camera separately
+- the tracker uses a kalman filter on position and appearance information (color histogram)
+- each detection cycle a track is matched to zero or one detection
+- each detection cycle the track and detection with smallest distance is matched, the rest is matched recursively until distance is outside the predefined threshold, this in contrast to global best match which is slow
+- the tracker only allows tracks to appear/disappear in entry/exit areas in the field of view, with the exception of detections within X seconds after starting the tracker when the whole field of view is an entry area
+- detections that match no track and are outside of entry areas are ignored, detections inside an entry area spawns a new track with new ID
+- when a track is not matched to a detection it is assumed to keep the same appearance, position and speed, when it is in an exit area it will be removed after not matching for X seconds
+- the tracker uses robot position and appearance information to determine which track is the robot
+
+
+- multi-threaded detection so all 15 fps can be used for detection, currently most are dropped
+- update install script to install dependencies and software for quick installation at other sides
+- add (graphical) feedback of the system to users
+- write manual on how to operate and trouble shoot the system
+
 
 
 = TEST EVERTHING =
@@ -35,3 +47,4 @@ robot detected as human
 keeps curtains close, make sure lighting condition are stable
 not moving around objects
 reviewers stay in restricted zone
+

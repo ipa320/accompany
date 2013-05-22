@@ -12,7 +12,7 @@ using namespace boost::program_options;
 
 int main(int argc, char **argv)
 {
-  string parent;
+  string parentName;
   string frameName;
   string filename;
   double a;
@@ -25,8 +25,8 @@ int main(int argc, char **argv)
   optionsDescription.add_options()
     ("help,h","show help message")
     ("filename,f", value<string>(&filename)->default_value("frame.dat"),"filename of the coordiante name file")
-    ("frame-name,n", value<string>(&frameName)->default_value("/child_frame"),"name of the new frame")
-    ("parent-name,p", value<string>(&parent)->default_value("/map"),"name of parent frame")
+    ("frame-name,n", value<string>(&frameName)->default_value("/myFrame"),"name of the new frame")
+    ("parent-name,p", value<string>(&parentName)->default_value("/map"),"name of parent frame")
     ("angle,a", value<double>(&a)->default_value(0.0),"angle in xy plane in degrees")
     ("xpos,x", value<double>(&x)->default_value(0.0),"x position")
     ("ypos,y", value<double>(&y)->default_value(0.0),"y position")
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
                                           btVector3(x,y,z)); // translation vector
     tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
                                                                ros::Time(0),  // time, not used here
-                                                               parent,        // parent coordinate frame
+                                                               parentName,        // parent coordinate frame
                                                                frameName); // child coordinate frame
     tf::transformStampedTFToMsg(stampedTransform,transformStamped);
     save_msg(transformStamped,filename); // write to file
@@ -79,14 +79,14 @@ int main(int argc, char **argv)
     bool rename=false;
     if (variablesMap.count("frame-name"))
     {
-      cout<<"renaming frame-name: '"<<frameName<<"'"<<endl;
+      cout<<"renaming child-frame-name: '"<<frameName<<"'"<<endl;
       transformStamped.child_frame_id=frameName;
       rename=true;
     }
     if (variablesMap.count("parent-name"))
     {
-      cout<<"renaming parent-name: '"<<parent<<"'"<<endl;
-      transformStamped.header.frame_id=parent;
+      cout<<"renaming parent-name: '"<<parentName<<"'"<<endl;
+      transformStamped.header.frame_id=parentName;
       rename=true;
     }
     if (rename)

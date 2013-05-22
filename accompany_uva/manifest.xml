@@ -11,6 +11,6 @@
   <depend package="accompany_uva_utils"/>
   <depend package="accompany_uva_msg"/>
   <depend package="accompany_static_camera_localisation"/>
-  <depend package="accompany_static_camera_localisation"/>
+  <depend package="accompany_human_tracker"/>
 
 </package>

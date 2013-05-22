@@ -1,43 +1,48 @@
 <launch>
 
   <node pkg="rosbag" type="play" name="playBags"
-   args="-l -d 2 -r 0.2
-     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag 
+   args="-l -d 1 -r 0.2
+     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag
      $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
      "/>
 
-
-  <!-- decode  camera1 -->
-  <node pkg="image_transport" type="republish" name="republishCamera1" 
-        args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw"/>
-
-  <!-- decode  camera3  -->
-  <node pkg="image_transport" type="republish" name="republishCamera3"
-        args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw"/>
- 
-
-
-  <!-- localise camera1 -->
-  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera1" output="screen"
-        args="-p $(find accompany_uva)/res/testRobotHouse/camera1 -n 8 -v
-              image:=/camera1/gscam/image_raw"/>
+  <!-- camera1 -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw_large"/>
+  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
+        args="-i /camera1/gscam/image_raw_large -o /camera1/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
+  <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
+        args="-i /camera1/gscam/image_raw_resize -o /camera1/image_raw 
+              -f camera1 -n $(find accompany_uva)/res/testRobotHouse/bothCameras/camera_intrinsic1.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p camera_frame -c camera1 -e $(find accompany_uva)/res/testRobotHouse/camera1/camera_extrinsic.xml"/>
   
-  <!-- localise camera3 -->
-  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="localiseCamera3" output="screen"
-        args="-p $(find accompany_uva)/res/testRobotHouse/camera3 -n 8 -v
-              image:=/camera3/gscam/image_raw"/>
-  
+
+  <!-- camera3 -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw_large"/>
+  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
+        args="-i /camera3/gscam/image_raw_large -o /camera3/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
+  <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
+        args="-i /camera3/gscam/image_raw_resize -o /camera3/image_raw 
+              -f camera3 -n $(find accompany_uva)/res/testRobotHouse/bothCameras/camera_intrinsic3.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p camera_frame -c camera3 -e $(find accompany_uva)/res/testRobotHouse/camera3/camera_extrinsic.xml"/>
+
+
+
+  <!-- detect -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization" output="screen"
+        args="-p $(find accompany_uva)/res/testRobotHouse/bothCameras/params.xml -n 4 -t 4 -v"/>
+
 
   <!-- track humans using localisation data -->
-  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker"
-        args="-t 5"/> 
-  
-
-  <!-- visualize tracks -->
-  <node pkg="accompany_human_tracker" type="view_tracks" name="view_tracks"/> 
-  
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
+        args="-p $(find accompany_uva)/res/testRobotHouse/bothCameras"/>
+         
   
   <!-- Map server -->
   <node pkg="map_server" type="map_server" name="map_server" args="$(find accompany_uva)/res/testRobotHouse/map.yaml"/>
   
+
 </launch>

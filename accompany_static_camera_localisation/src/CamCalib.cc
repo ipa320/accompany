@@ -6,34 +6,25 @@
 #include <err.h>
 #include "Helpers.hh"
 #include <iostream>
+
+#include <boost/filesystem/path.hpp>
 // #include
 // // #include <opencv/cv.h>
-
 using namespace std;
 
 std::vector<CamCalib> cam;
 double personHeight = 0, wg = 0, wm = 0, wt = 0, midRatio = 0;
 double minX, maxX, minY, maxY;
-string ExtrinsicFile, IntrinsicFile;
+string extrinsicFile, intrinsicFile;
+const char *calibLoadPath=NULL;
 
 #define OCTAGON 1
-
-double sqGroundDist(const WorldPoint &p1, const WorldPoint &p2)
-{
-  double dx = p1.x - p2.x, dy = p1.y - p2.y; // ignore z
-
-  return dx * dx + dy * dy;
-}
-
-ostream &operator<<(ostream &os, const WorldPoint &wp)
-{
-  return os << "(" << wp.x << "," << wp.y << "," << wp.z << ")";
-}
 
 CamCalib::CamCalib() :
     stdev1(9), stdev2(9), stdev3(9), scale(1.0)
 {
   updateCache();
+  occlusionBGMaskFile="";
 }
 
 void CamCalib::xmlPack(XmlFile &f) const
@@ -42,6 +33,8 @@ void CamCalib::xmlPack(XmlFile &f) const
   //     f.pack("ModelFile", modelFile);
   // f.pack("w", w);
   // f.pack("w2", w2);
+  f.pack("name", name);
+  f.pack("occlusionBGMaskFile",occlusionBGMaskFile);
   f.pack("sigma1", stdev1);
   f.pack("sigma2", stdev2);
   f.pack("sigma3", stdev3);
@@ -53,16 +46,49 @@ void CamCalib::xmlUnpack(XmlFile &f)
   double scale;
   f.unpack("SCALE", scale);
 
-  ifstream ifs(ExtrinsicFile.c_str());
+  // if set load from params.xml, otherwise use preset intrinsicFile extrinsicFile
+  if (calibLoadPath!=NULL) 
+  {
+    f.unpack("intrinsicFile",intrinsicFile);
+    f.unpack("extrinsicFile",extrinsicFile);
+    intrinsicFile=((string)calibLoadPath)+"/"+intrinsicFile;
+    extrinsicFile=((string)calibLoadPath)+"/"+extrinsicFile;
+  }
+
+  try
+  {
+    f.unpack("occlusionBGMaskFile",occlusionBGMaskFile);
+    if (occlusionBGMaskFile.compare("")!=0)
+    {
+      string fullName=((string)calibLoadPath)+"/"+occlusionBGMaskFile;
+      ifstream maskin(fullName.c_str());
+      if (maskin.is_open())
+      {
+        cout<<"read existing mask '"<<fullName<<"'."<<endl;
+        maskin>>occlusionBGMask;
+        maskin.close();
+        cout<<occlusionBGMask<<endl;
+      }
+      else
+        cout<<"no existing mask '"<<fullName<<"' found"<<endl;
+    }
+  } 
+  catch (const std::exception& ex) 
+  {
+    cout<<"could not unpack 'occlusionBGMaskFile'"<<endl;
+  }
+
+  ifstream ifs(extrinsicFile.c_str());
   if (!ifs)
   {
-    cerr << "Could not load file " << ExtrinsicFile << endl;
+    cerr << "Could not load file " << extrinsicFile << endl;
     exit(1);
   }
   
   // initialize camera model 
-  model.init(IntrinsicFile, ExtrinsicFile, scale);
+  model.init(intrinsicFile,extrinsicFile, scale);
   cout << "SCALE" << "," << scale << endl;
+  f.unpack("name", name);
   // f.unpack("w", w);
   // f.unpack("w2", w2);
   f.unpack("sigma1", stdev1);
@@ -451,13 +477,9 @@ void plotTemplate(IplImage *img, const vector<CvPoint> &points,
 }
 #endif
 
-void loadCalibrations(const char *filename,const char* intrinsic,const char* extrinsic)
+void loadCalibrationsHelper(const char *filename)
 {
-  ExtrinsicFile = extrinsic;
-  IntrinsicFile = intrinsic;
-
   XmlReader rd(filename);
-
   rd.unpack("PersonHeight", personHeight);
   rd.unpack("wg", wg);
   rd.unpack("wm", wm);
@@ -471,74 +493,14 @@ void loadCalibrations(const char *filename,const char* intrinsic,const char* ext
   //cam[0].init(); // TODO
 }
 
-float loadWorldPriorHull(const char *file, vector<WorldPoint> &polygon)
+void loadCalibrations(const char *filename)
 {
-  ifstream ifs(file);
-  if (!ifs)
-    errx(1, "Cannot open file '%s'", file);
-
-  char buffer[1024];
-  ifs.getline(buffer, sizeof(buffer));
-  float logInside = atof(buffer);
-  ifs.getline(buffer, sizeof(buffer));
-  while (!ifs.eof())
-  {
-    vector<char *> s = splitwhite(buffer, true);
-    if (s.size() == 3)
-      polygon.push_back(WorldPoint(atoi(s[0]), atoi(s[1]), atoi(s[2])));
-    else if (s.size() == 2)
-      polygon.push_back(WorldPoint(atoi(s[0]), atoi(s[1]), 0));
-    else
-    {
-      cout << "ERROR " << __PRETTY_FUNCTION__ << " Split size=" << s.size()
-          << flush;
-      for (unsigned j = 0; j != s.size(); ++j)
-        cout << ":" << s[j];
-      cout << endl;
-    }
-
-    ifs.getline(buffer, sizeof(buffer));
-
-  }
-  polygon.push_back(polygon.front());
-
-  return logInside;
+  boost::filesystem::path p(filename);
+  boost::filesystem::path path=p.parent_path();
+  calibLoadPath=path.string().c_str();
+  loadCalibrationsHelper(filename);
 }
 
-bool inside(const WorldPoint &p, const vector<WorldPoint> &prior)
-{
-  unsigned nLeft = 0, nRight = 0;
-  for (unsigned i = 1; i < prior.size(); ++i)
-  {
-    if ((p.y >= prior[i - 1].y && p.y < prior[i].y)
-        || (p.y >= prior[i].y && p.y < prior[i - 1].y))
-    {
-      double deltaX = prior[i].x - prior[i - 1].x, deltaY = prior[i].y
-          - prior[i - 1].y;
-      if (fabs(deltaX) > fabs(deltaY))
-      {
-        double a = deltaY / deltaX, b = prior[i].y - a * prior[i].x, x = (p.y
-            - b) / a;
-        if (x < p.x)
-          nLeft++;
-        else
-          // on the line is out
-          nRight++;
-      }
-      else
-      {
-        double a = deltaX / deltaY, b = prior[i].x - a * prior[i].y, x = a * p.y
-            + b;
-        if (x < p.x)
-          nLeft++;
-        else
-          // on the line is out
-          nRight++;
-      }
-    }
-  }
-  return (nLeft % 2 == 1 && nRight % 2 == 1);
-}
 
 /**
  * \brief Given a vector of the same size as scanlocations, create a matrix representation
@@ -622,4 +584,38 @@ void genScanLocations(const vector<WorldPoint> &prior, double scanRes,
   // cout << "Grid is " << r << "x" << c << endl;
   gridWidth = c;
   gridHeight = r;
+}
+
+
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color)
+{
+  vector<CvPoint> proj;
+  for (unsigned i=0; i!=priorHull.size(); ++i)
+    proj.push_back(cam[idx].project(priorHull[i]));
+  if (proj.size()>0)
+  {
+    proj.push_back(proj.front());
+
+    cvCircle(img, proj[0],2, color, 1);
+    for (unsigned i=1; i<proj.size(); ++i) {
+      cvCircle(img,proj[i],5,color,3);
+      cvLine(img, proj[i-1],proj[i],color,2);
+    }
+  }
+}
+
+void plotHull(IplImage *img, const vector<WorldPoint>& priorHull, unsigned idx, CvScalar color, const WorldPoint &pt)
+{
+  vector<CvPoint> proj;
+  for (unsigned i=0; i!=priorHull.size(); ++i)
+    proj.push_back(cam[idx].project(priorHull[i]));
+  
+  proj.push_back(cam[idx].project(pt));
+  proj.push_back(proj.front());
+  
+  cvCircle(img, proj[0],5, CV_RGB(0,255,0), 3);
+  for (unsigned i=1; i<proj.size(); ++i) {
+    cvCircle(img,proj[i],5,color,3);
+    cvLine(img,proj[i-1],proj[i],color,2);
+  }
 }

@@ -1,0 +1,44 @@
+<launch>
+
+  <!-- play -->
+  <node pkg="rosbag" type="play" name="playBags"
+   args="-d 2
+     $(find accompany_uva)/res/testRobotHouse/camera1/retopic.bag
+     $(find accompany_uva)/res/testRobotHouse/camera3/retopic.bag
+     "/>
+
+  <!-- camera1 -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera1/gscam/image_raw _image_transport:=theora raw out:=/camera1/gscam/image_raw_large"/>
+  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
+        args="-i /camera1/gscam/image_raw_large -o /camera1/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
+  <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
+        args="-i /camera1/gscam/image_raw_resize -o /camera1/image_raw 
+              -f camera1 -n $(find accompany_uva)/res/testRobotHouse/camera1/camera_intrinsic.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p camera_frame -c camera1 -e $(find accompany_uva)/res/testRobotHouse/camera1/camera_extrinsic.xml"/>
+  
+
+  <!-- camera3 -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera3/gscam/image_raw _image_transport:=theora raw out:=/camera3/gscam/image_raw_large"/>
+  <node pkg="accompany_static_camera_localisation" type="resize_image" name="$(anon resize_image)"
+        args="-i /camera3/gscam/image_raw_large -o /camera3/gscam/image_raw_resize --sw 0.5 --sh 0.5 "/>
+  <node pkg="accompany_static_camera_localisation" type="add_camera_info" name="$(anon add_camera_info)"
+        args="-i /camera3/gscam/image_raw_resize -o /camera3/image_raw 
+              -f camera3 -n $(find accompany_uva)/res/testRobotHouse/camera3/camera_intrinsic.xml"/>
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p camera_frame -c camera3 -e $(find accompany_uva)/res/testRobotHouse/camera3/camera_extrinsic.xml"/>
+ 
+
+  <!-- record -->
+  <node pkg="rosbag" type="record" name="$(anon record)" 
+        args="-b 0 -o robotHouse
+              /camera1/image_raw/compressed
+              /camera1/camera_info
+              /camera3/image_raw/compressed
+              /camera3/camera_info
+              /tf"
+        />
+
+</launch>

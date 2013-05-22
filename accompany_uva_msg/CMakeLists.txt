@@ -29,7 +29,9 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_library(MsgToMarkerArray src/MsgToMarkerArray.cpp)
+rosbuild_add_library(MsgToMarkerArray 
+  src/MsgToMarkerArray.cpp
+  include/accompany_uva_msg/MsgToMarkerArray.h)
 
 rosbuild_add_executable(MsgToMarkerArrayTest src/MsgToMarkerArrayTest.cpp)
 target_link_libraries(MsgToMarkerArrayTest MsgToMarkerArray)

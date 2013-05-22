@@ -21,6 +21,7 @@ extern FLOAT stdev1, pixelVar1, pv2_1, lpv2_1;
 extern FLOAT stdev2, pixelVar2, pv2_2, lpv2_2;
 extern FLOAT stdev3, pixelVar3, pv2_3, lpv2_3;
 #endif // HELPERS_CC
+
 void connectedComponents(std::vector<int> &v);
 void connectedComponentsFH(std::vector<int> &v);
 void convexHull(const std::vector<CvPoint> &pt, std::vector<CvPoint> &hull);
