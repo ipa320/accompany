@@ -15,6 +15,8 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 // #include <boost/date_time/gregorian/conversion.hpp>
 
+#include <Hull.h>
+
 using namespace std;
 using namespace boost::posix_time;
 using namespace boost;
@@ -41,48 +43,6 @@ ostream &operator<<(ostream &os, const scanline_t &l)
 {
   return os << "{" << l.line << ":" << l.start << "-" << l.end << "}";
 }
-
-/**
- * \brief Split a (CSV-separated) string
- * \param str The string to split
- * \param dropEmpty whether to drop empty fields
- * \return A vector of strings, containing the fields
- * 
- * WARNING: for efficiency, the original string is destroyed
- * 
- * No copy operations are performed in this function.
- * 
- * 2008/05/07: GWENN - First version
- * 
- **/
-std::vector<char *> splitWhite(char *str, bool dropEmpty)
-		    {
-  std::vector<char *>
-  res;
-  char
-  *prev = str;
-  while (*str) {
-    if (isspace(*str)) {
-      if (!dropEmpty || str!=prev)
-        res.push_back(prev);
-      if (dropEmpty)  {
-        while (isspace(*str)) {
-          *str = '\0';
-          ++str;
-        }
-      } else {
-        *str = '\0';
-        ++str;
-      }
-      prev = str;
-    } else
-      str++;
-  }
-  if (!dropEmpty || str!=prev)
-    res.push_back(prev);
-
-  return res;
-		    }
 
 void connectedComponents(vector<int> &v)
 {
@@ -338,7 +298,7 @@ void jarvis(const vector<CvPoint> &in, vector<CvPoint> &res)
   for (unsigned i=0; i!=in.size(); ++i) {
     CvPoint
     endpoint = in[0];
-    for (unsigned j=1; j+1<in.size(); ++j)
+    for (unsigned j=1; j<in.size(); ++j)
       if ((endpoint == pointOnHull) || ccw(endpoint,in[j],pointOnHull) < 0)
         endpoint = in[j];
     pointOnHull = endpoint;
@@ -688,9 +648,7 @@ scanline_t& getElt(vector<scanline_t> &v, unsigned elt)
 
 void getScanLines(vector<CvPoint> &corners, vector<scanline_t> &lines)
 {
-  corners.push_back(corners.front());
-  int
-  offset = corners[0].y;
+  int offset = corners[0].y;
   for (unsigned i=0; i!=corners.size(); ++i)
     if (offset>corners[i].y)
       offset = corners[i].y;

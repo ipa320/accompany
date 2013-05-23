@@ -51,11 +51,17 @@ namespace Hu
   //!  A root class handling camera model
   class CameraModel
   {
-    public:
+  private:
 
-      /* PRIVATE */ // TODO
       bool isInit;
       cv::Mat camera_matrix, distortion_coefficients, rvec, tvec;
+      
+      // cached variables computed from the above
+      cv::Mat worl2ImageRotMatrix;
+      cv::Mat image2WorldRotMatrix;
+      cv::Mat image2WorldTransMatrix;
+
+  public:
 
       void init(string IntrinsicFile, string ExtrinsicFile, double SCALE);
 
@@ -72,13 +78,15 @@ namespace Hu
       bool worldToImage(double Xw, double Yw, double Zw, double& Xi,
           double& Yi);
 
-      //! from image coordinate to world coordinate (Matrix)
-      bool imageToWorldMat(cv::Mat image_coordinates,
-          cv::Mat& world_coordinates);
-
       //! from world coordinate to image coordinate (Matrix)
       bool worldToImageMat(cv::Mat world_coordinates,
           cv::Mat& image_coordinates);
+
+      // expose cached variables
+      const cv::Mat& getWorl2ImageRotMatrix() const;
+      const cv::Mat& getImage2WorldRotMatrix() const;
+      const cv::Mat& getImage2WorldTransMatrix() const;
+      
   };
 }
 ;

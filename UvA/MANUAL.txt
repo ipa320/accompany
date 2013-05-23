@@ -29,16 +29,6 @@ Commands:
   roslaunch accompany_uva startCamAll.launch
 
 
--Record static background images on all hosts:
-
-  roslaunch accompany_uva recordBackgroundAll.launch
-
-
--Build background model from recorded images on all hosts:
-
-  roslaunch accompany_uva buildBackgroundModelAll.launch 
-
-
 -Start detection of humans on all hosts:
 
   roslaunch accompany_uva startDetectAll.launch 

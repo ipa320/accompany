@@ -13,10 +13,11 @@
 namespace po = boost::program_options;
 using namespace std;
 
-CvScalar CLR = CV_RGB(0,255,0);
+CvScalar CLR=CV_RGB(0,255,0), CLR2=CV_RGB(0,255,255);
 vector<IplImage *> img;
 vector<IplImage *> imgPlot;
 vector<WorldPoint> priorHull;
+vector< vector<WorldPoint> > entryExitHulls;
 
 WorldPoint pt;
 bool ptValid=false;
@@ -37,11 +38,23 @@ void plotPriorHull()
 {
   for (unsigned i=0; i!=img.size(); ++i) 
   {
-    if (ptValid)
-      plotHull(imgPlot[i],priorHull,i,CLR,pt);
-    else
-      plotHull(imgPlot[i],priorHull,i,CLR);
+    plotHull(imgPlot[i],priorHull,i,CLR);
     cvShowImage(win[i],imgPlot[i]);
+  }
+}
+
+void plotEntryExitHulls()
+{
+  for (unsigned j=0;j<entryExitHulls.size();j++)
+  {
+    for (unsigned i=0; i!=img.size(); ++i) 
+    {
+      if (j==entryExitHulls.size()-1 && ptValid)
+        plotHull(imgPlot[i],entryExitHulls[j],i,CLR2,pt);
+      else
+        plotHull(imgPlot[i],entryExitHulls[j],i,CLR2);
+      cvShowImage(win[i],imgPlot[i]);
+    }
   }
 }
 
@@ -49,6 +62,7 @@ void plot()
 {
   refreshPlot();
   plotPriorHull();
+  plotEntryExitHulls();
 }
 
 void mouseHandler(int idx, int event, int x, int y, int flags, void *)
@@ -58,13 +72,18 @@ void mouseHandler(int idx, int event, int x, int y, int flags, void *)
 
   switch (event) 
   {
-  case CV_EVENT_MOUSEMOVE:
-    break;
   case CV_EVENT_LBUTTONUP:
-    priorHull.push_back(pt);
+    entryExitHulls.back().push_back(pt);
     break;
-  case CV_EVENT_RBUTTONDOWN:
-    if (priorHull.size()>0) priorHull.pop_back();
+  case CV_EVENT_RBUTTONDOWN: // remove
+    if (entryExitHulls.size()>0 && entryExitHulls.back().size()==0)
+      entryExitHulls.pop_back();
+    else
+      entryExitHulls.back().pop_back();
+    break;
+  case CV_EVENT_MBUTTONDOWN: // add new hull
+    vector<WorldPoint> hull;
+    entryExitHulls.push_back(hull);
     break;
   }
   plot();
@@ -78,8 +97,8 @@ mh_t mh[] = { mh0,mh1,mh2,mh3,mh4,mh5,mh6,mh7,mh8,mh9,mh10,mh11,mh12,mh13,mh14,m
 
 
 
-int main(int argc, char **argv) {
-
+int main(int argc, char **argv) 
+{
   string imagelist_file, params_file;
 
   // handling arguments
@@ -107,11 +126,12 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+
   vector< vector<string> > imgs;
   listImages(imagelist_file.c_str(),imgs);
   cam = vector<CamCalib>(imgs[0].size());
   img = vector<IplImage *>(imgs[0].size());
-
+    
   unsigned index = 0;
   for (unsigned i=0; i!=imgs[index].size(); ++i)
   {
@@ -131,32 +151,34 @@ int main(int argc, char **argv) {
   boost::filesystem::path p(params_file);
   string path = p.parent_path().string().c_str();
   string prior_file = path + "/" + "prior.txt";
+  string entryExit_file = path + "/" + "entryExit.txt";
 
-  loadHull(prior_file.c_str(),priorHull);
   loadCalibrations(params_file.c_str());
+  loadHull(prior_file.c_str(), priorHull);
+  loadHulls(entryExit_file.c_str(),entryExitHulls);
+  if (entryExitHulls.size()==0)
+  {
+    vector<WorldPoint> init;
+    entryExitHulls.push_back(init);
+  }
   plot();
 
   cout<<"================================"<<endl;
-  cout<<"left button : add point"<<endl;
-  cout<<"right button: remove point"<<endl;
-  cout<<"key 'q'     : save and quit"<<endl;
-  cout<<"key Ctrl-C  : quit without saving"<<endl;
+  cout<<"left button  : add point"<<endl;
+  cout<<"right button : remove point"<<endl;
+  cout<<"middle button: start new area"<<endl;
+  cout<<"key 'q'      : save and quit"<<endl;
+  cout<<"key Ctrl-C   : quit without saving"<<endl;
   cout<<"================================"<<endl;
 
+
   int key = 0;
-  while ((char)key != 'q') {
-    // cvShowImage("image", src);
+  while ((char)key != 'q') 
+  {
     key = cvWaitKey(0);
   }
-
-  cout << "1" << endl;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    cout << priorHull[i].x << " " << priorHull[i].y << " " << priorHull[i].z << endl;
-
-  saveHull(prior_file.c_str(),priorHull);
-
-  cout << endl;
-  cout << "prior saved to " << prior_file << endl;
+  
+  saveHulls(entryExit_file.c_str(),entryExitHulls);
 
   for (unsigned i=0; i!=img.size(); ++i)
   {

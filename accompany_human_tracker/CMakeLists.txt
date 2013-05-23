@@ -29,21 +29,30 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-# check for libs
-find_library(TIM_TRACKER TimTracker)
-if(NOT TIM_TRACKER)
-  message(FATAL_ERROR "Could not find 'TimTracker' library, please git clone 'git://basterwijn.nl/home/bterwijn/git/TimTracker.git' and make install")
-endif(NOT TIM_TRACKER)
+include_directories(${PROJECT_SOURCE_DIR}/src)
 
-find_package( OpenCV REQUIRED )
+FIND_PACKAGE(VXL)
 
-include_directories ("${PROJECT_SOURCE_DIR}/src")
-rosbuild_add_executable(human_tracker src/human_tracker.cpp src/MyTracker.cpp)
-target_link_libraries(human_tracker ${TIM_TRACKER} ${OpenCV_LIBS} boost_program_options MsgToMarkerArray)
+IF(VXL_FOUND)
+  INCLUDE(${VXL_CMAKE_DIR}/UseVXL.cmake)
+  include_directories(${VXL_CORE_INCLUDE_DIR})
+ENDIF(VXL_FOUND)
 
-rosbuild_add_executable(view_tracks src/view_tracks.cpp)
-target_link_libraries(view_tracks ${OpenCV_LIBS} boost_program_options)
+rosbuild_add_executable(human_tracker  
+  src/human_tracker.cpp 
+  src/Tracker.h
+  src/Tracker.cpp
+  src/Track.h
+  src/Track.cpp
+  src/DataAssociation.h
+  src/DataAssociation.cpp
+  src/IDToName.h
+  src/IDToName.cpp)
+target_link_libraries(human_tracker hull MsgToMarkerArray boost_program_options vnl vnl_algo)
 
-rosbuild_add_executable(tracker_test_data src/tracker_test_data.cpp)
+#rosbuild_add_executable(view_tracks src/view_tracks.cpp)
+#target_link_libraries(view_tracks ${OpenCV_LIBS} boost_program_options)
 
-rosbuild_add_executable(DataAssociationTest src/DataAssociationTest.cpp)
+#rosbuild_add_executable(tracker_test_data src/tracker_test_data.cpp)
+
+#rosbuild_add_executable(DataAssociationTest src/DataAssociationTest.cpp)

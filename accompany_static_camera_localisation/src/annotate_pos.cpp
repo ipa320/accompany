@@ -34,28 +34,11 @@ CvPoint operator*(double d, const CvPoint &p) {
   return cvPoint(d*p.x,d*p.y);
 }
 
-void plotHull(IplImage *img, unsigned idx)
-{
-  if (!priorHull.size())
-    return;
-
-  vector<CvPoint> proj;
-  for (unsigned i=0; i!=priorHull.size(); ++i)
-    proj.push_back(scale*cam[idx].project(priorHull[i]));
-  proj.push_back(proj.front());
-
-  cvCircle(img, proj[0],2, CLR, 1);
-  for (unsigned i=1; i<proj.size(); ++i) {
-    cvCircle(img,proj[i],5,CLR,2);
-    cvLine(img, proj[i-1],proj[i],CLR,1);
-  }
-}
-
 void showScaledImg(unsigned c, IplImage *img)
 {
   IplImage *scaled = cvCreateImage(cvSize(img->width*scale,img->height*scale), IPL_DEPTH_8U,3);
   cvResize(img,scaled,CV_INTER_LINEAR);
-  plotHull(scaled,c);
+  plotHull(scaled,priorHull,c,CLR);
   cvShowImage(win[c], scaled);
   cvReleaseImage(&scaled);
 }
@@ -248,11 +231,10 @@ int main(int argc, char **argv)
   halfresX = width / 2;
   halfresY = height / 2;
 
-  loadCalibrations(params_file.c_str(), intrinsic_file.c_str(),
-      extrinsic_file.c_str());
+  loadCalibrations(params_file.c_str());
   index++;
 
-  loadWorldPriorHull(prior_file.c_str(), priorHull);
+  loadHull(prior_file.c_str(), priorHull);
 
   ofstream ofs(annotated_file.c_str());
   if (!ofs)
