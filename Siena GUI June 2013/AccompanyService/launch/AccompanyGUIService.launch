@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+	<!--node pkg="AccompanyService" name="ActionsService" type="ActionsService.py"/-->	
+
+	<!--node pkg="AccompanyService" name="DatabaseService" type="DatabaseConnector.py"/-->	
+
+	<node pkg="AccompanyService" name="EmphasisService" type="EmphasisServer.py"/>
+</launch>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/user_background"
+    android:id="@+id/global_user_layout" >
+	
+    <AbsoluteLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" 
+        android:background="@android:color/transparent"
+        android:id="@+id/user_layout">
+    </AbsoluteLayout>
+	
+	<!-- ImageButton
+	    android:id ="@+id/switchtorobot"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+		android:layout_gravity="left|bottom"
+        android:src="@drawable/switchtorobot"/-->   
+    <Button 
+        android:id="@+id/switchtorobot"
+        android:textColor="@color/white_transparency70"
+		android:text="@string/switch_to_robot_view_btn"
+		android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="40dp"
+        android:layout_marginLeft="40dp"
+        android:drawablePadding="15dp"
+        android:typeface="sans"
+        android:textSize="26dp"
+		android:layout_gravity="left|bottom"
+		android:drawableLeft="@drawable/switchtorobot"
+		/> 	
+    
+    <ImageButton
+	    android:id ="@+id/optmenu"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="10dp"
+		android:layout_gravity="right|bottom"
+        android:src="@drawable/opt_menu"/>
+</FrameLayout>

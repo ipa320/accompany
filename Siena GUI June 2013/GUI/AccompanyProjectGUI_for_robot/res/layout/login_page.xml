@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/login_main"
+    android:background="@android:color/transparent" >
+    
+     <TextView android:id ="@+id/login_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="24dp"
+        android:textStyle="bold"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:text="@string/login_page_title"
+        />
+     
+     <FrameLayout android:id="@+id/line_login" 
+         android:layout_marginLeft="10dp"
+         android:layout_width="match_parent"
+         android:layout_height="2dp"
+         android:background="@android:color/white"
+         android:layout_marginRight="10dp"
+         android:layout_below="@+id/login_title" >      
+     </FrameLayout>
+    <RelativeLayout
+        android:id="@+id/central_layout_login"
+        android:layout_centerInParent="true"
+        android:background="@drawable/cornice_transparente"
+        android:layout_width="400dp"
+        android:layout_height="350dp"
+        >
+    
+    <!--   <TextView android:id ="@+id/password_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+		android:layout_centerVertical="true"
+		android:layout_marginLeft="50dp"
+        android:layout_marginTop="15dp"
+        android:text="Password:"
+        />
+    <EditText
+        android:id="@+id/password_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="250dp"
+        android:layout_below="@+id/password_tv"
+        android:layout_alignLeft="@+id/password_tv"
+        android:textColor="@android:color/black"
+        android:textSize="20dp"
+        android:inputType="textPassword"
+        android:textStyle="bold"
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="5dp"
+        /> -->
+        
+        <TextView android:id ="@+id/ip_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+		android:layout_centerVertical="true"
+		android:layout_marginLeft="50dp"
+        android:layout_marginTop="15dp"
+        android:text="@string/ros_master_ip"
+        />
+    <EditText
+        android:id="@+id/ip_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="250dp"
+        android:layout_below="@+id/ip_tv"
+        android:layout_alignLeft="@+id/ip_tv"
+        android:background="@drawable/cornice_bianca"
+        android:textColor="@android:color/black"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:maxLines="1"
+        android:layout_marginBottom="50dp"
+        android:layout_marginTop="5dp"
+        />
+    
+    <EditText
+        android:id="@+id/user_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="250dp"
+        android:layout_above="@+id/ip_tv"
+        android:layout_alignLeft="@+id/ip_tv"
+        android:textColor="@android:color/black"
+        android:textSize="20dp"
+        android:maxLines="1"
+        android:text="M"
+        android:textStyle="bold"
+        android:background="@drawable/cornice_bianca"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="5dp"
+        >
+        <requestFocus /> </EditText>
+    
+        <TextView android:id ="@+id/user_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_above="@+id/user_et"
+        android:layout_alignLeft="@+id/user_et"
+        android:text="@string/username"
+        />
+        
+        <Button
+            android:id="@+id/ok_btn_login"
+            android:layout_width="wrap_content"
+        	android:layout_height="wrap_content"
+        	android:minWidth="100dp"
+        	android:text="@string/ok"
+        	android:layout_alignParentRight="true"
+        	android:layout_alignParentBottom="true"
+        	android:layout_marginRight="5dp"
+        	android:layout_marginBottom="20dp"
+        	android:textColor="@android:color/white"
+        	android:textSize="22dp"
+        	android:background="@android:color/transparent"
+        	android:textStyle="bold"
+            />
+	</RelativeLayout>
+	<TextView 
+	    android:id ="@+id/log_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="22dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_above="@+id/central_layout_login"
+        android:layout_alignLeft="@+id/central_layout_login"
+        android:text="@string/login_title"
+	    />
+	<ImageButton
+	    android:id ="@+id/optmenu"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:src="@drawable/opt_menu"/>
+	
+</RelativeLayout>

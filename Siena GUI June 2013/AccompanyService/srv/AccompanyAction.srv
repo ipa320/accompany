@@ -1,0 +1,5 @@
+string action
+int64 uid
+---
+int64 result
+

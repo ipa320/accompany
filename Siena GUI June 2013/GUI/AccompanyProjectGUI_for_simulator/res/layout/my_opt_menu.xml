@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#242424"
+    android:orientation="horizontal" >
+
+    <Button 
+        android:layout_margin="1dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" 
+        android:id="@+id/act_btn"
+        android:text="@string/opt_menu_action_list_button"
+        android:textColor="#FFFFFF"
+        android:background="#000000"
+        android:textStyle="bold"
+        />
+    
+    <Button
+        android:layout_margin="1dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" 
+        android:id="@+id/Sett_btn"
+        android:text="@string/opt_menu_settings_button"
+        android:textColor="#FFFFFF"
+        android:background="#000000"
+        android:textStyle="bold"/>
+    <Button 
+        android:layout_margin="1dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" 
+        android:id="@+id/voice_btn"
+        android:text="@string/opt_menu_voice_on_button"
+        android:textColor="#FFFFFF"
+        android:background="#000000"
+        android:textStyle="bold"
+        />
+    <Button
+        android:layout_margin="1dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" 
+        android:id="@+id/Close_btn"
+        android:text="@string/opt_menu_close_button"
+        android:background="#000000"
+        android:textColor="#FFFFFF"
+        android:textStyle="bold"/>
+</LinearLayout>

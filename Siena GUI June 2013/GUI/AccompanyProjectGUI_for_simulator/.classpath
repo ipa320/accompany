@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/org.ros.android.android_gingerbread_mr1.MasterChooser"/>
+	<classpathentry exported="true" kind="lib" path="libs/android-async-http-1.4.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/usb-serial-for-android-v010.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/rosjava_tutorial_pubsub-0.0.0-SNAPSHOT.jar"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

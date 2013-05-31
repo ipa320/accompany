@@ -1,0 +1,22 @@
+<package>
+  <description brief="AccompanyImagesRepublisher">
+
+     AccompanyImagesRepublisher
+
+  </description>
+  <author>Patrizia Marti</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/AccompanyImagesRepublisher</url>
+  <depend package="sensor_msgs"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <depend package="image_transport"/>
+  <depend package="pr2_controllers_msgs" />
+  <depend package="trajectory_msgs" />
+
+</package>
+
+

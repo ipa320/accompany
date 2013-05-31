@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rotate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/anim_rotation"
+    android:fromDegrees="0"
+    android:toDegrees="360"
+    android:pivotX="50%"
+    android:pivotY="50%"
+    android:fillAfter="true"
+    android:duration="5000"
+    android:repeatCount="infinite"
+    android:repeatMode="restart" />

@@ -1,0 +1,25 @@
+Import the Database dump (maybe you can just import the new tables and then add the new sequences).
+
+COBScheduler configuration:
+import the package in your ros workspace and run it with "rosrun COBScheduler COBScheduler"
+
+Web Services configuration:
+- edit the config file (path: "AccompanyDatabaseWS/db_cnf") inserting the correct parameters for your database configuration
+- open a terminal window and type:
+  python WSname hostIP:hostPort   e.g: "python DatabaseConnectorWS.py 10.0.1.5:9995"
+
+ImagesRepublisher:
+-  It is a ros package, from terminal type: "rosrun AccompanyImagesRepublisher ImagesRepublisher"
+-  It's possible to configure some parameters editing "AccompanyImagesRepublisher/config/config.txt" 
+
+EmphasisServer (Squeeze-me):
+- roslaunch AccompanyService AccompanyGUIService.launch (I've removed the other nodes. Now it runs only the emphasis server)
+
+The GUI:
+- just upload the apk on your tablet and edit the ros master ip, and the other values in the settings:
+    - In the Database IP you should set the IP you passed to the Web Services (I assumed they are both on the same IP)
+    - The database port is the port you passed to the DatabaseConnectorWS
+    - The Robot status port is the one you passed to RobotStatusControlWS
+
+To let the GUI work the Emphasis server should be running. The GUI can start without the ImagesRepublisher and the COBScheduler, but in that case
+you will not have the images from the robot, or you'll not be able to run any Action.

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/robot_working_global_layout"
+    android:background="@color/robot_bck_color" >
+    
+     <ImageView
+        android:id="@+id/robot_working_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="matrix"
+        android:background="@android:color/transparent"
+        />
+        
+    <ImageView 
+        android:id="@+id/mask_basic_working"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"/> 
+        
+    <ImageView 
+        android:id="@+id/mask_basic_working1"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/> 
+    <ImageView 
+        android:id="@+id/mask_basic_working2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/> 
+    <ImageView 
+        android:id="@+id/mask_basic_working3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/> 
+    <ImageView 
+        android:id="@+id/mask_basic_working4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/>
+    <ImageView 
+        android:id="@+id/mask_basic_working5"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/>  
+    <ImageView 
+        android:id="@+id/mask_basic_working6"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/> 
+    <ImageView 
+        android:id="@+id/mask_basic_working7"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/> 
+    <ImageView 
+        android:id="@+id/mask_basic_workingF"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/mask_basic"
+        android:visibility="invisible"/>
+        
+     <ImageButton
+	    android:id ="@+id/optmenu"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+		android:layout_gravity="right|bottom"
+        android:src="@drawable/opt_menu"/>
+     
+     <Button 
+        android:id = "@+id/current_working_action"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:textSize="10dp"
+        android:background="@drawable/round_robot_simple"
+        android:layout_marginBottom="2dp"
+        android:layout_marginRight="80dp"
+		android:layout_gravity="right|bottom"
+        android:src="@drawable/opt_menu"/>
+
+</FrameLayout>

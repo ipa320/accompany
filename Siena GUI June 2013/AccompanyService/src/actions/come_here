@@ -1,0 +1,5 @@
+say ['Coming']
+move_base @user
+move_torso front true
+move_arm folded true
+move_torso back true

@@ -1,0 +1,6 @@
+sampling_rate 4
+output_topic accompany/GUIimage
+input_topic stereo/left/image_color
+head_control_topic head_controller/command
+image_width 1280
+image_heigth 752
