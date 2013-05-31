@@ -1,0 +1,5 @@
+say ['spengo_luci']
+move_arm folded True
+move_base lights
+move_arm home True
+move_arm folded True

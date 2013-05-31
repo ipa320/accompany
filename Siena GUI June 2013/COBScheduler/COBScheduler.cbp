@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+   <FileVersion major="1" minor="6" />
+   <Project>
+      <Option title="COBScheduler" />
+      <Option makefile_is_custom="1" />
+      <Option compiler="gcc" />
+      <Option virtualFolders="CMake Files\;" />
+      <Build>
+      <Target title="all">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; all" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="COBScheduler">
+         <Option output="/home/joe/ros_workspace/COBScheduler/bin/COBScheduler" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler/bin" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/home/joe/ros_workspace/COBScheduler/include" />
+            <Add directory="/opt/ros/electric/ros/core/roslib/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/ros/core/roslib/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_command_tools/cob_script_server/msg/cpp" />
+            <Add directory="/home/joe/git/care-o-bot/cob_command_tools/cob_script_server/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_common/cob_srvs/srv/cpp" />
+            <Add directory="/home/joe/git/care-o-bot/cob_common/cob_srvs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/pr2_controllers/pr2_controllers_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/pr2_controllers/pr2_controllers_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/navigation/move_base_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/actionlib_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/trajectory_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/geometry_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/bullet/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/angles/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/message_filters/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_light/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_sound/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_sound/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/include" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/msg/cpp" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/diagnostic_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rosbag/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/topic_tools/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/topic_tools/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common/actionlib/include" />
+            <Add directory="/opt/ros/electric/stacks/common/actionlib/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/std_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rostest/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_serialization/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_traits/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/xmlrpcpp/src" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rosconsole/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/rostime/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/cpp_common/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/ros/tools/rospack" />
+            <Add directory="/opt/ros/electric/ros/tools/rospack/include" />
+            <Add directory="/usr/include" />
+            <Add directory="/usr/include/qt4" />
+            <Add directory="/usr/include/qt4/QtGui" />
+            <Add directory="/usr/include/qt4/QtSql" />
+            <Add directory="/usr/include/qt4/QtCore" />
+            <Add directory="/home/joe/ros_workspace/COBScheduler" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; COBScheduler" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="COBScheduler/fast">
+         <Option output="/home/joe/ros_workspace/COBScheduler/bin/COBScheduler" prefix_auto="0" extension_auto="0" />
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler/bin" />
+         <Option object_output="./" />
+         <Option type="1" />
+         <Option compiler="gcc" />
+         <Compiler>
+            <Add directory="/home/joe/ros_workspace/COBScheduler/include" />
+            <Add directory="/opt/ros/electric/ros/core/roslib/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/ros/core/roslib/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_command_tools/cob_script_server/msg/cpp" />
+            <Add directory="/home/joe/git/care-o-bot/cob_command_tools/cob_script_server/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_common/cob_srvs/srv/cpp" />
+            <Add directory="/home/joe/git/care-o-bot/cob_common/cob_srvs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/pr2_controllers/pr2_controllers_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/pr2_controllers/pr2_controllers_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/navigation/move_base_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/arm_navigation/arm_navigation_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/actionlib_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/trajectory_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/tf/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/sensor_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/geometry_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/bullet/include" />
+            <Add directory="/opt/ros/electric/stacks/geometry/angles/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/message_filters/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_light/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_sound/msg_gen/cpp/include" />
+            <Add directory="/home/joe/git/care-o-bot/cob_driver/cob_sound/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/include" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/msg/cpp" />
+            <Add directory="/opt/ros/electric/stacks/audio_common/sound_play/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/diagnostic_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common_msgs/diagnostic_msgs/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rosbag/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/topic_tools/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/topic_tools/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/common/actionlib/include" />
+            <Add directory="/opt/ros/electric/stacks/common/actionlib/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/std_msgs/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/std_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rostest/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp/srv_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_serialization/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/clients/cpp/roscpp_traits/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/xmlrpcpp/src" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/tools/rosconsole/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/rostime/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/utilities/cpp_common/include" />
+            <Add directory="/opt/ros/electric/stacks/ros_comm/messages/rosgraph_msgs/msg_gen/cpp/include" />
+            <Add directory="/opt/ros/electric/ros/tools/rospack" />
+            <Add directory="/opt/ros/electric/ros/tools/rospack/include" />
+            <Add directory="/usr/include" />
+            <Add directory="/usr/include/qt4" />
+            <Add directory="/usr/include/qt4/QtGui" />
+            <Add directory="/usr/include/qt4/QtSql" />
+            <Add directory="/usr/include/qt4/QtCore" />
+            <Add directory="/home/joe/ros_workspace/COBScheduler" />
+         </Compiler>
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; COBScheduler/fast" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="ROSBUILD_genaction_msgs">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; ROSBUILD_genaction_msgs" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="ROSBUILD_genmsg_cpp">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; ROSBUILD_genmsg_cpp" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="ROSBUILD_genmsg_lisp">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; ROSBUILD_genmsg_lisp" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="ROSBUILD_gensrv_cpp">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; ROSBUILD_gensrv_cpp" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="ROSBUILD_gensrv_lisp">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; ROSBUILD_gensrv_lisp" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="clean-test-results">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean-test-results" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rebuild_cache">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rebuild_cache" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rosbuild_precompile">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rosbuild_precompile" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rosbuild_premsgsrvgen">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rosbuild_premsgsrvgen" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rospack_genmsg">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rospack_genmsg" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rospack_genmsg_libexe">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rospack_genmsg_libexe" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="rospack_gensrv">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; rospack_gensrv" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="test">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; test" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="test-future">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; test-future" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="test-results">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; test-results" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="test-results-run">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; test-results-run" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      <Target title="tests">
+         <Option working_dir="/home/joe/ros_workspace/COBScheduler" />
+         <Option type="4" />
+         <MakeCommands>
+            <Build command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; tests" />
+            <CompileFile command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; &quot;$file&quot;" />
+            <Clean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+            <DistClean command="/usr/bin/make -f &quot;/home/joe/ros_workspace/COBScheduler/Makefile&quot; clean" />
+         </MakeCommands>
+      </Target>
+      </Build>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/include/COBScheduler/moc_mainwindow.cxx">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/src/main.cpp">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/src/mainwindow.cpp">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/include/COBScheduler/moc_mainwindow.cxx.rule">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/ui/mainwindow.ui">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/ui_mainwindow.h">
+      </Unit>
+      <Unit filename="/home/joe/ros_workspace/COBScheduler/CMakeLists.txt">
+          <Option virtualFolder="CMake Files\" />
+      </Unit>
+   </Project>
+</CodeBlocks_project_file>

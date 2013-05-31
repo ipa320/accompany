@@ -1,0 +1,10 @@
+This is my fresh database dump. I have added some tables, namely:
+- GUIExpression is no more the old one. Now it contains a list of possible expressions (I still need to define some of them, and I'll upload a new version soon), and the selected one is specified by       
+   the field "isOn".
+- ActionPossibilityOptions contains a list of the possible options for the action possibilities, together with the value list and the last selected value.
+- ActionPossibility_APOptions is the relation between Options and Action Possibilities.
+- seqeunce_precondition_actionPossibilities put in reletaion each ActionPossibility with its "precondition id" and also with its sequence.
+- RobotActionsHistory: contains a log of the robot actions with a timestamp
+
+I have also added new lines to the ActionPossibilities Table, and I have defined new sequences with the COBSequencer. Hence you sholud update the values in that tables too.
+

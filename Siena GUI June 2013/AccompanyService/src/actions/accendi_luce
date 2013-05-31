@@ -1,0 +1,6 @@
+say ['accendo_luci']
+move_tray up
+move_arm folded true
+move_base lights
+move_arm home True
+move_arm folded True

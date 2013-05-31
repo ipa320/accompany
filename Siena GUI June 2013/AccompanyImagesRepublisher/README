@@ -1,0 +1,10 @@
+This node provides a new image transport with images resized to fit exactly the tablet screen dimension. 
+It subscribe the images from an input topic that can be configured (from config file  "config/config.txt" )
+and republish it in the new image transport (The output topic can be configured, but in that case I'll had 
+to change the GUI code so please don't touch it).
+Hence, it performs a sort of "downsampling" publishing only one images every n subscribed.
+Finally it turn the image based on the last head position. To do that I subscribed the head_contoller/command topic
+because it works in simulation. On the real robot you could have problems (I remember that there were sone issues with the head control
+which worked on the same topic), in that case you can configure a new head control topic to be subscribed. However I expect this trick to work
+only in case that the command messages are in the same format of head_controler/command. Otherwise (or if you have any other problem with the real robot)
+ please let me know and I'll upgrade the code with the correct topic and messages format.

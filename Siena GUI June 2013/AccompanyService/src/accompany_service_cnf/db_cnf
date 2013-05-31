@@ -1,0 +1,5 @@
+host 10.0.1.5
+db_name Accompany
+user root
+password accompany
+likelihood 0.1
