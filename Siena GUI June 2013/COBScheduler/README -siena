@@ -1,0 +1,8 @@
+I have slightly modified this package to implement the robot tak detection, and to solve a problem that i found in simulation.
+I worked only on "mainwindow.cpp", I list below my changes to the code (Moreover, there is a comment "//MARCOB" where i modified it):
+-  I have added a new db connection (for my queries).
+- I set a flag (update the value of the 999 sensor in db) when I start a command (MainWindow::runSequence(QString sequenceName, int priority, QString CanInterrupt, int row) - line 1322)
+- I unset the flag when the command ends (schedulerThread::run() - line 83)
+- I also log the command executed in the table RobotActionsHistory
+- I have removed the line "returnResult = SCRIPTSERVER_EXECUTION_FAILURE; " (line 1036) because I found that more or less every command 
+   I run ends in a script server failed to execute the command, and thence in an automatic termination of the scheduler. 

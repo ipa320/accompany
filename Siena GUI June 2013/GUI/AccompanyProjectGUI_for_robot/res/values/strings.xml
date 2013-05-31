@@ -1,0 +1,57 @@
+<resources>
+    <!-- Variouys strings -->
+    <string name="app_name">AccompanyProjectGUI</string>
+    <!-- string name="settings_title">AccompanyGUI Settings</string-->
+    <string name="robot_ip_text">Robot Ip:</string>
+    
+    <!-- Colors -->
+    <color name="user_bck_color">#375B81</color>
+    <color name="robot_bck_color">#bebebe</color>
+    <color name="actions_list_bck">#222222</color>
+    <color name="white">#FFFFFF</color>
+    <color name="white_transparency70">#99FFFFFF</color>
+    <color name="black_transparency70">#99000000</color>
+    <color name="user_background">#FF312F2F</color>
+    
+    <!-- Login page and connection dialogs strings -->
+    <string name="login_page_title">Accompany G.U.I.</string>
+    <string name="login_title">Login</string>
+    <string name="username">Username:</string>
+    <string name="ros_master_ip">ROS Master Ip:</string>
+    <string name="ok">Ok</string>
+    <string name="connecting_master">Connecting to ROS Mastr&#8230;</string>
+    <string name="gui_title">Accompany GUI</string>
+    <string name="cannot_connect_master">Cannot connect with ROS master and DB. Please check the ROS Master Ip&#8230;</string>
+    <string name="wrong_usr_pwd">Wrong username or password!</string>
+    
+    <!-- Robot View Strings -->
+    <string name="switch_to_user_view_btn">screen</string>
+    
+    <!-- User View Strings -->
+    <string name="switch_to_robot_view_btn">user</string>
+    
+    <!-- Actions List View Strings -->
+    <string name="actions_list_title">Actions list</string>
+    
+    <!-- Robot Working View Strings-->
+    
+    <!-- Settings Strings -->
+    <string name="settings_page_title">Accompany G.U.I</string>
+    <string name="settings_title">Settings</string>
+    <string name="save">Save</string>
+    <string name="images_subscribing_rate">Images subscribing rate:</string>
+    <string name="database_ip">Database IP:</string>
+    <string name="database_port">Database port:</string>
+    <string name="status_port">Robot status control port:</string>
+    
+    <!-- Options menu strings -->
+    <string name="opt_menu_action_list_button">Action List</string>
+    <string name="opt_menu_settings_button">Settings</string>
+    <string name="opt_menu_voice_on_button">Voice On</string>
+    <string name="opt_menu_voice_off_button">Voice Off</string>
+    <string name="opt_menu_close_button">Close</string>
+    <string name="close_act_title">Close Activity</string>
+    <string name="are_you_sure_question">Are you sure?</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+</resources>

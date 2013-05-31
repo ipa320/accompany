@@ -1,0 +1,7 @@
+This folder contains the two WS for the database connection and the control of the current task the robot is running.
+The database WS is quite simple and consists just in an inteface between the android app and the mysql db.
+The other one let the GUI know when the scheduler starts/finish any task which is different from sleep.
+As we decided in February this mainly consist in an open http request from the GUI which is answerd only when there is a change
+in the running task.
+In this .py file I start (and close) also two threads. One is to monitor and upgrade the likelihood of action possibilities (It's 
+actually empty I still need to fill it, I'll do in the future). The second one manages the expressions of the GUI.

@@ -1,0 +1,5 @@
+The Emphasis server is the only node stil in use here.
+It can be configured from the config file (config/emphasis.config) selecting the min and max speed value for the robot.
+It actually assumes that you are running the ROS dwa navigation for the base. I used 2dnav_ros_dwa.launch in my simulatied 
+tests, and the emphasis uses a dynamic reconfiguration client for the topic "/move_base/DWAPlannerROS".
+

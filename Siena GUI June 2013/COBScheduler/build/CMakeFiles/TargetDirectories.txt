@@ -1,0 +1,17 @@
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/COBScheduler.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/ROSBUILD_genaction_msgs.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/ROSBUILD_genmsg_cpp.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/ROSBUILD_genmsg_lisp.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/ROSBUILD_gensrv_cpp.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/ROSBUILD_gensrv_lisp.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/clean-test-results.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/rosbuild_precompile.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/rosbuild_premsgsrvgen.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/rospack_genmsg.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/rospack_genmsg_libexe.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/rospack_gensrv.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/test.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/test-future.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/test-results.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/test-results-run.dir
+/home/patrizia/ros_workspace/accompany_master/COBScheduler/build/CMakeFiles/tests.dir

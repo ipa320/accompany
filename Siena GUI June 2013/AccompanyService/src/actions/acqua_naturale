@@ -1,0 +1,4 @@
+say ['acqua_naturale']
+move_arm folded true
+move_base kitchen
+move_tray up
