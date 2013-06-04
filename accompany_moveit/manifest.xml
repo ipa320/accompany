@@ -1,0 +1,17 @@
+<package>
+  <description brief="accompany_moveit">
+
+     accompany_moveit
+
+  </description>
+  <author>Felix Messmer, Thiago de Freitas</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_moveit</url>
+  <depend package="rospy" />
+  <depend package="tf" />
+  <depend package="geometry_msgs" />
+  <depend package="moveit_commander" />
+</package>
+
+
