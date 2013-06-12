@@ -1,3 +1,0 @@
-kill `ps aux | grep "/opt/ros/electric/" | awk '{print $2}'`
-echo "remaining processes:"
-ps aux | grep "/opt/ros/electric/" | grep -v " grep "
