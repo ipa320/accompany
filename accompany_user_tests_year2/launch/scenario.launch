@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+
+	<arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+	<arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)"/>
+	<arg name="pkg_robot_config" default="$(find cob_default_robot_config)"/>
+	<arg name="pkg_env_config" default="$(find accompany_user_tests_year2)"/>
+
+	<!-- start navigation -->
+	<include file="$(find cob_navigation_global)/launch/2dnav_ros_dwa.launch">
+		<arg name="map" default="$(find accompany_user_tests_year2)/config/envs/$(arg robot_env)/map.yaml" />
+	</include>
+
+</launch>
