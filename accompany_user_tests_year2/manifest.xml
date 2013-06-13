@@ -9,6 +9,10 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/accompany_user_tests_year2</url>
 
+  <depend package="cob_script_server"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+
 </package>
 
 
