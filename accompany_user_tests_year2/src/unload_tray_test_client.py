@@ -15,8 +15,9 @@ if __name__ == '__main__':
 	
 
 	# Fill in the goal here
-	client.send_goal(goal)
-	if not client.wait_for_result(rospy.Duration.from_sec(5.0)):
-		print "not finished within time"
-	print "result=", client.get_state()
+	while not rospy.is_shutdown():
+		client.send_goal(goal)
+		if not client.wait_for_result(rospy.Duration.from_sec(30.0)):
+			print "not finished within time"
+		print "result=", client.get_state()
 

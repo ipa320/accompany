@@ -121,14 +121,14 @@ def moveit_cart_goals(group, ref_frame, goal_list, avoid_collisions=True):
     
     mgc.set_pose_reference_frame(ref_frame)
     (traj,frac)  = mgc.compute_cartesian_path(goal_list, 0.01, 4, avoid_collisions)
-    print traj,frac
+    #print traj,frac
 
     #mgc.execute(traj)
     #print "Done moving"
     #return 'succeeded'  
     
     if frac == 1.0:
-        print mgc.execute(traj)
+        mgc.execute(traj)
         return "succeeded"
         #if mgc.execute(traj):
 		#        print "Done moving"
