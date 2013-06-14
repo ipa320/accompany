@@ -1,6 +1,9 @@
 # goal
-string object_name 
-string target_location
+
+# distance between floor and tabletop (there is a safety offset added to place the object a little higher)
+# min 0.45
+# max 0.60
+float32 table_height   
 
 ---
 #result

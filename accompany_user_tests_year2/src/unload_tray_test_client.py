@@ -12,12 +12,11 @@ if __name__ == '__main__':
 	client.wait_for_server()
 
 	goal = UnloadTrayGoal()
-	
+	goal.table_height = 0.60
 
 	# Fill in the goal here
-	while not rospy.is_shutdown():
-		client.send_goal(goal)
-		if not client.wait_for_result(rospy.Duration.from_sec(30.0)):
-			print "not finished within time"
-		print "result=", client.get_state()
+	client.send_goal(goal)
+	if not client.wait_for_result(rospy.Duration.from_sec(90.0)):
+		print "not finished within time"
+	print "result=", client.get_state()
 

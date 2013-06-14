@@ -19,7 +19,16 @@ class UnloadTrayServer:
 		self.server.start()
 
 	def execute(self, goal):
+		if goal.table_height <= 0.445 or goal.table_height >= 0.605:
+			rospy.logerr("table_height (" + str(goal.table_height) + ") not within limits (0.45...0.60), goal aborted.")
+			self.server.set_aborted()
+			return
+		
+		print "placing object on table with a height of " + str(goal.table_height)
+	
 		sss.set_light("yellow")
+	
+		sss.move("tray","deliverup")
 		
 		grasp = [-1.023739218711853, -1.0562658309936523, 2.3108131885528564, 1.5178372859954834, -0.08975735306739807, 1.0026973485946655, 0.1390783041715622]
 		
@@ -28,30 +37,18 @@ class UnloadTrayServer:
 		sss.move("sdh","cylopen")
 		handle_arm.wait()
 
-#		current_pose = moveit_get_current_pose("arm")
-#		goal_pose1 = self.calculate_goal_pose(current_pose, 0.15, 0.1, -0.1, 0.0, 0.0, 0.6)
-#		goal_pose2 = self.calculate_goal_pose(current_pose, 0.0, 0.1, 0.0, 0.0, 0.0, 0.0)
-#		success = moveit_cart_goals("arm", "base_link", [goal_pose1, goal_pose2], False)
-
-#		sss.move("sdh","cylclosed")
-#		current_pose = moveit_get_current_pose("arm")
-#		goal_pose1 = self.calculate_goal_pose(current_pose, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0)
-#		goal_pose2 = self.calculate_goal_pose(current_pose, 0.0, -0.2, 0.0, 0.0, 0.0, 0.0)
-#		success = moveit_cart_goals("arm", "base_link", [goal_pose1, goal_pose2], False)
-
-
 		sss.move("sdh","cylclosed")
 		handle_arm = sss.move("arm",["intermediatefront"])
 
-		table_height = 0.45
+		table_height = goal.table_height
 		intermediatefront_height = 0.98
 		dz = table_height - intermediatefront_height
 
 		current_pose = moveit_get_current_pose("arm")
 		goal_pose1 = self.calculate_goal_pose(current_pose, -0.2, -0.3, dz, 0.0, 0.0, -1.5)
-		if not moveit_cart_goals("arm", "base_link", [goal_pose1], False):
+		if not moveit_cart_goals("arm", "base_link", [goal_pose1], False) == "succeeded":
 			sss.set_light("red")
-			handle_arm = sss.move("arm",["intermediateback","folded"],False)
+			handle_arm = sss.move("arm",["intermediateback","folded"])
 			self.server.set_aborted()
 			return
 
