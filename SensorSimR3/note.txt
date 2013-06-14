@@ -1,5 +1,0 @@
-R3: 20121030
-1. Reassign/rearrange sensor (database value changed)
-2. Add wattage (value) spinbox for appropriate items
-3. Fetch checked (on/off) state to show last activation state
-4. Fetch spinbox value to show last activation value

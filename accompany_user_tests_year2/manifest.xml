@@ -1,0 +1,20 @@
+<package>
+  <description brief="accompany_user_tests_year2">
+
+     accompany_user_tests_year2
+
+  </description>
+  <author>accompany</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_user_tests_year2</url>
+
+  <depend package="tf"/>
+  <depend package="actionlib"/>
+  <depend package="actionlib_msgs"/>
+  <depend package="accompany_moveit"/>
+  <depend package="cob_script_server"/>
+
+</package>
+
+
