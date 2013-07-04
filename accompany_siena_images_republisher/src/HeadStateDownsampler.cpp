@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	head_output_topic=DEFAULT_OUTPUT_TOPIC;
 	sampling_rate=RATE;
         //reading the configuration
-	std::string path=ros::package::getPath("AccompanyImagesRepublisher")+"/config/config.txt";
+	std::string path=ros::package::getPath("accompany_siena_images_republisher")+"/config/config.txt";
 	//std::cout << path << "\n";
 	
 	std::ifstream infile(path.c_str());

@@ -1,0 +1,8 @@
+sampling_rate 10
+output_topic accompany/GUIimage
+input_topic stereo/left/image_color
+head_input_topic head_controller/state
+head_downsampled_control_topic head_controller/state_downsampled
+head_sampling_rate 100
+image_width 640
+image_heigth 376
