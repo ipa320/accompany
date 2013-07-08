@@ -12,7 +12,7 @@ if __name__ == '__main__':
 	client.wait_for_server()
 
 	goal = UnloadTrayGoal()
-	goal.table_height = 0.60
+	goal.table_height = 0.45
 
 	# Fill in the goal here
 	client.send_goal(goal)

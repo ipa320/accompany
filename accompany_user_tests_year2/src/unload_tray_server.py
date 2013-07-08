@@ -26,7 +26,7 @@ class UnloadTrayServer:
 		
 		print "placing object on table with a height of " + str(goal.table_height)
 	
-		sss.set_light("yellow")
+		sss.set_light([0,0,1])
 	
 		sss.move("tray","deliverup")
 		
@@ -48,7 +48,7 @@ class UnloadTrayServer:
 		goal_pose1 = self.calculate_goal_pose(current_pose, -0.2, -0.3, dz, 0.0, 0.0, -1.5)
 		if not moveit_cart_goals("arm", "base_link", [goal_pose1], False) == "succeeded":
 			sss.set_light("red")
-			handle_arm = sss.move("arm",["intermediateback","folded"])
+#			handle_arm = sss.move("arm",["intermediateback","folded"])
 			self.server.set_aborted()
 			return
 
