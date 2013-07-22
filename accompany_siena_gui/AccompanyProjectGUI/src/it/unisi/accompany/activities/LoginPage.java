@@ -5,6 +5,8 @@ import it.unisi.accompany.AccompanyPreferences;
 import it.unisi.accompany.R;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -37,6 +39,9 @@ import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 public class LoginPage extends Activity{
 	
+	protected final int TIMEOUT_MASTER_CONNECTION=20000; //20 seconds to connect to ros master
+	protected final int SETTINGS_CODE=10;
+	
 	LoginPage me;
 	protected PopupWindow popupWindow;
 	protected AccompanyGUIApp myApp;
@@ -47,8 +52,6 @@ public class LoginPage extends Activity{
 	protected Button ok;
 	
 	protected RelativeLayout mainLayout;
-	
-	protected final int SETTINGS_CODE=10;
 	
 	protected boolean waited_flag,clicked;
 	protected String user,password;
@@ -64,6 +67,7 @@ public class LoginPage extends Activity{
 	int waited=0;
 	
 	protected boolean appClosing=false;
+	protected  Timer t;   //for timeout the connection to master
 	
 	//aggiungi option per cambiare ip del db!!
 	
@@ -100,6 +104,7 @@ public class LoginPage extends Activity{
 		    usr=(EditText)this.findViewById(R.id.user_et);
 		    
 		    rosIp.setText(myPreferences.getRosMasterIP());
+		    usr.setText(myPreferences.getLastUser());
 		    opt_menu=(ImageButton)this.findViewById(R.id.optmenu);
 		    opt_menu.setOnClickListener(new View.OnClickListener() {
 				
@@ -114,8 +119,8 @@ public class LoginPage extends Activity{
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if(actionId==EditorInfo.IME_NULL && event.getAction()==KeyEvent.ACTION_DOWN)
 					{
-						Ip=rosIp.getText().toString();
-						user=usr.getText().toString();
+						Ip=rosIp.getText().toString().replace("\\n", "").replace("\\r", "");
+						user=usr.getText().toString().replace("\\n", "").replace("\\r", "");
 						clicked=true;
 						/*if (isClientDbWorking())
 						{
@@ -138,8 +143,8 @@ public class LoginPage extends Activity{
 				public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
 					if(actionId==EditorInfo.IME_NULL && event.getAction()==KeyEvent.ACTION_DOWN)
 					{
-						Ip=rosIp.getText().toString();
-						user=usr.getText().toString();
+						Ip=rosIp.getText().toString().replace("\\n", "").replace("\\r", "");
+						user=usr.getText().toString().replace("\\n", "").replace("\\r", "");
 						clicked=true;
 						/*if (isClientDbWorking())
 						{
@@ -161,8 +166,8 @@ public class LoginPage extends Activity{
 				@Override
 				public void onClick(View v) {
 					//password=pwd.getText().toString();
-					Ip=rosIp.getText().toString();
-					user=usr.getText().toString();
+					Ip=rosIp.getText().toString().replace("\\n", "").replace("\\r", "");
+					user=usr.getText().toString().replace("\\n", "").replace("\\r", "");
 					clicked=true;
 					/*if (isClientDbWorking())
 					{
@@ -184,7 +189,7 @@ public class LoginPage extends Activity{
 	public void onResume()
 	{
 		super.onResume();
-		try{
+		/*try{  //togliere dopo rimesso SQUEEZE
 			myApp.mSerialDevice = UsbSerialProber.acquire(myApp.mUsbManager);
 	        Log.d("AccompanyGUI-squeeze", "Resumed, mSerialDevice=" + myApp.mSerialDevice);
 	        if (myApp.mSerialDevice == null) {
@@ -238,9 +243,10 @@ public class LoginPage extends Activity{
 					final Intent intent = new Intent().setClass(LoginPage.this.me, RobotWorkingView.class);
 					LoginPage.this.startActivity(intent);
 					finish();
-				}
+				} break;
+				default: break;
 			}
-        }
+        }*/
 	}
 	
 	 private void setPreferences() {
@@ -253,6 +259,7 @@ public class LoginPage extends Activity{
 		    //editor.putInt("images_rate", myPreferences.getImagesRate());
 		    editor.putBoolean("speech_mode", myPreferences.getSpeechMode());
 	        editor.putString("database_url", myPreferences.getDatabaseUrl());
+	        editor.putString("last_logged_user", user);
 	        
 		    editor.commit();
 		  }
@@ -284,7 +291,7 @@ public class LoginPage extends Activity{
 					if (clicked)
 						if (isClientDbWorking())
 						{
-							myApp.db_client.login(user, password);
+							myApp.db_client.login(user);
 						}
 						else
 							h.post(new Runnable(){
@@ -309,7 +316,7 @@ public class LoginPage extends Activity{
 		else return true;
 	}
 	
-	 //Toast to send a short message on  the screen
+	//Toast to send a short message on  the screen
     public Toast toastMessage(String msg)
 	{
     	Log.i("AccompanyGUI-LoginPage","toast login" + msg);
@@ -409,7 +416,7 @@ public class LoginPage extends Activity{
 		case R.id.settings: {
 			Intent settingsIntent = new Intent(LoginPage.this,
     				Settings.class);
-			//settingsIntent.putExtra("login", true);
+			settingsIntent.putExtra("login", true);
     		LoginPage.this.startActivityForResult(settingsIntent,SETTINGS_CODE);
 		}return true;
 		default: return super.onOptionsItemSelected(item);
@@ -435,11 +442,30 @@ public class LoginPage extends Activity{
     	else
     	{
     		myApp.setUserId(Integer.parseInt(s));
-    		final Intent intent = new Intent().setClass(LoginPage.this.me, UserView.class);
-			LoginPage.this.startActivity(intent);
-			finish();
+    		//THE ACTUAL LOGIN WILL HAPPEN ON THE SERVICES STARTED SUCCESSFULLY -->show dialog
+    		pd=ProgressDialog.show(this, this.getResources().getString(R.string.gui_title), "Login successfull!\nConnecting to Ros Master...");
     		//myApp.startRun();
+    		//setting timeout to connection!
+    		t= new Timer();
+    		t.schedule(new TimerTask(){
+				@Override
+				public void run() {
+					h.post(new Runnable(){
+						@Override
+						public void run() {
+							closeAppOnError("Cannot connect to master within timeout.\nClosing...");
+						}});
+				}}, TIMEOUT_MASTER_CONNECTION);
     	}
+    }
+    
+    public void loginSuccess()
+    {
+    	if (t!=null) t.cancel();
+    	if (pd!=null) pd.dismiss();
+    	final Intent intent = new Intent().setClass(LoginPage.this.me, UserView.class);
+		LoginPage.this.startActivity(intent);
+		finish();
     }
     
    /*public void switchToUser()
@@ -453,6 +479,7 @@ public class LoginPage extends Activity{
     public void onDestroy()
     {
     	//this.setContentView(null);
+    	if (t!=null) t.cancel();
     	if (pd!=null) pd.dismiss();
     	super.onDestroy();
     	
@@ -615,7 +642,7 @@ public class LoginPage extends Activity{
 				myApp.setSettings();
 				Intent settingsIntent = new Intent(LoginPage.this,
 	    				Settings.class);
-				//settingsIntent.putExtra("login", true);
+				settingsIntent.putExtra("login", true);
 	    		LoginPage.this.startActivityForResult(settingsIntent,SETTINGS_CODE);
 			}
 		});
@@ -658,5 +685,16 @@ public class LoginPage extends Activity{
 				}
 			}
 		};
+    }
+    
+    public void wrongHost()
+    {
+    	if (pd!=null) pd.dismiss();
+    	pd= ProgressDialog.show(this, this.getResources().getString(R.string.gui_title), "Unable to connect to Database...\nPlease open settings and check the url.");
+    	h.postDelayed(new Runnable(){
+			@Override
+			public void run() {
+				pd.dismiss();
+			}}, 2500);
     }
 }

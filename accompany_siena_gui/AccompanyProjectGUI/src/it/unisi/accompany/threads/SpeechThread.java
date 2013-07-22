@@ -134,11 +134,16 @@ public class SpeechThread extends Thread implements MicrophoneInputListener{
 								myApp.sendActionRequest(myApp.COMEHEREID);
 								Log.e("AccompanyGUI-speech","state "+state);
 							}
-            		
 					}
+					else
+						if (normalizedValue>NORMALIZED_TRS)
+						{
+							myApp.emp_client.setEmphasis((normalizedValue-NORMALIZED_TRS)/1000);
+							Log.i(TAG,"setting emphasis but not sending command");
+						}
             		//onEndEmphasis();
             		try {
-						Thread.sleep(5000);
+						Thread.sleep(500);
 					} catch (InterruptedException e) {
 						Log.e(TAG,"Error sleeping!");
 						interrupt();

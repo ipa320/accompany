@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/global_actions_list_layout"
+    android:background="@color/actions_list_bck" >
+     <LinearLayout
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:id="@+id/vertical_actions_list_layout"
+         android:layout_alignParentTop="true"
+         android:background="@android:color/transparent"
+         android:orientation="vertical" >
+
+		<TextView
+			android:id="@+id/actions_list_title_tv"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:background="@android:color/transparent"
+			android:text="@string/actions_list_title"
+			android:textColor="@color/white"
+			android:textSize="22dp" 
+			android:paddingLeft="15dp"
+			android:paddingTop="10dp"
+			android:paddingBottom="2dp"/>
+    
+		<FrameLayout
+			android:id="@+id/actions_title_line"
+			android:layout_height="2dp"
+			android:layout_width="match_parent"
+			android:background="@color/white"
+			android:clickable="false">
+		</FrameLayout>
+
+		<LinearLayout 
+			android:id="@+id/main_actions_list_layout"
+			android:orientation="horizontal"
+			android:layout_width="match_parent"
+			android:layout_height="match_parent"
+			android:background="@android:color/transparent"
+			android:layout_marginTop="30dp">
+        
+			<LinearLayout
+				android:id="@+id/environments_list_view"
+				android:layout_height="match_parent"
+				android:layout_width="275dp"
+				android:paddingTop="2dp"
+				android:paddingLeft="10dp"
+				android:orientation="vertical"
+				android:background="@android:color/transparent"></LinearLayout>
+        
+			<FrameLayout
+				android:id="@+id/actions_vertical_line"
+				android:layout_height="match_parent"
+				android:layout_width="2dp"
+				android:background="@color/white"
+				android:clickable="false" >
+			</FrameLayout>
+        
+			<LinearLayout
+				android:id="@+id/actions_list_view"
+				android:layout_height="match_parent"
+				android:layout_width="match_parent"
+				android:orientation="vertical"
+				android:layout_marginLeft="10dp"
+				android:layout_marginTop="15dp"
+				android:background="@android:color/transparent"
+            ></LinearLayout>
+        
+        </LinearLayout>
+    
+     </LinearLayout>
+     
+      <Button
+	    android:id ="@+id/switchtouser"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+		android:layout_alignParentBottom="true"
+		android:typeface="sans"
+	    android:drawablePadding="15dp"
+        android:textSize="26dp"
+		android:layout_alignParentLeft="true"
+        android:drawableLeft="@drawable/switchtouser"
+        android:textColor="@color/white_transparency70"
+        android:text="@string/switch_to_user_view_btn"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="20dp" />
+      
+       <Button
+	    android:id ="@+id/switchtorobot"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="20dp"
+        android:typeface="sans"
+		android:layout_alignParentLeft="true"
+		android:layout_above="@+id/switchtouser"
+	    android:drawablePadding="15dp"
+        android:textSize="26dp"
+        android:drawableLeft="@drawable/switchtorobot"
+        android:textColor="@color/white_transparency70"
+        android:text="@string/switch_to_robot_view_btn" />
+     
+     <ImageButton
+	    android:id ="@+id/optmenu"
+	    android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="10dp"
+		android:layout_alignParentBottom="true"
+		android:layout_alignParentRight="true"
+        android:src="@drawable/opt_menu"
+		/>"
+
+</RelativeLayout>

@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.StrictMode;
 import android.util.Log;
 import android.view.Display;
@@ -39,6 +40,7 @@ import android.widget.FrameLayout.LayoutParams;
 public class ActionsListView extends Activity{
 	
 	protected final String TAG = "AccompanyGUI - ActionsListView";
+	protected boolean toClose;
 	
 	protected AccompanyGUIApp myApp;
 	protected ActionsListView me;
@@ -70,6 +72,8 @@ public class ActionsListView extends Activity{
 	protected PopupWindow optionPd=null;
 	
 	protected ProgressDialog pdd=null;
+	protected ProgressDialog pd;
+	protected Handler closeHandler;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState)
@@ -91,6 +95,8 @@ public class ActionsListView extends Activity{
         myApp=(AccompanyGUIApp)this.getApplication();
         myApp.setActionsView(this);
         me=this;
+        
+        closeHandler= new Handler();
         
         //reading the preferences 
         myPreferences=new AccompanyPreferences(this);
@@ -325,7 +331,7 @@ public class ActionsListView extends Activity{
 					@Override
 					public void onClick(View v) {
 						popupWindow.dismiss();	
-						myApp.closeApp();
+						closeApp();
 					}
 				});
 	       	yes.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -361,6 +367,7 @@ public class ActionsListView extends Activity{
 			@Override
 			public void onClick(View v) {
 				myApp.setSettings();
+				toClose=false;
 				Intent settingsIntent = new Intent(ActionsListView.this,
 	    				Settings.class);
 	    		ActionsListView.this.startActivityForResult(settingsIntent,SETTINGS_CODE);
@@ -455,8 +462,10 @@ public class ActionsListView extends Activity{
 	//Switching to robot view (on right banner clicks), the robot view activity is launched:
 		public void switchToRobotView()
 		{
-			
+			if (pd!=null) pd.dismiss();
+			pd= ProgressDialog.show(this,this.getResources().getString(R.string.app_name),this.getResources().getString(R.string.load_images));
 			myApp.StartSubscribing();
+			toClose=false;
 			old_environment=null;
 			final Intent intent = new Intent().setClass(ActionsListView.this.me, RobotView.class);
 			ActionsListView.this.startActivity(intent);
@@ -467,6 +476,7 @@ public class ActionsListView extends Activity{
 		protected void switchToUserView()
 		{
 			old_environment=null;
+			toClose=false;
 			final Intent intent = new Intent().setClass(ActionsListView.this.me, UserView.class);
 			ActionsListView.this.startActivity(intent);
 		}
@@ -474,7 +484,10 @@ public class ActionsListView extends Activity{
 		//Switching to the "Robot executing command" view, (called when a Button,i.e. command, is pressed)
 		public void showRobotExecutingCommandView()
 		{
-			myApp.st.setMode(false);
+			if (pd!=null) pd.dismiss();
+			pd= ProgressDialog.show(this,this.getResources().getString(R.string.app_name),this.getResources().getString(R.string.load_images));
+			if (myApp.st!=null) myApp.st.setMode(false);
+			toClose=false;
 			myApp.StartSubscribing();
 			myApp.robotBusy();
 			final Intent intent = new Intent().setClass(ActionsListView.this.me, RobotWorkingView.class);
@@ -538,6 +551,7 @@ public class ActionsListView extends Activity{
 			if (pdd!=null) pdd.dismiss();
 			if (optionPd!=null) optionPd.dismiss();
 			if (menu!=null) menu.dismiss();
+			if (pd!=null) pd.dismiss();
 			super.onDestroy();
 		}
 		
@@ -552,5 +566,42 @@ public class ActionsListView extends Activity{
 	    	lastApClicked.handleOptionsResponse(res,id);
 	    }
 		
+		public void closeApp()
+		{
+			if (pd!=null) pd.dismiss();
+			pd= ProgressDialog.show(ActionsListView.this,ActionsListView.this.getResources().getString(R.string.gui_title),
+					"Closing application. Please wait...");
+			pd.setCancelable(false);
+			closeHandler.postDelayed(new Runnable(){
+				@Override
+				public void run() {
+					myApp.closeApp();
+				}}, 250);
+		}
 	
+		@Override
+		public void onResume()
+		{
+			Log.v(TAG,"On pause...");
+			toClose=true;
+			super.onResume();
+		}
+		
+		@Override
+		public void onPause()
+		{
+			Log.v(TAG,"On pause...");
+			checkClosure();
+			super.onPause();
+		}
+		
+		public void checkClosure()
+		{
+			if (toClose)
+			{
+				Log.w(TAG,"Closing app...");
+				Log.v(TAG,"Received pause request from something external to the app.");
+				closeApp();//myApp.closeApp();
+			}
+		}
 }

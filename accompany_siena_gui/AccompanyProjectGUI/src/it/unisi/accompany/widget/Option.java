@@ -583,5 +583,16 @@ public class Option extends Button implements View.OnTouchListener{
 		this.setVisibility(View.INVISIBLE);
 		myLayout.removeView(this);
 	}
+	
+	public void bringSiblingsToFront()
+	{
+		if (myValues!=null)
+			for (int i=0;i<myValues.size();i++)
+		 	{
+		 		myValues.get(i).bringToFront();
+		 	}
+		if (selectedValue!=null)
+			selectedValue.bringToFront();
+	}
 
 }

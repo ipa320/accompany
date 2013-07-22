@@ -1,5 +1,8 @@
 package it.unisi.accompany.rosnodes;
 
+import it.unisi.accompany.AccompanyGUIApp;
+import it.unisi.accompany.R;
+
 import java.security.Timestamp;
 import java.util.Calendar;
 
@@ -21,6 +24,10 @@ import trajectory_msgs.JointTrajectoryPoint;
 import android.util.Log;
 public class HeadControllerGUI implements NodeMain{
 
+	protected final String TAG="AccompanyGUI-HeadController";
+	
+	protected AccompanyGUIApp myApp;
+	
 	protected final String HEAD_CONTROL_DOWNSAMPLED_TOPIC = "head_controller/state_downsampled";
 	public final double max_head_pos=0;
 	public final double min_head_pos=-Math.PI;
@@ -38,6 +45,11 @@ public class HeadControllerGUI implements NodeMain{
 	
 	protected boolean shouldBringHome=false;
 	
+	public HeadControllerGUI(AccompanyGUIApp a)
+	{
+		myApp=a;
+	}
+	
 	public double getHeadPos()
 	{
 		return head_pos;
@@ -50,14 +62,15 @@ public class HeadControllerGUI implements NodeMain{
 	
 	@Override
 	public void onError(Node arg0, Throwable arg1) {
-		Log.e("Accompany-GUI-HeadController","ERROR");
+		Log.e(TAG,"ERROR");
+		myApp.closeAppOnError(myApp.getResources().getString(R.string.comunication_error));
 	}
 
 	@Override
 	public void onShutdown(Node arg0) {
 		//s.shutdown();
 		if (p!=null) p.shutdown();
-		Log.e("Accompan-Ros","Shutdown Head controller");
+		Log.e(TAG,"Shutdown...");
 	}
 
 	@Override
@@ -77,6 +90,7 @@ public class HeadControllerGUI implements NodeMain{
 			      public void onNewMessage(final pr2_controllers_msgs.JointTrajectoryControllerState message) {
 			        double[] a =message.getActual().getPositions();
 			        head_pos=a[0];
+			        //Log.v(TAG,"Head pos: "+head_pos);
 			        if (calendar.getTimeInMillis()-last_publish>3000)
 			        	desired_head_pos=head_pos;
 			      }
@@ -95,6 +109,7 @@ public class HeadControllerGUI implements NodeMain{
 		{
 			s.shutdown();
 			p.shutdown();
+			myApp.closeAppOnError(myApp.getResources().getString(R.string.registration_error)+"\n - Missing Head Controller -");
 			throw new RosRuntimeException(e);
 		}
 	}
@@ -110,14 +125,14 @@ public class HeadControllerGUI implements NodeMain{
 		double diff=0;
 		if (p==null)
 		{
-			Log.i("Accompany-GUI-HeadController"," Head controller not ready!");
+			Log.i(TAG," Head controller not ready!");
 			shouldBringHome=true;
 			return 0;
 		}
 		pr2_controllers_msgs.JointTrajectoryActionGoal msg = p.newMessage();
 		JointTrajectoryGoal gg=null;
 		try{
-			Log.i("HEAD","moving of value:"+value);
+			Log.i("TAG","moving of value:"+value);
 			 JointTrajectoryPoint pp=mf.newFromType(JointTrajectoryPoint._TYPE);
 			 gg=mf.newFromType(JointTrajectoryGoal._TYPE);
 			 
@@ -147,7 +162,7 @@ public class HeadControllerGUI implements NodeMain{
 			 gg.getTrajectory().getJointNames().add("head_axis_joint");
 			 my_seq_count++;
 		}catch(Exception e){
-			Log.i("Accompany-GUI-HeadController"," cannot instantiate head message");
+			Log.i(TAG," cannot instantiate head message");
 		}
 		msg.setGoal(gg);
 		p.publish(msg);
@@ -157,17 +172,16 @@ public class HeadControllerGUI implements NodeMain{
 	
 	public void bringCameraToFront()
 	{
-		double diff=0;
 		if (p==null)
 		{
-			Log.i("Accompany-GUI-HeadController"," Head controller not ready!");
+			Log.i(TAG," Head controller not ready!");
 			shouldBringHome=true;
 			return;
 		}
 		pr2_controllers_msgs.JointTrajectoryActionGoal msg = p.newMessage();
 		JointTrajectoryGoal gg=null;
 		try{
-			Log.i("HEAD","moving head to front");
+			Log.i(TAG,"moving head to front");
 			 JointTrajectoryPoint pp=mf.newFromType(JointTrajectoryPoint._TYPE);
 			 gg=mf.newFromType(JointTrajectoryGoal._TYPE);
 			 
@@ -184,7 +198,7 @@ public class HeadControllerGUI implements NodeMain{
 			 gg.getTrajectory().getJointNames().add("head_axis_joint");
 			 my_seq_count++;
 		}catch(Exception e){
-			Log.i("Accompany-GUI-HeadController"," cannot instantiate head message");
+			Log.i(TAG," cannot instantiate head message");
 		}
 		msg.setGoal(gg);
 		p.publish(msg);

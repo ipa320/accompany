@@ -45,6 +45,7 @@ import android.widget.FrameLayout.LayoutParams;
 public class UserView extends AccompanyActivity{
 	
 	protected UserView me;
+	protected boolean toClose;
 	
 	protected final String TAG = "AccompanyGUI-userView";
 	
@@ -207,8 +208,22 @@ public class UserView extends AccompanyActivity{
 				c.drawCircle(x, y, 10, p);
 				iv.setImageBitmap(b);
 				removeAllLabelsFromScreen();
+				/*if (ActionPossibilities!=null)
+					if (!ActionPossibilities.isEmpty()) 
+					{
+						showLabels();
+						Log.e(TAG,"labels shown from view tree");
+					}*/
 				if (ActionPossibilities!=null)
-					if (!ActionPossibilities.isEmpty()) showLabels();
+				{
+					try{
+						sendRequest();
+					}
+					catch(Exception e)
+					{
+						Log.e(TAG,"Problem connecting to Database... cannot load APs!");
+					}
+				}
 					
 				UserView.this.vto=UserView.this.container_layout.getViewTreeObserver();
 				vto.removeOnPreDrawListener(UserView.this.pdl);
@@ -255,7 +270,8 @@ public class UserView extends AccompanyActivity{
 	@Override
 	public void onResume()
 	{
-		Log.i("AccompanyGUI","on resume userView");
+		Log.i(TAG,"on resume userView");
+		toClose=true;
 		super.onResume();
 		if (myApp.mSerialDevice==null)
 		{
@@ -328,6 +344,12 @@ public class UserView extends AccompanyActivity{
         showLabels();
         
         container_layout.addView(my_layout);
+        
+        my_layout.setOnClickListener(new View.OnClickListener() {			
+			@Override
+			public void onClick(View v) {
+				resetAllActionsPossibilities();
+			}		});	
         //my_layout.invalidate();container_layout.invalidate();
         //container_layout.requestLayout();my_layout.requestLayout();
         Log.e(TAG," all added to layout!");
@@ -457,6 +479,9 @@ public class UserView extends AccompanyActivity{
 	//Switching to robot view (on banners clicks), the robot view activity is launched:
 	public void switchToRobotView()
 	{
+		if (pd!=null) pd.dismiss();
+		pd= ProgressDialog.show(this,this.getResources().getString(R.string.app_name),this.getResources().getString(R.string.load_images));
+		toClose=false;
 		myApp.StartSubscribing();
 		final Intent intent = new Intent().setClass(UserView.this.me, RobotView.class);
 		UserView.this.startActivity(intent);
@@ -466,7 +491,10 @@ public class UserView extends AccompanyActivity{
 	//Switching to the "Robot executing command" view, (called when a Button,i.e. command, is pressed)
 	public void showRobotExecutingCommandView(String phrase)
 	{
-		Log.i("123","user - RobotShowExecutingCommandView start...");
+		if (pd!=null) pd.dismiss();
+		pd= ProgressDialog.show(this,this.getResources().getString(R.string.app_name),this.getResources().getString(R.string.load_images));
+		toClose=false;
+		Log.i(TAG,"user - RobotShowExecutingCommandView start...");
 		if (myApp.st!=null) myApp.st.setMode(false);
 		myApp.StartSubscribing();
 		myApp.robotBusy();
@@ -478,7 +506,10 @@ public class UserView extends AccompanyActivity{
 	
 	public void showRobotExecutingCommandView()
 	{
-		Log.i("123","user - RobotShowExecutingCommandView start...");
+		if (pd!=null) pd.dismiss();
+		pd= ProgressDialog.show(this,this.getResources().getString(R.string.app_name),this.getResources().getString(R.string.load_images));
+		toClose=false;
+		Log.i(TAG,"user - RobotShowExecutingCommandView start...");
 		if (myApp!=null) if (myApp.st!=null) myApp.st.setMode(false);
 		myApp.StartSubscribing();
 		myApp.robotBusy();
@@ -565,15 +596,7 @@ public class UserView extends AccompanyActivity{
 					@Override
 					public void onClick(View v) {
 						popupWindow.dismiss();	
-						if (pd!=null) pd.dismiss();
-						pd= ProgressDialog.show(UserView.this,UserView.this.getResources().getString(R.string.gui_title),
-								"Closing application. Please wait...");
-						pd.setCancelable(false);
-						closeHandler.postDelayed(new Runnable(){
-							@Override
-							public void run() {
-								myApp.closeApp();
-							}}, 250);
+						closeApp();
 					}
 				});
 	       	yes.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -608,6 +631,7 @@ public class UserView extends AccompanyActivity{
 	    sett_btn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				toClose=false;
 				myApp.setSettings();
 				Intent settingsIntent = new Intent(UserView.this,
 	    				Settings.class);
@@ -618,6 +642,7 @@ public class UserView extends AccompanyActivity{
 	    act_btn.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				toClose=false;
 				final Intent intent = new Intent().setClass(UserView.this.me, ActionsListView.class);
 				UserView.this.startActivity(intent);
 				finish();
@@ -761,4 +786,34 @@ public class UserView extends AccompanyActivity{
 	}
 	
 
+	public void closeApp()
+	{
+		if (pd!=null) pd.dismiss();
+		pd= ProgressDialog.show(UserView.this,UserView.this.getResources().getString(R.string.gui_title),
+				"Closing application. Please wait...");
+		pd.setCancelable(false);
+		closeHandler.postDelayed(new Runnable(){
+			@Override
+			public void run() {
+				myApp.closeApp();
+			}}, 250);
+	}
+	
+	public void checkClosure()
+	{
+		if (toClose)
+		{
+			Log.w(TAG,"Closing app...");
+			Log.v(TAG,"Received pause request from something external to the app.");
+			closeApp();//myApp.closeApp();
+		}
+	}
+	
+	@Override
+	public void onPause()
+	{
+		Log.v(TAG,"On pause...");
+		checkClosure();
+		super.onPause();
+	}
 }

@@ -20,6 +20,9 @@ namespace enc = sensor_msgs::image_encodings;
 #define MAX_HEAD_POS 0.0001
 #define MIN_HEAD_POS -3.1417
 
+#define COB_3_2 0
+#define COB_3_6 1
+
 //image rate constants
 #define RATE 4        // 3 limit number on my netWork in Siena
 
@@ -31,6 +34,9 @@ namespace enc = sensor_msgs::image_encodings;
 #define DEFAULT_OUTPUT_TOPIC "accompany/GUIimage"
 #define DEFAULT_INPUT_TOPIC "/stereo/left/image_color"
 #define DEFAULT_HEAD_TOPIC "head_controller/command"
+
+//Cob version (defines the rotation)
+int cob_version= COB_3_6;
 
 //Image & image_transports stuffs 
 IplImage* last_img;
@@ -87,27 +93,57 @@ void image_callback(const sensor_msgs::ImageConstPtr& msg)
 			cvResize(last_img, tmp_img);
 			if (head_position>(-(MAX_HEAD_POS-MIN_HEAD_POS)/2))//<
                         { 
-			    //printf("+++ rotating, head pos: %f\n",head_position);
-			    IplImage* tmp_img_2 = cvCreateImage(size, last_img->depth, last_img->nChannels);
-                            CvPoint2D32f pivot = cvPoint2D32f(half_width,half_heigth);
-                            CvMat* rot_mat=cvCreateMat(2,3,CV_32FC1);
-                            cv2DRotationMatrix(pivot,180,1,rot_mat);
-                            cvWarpAffine(tmp_img,tmp_img_2,rot_mat);
-			    //sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img_2,"bgr8");
-			    //pub.publish(msg);
+			    if (cob_version==COB_3_6)
+			    {
+				    //printf("+++ rotating, head pos: %f\n",head_position);
+				    IplImage* tmp_img_2 = cvCreateImage(size, last_img->depth, last_img->nChannels);
+		                    CvPoint2D32f pivot = cvPoint2D32f(half_width,half_heigth);
+		                    CvMat* rot_mat=cvCreateMat(2,3,CV_32FC1);
+		                    cv2DRotationMatrix(pivot,180,1,rot_mat);
+		                    cvWarpAffine(tmp_img,tmp_img_2,rot_mat);
+				    //sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img_2,"bgr8");
+				    //pub.publish(msg);
 
-			    ppp->image=tmp_img_2;
-			    pub.publish(ppp->toImageMsg());
+				    ppp->image=tmp_img_2;
+				    pub.publish(ppp->toImageMsg());
 
-			    cvReleaseImage(&tmp_img_2);
+				    cvReleaseImage(&tmp_img_2);
+			    }
+			    else
+			    {
+				    //printf("+++ normal, head pos: %f",head_position);
+				    //sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img,"bgr8");
+				    //pub.publish(msg);
+	  			    ppp->image=tmp_img;
+				    pub.publish(ppp->toImageMsg());
+			    }
                         }
                         else
 			{
-			    //printf("+++ normal, head pos: %f",head_position);
-			    //sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img,"bgr8");
-			    //pub.publish(msg);
-  			    ppp->image=tmp_img;
-			    pub.publish(ppp->toImageMsg());
+				if (cob_version==COB_3_6)
+	                        {
+			    		//printf("+++ normal, head pos: %f",head_position);
+			    		//sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img,"bgr8");
+			    		//pub.publish(msg);
+  			    		ppp->image=tmp_img;
+			    		pub.publish(ppp->toImageMsg());
+				}
+				else
+				{
+				    //printf("+++ rotating, head pos: %f\n",head_position);
+				    IplImage* tmp_img_2 = cvCreateImage(size, last_img->depth, last_img->nChannels);
+		                    CvPoint2D32f pivot = cvPoint2D32f(half_width,half_heigth);
+		                    CvMat* rot_mat=cvCreateMat(2,3,CV_32FC1);
+		                    cv2DRotationMatrix(pivot,180,1,rot_mat);
+		                    cvWarpAffine(tmp_img,tmp_img_2,rot_mat);
+				    //sensor_msgs::ImagePtr msg = sensor_msgs::CvBridge::cvToImgMsg(tmp_img_2,"bgr8");
+				    //pub.publish(msg);
+
+				    ppp->image=tmp_img_2;
+				    pub.publish(ppp->toImageMsg());
+
+				    cvReleaseImage(&tmp_img_2);
+				}
 			}
                         cvReleaseImage(&tmp_img);
 			count=0;
@@ -126,7 +162,7 @@ void head_callback(const pr2_controllers_msgs::JointTrajectoryControllerState::C
 {
 	pr2_controllers_msgs::JointTrajectoryControllerState traj= *msg;
 	double a=traj.actual.positions[0];
-	printf("new head position: %f\n",a);
+	//printf("new head position: %f\n",a);
 	head_position=a;
 }
 
@@ -149,6 +185,15 @@ int main(int argc, char** argv)
 	while(infile >> param >> value)
 	{
 		//std::cout << "param: " << param << ", value: " << value <<"\n";
+		if (param=="cob_version")
+		{
+			/*const char * c_val=value.c_str();
+			if (strcmp(c_val,"cob3-6")==0||strcmp(c_val,"cob_3_6")==0||strcmp(c_val,"cob3_6")==0||strcmp(c_val,"cob-3-6")==0) cob_version==COB_3_6;
+			if (strcmp(c_val,"cob3-2")==0||strcmp(c_val,"cob_3_2")==0||strcmp(c_val,"cob3_2")==0||strcmp(c_val,"cob-3-2")==0) cob_version==COB_3_2;
+			printf("tmp cob version: %s\n",c_val);*/
+			if (value=="cob3-6"||value=="cob_3_6"||value=="cob3-6"||value=="cob-3-6") cob_version=COB_3_6;
+			if (value=="cob3-2"||value=="cob_3_2"||value=="cob3-2"||value=="cob-3-2") cob_version=COB_3_2;
+		}
 		if (param=="image_width")
 		{
 			sscanf(value.c_str(), "%d", &width);
@@ -174,6 +219,10 @@ int main(int argc, char** argv)
 			sscanf(value.c_str(), "%d", &sampling_rate);
 		}
 	}
+	if (cob_version== COB_3_6)		
+		std::cout <<"Cob version: cob 3-6\n";
+	else
+		std::cout <<"Cob version: cob 3-2\n";
 	std::cout <<"Width:" <<width <<", Heigth:"<<heigth<<"\n";
 	std::cout <<"Input topic: " <<input_topic<<"\n";
 	std::cout <<"Output topic: " <<output_topic<<"\n";
@@ -203,6 +252,21 @@ int main(int argc, char** argv)
         std::cout << "Downsizing images to "<<width<<"x"<<heigth<<"\n";
 	std::cout << "Cutting image frequency with "<<sampling_rate <<" ratio.\n";
 	std::cout << "Images Republisher started...\n"	;
+
+	//try to get robot version from environment
+	try{
+		std::cout << "Running robot: " << getenv("ROBOT") << "\n";
+		std::string cob_run = getenv("ROBOT");
+		if (cob_run=="cob3-2") cob_version=COB_3_2;
+		if (cob_run=="cob3-6") cob_version=COB_3_6;
+	}catch(const std::exception e)
+	{
+		std::cout << "Exception retriving running robot version: " << e.what() << "\n"; 
+	}
+	catch(...)
+	{
+		std::cout << "Generic exception retriving runninbg robot version: unknown.\n";
+	}
 
 	ros::spin();
 	/*ros::Rate loop_rate(0.2);

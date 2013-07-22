@@ -2,6 +2,7 @@ package it.unisi.accompany.activities;
 
 import it.unisi.accompany.AccompanyGUIApp;
 import it.unisi.accompany.AccompanyPreferences;
+import it.unisi.accompany.threads.DrawingThread;
 import it.unisi.accompany.threads.MaskAnimationThreadWorking;
 import it.unisi.accompany.R;
 import android.app.Activity;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.graphics.drawable.AnimationDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -18,8 +18,9 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsoluteLayout;
@@ -33,16 +34,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.FrameLayout.LayoutParams;
 
-public class RobotWorkingView extends Activity {
+@SuppressWarnings("deprecation")
+public class RobotWorkingView extends Activity implements SurfaceHolder.Callback{
 	
 	protected final String TAG = "Accomapny GUI - working view";
 	
 	protected AccompanyGUIApp myApp;
 	protected RobotWorkingView me;
+	protected boolean toClose;
 	
 	protected AbsoluteLayout my_layout;
-	public ImageView image;
-	public ImageView mask,mask1,mask2,mask3,mask4,mask5,mask6,mask7,maskF;
+	public SurfaceView image;
+	public ImageView mask,mask1,mask2,mask3,mask4,mask5,mask6,mask7,maskF;//,mask9,mask10;
+	//public ImageView mask1s,mask2s,mask3s,mask4s,mask5s,mask6s,mask7s,mask8s;
+
 	
 	protected PopupWindow popupWindow;
 	protected AccompanyPreferences myPreferences;
@@ -65,17 +70,20 @@ public class RobotWorkingView extends Activity {
 	
 	protected ProgressDialog pdd = null;
 	
+	protected DrawingThread myThread;
+	public int screen_w,screen_h;
+	protected SurfaceHolder holder;
+	
 	@Override
-	public void onCreate(Bundle savedInstanceState)
+	public void onCreate(Bundle savedInstanceState) 
 	{
 		//standrd things
 		super.onCreate(savedInstanceState);
-		this.setContentView(R.layout.robot_working_view);
+		this.setContentView(R.layout.new_rww);
 		
 		//recovering the application that owns this activity
-		//and setting the activity variable
+		//and setting the activity variable -->LATER TO AVOID CRASHES
 		myApp=(AccompanyGUIApp)this.getApplication();
-		myApp.setRobotWorkingView(this);
 		me=this;
 		
 		//bring camera to front
@@ -93,9 +101,12 @@ public class RobotWorkingView extends Activity {
 			StrictMode.setThreadPolicy(policy);
 		}
 		
-		image=(ImageView)this.findViewById(R.id.robot_working_image_view);
+		image=(SurfaceView)this.findViewById(R.id.robot_working_image_view);
+		holder = image.getHolder();
+		holder.addCallback(this);
+		
 		try{
-			image.setImageBitmap(myApp.getLastImage());
+			//image.setImageBitmap(myApp.getLastImage());
 		}catch(Exception e)
 		{
 			Log.w(TAG,"Attention: null robot image when going in working view!");
@@ -110,6 +121,16 @@ public class RobotWorkingView extends Activity {
 		mask6=(ImageView)this.findViewById(R.id.mask_basic_working6);
 		mask7=(ImageView)this.findViewById(R.id.mask_basic_working7);
 		maskF=(ImageView)this.findViewById(R.id.mask_basic_workingF);
+		//mask9=(ImageView)this.findViewById(R.id.mask_basic_working9);
+		//mask10=(ImageView)this.findViewById(R.id.mask_basic_working10);
+		/*mask1s=(ImageView)this.findViewById(R.id.mask_basic_1s);
+		mask2s=(ImageView)this.findViewById(R.id.mask_basic_2s);
+		mask3s=(ImageView)this.findViewById(R.id.mask_basic_3s);
+		mask4s=(ImageView)this.findViewById(R.id.mask_basic_4s);
+		mask5s=(ImageView)this.findViewById(R.id.mask_basic_5s);
+		mask6s=(ImageView)this.findViewById(R.id.mask_basic_6s);
+		mask7s=(ImageView)this.findViewById(R.id.mask_basic_7s);
+		mask8s=(ImageView)this.findViewById(R.id.mask_basic_8s);*/
 		
 		opt_menu=(ImageButton)this.findViewById(R.id.optmenu);
 	    opt_menu.setOnClickListener(new View.OnClickListener() {
@@ -125,44 +146,47 @@ public class RobotWorkingView extends Activity {
 		Log.i("AccompanyGUI","on create robotWorkingView");
 		myApp.setRunningActivity(myApp.EXECUTE_VIEW);
 		
-		//select the correct inital mask
-		setMask();
+		animationHandler= new Handler();
+	//	main_layout.addView(runningAction);
+        
+        //finally we register the activity on the app to be sure that everything is loaded and avoid crashes
+        myApp.setRobotWorkingView(me);//this);
+        
 		runningAction=(Button)this.findViewById(R.id.current_working_action);
 		runningAction.setText(myApp.getCurrentTask());	
 		runningAction.startAnimation(AnimationUtils.loadAnimation(this, R.anim.rotation));
-	//	main_layout.addView(runningAction);
-		
-		animationHandler= new Handler();
-        mt=new MaskAnimationThreadWorking(animationHandler, this);
-        mt.start();
 	}
 	
 	@Override
 	public void onRestart()
 	{
 		super.onRestart();
-		mt.continueRun();
 	}
 	
 	@Override
 	public void onResume()
 	{
 		super.onResume();
-		//mt.continueRun();
+        mt=new MaskAnimationThreadWorking(animationHandler, me);//this);
+        mt.start();
+    	//select the correct inital mask
+		setMask();
+		toClose=true;
+		if (myThread!=null) myThread.restart();
 	}
 	
 	public void refreshImage(Bitmap b)
 	{
-		image.setImageBitmap(b);
+//		image.setImageBitmap(b);
 	}
 	
-	public void refreshImage2(Bitmap b, Matrix m)
+	/*public void refreshImage2(Bitmap b, Matrix m)
 	{
 		image.setImageBitmap(b);
 		image.setImageMatrix(m);
 		my_matrix=m;
 		image.invalidate();
-	}
+	}*/
 	
 	//Toast to send a short message on  the screen
 	public Toast toastMessage(String msg)
@@ -179,8 +203,10 @@ public class RobotWorkingView extends Activity {
 	//to switch to the user view we need to launch the correct activity
 	public void switchToUserView()
 	{
-		mt.pause();
+		mt.terminate();
+		toClose=false;
 		myApp.stopSubscribing();
+		myApp.setDrawingThread(null);
 		final Intent intent = new Intent().setClass(RobotWorkingView.this.me, UserView.class);
 		RobotWorkingView.this.startActivity(intent);
 		finish();
@@ -189,7 +215,9 @@ public class RobotWorkingView extends Activity {
 	//Switching to robot view (on banners clicks), the robot view activity is launched:
 	public void switchToRobotView()
 	{
-		mt.pause();
+		mt.terminate();
+		toClose=false;
+		myApp.setDrawingThread(null);
 		final Intent intent = new Intent().setClass(RobotWorkingView.this.me, RobotView.class);
 		RobotWorkingView.this.startActivity(intent);
 		finish();
@@ -198,8 +226,10 @@ public class RobotWorkingView extends Activity {
 	//Switching to robot view (on banners clicks), the robot view activity is launched:
 	public void switchToActionsList()
 	{
-		mt.pause();
+		mt.terminate();
 		myApp.stopSubscribing();
+		toClose=false;
+		myApp.setDrawingThread(null);
 		final Intent intent = new Intent().setClass(RobotWorkingView.this.me, ActionsListView.class);
 		RobotWorkingView.this.startActivity(intent);
 		finish();
@@ -208,9 +238,17 @@ public class RobotWorkingView extends Activity {
 	@Override
 	public void onDestroy()
 	{
+		Log.e(TAG,"destroying...");
 		if (pdd!=null) pdd.dismiss();
 		if (menu!=null) menu.dismiss();
-		mt.terminate();
+		if (mt!=null) 
+		{
+			try{
+				mt.join();
+			}catch(Exception e){
+				Log.e(TAG,"Cannot join mask thread...");
+			}
+		}
 		super.onDestroy();
 	}
 	
@@ -349,15 +387,7 @@ public class RobotWorkingView extends Activity {
 					@Override
 					public void onClick(View v) {
 						popupWindow.dismiss();	
-						if (pdd!=null) pdd.dismiss();
-						pdd= ProgressDialog.show(RobotWorkingView.this, RobotWorkingView.this.getResources().getString(R.string.gui_title),
-								"Closing application. Please wait...");
-						pdd.setCancelable(false);
-						animationHandler.postDelayed(new Runnable(){
-							@Override
-							public void run() {
-								myApp.closeApp();
-							}}, 250);
+						closeApp();
 					}
 				});
 	       	yes.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -412,6 +442,7 @@ public class RobotWorkingView extends Activity {
 	protected void setMask()
 	{
 		int ans=myApp.getCurrentExpression();
+		if (ans!=-1 && mt!=null) mt.setSqueezed(8);
 		switch(ans)
 		{
 			case 0:
@@ -500,17 +531,100 @@ public class RobotWorkingView extends Activity {
 				mask.setVisibility(View.INVISIBLE);
 				maskF.setVisibility(View.VISIBLE);
 				break;
+			/*case -1: //special case for squeeze
+				mask1.setBackgroundResource(R.drawable.basic_squeeze_one);
+				mask2.setBackgroundResource(R.drawable.basic_squeeze_two);
+				mask3.setBackgroundResource(R.drawable.basic_squeeze_three);
+				mask4.setBackgroundResource(R.drawable.basic_squeeze_four);
+				mask5.setBackgroundResource(R.drawable.basic_squeeze_five);
+				mask6.setBackgroundResource(R.drawable.basic_squeeze_six);
+				mask7.setBackgroundResource(R.drawable.basic_squeeze_seven);
+				maskF.setBackgroundResource(R.drawable.basic_squeeze_eight);
+				switch (myApp.emp_client.getLastSqueezeSpeed())
+				{
+					case 1:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask1.setVisibility(View.VISIBLE);
+						mt.setSqueezed(1);
+					} break;
+					case 2:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask2.setVisibility(View.VISIBLE);
+						mt.setSqueezed(2);
+					} break;
+					case 3:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask3.setVisibility(View.VISIBLE);
+						mt.setSqueezed(3);
+					} break;
+					case 4:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask4.setVisibility(View.VISIBLE);
+						mt.setSqueezed(4);
+					} break;
+					case 5:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask5.setVisibility(View.VISIBLE);
+						mt.setSqueezed(5);
+					} break;
+					case 6:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask6.setVisibility(View.VISIBLE);
+						mt.setSqueezed(6);
+					} break;
+					case 7:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask7.setVisibility(View.VISIBLE);
+						mt.setSqueezed(7);
+					} break;
+					case 9:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask9.setVisibility(View.VISIBLE);
+						mt.setSqueezed(9);
+					} break;
+					case 10:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						mask10.setVisibility(View.VISIBLE);
+						mt.setSqueezed(10);
+					} break;
+					default:
+					{
+						mask.setVisibility(View.INVISIBLE);
+						maskF.setVisibility(View.VISIBLE);
+						mt.setSqueezed(8);
+					} break;
+				}*/
 			default:
 				break;
 		}
 	}
 	
-	 public void switchMask(int b, int a)
+	 public int switchMask(int b, int a)
 	    {
 	    	
-	    	if (a==b) return;
+			if (a==b) 
+	    	{
+	    		if (a!=-1)
+	    			return 1;
+	    		else
+	    		{
+	    			Log.v(TAG,"Squeeze intensity variation");
+	    			return mt.specialShot(myApp.emp_client.getLastSqueezeSpeed());
+	    		}
+	    	}
 	    	if (b==0) //se siamo in basic
 	    	{
+	    		//reset squueze to normal value
+	    		mt.setSqueezed(8);
 	    		mt.resetLoad();
 	    		int delay=10;
 	    		switch(a)
@@ -914,106 +1028,71 @@ public class RobotWorkingView extends Activity {
 							}
 						}, delay*7);
 	    				break;
+	    			/*case -1:
+	    				mask1.post(new Runnable(){
+							@Override
+							public void run() {
+								mask1.setBackgroundResource(R.drawable.basic_squeeze_one);
+								mt.imageLoaded(1);
+							}});
+	    				mask2.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask2.setBackgroundResource(R.drawable.basic_squeeze_two);
+								mt.imageLoaded(2);
+							}
+						}, delay);
+	    				mask3.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask3.setBackgroundResource(R.drawable.basic_squeeze_three);
+								mt.imageLoaded(3);
+							}
+						}, delay*2);
+	    				mask4.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask4.setBackgroundResource(R.drawable.basic_squeeze_four);
+								mt.imageLoaded(4);
+							}
+						}, delay*3);
+	    				mask5.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask5.setBackgroundResource(R.drawable.basic_squeeze_five);
+								mt.imageLoaded(5);
+							}
+						}, delay*4);
+	    				mask6.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask6.setBackgroundResource(R.drawable.basic_squeeze_six);
+								mt.imageLoaded(6);
+							}
+						}, delay*5);
+	    				mask7.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								mask7.setBackgroundResource(R.drawable.basic_squeeze_seven);
+								mt.imageLoaded(7);
+							}
+						}, delay*6);
+	    				maskF.postDelayed(new Runnable() {
+							@Override
+							public void run() {
+								maskF.setBackgroundResource(R.drawable.basic_squeeze_eight);
+								mt.imageLoaded(8);
+							}
+						}, delay*7);
+	    				mt.setSqueezed(myApp.emp_client.getLastSqueezeSpeed());
+	    				break;*/
 	    			default: break;
 	    		}
-	    		mt.shot2(false,a);
+	    		return mt.shot2(false,a);
 	    	}
 	    	else //altrimenti
 	    	{
-	    		mt.shot2(true,a);
-	    	}
-	    }
-	
-	 public void switchMaskOld(int b, int a)
-	    {
-	    	
-	    	if (a==b) return;
-	    	if (b==0) //se siamo in basic
-	    	{
-	    		switch(a)
-	    		{
-	    			case 1:
-	    				mask1.setBackgroundResource(R.drawable.basic_sadness_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_sadness_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_sadness_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_sadness_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_sadness_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_sadness_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_sadness_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_sadness);
-	    				break;
-	    			case 2:
-	    				mask1.setBackgroundResource(R.drawable.basic_fear_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_fear_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_fear_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_fear_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_fear_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_fear_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_fear_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_fear);
-	    				break;
-	    			case 3:
-	    				mask1.setBackgroundResource(R.drawable.basic_disgust_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_disgust_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_disgust_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_disgust_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_disgust_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_disgust_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_disgust_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_disgust);
-	    				break;
-	    			case 4:
-	    				mask1.setBackgroundResource(R.drawable.basic_surprise_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_surprise_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_surprise_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_surprise_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_surprise_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_surprise_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_surprise_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_surprise);
-	    				mask.setVisibility(View.INVISIBLE);
-	    				maskF.setVisibility(View.VISIBLE);
-	    				break;
-	    			case 5:
-	    				mask1.setBackgroundResource(R.drawable.basic_angry_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_angry_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_angry_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_angry_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_angry_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_angry_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_angry_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_angry);
-	    				mask.setVisibility(View.INVISIBLE);
-	    				maskF.setVisibility(View.VISIBLE);
-	    			case 6:
-	    				mask1.setBackgroundResource(R.drawable.basic_joy_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_joy_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_joy_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_joy_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_joy_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_joy_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_joy_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_joy);
-	    				mask.setVisibility(View.INVISIBLE);
-	    				maskF.setVisibility(View.VISIBLE);
-	    			case 7:
-	    				mask1.setBackgroundResource(R.drawable.basic_lowbatteries_one);
-	    				mask2.setBackgroundResource(R.drawable.basic_lowbatteries_two);
-	    				mask3.setBackgroundResource(R.drawable.basic_lowbatteries_three);
-	    				mask4.setBackgroundResource(R.drawable.basic_lowbatteries_four);
-	    				mask5.setBackgroundResource(R.drawable.basic_lowbatteries_five);
-	    				mask6.setBackgroundResource(R.drawable.basic_lowbatteries_six);
-	    				mask7.setBackgroundResource(R.drawable.basic_lowbatteries_seven);
-	    				maskF.setBackgroundResource(R.drawable.mask_lowbatteries);
-	    				mask.setVisibility(View.INVISIBLE);
-	    				maskF.setVisibility(View.VISIBLE);
-	    			default: break;
-	    		}
-	    		//mt.shot2(false);
-	    	}
-	    	else //altrimenti
-	    	{
-	    		//mt.shot2(true);
+	    		return mt.shot2(true,a);
 	    	}
 	    }
 	
@@ -1046,5 +1125,59 @@ public class RobotWorkingView extends Activity {
         	} break;
     	}
     }
+
+	@Override
+	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+			int height) {
+		// do nothing x ora
+	}
+
+	@Override
+	public void surfaceCreated(SurfaceHolder holder) {
+		myThread=new DrawingThread(holder);
+		myThread.start();
+		myApp.setDrawingThread(myThread);
+	}
+
+	@Override
+	public void surfaceDestroyed(SurfaceHolder holder) {
+		myThread.stopDraw();
+		try {
+			myThread.join();
+		} catch (InterruptedException e) {
+			Log.e(TAG, "Thread stop problem!");
+		}
+	}
 	
+	@Override
+	public void onPause()
+	{
+		if (myThread!=null) myThread.pause();
+		checkClosure();
+		super.onPause();
+		Log.i(TAG,"on pause");
+	}
+	
+	public void closeApp()
+	{
+		if (pdd!=null) pdd.dismiss();
+		pdd= ProgressDialog.show(RobotWorkingView.this, RobotWorkingView.this.getResources().getString(R.string.gui_title),
+				"Closing application. Please wait...");
+		pdd.setCancelable(false);
+		animationHandler.postDelayed(new Runnable(){
+			@Override
+			public void run() {
+				myApp.closeApp();
+			}}, 250);
+	}
+	
+	public void checkClosure()
+	{
+		if (toClose)
+		{
+			Log.w(TAG,"Closing app...");
+			Log.v(TAG,"Received pause request from something external to the app.");
+			closeApp();//myApp.closeApp();
+		}
+	}
 }

@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	std::cout <<"Output topic: " <<head_output_topic<<"\n";
 	std::cout <<"Sampling rate: "<<sampling_rate<<"\n";
 	
-	ros::init(argc,argv,"Head state downsampler");
+	ros::init(argc,argv,"Head_state_downsampler");
 	ros::NodeHandle nh;
 
 	//reset the counter;

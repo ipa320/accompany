@@ -1,6 +1,7 @@
 package it.unisi.accompany.rosnodes;
 
 import it.unisi.accompany.AccompanyGUIApp;
+import it.unisi.accompany.R;
 import it.unisi.accompany.msgs_and_data.AccompanyAction;
 import it.unisi.accompany.msgs_and_data.AccompanyActionRequest;
 import it.unisi.accompany.msgs_and_data.AccompanyActionResponse;
@@ -21,16 +22,46 @@ import android.util.Log;
 public class EmphasisClient implements NodeMain{
 
 	protected final String TAG ="Accompany GUI - Emphasis (i.e. Squeeze-Me) Client";
+	protected final double MAX_SPEED=1.0;
 	
 	protected ServiceClient<AccompanyActionRequest,AccompanyActionResponse> sc;
 	protected AccompanyGUIApp myApp;
 	
+	protected double last_squeeze_speed;
+	
 	protected final double DEFAULT_SPEED=0.3;
+	//values starting more or less from 0.1 and going up (usually 0.8 is very high)
+	
 	
 	public EmphasisClient(AccompanyGUIApp a)
 	{
 		super();
 		myApp=a;
+		last_squeeze_speed=0.25;
+	}
+	
+	public int getLastSqueezeSpeed()
+	{
+		if (last_squeeze_speed<0.18)
+			return 1;
+		if (last_squeeze_speed<0.26)
+			return 2;
+		if (last_squeeze_speed<0.34)
+			return 3;
+		if (last_squeeze_speed<0.42)
+			return 4;
+		if (last_squeeze_speed<0.50)
+			return 5;
+		if (last_squeeze_speed<0.58)
+			return 6;
+		if (last_squeeze_speed<0.66)
+			return 7;
+		if (last_squeeze_speed<0.74)
+			return 8;
+		if (last_squeeze_speed<0.82)
+			return 9;
+		return 10;
+		
 	}
 	
 	@Override
@@ -56,7 +87,8 @@ public class EmphasisClient implements NodeMain{
 		}catch(Exception e){  //sarebbe ServiceNotFoundException
 			Log.e(TAG,"Error in connecting to Accompany Emphasis Service!");
 			if (sc!=null) sc.shutdown();
-			myApp.closeAppOnError("Cannoct connect to emphaisis server!");
+			myApp.closeAppOnError(myApp.getResources().getString(R.string.registration_error));
+			//myApp.toastMessage("Emphasis server not found!");
 			//throw new RosRuntimeException(e);
 		}
 	}
@@ -66,9 +98,16 @@ public class EmphasisClient implements NodeMain{
 		return GraphName.of("AccompanyGUIEmphasisClient");
 	}
 	
-	public void setEmphasis(final Double speed)
+	public void setEmphasis(Double speed)
 	{
+		//check max
+		if (speed>MAX_SPEED) speed=MAX_SPEED;
 		//sending request to service
+		setEmphasisRequest(speed);
+	}
+	
+	protected void setEmphasisRequest(final Double speed)
+	{
 		if (sc!=null)
 		{
 			AccompanyActionRequest req =sc.newMessage();
@@ -83,7 +122,9 @@ public class EmphasisClient implements NodeMain{
 
 				@Override
 				public void onSuccess(AccompanyActionResponse arg0) {
-					Log.i(TAG,"emphasis set result: "+arg0.getResult());	
+					Log.v(TAG,"emphasis set result: "+arg0.getResult());
+					Log.i(TAG,"squeeze speed setted to: "+speed);	
+					last_squeeze_speed=speed;
 					myApp.db_client.updateEmphasis(speed);
 				}	
 			});
@@ -109,8 +150,10 @@ public class EmphasisClient implements NodeMain{
 
 				@Override
 				public void onSuccess(AccompanyActionResponse arg0) {
-					Log.i(TAG,"emphasis set result: "+arg0.getResult());	
+					Log.v(TAG,"emphasis set result: "+arg0.getResult());	
+					Log.i(TAG,"squeeze speed resetted to: "+DEFAULT_SPEED);	
 					myApp.db_client.updateResetEmphasis(DEFAULT_SPEED);
+					last_squeeze_speed=DEFAULT_SPEED;
 				}	
 			});
 		}

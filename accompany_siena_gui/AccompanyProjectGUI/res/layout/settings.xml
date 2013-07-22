@@ -26,13 +26,21 @@
          android:layout_marginRight="10dp"
          android:layout_below="@+id/settings_title" >      
      </FrameLayout>
-    <RelativeLayout
+     
+     <LinearLayout         
         android:id="@+id/central_layout_settings"
         android:layout_centerInParent="true"
         android:background="@drawable/cornice_transparente"
+        android:layout_width="800dp"
+        android:layout_height="400dp"
+        android:orientation="horizontal">
+        
+   <RelativeLayout
+		android:id="@+id/left_layout_settings"
+        android:background="@android:color/transparent"
         android:layout_width="400dp"
         android:layout_height="400dp"
-        >
+        >    
         
         <TextView android:id ="@+id/master_tv"
         android:layout_width="wrap_content"
@@ -56,6 +64,7 @@
         android:background="@drawable/cornice_bianca"
         android:textSize="20dp"
         android:maxLines="1"
+        android:inputType="text"
         android:textStyle="bold"
         android:layout_marginRight="50dp"
         android:layout_marginTop="5dp"
@@ -63,36 +72,7 @@
         >
         <requestFocus /> </EditText>
         
-        <!-- TextView android:id ="@+id/dbip_tv"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:textSize="20dp"
-        android:layout_below="@+id/master_et"
-        android:layout_alignLeft="@+id/master_et"
-		android:layout_marginTop="5dp"
-        android:text="@string/database_ip"
-        /--><!-- android:layout_centerVertical="true" -->
-        
-    	<!-- EditText
-        android:id="@+id/dbip_et"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:minWidth="250dp"
-        android:layout_below="@+id/dbip_tv"
-        android:layout_alignLeft="@+id/dbip_tv"
-        android:textColor="@android:color/black"
-        android:background="@drawable/cornice_bianca"
-        android:textSize="20dp"
-        android:textStyle="bold"
-        android:maxLines="1"
-        android:layout_marginRight="50dp"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
-        /-->
-   
-        <TextView android:id ="@+id/db_port_tv"
+          <TextView android:id ="@+id/db_port_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
@@ -115,6 +95,7 @@
         android:background="@drawable/cornice_bianca"
         android:textSize="20dp"
         android:maxLines="1"
+        android:inputType="text"
         android:textStyle="bold"
         android:layout_marginRight="50dp"
         android:layout_marginTop="5dp"
@@ -144,11 +125,141 @@
         android:background="@drawable/cornice_bianca"
         android:textSize="20dp"
         android:maxLines="1"
+        android:inputType="text"
         android:textStyle="bold"
         android:layout_marginRight="50dp"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         > </EditText>
+       
+        </RelativeLayout>
+    <!-- Right layout -->
+    <RelativeLayout
+		android:id="@+id/right_layout_settings"
+        android:background="@android:color/transparent"
+        android:layout_width="400dp"
+        android:layout_height="400dp"
+        >     
+        
+        <TextView android:id ="@+id/ap_update_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:layout_marginTop="50dp"
+		android:layout_marginLeft="50dp"
+        android:text="@string/ap_update"
+        />
+        
+         <EditText
+        android:id="@+id/ap_update_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="150dp"
+        android:maxWidth="200dp"
+        android:layout_below="@+id/ap_update_tv"
+        android:layout_alignLeft="@+id/ap_update_tv"
+        android:textColor="@android:color/black"
+        android:background="@drawable/cornice_bianca"
+        android:textSize="20dp"
+        android:maxLines="1"
+        android:inputType="number"
+        android:textStyle="bold"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        > </EditText>
+        
+        <TextView 
+        android:id ="@+id/ap_update_tv_secs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+		android:layout_alignBaseline="@+id/ap_update_et"
+		android:layout_toRightOf="@+id/ap_update_et"
+        android:text="@string/seconds"/>
+        
+         <TextView android:id ="@+id/exp_update_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:layout_below="@+id/ap_update_et"
+		android:layout_marginLeft="50dp"
+        android:text="@string/expression_update"
+        />
+        
+         <EditText
+        android:id="@+id/exp_update_et"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:minWidth="150dp"
+        android:maxWidth="200dp"
+        android:layout_below="@+id/exp_update_tv"
+        android:layout_alignLeft="@+id/exp_update_tv"
+        android:textColor="@android:color/black"
+        android:background="@drawable/cornice_bianca"
+        android:textSize="20dp"
+        android:maxLines="1"
+        android:inputType="number"
+        android:textStyle="bold"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        > </EditText>
+        
+        <TextView 
+        android:id ="@+id/exp_update_tv_secs"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+		android:layout_alignBaseline="@+id/exp_update_et"
+		android:layout_toRightOf="@+id/exp_update_et"
+        android:text="@string/seconds"/>
+        
+        <TextView android:id ="@+id/cob_version_tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:textColor="@android:color/white"
+        android:textSize="20dp"
+        android:layout_below="@+id/exp_update_et"
+		android:layout_marginLeft="50dp"
+        android:text="@string/cob_version"
+        />
+        
+        <RadioGroup android:id="@+id/cob_version_rg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/cob_version_tv"
+        android:layout_centerHorizontal="true"
+        android:orientation="horizontal"
+            >
+        <RadioButton android:id="@+id/cob32_rb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:text="@string/cob32"
+        android:onClick="onVersionChanged"/>
+        <RadioButton android:id="@+id/cob36_rb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cob36"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:onClick="onVersionChanged"/>            
+        </RadioGroup>
         
         <Button
             android:id="@+id/ok_btn_settings"
@@ -167,6 +278,7 @@
             />
         
     </RelativeLayout>
+    </LinearLayout>
     <TextView 
 	    android:id ="@+id/sett_tv"
         android:layout_width="wrap_content"

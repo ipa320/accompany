@@ -72,7 +72,7 @@ public class DatabaseClient {//extends Thread{
 	
 
 	//login request
-	public void login(String user,String pwd)
+	public void login(String user)
 	{
 		RequestParams my_par= new RequestParams();
 		my_par.put("unick",user);
@@ -102,8 +102,8 @@ public class DatabaseClient {//extends Thread{
 						
 						@Override
 						public void run() {
-							Log.e("Accompany GUI - Login reponse","ERROR! - resp: "+response);
-					    	app.toastMessage("Cannot connect to db Host! please check Database Ip and port in settings!");
+							Log.e(TAG,"ERROR! - Login response: "+response);
+					    	app.wrongDbHost();
 						}
 					});
 			    	

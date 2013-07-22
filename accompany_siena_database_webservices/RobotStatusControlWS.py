@@ -235,7 +235,7 @@ class myExpressionThread (threading.Thread):
 	def run(self):
 
 		sensorsIds = {'toiletFlush':'14','dorbell':'59', 'door':'23'}  
-		expressionId = {'basic':1,'sadness':2,'fear':3,'disgust':4,'surprise':5,'anger':6,'joy':7,'low_batteries':8} 		
+		expressionId = {'basic':1,'sadness':2,'fear':3,'disgust':4,'surprise':5,'anger':6,'joy':7,'low_batteries':8,'squeeze':99} 		
 
 		delay=0.5
 		#read the db configuration from file
@@ -261,7 +261,7 @@ class myExpressionThread (threading.Thread):
 	    	f.close()
 
 		while (self._stop.isSet()==False):
-			scores = { 'basic':0.5, 'disgust':0.0, 'fear':0.0, 'sadness':0.0, 'surprise':0.0, 'joy':0.0, 'lowbatteries':0.0, 'angry':0.0 }
+			scores = { 'basic':0.5, 'disgust':0.0, 'fear':0.0, 'sadness':0.0, 'surprise':0.0, 'joy':0.0, 'lowbatteries':0.0, 'anger':0.0, 'squeeze':0.0 }
 			db= MySQLdb.connect(host,usr,pwd,db_name)
 
 			# define here how to change expressions!
@@ -270,19 +270,19 @@ class myExpressionThread (threading.Thread):
 			#TIME MANAGEMENT 
 			# depending on the hour we can improve slightly the sleep (lowbattery), sadness/joy and others expressions
 
-			#cur= db.cursor()   #WATERTOILET EVENT
-			#sql = ('SELECT lastTimeActive FROM Sensors WHERE sensorId=\'%s\''%sensorsIds['toiletFlush'])	
-			#cur.execute(sql);
-			#if cur.rowcount>0:
-			#	watertoiletflushtime=cur.fetchone()[0]
+			cur= db.cursor()   #WATERTOILET EVENT
+			sql = ('SELECT lastTimeActive FROM Sensors WHERE sensorId=\'%s\''%sensorsIds['toiletFlush'])	
+			cur.execute(sql);
+			if cur.rowcount>0:
+				watertoiletflushtime=cur.fetchone()[0]
 				#print watertoiletflushtime 
 				#lastflush= datetime.fromtimestamp(watertoiletflushtime)
-			#	lastflush=watertoiletflushtime
-			#	tdelta= now-lastflush
-			#	seconds=(tdelta.microseconds + ( tdelta.seconds + tdelta.days * 24 *3600 )* 10**6) / 10**6
+				lastflush=watertoiletflushtime
+				tdelta= now-lastflush
+				seconds=(tdelta.microseconds + ( tdelta.seconds + tdelta.days * 24 *3600 )* 10**6) / 10**6
 				#print seconds
-			#	if (seconds<30):    # IF WATER WAS FLUSHED IN THE LAST 30 SECONDS DISGUST SCORES INCREASED BY 1
-			#		scores['disgust']+=1.5
+				if (seconds<30):    # IF WATER WAS FLUSHED IN THE LAST 30 SECONDS DISGUST SCORES INCREASED BY 1
+					scores['disgust']+=1.5
 
 			cur= db.cursor()    #DORBELL EVENT & open door
 			sql = ('SELECT lastTimeActive FROM Sensors WHERE sensorId=\'%s\''%sensorsIds['dorbell'])	
@@ -310,20 +310,20 @@ class myExpressionThread (threading.Thread):
 				#if cur.rowcount==2:
 				#	scores['sadness']+=1.5 #surprise
 				#elif cur.rowcount>3: 
-			if cur.rowcount>3:
-				scores['fear']+=2.5
+			if cur.rowcount>0:
+				scores['squeeze']+=10.0
 
 			cur = db.cursor()   #USER COMMANDS EVENTS
-			sql = ('SELECT id FROM RobotActionsHistory WHERE timestamp > (NOW()-1800)')   #180 - last half hour doing nothing -->sad
-			cur.execute(sql)
-			if cur.rowcount==0:
-				scores['sadness']+=1.0
+			#sql = ('SELECT id FROM RobotActionsHistory WHERE timestamp > (NOW()-1800)')   #180 - last half hour doing nothing -->sad
+			#cur.execute(sql)
+			#if cur.rowcount==0:
+			#	scores['sadness']+=1.0
 
 			#MAX SCORE SELECTED AS NEW EXPRESSION
 			mymax=scores['basic']
 			new='basic'
 			#print 0, new, mymax 
-			for  i, v in enumerate(['disgust','fear','sadness','surprise','joy','lowbatteries','angry']):
+			for  i, v in enumerate(['disgust','fear','sadness','surprise','joy','lowbatteries','anger','squeeze']):
 				#print i, v, scores[v]
 				if (scores[v]>mymax):
 					mymax=scores[v]
@@ -338,7 +338,7 @@ class myExpressionThread (threading.Thread):
 			cur= db.cursor()		
 			sql = ('UPDATE GUIexpression SET ison=\'0\' WHERE id<>\'%s\''%expressionId[new])	
 			cur.execute(sql);
-
+			#print new;
 			time.sleep(delay)
 			
 	def stop(self):
@@ -402,15 +402,15 @@ if __name__ == "__main__":
 	
 	expressionThread = myExpressionThread(1,"ExpressionThread")
 	expressionThread.start()
-	likelihoodThread = myLikelihoodThread(2,"LikelihoodThread")
-	likelihoodThread.start()
+	#likelihoodThread = myLikelihoodThread(2,"LikelihoodThread")
+	#likelihoodThread.start()
  	
 	app = web.application(urls, globals())
 	print "running..."
 	app.run()      
 	print "app stopped"
-	#expressionThread.stop()
-	likelihoodThread.stop()
-	#expressionThread.join()
-	likelihoodThread.join()
+	expressionThread.stop()
+	#likelihoodThread.stop()
+	expressionThread.join()
+	#likelihoodThread.join()
 	print "thread stopped. exit."

@@ -32,6 +32,7 @@ import it.unisi.accompany.widget.actionliststuffs.Action;
 public class ActionPossibilitiesUpdateThread extends Thread{
 	
 	protected final String TAG="AccompanyGUI-ApUpdateThread";
+	protected final int DEFAULT_SLEEPTIME=1000;
 	
 	protected AccompanyGUIApp myApp;
 	protected boolean stop;
@@ -39,11 +40,12 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 	
 	protected Handler myHandler;
 	
-	protected final int sleeptime=5000;
+	protected int sleeptime;
 	protected ArrayList<AP_couple> user_aps,robot_aps,list_aps;
 	
 	protected String last_response;
 	
+	//CONSTRUCTOR -> DEFAULT SLEEPTIME
 	public ActionPossibilitiesUpdateThread(AccompanyGUIApp ma,Handler h,String ip,String port)
 	{
 		super();
@@ -53,11 +55,35 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 		robot_aps= new ArrayList<AP_couple>();
 		list_aps= new ArrayList<AP_couple>();
 		
+		this.sleeptime=DEFAULT_SLEEPTIME;
 		this.stop=false;
 		
 		createBaseUrl(ip,port);
 	}
 	
+	//constructor with sleeptime
+	public ActionPossibilitiesUpdateThread(AccompanyGUIApp ma,Handler h,String ip,String port, int timesleep)
+	{
+		super();
+		this.myApp=ma;
+		this.myHandler=h;
+		user_aps= new ArrayList<AP_couple>();
+		robot_aps= new ArrayList<AP_couple>();
+		list_aps= new ArrayList<AP_couple>();
+		
+		this.sleeptime=timesleep;
+		this.stop=false;
+		
+		createBaseUrl(ip,port);
+	}
+	
+	public void setSleepTime(int st)
+	{
+		Log.v(TAG,"Setting sleeptime: "+st+" (old "+sleeptime+")" );
+		this.sleeptime=st;
+	}
+	
+	//CONSTRUCTOR -> DEFAULT SLEEPTIME
 	public ActionPossibilitiesUpdateThread(AccompanyGUIApp ma,Handler h,String uu)
 	{
 		super();
@@ -68,6 +94,23 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 		list_aps= new ArrayList<AP_couple>();
 		
 		this.stop=false;
+		this.sleeptime=DEFAULT_SLEEPTIME;
+		
+		createBaseUrl(uu);
+	}
+	
+	//CONSTRUCTOR WITH SLEEPTIME
+	public ActionPossibilitiesUpdateThread(AccompanyGUIApp ma,Handler h,String uu, int st)
+	{
+		super();
+		this.myApp=ma;
+		this.myHandler=h;
+		user_aps= new ArrayList<AP_couple>();
+		robot_aps= new ArrayList<AP_couple>();
+		list_aps= new ArrayList<AP_couple>();
+		
+		this.stop=false;
+		this.sleeptime=st;
 		
 		createBaseUrl(uu);
 	}
@@ -138,11 +181,43 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 				}
 			user_aps=news;
 			
+			//ROBOT
+			news= filterAps(getRobotAps());
+			//control of user aps
+			for (int i=0;i<news.size();i++)
+				for (int j=0;j<robot_aps.size();j++)
+					if(robot_aps.get(j).compare(news.get(i)))
+					{
+						robot_aps.get(j).check=true;
+						news.get(i).check=true;
+					}
+			//update of user aps
+			for (int i=0;i<robot_aps.size();i++)
+				if (robot_aps.get(i).check!=true) 
+				{
+					final int idf=robot_aps.get(i).getId();
+					myHandler.post(new Runnable(){
+						@Override
+						public void run() {
+							myApp.removeRobotAp(idf);
+						}});
+				}
+			for (int i=0;i<news.size();i++)
+				if (news.get(i).check!=true) 
+				{
+					final int idf=news.get(i).getId();
+					myHandler.post(new Runnable(){
+						@Override
+						public void run() {
+								myApp.addRobotAp(idf,last_response);
+						}});
+				}
+			robot_aps=news;
 			
 			//se c'è novità allora manda richiesta di refresh alla GUI - > che aggiunge le nuove in coda, mette la flag di rimozione alle altre 
 			//(i.e. toglie se sono in normal, le toglie al prossimo reset se sono selezionate)
 		}
-		Log.e("close","action possibilities update thread");
+		Log.e(TAG,"closing...");
 	}
 	
 	public void halt()
@@ -177,9 +252,9 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 	    	HttpClient hc= new DefaultHttpClient(httpParameters); 
 	    	//HttpPost hp= new HttpPost(url+"full_action_list");
 	    	HttpGet hp=new HttpGet(url+"full_action_list");
-	    	Log.i(TAG,"starting connection for current status...");
+	    	Log.v(TAG,"starting connection for current status...");
 	    	HttpResponse response = hc.execute(hp);
-	    	Log.i(TAG,"Executed the query");
+	    	//Log.v(TAG,"Executed the query");
 	    	HttpEntity entity = response.getEntity();
 	    	is = entity.getContent();
 	    	
@@ -244,11 +319,13 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 	    	HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 	    	
 	    	HttpClient hc= new DefaultHttpClient(httpParameters); 
-	    	HttpPost hp= new HttpPost(url+"robot_actions");
-	    	Log.i(TAG,"starting connection for current status...");
-	    	hp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+	    	String myurl=url+"robot_actions";
+	    	myurl+="?"+URLEncodedUtils.format(nameValuePairs,"utf-8");
+	    	HttpGet hp= new HttpGet(myurl);
+	    	
+	    	Log.v(TAG,"starting connection for current robot aps...");
 	    	HttpResponse response = hc.execute(hp);
-	    	Log.i(TAG,"Executed the query");
+	    	//Log.v(TAG,"Executed the query");
 	    	HttpEntity entity = response.getEntity();
 	    	is = entity.getContent();
 	    	
@@ -317,10 +394,10 @@ public class ActionPossibilitiesUpdateThread extends Thread{
 	    	String myurl=url+"user_actions";
 	    	myurl+="?"+URLEncodedUtils.format(nameValuePairs,"utf-8");
 	    	HttpGet hp= new HttpGet(myurl);
-	    	Log.i(TAG,"starting connection for current status...");
+	    	Log.v(TAG,"starting connection for current status...");
 	    	//hp.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 	    	HttpResponse response = hc.execute(hp);
-	    	Log.i(TAG,"Executed the query");
+	    	//Log.v(TAG,"Executed the query");
 	    	HttpEntity entity = response.getEntity();
 	    	is = entity.getContent();
 	    	

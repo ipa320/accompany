@@ -808,4 +808,30 @@ public class ActionPossibilityWidget extends Button implements View.OnClickListe
 		  this.setClickable(true);
 	  }
 	  
+	  public int getMyX()
+	  {
+		  return my_X;
+	  }
+	  
+	  public int getMyY()
+	  {
+		  return my_Y;
+	  }
+	  
+	  public void refreshIfSelected()
+	  {
+		  if (state!=NORMAL)
+		  {
+			 //AbsoluteLayout.LayoutParams p= (AbsoluteLayout.LayoutParams)this.getLayoutParams();
+			  this.bringToFront();
+			  this.my_blue_circle.bringToFront();
+			  if (options!=null)
+				  for (int i=0;i<options.size();i++)
+				  {
+					  options.get(i).bringToFront();
+					  options.get(i).bringSiblingsToFront();
+				  }
+		  }
+	  }
+	  
 }

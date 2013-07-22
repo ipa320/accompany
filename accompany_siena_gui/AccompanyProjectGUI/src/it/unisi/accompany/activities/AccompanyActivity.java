@@ -195,14 +195,14 @@ public abstract class AccompanyActivity extends Activity{
     @Override
     public void onPause()
     {
-    	Log.i("Accompany-GUI-activity","on pause");
+    	//Log.v("Accompany-GUI-activity","on pause");
     	super.onPause();
     }
 
     @Override 
     public void onBackPressed()
     {
-    	Log.i("Accompany-GUI-activity","on back pressed");
+    	Log.v("Accompany-GUI-activity","on back pressed");
     	super.onBackPressed();
     }
     

@@ -1,5 +1,8 @@
 package it.unisi.accompany.rosnodes;
 
+import it.unisi.accompany.AccompanyGUIApp;
+import it.unisi.accompany.R;
+
 import java.util.Calendar;
 
 import org.ros.exception.RosRuntimeException;
@@ -21,9 +24,6 @@ public class TorsoControllerGUI implements NodeMain{
 	
 	protected final String TAG= "AccompanyGUI-TorsoController";
 	
-	protected final int COB3_2=1;
-	protected final int COB3_6=2;
-	
 	public final double[] max_torso_pos={0.0,0.15,0.0,0.25}; //cob 3-2
 	public final double[] min_torso_pos={0.0,-0.15,0.0,-0.25}; //cob 3-2
 	//public final double[] max_torso_pos={0.10,0.0,0.1499}; //cob 3-3
@@ -38,9 +38,83 @@ public class TorsoControllerGUI implements NodeMain{
 	protected long last_publish;
 	protected Calendar calendar;
 	
-	protected int cob_version=COB3_6;
+	protected int cob_version;
+	protected AccompanyGUIApp myApp;
 	
 	protected boolean shouldBringHome=false;
+	
+	/*public TorsoControllerGUI(int v)
+	{
+		String cv="";
+		if (v==AccompanyGUIApp.COB32) cv="Cob 3-2";
+		else cv="Cob 3-6";
+		Log.v(TAG, "Creating...");
+		Log.v(TAG,"Cob Version --> "+cv);
+		cob_version=v;
+	}*/
+	
+	public TorsoControllerGUI(AccompanyGUIApp a, int v)
+	{
+		myApp=a;
+		String cv="";
+		if (v==AccompanyGUIApp.COB32) cv="Cob 3-2";
+		else cv="Cob 3-6";
+		Log.v(TAG, "Creating...");
+		Log.v(TAG,"Cob Version --> "+cv);
+		cob_version=v;
+	}
+	
+	public void setCobVersion(int v)
+	{
+		//log infos
+		String cv="";
+		if (v==AccompanyGUIApp.COB32) cv="Cob 3-2";
+		else cv="Cob 3-6";
+		Log.v(TAG, "setting Cob Version --> "+cv);
+		
+		//managing different sizes of the vectors for the 2 versions:
+		switch(v)
+		{
+			case AccompanyGUIApp.COB32:
+			{
+				if (cob_version==AccompanyGUIApp.COB36)
+				{
+					double[] oldt = torso_pos;
+					torso_pos= new double[4];
+					torso_pos[0]=oldt[0];
+					torso_pos[1]=oldt[1];
+					torso_pos[2]=oldt[0];
+					torso_pos[3]=oldt[2];
+					oldt= desired_torso_pos;
+					desired_torso_pos= new double[4];
+					desired_torso_pos[0]=oldt[0];
+					desired_torso_pos[1]=oldt[1];
+					desired_torso_pos[2]=oldt[0];
+					desired_torso_pos[3]=oldt[2];
+				}
+			} break;
+			case AccompanyGUIApp.COB36:
+			{
+				if (cob_version==AccompanyGUIApp.COB32)
+				{
+					double[] oldt = torso_pos;
+					torso_pos= new double[3];
+					torso_pos[0]=oldt[0];
+					torso_pos[1]=oldt[1];
+					torso_pos[2]=oldt[3];
+					oldt= desired_torso_pos;
+					desired_torso_pos= new double[3];
+					desired_torso_pos[0]=oldt[0];
+					desired_torso_pos[1]=oldt[1];
+					desired_torso_pos[2]=oldt[3];
+				}
+			} break;
+			default: break;
+		}
+		
+		//real update
+		cob_version=v;
+	}
 	
 	public double[] getTorsoPos()
 	{
@@ -54,7 +128,9 @@ public class TorsoControllerGUI implements NodeMain{
 	
 	@Override
 	public void onError(Node arg0, Throwable arg1) {
-		Log.e("AccompanyGUI-Torso controller","Error: Torso controller error!");
+		Log.e(TAG,"Error: Torso controller error!");
+myApp.closeAppOnError(myApp.getResources().getString(R.string.comunication_error));
+		
 	}
 	@Override
 	public void onShutdown(Node arg0) {
@@ -69,20 +145,38 @@ public class TorsoControllerGUI implements NodeMain{
 	@Override
 	public void onStart(ConnectedNode cn) {
 		try{
-		calendar= Calendar.getInstance();
-		my_seq_count=0;
-		p= cn.newPublisher("torso_controller/command",trajectory_msgs.JointTrajectory._TYPE);
-		mf=cn.getTopicMessageFactory();
+			String cv="";
+			if (cob_version== AccompanyGUIApp.COB32) cv="Cob 3-2";
+			else cv="Cob 3-6";
+			Log.v(TAG,"Starting torso controller, (Cob Version:"+cv+")");
+			calendar= Calendar.getInstance();
+			my_seq_count=0;
+			p= cn.newPublisher("torso_controller/command",trajectory_msgs.JointTrajectory._TYPE);
+			mf=cn.getTopicMessageFactory();
 		}catch(Exception e)
 		{
 			p.shutdown();
+			myApp.toastMessage("Cannot find TorsoController!");
+			myApp.closeAppOnError(myApp.getResources().getString(R.string.registration_error));
 			throw new RosRuntimeException(e);
 		}
-		desired_torso_pos = new double[4];
-		torso_pos= new double[4];
+		if (cob_version== AccompanyGUIApp.COB32)
+		{
+			desired_torso_pos = new double[4];
+			torso_pos= new double[4];
 		
-		for (int h=0;h<4;h++)
-			torso_pos[h]=0.;
+			for (int h=0;h<4;h++)
+				torso_pos[h]=0.;
+			
+		}
+		else
+		{
+			desired_torso_pos = new double[3];
+			torso_pos= new double[3];
+		
+			for (int h=0;h<3;h++)
+				torso_pos[h]=0.;
+		}
 		
 		if (shouldBringHome)
 		{
@@ -97,8 +191,9 @@ public class TorsoControllerGUI implements NodeMain{
 
 	public void publish(double difference)
 	{
+		Log.v(TAG,"Publishing: "+difference);
 		trajectory_msgs.JointTrajectory msg= p.newMessage();
-		if (cob_version==COB3_2)
+		if (cob_version==AccompanyGUIApp.COB32)
 		{
 			msg.getJointNames().add("torso_lower_neck_pan_joint");
 			msg.getJointNames().add("torso_lower_neck_tilt_joint");
@@ -129,7 +224,7 @@ public class TorsoControllerGUI implements NodeMain{
 				 d.nsecs=0;
 				 pp.setTimeFromStart(d);
 				 msg.getPoints().add(pp);
-				 msg.getHeader().setSeq(my_seq_count);
+				 //msg.getHeader().setSeq(my_seq_count);
 				 my_seq_count++;
 		}
 		else  //cob 3-6
@@ -154,7 +249,7 @@ public class TorsoControllerGUI implements NodeMain{
 					 desired_torso_pos[2]=max_torso_pos[2];
 				 a[0]=torso_pos[0];
 				 a[1]=desired_torso_pos[1];
-				 a[2]=torso_pos[2];
+				 a[2]=desired_torso_pos[2];
 				 pp.setPositions(a);
 				 
 				 Duration d= new Duration();
@@ -162,8 +257,8 @@ public class TorsoControllerGUI implements NodeMain{
 				 d.nsecs=0;
 				 pp.setTimeFromStart(d);
 				 msg.getPoints().add(pp);
-				 msg.getHeader().setSeq(my_seq_count);
-				 my_seq_count++;
+				 //msg.getHeader().setSeq(my_seq_count);
+				 //my_seq_count++;
 		}
 	    p.publish(msg);
 		last_publish= calendar.getTimeInMillis();
@@ -171,10 +266,11 @@ public class TorsoControllerGUI implements NodeMain{
 	
 	public void bringHome()
 	{
+		Log.v(TAG,"Torso --> Home");
 		if (p!=null)
 		{
 			trajectory_msgs.JointTrajectory msg= p.newMessage();
-			if (cob_version==COB3_2)
+			if (cob_version==AccompanyGUIApp.COB32)
 			{
 				msg.getJointNames().add("torso_lower_neck_pan_joint");
 				msg.getJointNames().add("torso_lower_neck_tilt_joint");
@@ -193,7 +289,7 @@ public class TorsoControllerGUI implements NodeMain{
 				d.nsecs=0;
 				pp.setTimeFromStart(d);
 				msg.getPoints().add(pp);
-				msg.getHeader().setSeq(my_seq_count);
+				//msg.getHeader().setSeq(my_seq_count);
 				my_seq_count++;
 			}
 			else //cob 3-6
@@ -213,8 +309,8 @@ public class TorsoControllerGUI implements NodeMain{
 				d.nsecs=0;
 				pp.setTimeFromStart(d);
 				msg.getPoints().add(pp);
-				msg.getHeader().setSeq(my_seq_count);
-				my_seq_count++;
+				//msg.getHeader().setSeq(my_seq_count);
+				//my_seq_count++;
 			}
 			 
 			

@@ -29,6 +29,7 @@
     
     <!-- User View Strings -->
     <string name="switch_to_robot_view_btn">user</string>
+    <string name="load_images">Loading&#8230;\nPlease wait&#8230;</string>
     
     <!-- Actions List View Strings -->
     <string name="actions_list_title">Actions list</string>
@@ -45,6 +46,12 @@
     <string name="status_port">Robot status control port:</string>
     <string name="database_url">Database url:</string>
     <string name="status_url">Robot status control url:</string>
+    <string name="cob_version">Cob version:</string>
+    <string name="cob32">Cob 3&#8211;2</string>
+    <string name="cob36">Cob 3&#8211;6</string>
+    <string name="ap_update">Update Action Possibilities every:</string>
+    <string name="expression_update">Update Expression every:</string>
+    <string name="seconds"> secs</string>
     
     <!-- Options menu strings -->
     <string name="opt_menu_action_list_button">Action List</string>
@@ -56,4 +63,8 @@
     <string name="are_you_sure_question">Are you sure?</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
+    
+    <!-- Error Management Strings -->
+    <string name="comunication_error">Error! Cannot comunicate with ROS Master. \n Closing&#8230;</string>
+    <string name="registration_error">Error! Cannot registrate node on ROS Master. \n Closing&#8230;</string>
 </resources>

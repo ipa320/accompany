@@ -1,5 +1,7 @@
 package it.unisi.accompany.rosnodes;
 
+import it.unisi.accompany.AccompanyGUIApp;
+import it.unisi.accompany.R;
 import geometry_msgs.Vector3;
 
 import org.ros.RosCore;
@@ -16,10 +18,18 @@ import android.util.Log;
 public class CmdVelocityPublisher implements NodeMain{
 
 	protected Publisher<geometry_msgs.Twist> p;
+	protected AccompanyGUIApp myApp;
+	
+	
+	public CmdVelocityPublisher(AccompanyGUIApp a)
+	{
+		myApp=a;
+	}
 	
 	@Override
 	public void onError(Node arg0, Throwable arg1) {
 		Log.e("Cmd_vel Accompany","Error!!");
+		myApp.closeAppOnError(myApp.getResources().getString(R.string.comunication_error));
 	}
 
 	@Override
@@ -47,6 +57,8 @@ public class CmdVelocityPublisher implements NodeMain{
 		}catch(Exception e)
 		{
 			p.shutdown();
+			myApp.closeAppOnError(myApp.getResources().getString(R.string.registration_error));
+			myApp.toastMessage("Base controller not found!");
 		}
 	
 		

@@ -12,6 +12,12 @@ public class AccompanyPreferences {
 	//protected String database_ip;
 	protected String database_url;
 	protected String status_url;
+	protected int cob_version;
+	
+	protected int ap_update;
+	protected int exp_update;
+	
+	protected String last_user;
 	
 	Activity owner;
 	
@@ -26,6 +32,10 @@ public class AccompanyPreferences {
 		//this.database_ip="10.0.1.5";
 		this.database_url="http://10.0.1.5:9995/";
 		this.status_url="http://10.0.1.5:9996/";
+		this.cob_version=AccompanyGUIApp.COB36;
+		this.last_user="M";
+		this.ap_update=1;
+		this.exp_update=1;
 	}
 	
 	public void loadPreferences() {
@@ -37,29 +47,55 @@ public class AccompanyPreferences {
 		//this.database_ip = prefs.getString("database_ip",database_ip);
 		this.database_url=prefs.getString("database_url",database_url);
 		this.status_url=prefs.getString("status_url", status_url);
+		this.cob_version=prefs.getInt("cob_version", AccompanyGUIApp.COB36);
+		this.last_user=prefs.getString("last_logged_user",last_user);
+		this.ap_update=prefs.getInt("actionpossibilities_update_frequency", ap_update);
+		this.exp_update=prefs.getInt("expression_update_frequency", exp_update);
 	}
 	
 	@Override
 	public String toString() {
 		return (this.RosMasterIP + " " +
-				this.images_rate + " "+ this.speechMode+" "+this.database_url+ " "+this.status_url);
+				this.images_rate + " "+ this.speechMode+" "+this.cob_version+" "+this.database_url+ " "+this.status_url+ " " +
+				this.last_user);
 	}
 	
 	public boolean equals(final AccompanyPreferences p) {
 		if (this.RosMasterIP.equals(p.getRosMasterIP())) {
 			if (this.images_rate==p.getImagesRate()) {
 				if (this.speechMode==p.getSpeechMode()){
-					//if (this.database_ip.equals(p.getDatabaseIp())){
+					if (this.cob_version==p.getCobVersion()){
 						if (this.database_url.equals(p.getDatabaseUrl())){
 							if (this.status_url.equals(p.getRobotStatusControlUrl())){
-								return true;
+								if (this.last_user.equals(p.getLastUser())) {
+									if (this.ap_update==p.getApUpdateFrequency()){
+										if (this.exp_update==p.getExpressionUpdateFrequency()){
+											return true;
+										}
+									}
+								}
 							}
 						}
-					//}
+					}
 				}
 			}
 		}
 		return false;
+	}
+		
+	public int getExpressionUpdateFrequency()
+	{
+		return exp_update;
+	}
+	
+	public int getApUpdateFrequency()
+	{
+		return ap_update;
+	}
+	
+	public int getCobVersion()
+	{
+		return cob_version;	
 	}
 	
 	public boolean getSpeechMode()
@@ -90,6 +126,11 @@ public class AccompanyPreferences {
 	public String getRobotStatusControlUrl()
 	{
 		return status_url;
+	}
+	
+	public String getLastUser()
+	{
+		return last_user;
 	}
 	
 /*	public String getRobotIP()

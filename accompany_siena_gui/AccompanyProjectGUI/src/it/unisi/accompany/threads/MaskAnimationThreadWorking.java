@@ -17,12 +17,20 @@ public class MaskAnimationThreadWorking extends Thread{
 	boolean pause=false;
 	int after;
 	
+	protected int squeezed=8;
+	
 	boolean im1,im2,im3,im4,im5,im6,im7,imF;
 	
 	public MaskAnimationThreadWorking(Handler h,RobotWorkingView ma)
 	{
 		hh=h;
 		act=ma;
+		squeezed=8;
+	}
+	
+	public void setSqueezed(int ss)
+	{
+		squeezed=ss;
 	}
 	
 	@Override
@@ -38,6 +46,7 @@ public class MaskAnimationThreadWorking extends Thread{
 		imF=true;
 		while (!interrupt)
 		{
+			squeezed=8;     //togliere quando si rimette espressione squeeze!
 			while (!sshot&&!interrupt)
 			{
 				try {
@@ -48,7 +57,7 @@ public class MaskAnimationThreadWorking extends Thread{
 				}
 			}
 			//wait to have all the images loaded
-			while (!im1||!im2||!im3||!im4||!im5||!im6||!im7||!imF)
+			while ((!im1||!im2||!im3||!im4||!im5||!im6||!im7||!imF) && !interrupt)
 			{
 				try {
 					Thread.sleep(50);
@@ -61,103 +70,159 @@ public class MaskAnimationThreadWorking extends Thread{
 			{
 				if (v)
 				{
-					hh.post(new Runnable() {
+					/*if (squeezed>9)
+					{
+						hh.post(new Runnable() {
 						
-						@Override
-						public void run() {
-							act.maskF.setVisibility(View.INVISIBLE);
-							act.mask7.setVisibility(View.VISIBLE);
+							@Override
+							public void run() {
+								act.mask10.setVisibility(View.INVISIBLE);
+								act.mask9.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
 					}
-					hh.post(new Runnable() {
+					if (squeezed>8)
+					{
+						hh.post(new Runnable() {
 						
-						@Override
-						public void run() {
-							act.mask7.setVisibility(View.INVISIBLE);
-							act.mask6.setVisibility(View.VISIBLE);
+							@Override
+							public void run() {
+								act.mask9.setVisibility(View.INVISIBLE);
+								act.maskF.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
+					}*/
+					if (squeezed>7)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.maskF.setVisibility(View.INVISIBLE);
+								act.mask7.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
+						}
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask6.setVisibility(View.INVISIBLE);
-							act.mask5.setVisibility(View.VISIBLE);
+					if (squeezed>6)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask7.setVisibility(View.INVISIBLE);
+								act.mask6.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask5.setVisibility(View.INVISIBLE);
-							act.mask4.setVisibility(View.VISIBLE);
+					if (squeezed>5)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask6.setVisibility(View.INVISIBLE);
+								act.mask5.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask4.setVisibility(View.INVISIBLE);
-							act.mask3.setVisibility(View.VISIBLE);
+					if (squeezed>4)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask5.setVisibility(View.INVISIBLE);
+								act.mask4.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
 					}
-					hh.post(new Runnable() {
+					if (squeezed>3)
+					{
+						hh.post(new Runnable() {
 						
-						@Override
-						public void run() {
-							act.mask3.setVisibility(View.INVISIBLE);
-							act.mask2.setVisibility(View.VISIBLE);
+							
+							@Override
+							public void run() {
+								act.mask4.setVisibility(View.INVISIBLE);
+								act.mask3.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask2.setVisibility(View.INVISIBLE);
-							act.mask1.setVisibility(View.VISIBLE);
+					if (squeezed>2)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask3.setVisibility(View.INVISIBLE);
+								act.mask2.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","interrupted!");
-						interrupt=true;
+					}
+					if (squeezed>1)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask2.setVisibility(View.INVISIBLE);
+								act.mask1.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","interrupted!");
+							interrupt=true;
+						}
 					}
 					
 					resetLoad();
@@ -198,97 +263,150 @@ public class MaskAnimationThreadWorking extends Thread{
 					} catch (InterruptedException e) {
 						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask1.setVisibility(View.INVISIBLE);
-							act.mask2.setVisibility(View.VISIBLE);
+					if (squeezed>1)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask1.setVisibility(View.INVISIBLE);
+								act.mask2.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask2.setVisibility(View.INVISIBLE);
-							act.mask3.setVisibility(View.VISIBLE);
+					if (squeezed>2)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask2.setVisibility(View.INVISIBLE);
+								act.mask3.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask3.setVisibility(View.INVISIBLE);
-							act.mask4.setVisibility(View.VISIBLE);
+					if (squeezed>3)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask3.setVisibility(View.INVISIBLE);
+								act.mask4.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask4.setVisibility(View.INVISIBLE);
-							act.mask5.setVisibility(View.VISIBLE);
+					if (squeezed>4)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask4.setVisibility(View.INVISIBLE);
+								act.mask5.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask5.setVisibility(View.INVISIBLE);
-							act.mask6.setVisibility(View.VISIBLE);
+					if (squeezed>5)
+					{
+						hh.post(new Runnable() {
+											
+							@Override
+							public void run() {
+								act.mask5.setVisibility(View.INVISIBLE);
+								act.mask6.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask6.setVisibility(View.INVISIBLE);
-							act.mask7.setVisibility(View.VISIBLE);
+					if(squeezed>6)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask6.setVisibility(View.INVISIBLE);
+								act.mask7.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
-					hh.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							act.mask7.setVisibility(View.INVISIBLE);
-							act.maskF.setVisibility(View.VISIBLE);
+					if (squeezed>7)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask7.setVisibility(View.INVISIBLE);
+								act.maskF.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
 						}
-					});
-					try {
-						Thread.sleep(50);
-					} catch (InterruptedException e) {
-						Log.e("sleep","sleep");
 					}
+					/*if (squeezed>8)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.maskF.setVisibility(View.INVISIBLE);
+								act.mask9.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
+						}
+					}
+					if (squeezed>9)
+					{
+						hh.post(new Runnable() {
+							
+							@Override
+							public void run() {
+								act.mask9.setVisibility(View.INVISIBLE);
+								act.mask10.setVisibility(View.VISIBLE);
+							}
+						});
+						try {
+							Thread.sleep(50);
+						} catch (InterruptedException e) {
+							Log.e("sleep","sleep");
+						}
+					}*/
 					sshot=false;
 				}
 			}
@@ -361,10 +479,256 @@ public class MaskAnimationThreadWorking extends Thread{
 		pause=false;
 	}
 	
-	public void shot2(boolean verso,int a)
+	public int shot2(boolean verso,int a)
 	{
-		after=a;
-		sshot=true;
-		v=verso;
+		if (sshot==false)
+		{
+			after=a;
+			sshot=true;
+			v=verso;
+			return 1;
+		}
+		else
+			return 0;
+	}
+	
+	public int specialShot(int newspeed)
+	{
+		/*Log.v(TAG,"Special shot... Squuezed value ->"+squeezed+". New value ->"+ newspeed);
+		if (sshot) return 0;
+		if (newspeed==squeezed) return 1;
+		else
+		{
+			Log.i(TAG,"Special shot running! ("+squeezed+" -> "+newspeed+")");
+			if (squeezed<newspeed)
+			{	
+				int delay=0;
+				int step=50;
+				if (squeezed==1)
+				{
+					hh.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask1.setVisibility(View.INVISIBLE);
+							act.mask2.setVisibility(View.VISIBLE);
+						}
+					});
+					delay+=step;
+				}
+				if (squeezed<3 && newspeed>2)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask2.setVisibility(View.INVISIBLE);
+							act.mask3.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<4 && newspeed>3)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask3.setVisibility(View.INVISIBLE);
+							act.mask4.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<5 && newspeed>4)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask4.setVisibility(View.INVISIBLE);
+							act.mask5.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<6 && newspeed>5)
+				{
+					hh.postDelayed(new Runnable() {
+										
+						@Override
+						public void run() {
+							act.mask5.setVisibility(View.INVISIBLE);
+							act.mask6.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if(squeezed<7 && newspeed>6)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask6.setVisibility(View.INVISIBLE);
+							act.mask7.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<8 && newspeed>7)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask7.setVisibility(View.INVISIBLE);
+							act.maskF.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<9 && newspeed>8)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.maskF.setVisibility(View.INVISIBLE);
+							act.mask9.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed<10 && newspeed>9)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask9.setVisibility(View.INVISIBLE);
+							act.mask10.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+			}
+			else
+			{
+				int delay=0;
+				int step=50;
+				if (squeezed==10)
+				{
+					hh.post(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask10.setVisibility(View.INVISIBLE);
+							act.mask9.setVisibility(View.VISIBLE);
+						}
+					});
+					delay+=step;
+				}
+				if (squeezed>8 && newspeed<9)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask9.setVisibility(View.INVISIBLE);
+							act.maskF.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>7 && newspeed<8)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.maskF.setVisibility(View.INVISIBLE);
+							act.mask7.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>6 && newspeed<7)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask7.setVisibility(View.INVISIBLE);
+							act.mask6.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>5 && newspeed<6)
+				{
+					hh.postDelayed(new Runnable() {
+										
+						@Override
+						public void run() {
+							act.mask6.setVisibility(View.INVISIBLE);
+							act.mask5.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if(squeezed>4 && newspeed<5)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask5.setVisibility(View.INVISIBLE);
+							act.mask4.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>3 && newspeed<4)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask4.setVisibility(View.INVISIBLE);
+							act.mask3.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>2 && newspeed<3)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask3.setVisibility(View.INVISIBLE);
+							act.mask2.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+				if (squeezed>1 && newspeed==1)
+				{
+					hh.postDelayed(new Runnable() {
+						
+						@Override
+						public void run() {
+							act.mask2.setVisibility(View.INVISIBLE);
+							act.mask1.setVisibility(View.VISIBLE);
+						}
+					},delay);
+					delay+=step;
+				}
+			}
+		}
+		squeezed=newspeed;
+		return 1;*/
+		return 1;   //rimettere sopra e togli questo quando si rimette squeeze
 	}
 }

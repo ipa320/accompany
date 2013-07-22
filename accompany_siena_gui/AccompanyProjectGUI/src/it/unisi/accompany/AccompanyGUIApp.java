@@ -9,6 +9,7 @@ import it.unisi.accompany.activities.UserView;
 import it.unisi.accompany.clients.DatabaseClient;
 import it.unisi.accompany.rosnodes.*;
 import it.unisi.accompany.threads.ActionPossibilitiesUpdateThread;
+import it.unisi.accompany.threads.DrawingThread;
 import it.unisi.accompany.threads.MaskExpressionThread;
 import it.unisi.accompany.threads.RobotStatusThread;
 import it.unisi.accompany.threads.SpeechThread;
@@ -36,7 +37,7 @@ import com.hoho.android.usbserial.util.SerialInputOutputManager;
 
 public class AccompanyGUIApp extends AccompanyRosApp{
 	
-	public final String TAG="Accompany GUI - Application";
+	public final String TAG="AccompanyGUI-Application";
 	
 	//Activities identifiers
 	public final int USER_VIEW=1;
@@ -52,11 +53,21 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 	public final int ROBOT_ACTIONS_REQUEST_CODE=3;
 	public final int EXPRESSION_REQUEST=5;
 	
-	//squeeze me and cal me action id
+	//Cob version constants
+	public static final int COB32 = 0;
+	public static final int COB36 = 1;
+	
+	//SQUUEZE CONSTANTS
+  	protected int UPPER_THR_EMPHASIS=35; // no more valid
+  	protected int LOWER_THR_EMPHASIS=20;
+	
+	//squeeze me and call me action id
 	public final int COMEHEREID=518;
 		
 	//Ros stuffs
 	protected String RosMasterIP;  // ros master ip address
+	//Cob version
+	protected int cob_version;
 	
 	//The user id saved after login (don't touch it!!)
 	protected int userId=-1;
@@ -140,23 +151,49 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 	@SuppressWarnings("deprecation")
 	@Override
 	public void closeApp() {
+		Log.v(TAG,"Closing Application...");
 		isClosing=true;
-		
-		//closing activities:
-		/*if (user_act  != null) user_act.halt();
-		if (robot_act != null) robot_act.halt();
-		if (robot_working_view != null) robot_working_view.halt();
-		if (actions_list != null) actions_list.halt();
-		if (login_page!= null) login_page.finish();*/
 		
 	    //closing all threads
 	    if (StatusController!=null) StatusController.halt();
 	    if (met!=null) met.halt();
 	    if (apt!=null) apt.halt();
 		if (st!=null) st.halt();
-		
-		Log.e("close","threads closed");
-		
+		Log.v(TAG,"Closing Threads...");
+		if (StatusController!=null)
+		{
+			try{
+				StatusController.join();
+			}catch(Exception e){
+				Log.e(TAG,"Cannot join Status controller thread...");
+			}
+		}
+		if (met!=null)
+		{
+			try{
+				met.join();
+			}catch(Exception e){
+				Log.e(TAG,"Cannot join Mask Expression thread...");
+			}
+		}
+		if (apt!=null)
+		{
+			try{
+				apt.join();
+			}catch(Exception e){
+				Log.e(TAG,"Cannot join Action Possibilities Update thread...");
+			}
+		}
+		if (st!=null)
+		{
+			try{
+				st.join();
+			}catch(Exception e){
+				Log.e(TAG,"Cannot join Speech thread...");
+			}
+		}
+		Log.i(TAG,"Threads closed.");
+		Log.v(TAG,"Closing Usb I/O...");
 		//closing usb serial reader: (for squeeze-me module)
 		stopIoManager();
 	    if (mSerialDevice != null) {
@@ -167,8 +204,8 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 	        }
 	        mSerialDevice = null;
 	    }
-	    Log.e("close","usb closed");
-	    
+	    Log.i(TAG,"Usb listener closed.");
+	    Log.v(TAG,"Closing Node Main Exrecutor Service (NMES)...");
 		//closing node main executor service
 		closeNodeMainExecutorService();
 		
@@ -177,23 +214,14 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 		//cleaning memory from robot images
 		if (robot_image!=null) robot_image.recycle();
 		robot_image=null;
-	     
-	    //if (oms!=null) oms.stopSelf();
-		
-		
-		//isClosing=false;
-		//exiting
-		//closeNodeMainExecutorService();
-		Log.e("close","app closing 1");
-	    //System.runFinalizersOnExit(true);
-	    //System.exit(0);
-	   // Log.e("close","app closing 2");
-	    
+		Log.i(TAG,"NMES closed.");
+		Log.v(TAG,"Killing process...");
 		//System.gc();
 		android.os.Process.killProcess(android.os.Process.myPid());
 	    Log.e("close","app closed (you should not see this!)");
 	}
 	
+	@Override
 	public void closeAppOnError(final String msg)
 	{
 		switch (running)
@@ -234,6 +262,48 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 			} break;
 		}
 	}
+	
+	@Override
+	public void closeAppWithDialog()
+	{
+		switch (running)
+		{
+			case ROBOT_VIEW:
+			{
+				ControllerHandler.post(new Runnable(){
+
+					@Override
+					public void run() {
+						robot_act.closeApp();
+					}});
+			} break;
+			case USER_VIEW:
+			{
+				ControllerHandler.post(new Runnable(){
+
+					@Override
+					public void run() {
+						user_act.closeApp();
+					}});
+			} break;
+			case ACTIONS_VIEW:
+			{
+				ControllerHandler.post(new Runnable(){
+					@Override
+					public void run() {
+						actions_list.closeApp();
+					}});
+			} break;
+			case EXECUTE_VIEW:
+			{
+				ControllerHandler.post(new Runnable(){
+				@Override
+				public void run() {
+					robot_working_view.closeApp();
+				}});
+			} break;
+		}
+	}
 
 	@Override
 	public void init(NodeMainExecutorService nmes) {
@@ -241,16 +311,16 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 		try{
 			if (turn_talker==null && imagesSubscriber==null &&head_controller==null && emp_client==null && torso_controller==null)
 			{
-				turn_talker= new CmdVelocityPublisher();
-				head_controller = new HeadControllerGUI();
+				turn_talker= new CmdVelocityPublisher(AccompanyGUIApp.this);
+				head_controller = new HeadControllerGUI(AccompanyGUIApp.this);
 				head_controller.shouldBringHome(shouldStartSubscribing);
-				torso_controller = new TorsoControllerGUI();
+				torso_controller = new TorsoControllerGUI(AccompanyGUIApp.this,cob_version);
 				torso_controller.shouldBringHome(shouldStartSubscribing);
-				imagesSubscriber= new ImagesSubscriber<sensor_msgs.CompressedImage>(images_handler,this);
+				imagesSubscriber= new ImagesSubscriber<sensor_msgs.CompressedImage>(images_handler,AccompanyGUIApp.this);
 				imagesSubscriber.setTopicName("accompany/GUIimage/compressed");
 			    imagesSubscriber.setMessageType(sensor_msgs.CompressedImage._TYPE);
 			    imagesSubscriber.shouldStart(shouldStartSubscribing);
-			    emp_client= new EmphasisClient(this);
+			    //emp_client= new EmphasisClient(AccompanyGUIApp.this);  //rimettere con squeeze
 			    
 			    NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(InetAddressFactory.newNonLoopback().getHostAddress(),
 					    new URI("http://"+RosMasterIP+":11311/"));
@@ -258,7 +328,7 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 				nmes.execute(turn_talker, nodeConfiguration.setNodeName("AccompanyGUI/CmdVelPub"));
 				nmes.execute(head_controller, nodeConfiguration.setNodeName("AccompanyGUI/HeadControllerGUI"));
 				nmes.execute(torso_controller, nodeConfiguration.setNodeName("AccompanyGUI/TorsoControllerGUI"));
-				nmes.execute(emp_client, nodeConfiguration.setNodeName("AccompanyGUI/emphasis_client"));
+				//nmes.execute(emp_client, nodeConfiguration.setNodeName("AccompanyGUI/emphasis_client"));
 				Log.e(TAG,"ROS services started");	
 			}
 			else
@@ -267,23 +337,22 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 		{
 			Log.e(TAG,"GRAVE: error starting ROS subscribers and publishers!!");
 		}
-		//crea il thread di controllo dello stato
+		// Starting all threads (Created on the creation of login page (method -> setLoginPage())
 		StatusController.start();
 		apt.start();
+		met.start();
 		//create the Thread for Call-me module
-		if ((st==null)) 
+		/*if ((st==null))   DISABLEDD FOR FIRST PART OF TEST
 		{
 			st= new SpeechThread(this,oldSpeechState,actions_handler);
 			st.start();
 			if (running== EXECUTE_VIEW)
 				st.setMode(false);
-		}
+		}*/
 		//create the Thread for the expression mamagement
-		if (met==null)
-		{
-			met=new MaskExpressionThread(actions_handler,db_client,this);
-			met.start();
-		}
+		
+		//switch form login to user view
+		login_page.loginSuccess();
 	}
 	
 	//set the login page to the app
@@ -295,6 +364,7 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 			AccompanyPreferences pref= new AccompanyPreferences(lp);
 			pref.loadPreferences();
 			oldSpeechState=pref.getSpeechMode();
+			cob_version=pref.getCobVersion();
 			this.login_page=lp;
 			dh= login_page.getDisplayHeight();
 			dw= login_page.getDisplayWidth();
@@ -304,7 +374,7 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 			
 			db_handler= new Handler();
 			db_client= new DatabaseClient(this,db_handler,pref.getDatabaseUrl());
-			
+			//creating threads (not starting them --> do it in init() method!)
 			if(StatusController==null)
 			{
 				ControllerHandler= new Handler(); 
@@ -312,7 +382,12 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 			}
 			if(apt==null)
 			{
-				apt= new ActionPossibilitiesUpdateThread(this,db_handler,pref.getDatabaseUrl());
+				apt= new ActionPossibilitiesUpdateThread(this,db_handler,pref.getDatabaseUrl(),pref.getApUpdateFrequency()*1000);
+			}
+			
+			if (met==null)
+			{
+				met=new MaskExpressionThread(actions_handler,db_client,this, pref.getExpressionUpdateFrequency()*1000);
 			}
 		}
 		else
@@ -441,7 +516,8 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 	
 	public void stopSubscribing()
 	{
-		imagesSubscriber.stopSubscribing();
+		if (imagesSubscriber!=null) imagesSubscriber.stopSubscribing();
+		else shouldStartSubscribing=false;
 	}
 	
 	public Bitmap getLastImage()
@@ -519,8 +595,7 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 
 	public void RequestToDB(int i)//, int son_id)
 	{
-		if (i==USER_ACTIONS_REQUEST_CODE) db_client.request(i, Integer.toString(userId)
-				,Integer.toString(userLang));
+		if (i==USER_ACTIONS_REQUEST_CODE) db_client.request(i, Integer.toString(userId),Integer.toString(userLang));
 			else if (i == ROBOT_ACTIONS_REQUEST_CODE) db_client.request(i, Integer.toString(userId),Integer.toString(userLang));
 	}
 	
@@ -693,16 +768,19 @@ public class AccompanyGUIApp extends AccompanyRosApp{
 		}
 	}
 	
-	public void switchMask(int before, int after)
+	public int switchMask(int before, int after)
     {
+		
     	if (running==ROBOT_VIEW)
     	{
-    		robot_act.switchMask(before,after);
+    		if (robot_act != null) return robot_act.switchMask(before,after);
     	}
     	else if (running==EXECUTE_VIEW)
     		{
-    			robot_working_view.switchMask(before,after);
+    			if (robot_working_view != null) return robot_working_view.switchMask(before,after);
     		}
+    	
+    	return 0;
     }
 	
 	/******************************************************************/
@@ -720,11 +798,9 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     private SerialInputOutputManager mSerialIoManager;
     
     //squeeze computation:
-  	protected int UPPER_THR_EMPHASIS=35;
-  	protected int LOWER_THR_EMPHASIS=20;
   	protected int emphasis;
-  	protected int field1;
-  	protected int field2;
+  	protected int duration;
+  	protected int max_read_value;
   	protected long time;
     
     //message management
@@ -751,10 +827,15 @@ public class AccompanyGUIApp extends AccompanyRosApp{
         }
     };
     
-    private void updateReceivedData(byte[] data){
+    private void updateReceivedData(byte[] data)  //only for first tests without squeeze
+    {
+    	
+    }
+    
+    private void updateReceivedDataoK(byte[] data){
    	
        message=new String(data);
-       Log.e(TAG+" (squeeze)","Squeeze-me message: "+message);
+       Log.e(TAG+" (squeeze)","Squeeze-me message: \""+message+"\"");
        if (!flag ) myM = "";
        int i=0;
        int start=0;
@@ -770,6 +851,7 @@ public class AccompanyGUIApp extends AccompanyRosApp{
        {
        	myM=myM+=message.substring(start, end+1);
        	flag=false;
+       	Log.e(TAG+" (squeeze)","Processing: \""+myM+"\"");
        	myM=myM.replace("$", "");
        	myM=myM.replace("^", "");
        	String[] split=myM.split(" ");
@@ -777,12 +859,12 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     	    Log.e(TAG+" (squeeze)","f2: "+split[1]);
     	    Log.e(TAG+" (squeeze)","emp: "+split[2]);
     	    emphasis= Integer.parseInt(split[2]);
-    	    field1=Integer.parseInt(split[0]);
-    	    field2=Integer.parseInt(split[1]);
+    	    duration=Integer.parseInt(split[0]);
+    	    max_read_value=Integer.parseInt(split[1]);
     	    //if ((emphasis>UPPER_THR_EMPHASIS)&&(running!=-1)&&(running!=EXECUTE_VIEW))
     	    if ((emphasis>UPPER_THR_EMPHASIS)&&(running!=-1))
     	    {
-    	    	emp_client.setEmphasis(((double)(emphasis-10))/100);
+    	    	emp_client.setEmphasis(((double)(emphasis-23))/1000); //-10 diviso 100
     	    	if (running!=EXECUTE_VIEW)
 	    		{
     	    		actions_handler.post(new Runnable()
@@ -836,8 +918,8 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     }
 
     public void onDeviceStateChange() {
-        stopIoManager();
-        startIoManager();
+        //stopIoManager();     //DISABLED FOR FIRST TESTS
+        //startIoManager();
     }
     
     /******************************************************************/
@@ -847,7 +929,6 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     //to send a toast message wiothout knowing the running activity
     public void toastMessage(String phrase)
 	{
-    	Log.i(TAG,"asdfghjkl");
 		switch (running)
 		{
 			case ROBOT_VIEW:
@@ -911,6 +992,10 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     	db_client.createBaseUrl( pref.getDatabaseUrl());
     	apt.createBaseUrl( pref.getDatabaseUrl());
     	StatusController.createBaseUrl(pref.getRobotStatusControlUrl());
+    	cob_version=pref.getCobVersion(); 
+    	apt.setSleepTime(pref.getApUpdateFrequency()*1000);             //passage between seconds and milliseconds
+    	met.setSamplingRate(pref.getExpressionUpdateFrequency()*1000); 
+    	if (torso_controller!=null)torso_controller.setCobVersion(cob_version);
     }
     
     public void removeUserAp(int id)
@@ -931,5 +1016,44 @@ public class AccompanyGUIApp extends AccompanyRosApp{
     	}
 	}
 	
+	public void removeRobotAp(int id)
+	{
+	   	if (running==ROBOT_VIEW)
+	   	{
+	   		robot_act.removeAp(id);
+	   		robot_act.recomputePositions();
+	   	}		
+	}	  
+		 
+		  
+	public void addRobotAp(int id, String last_r)
+	{
+		if (running==ROBOT_VIEW)
+	   	{
+	   		robot_act.addAp(id,last_r);
+	   	}
+	}
 	
+	public int getCobVersion()
+	{
+		return cob_version;
+	}
+	
+	public void setDrawingThread(DrawingThread d)
+	{
+		this.imagesSubscriber.setDrawingThread(d);
+	}
+	
+	public sensor_msgs.CompressedImage getLastMessage()
+	{
+		return imagesSubscriber.getLastMsg();
+	}
+	
+	public void wrongDbHost()
+	{
+		if (login_page!=null)
+			login_page.wrongHost();
+		else
+			toastMessage("Unable to connect to db! Please check the Url in settings.");
+	}
 }

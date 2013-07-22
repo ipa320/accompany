@@ -5,11 +5,15 @@
     android:id="@+id/robot_global_layout"
     android:background="@color/robot_bck_color" >
 
-    <ImageView android:id="@+id/robot_standard_image_view"
+    <!-- ImageView android:id="@+id/robot_standard_image_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@android:color/transparent"
-        /> 
+        /--> 
+        <SurfaceView android:id="@+id/robot_standard_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent" />
 
     <FrameLayout
         android:id="@+id/robotview_buttons_main_layout"
@@ -35,50 +39,110 @@
         android:id="@+id/mask_basic_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_4"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/>
     <ImageView 
         android:id="@+id/mask_basic_5"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/>  
     <ImageView 
         android:id="@+id/mask_basic_6"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_7"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_F"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/>
+      <!-- ImageView 
+        android:id="@+id/mask_basic_1s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_one"
+        android:visibility="invisible"/>
+        <ImageView 
+        android:id="@+id/mask_basic_2s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_two"
+        android:visibility="invisible"/>
+          <ImageView 
+        android:id="@+id/mask_basic_3s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_three"
+        android:visibility="invisible"/>
+            <ImageView 
+        android:id="@+id/mask_basic_4s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_four"
+        android:visibility="invisible"/>
+     <ImageView 
+        android:id="@+id/mask_basic_5s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_five"
+        android:visibility="invisible"/>
+       <ImageView 
+        android:id="@+id/mask_basic_6s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_six"
+        android:visibility="invisible"/>
+         <ImageView 
+        android:id="@+id/mask_basic_7s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_seven"
+        android:visibility="invisible"/>
+           <ImageView 
+        android:id="@+id/mask_basic_8s"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_eight"
+        android:visibility="invisible"/>
+             <ImageView 
+        android:id="@+id/mask_basic_9"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_nine"
+        android:visibility="invisible"/>
+      <ImageView 
+        android:id="@+id/mask_basic_10"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_ten"
+        android:visibility="invisible"/-->
     
     
     <Button 

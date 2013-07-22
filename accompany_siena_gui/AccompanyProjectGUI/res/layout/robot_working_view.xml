@@ -24,49 +24,61 @@
         android:id="@+id/mask_basic_working1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_working2"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+      android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_working3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+       android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_working4"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+      android:background="@android:color/black"
         android:visibility="invisible"/>
     <ImageView 
         android:id="@+id/mask_basic_working5"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/>  
     <ImageView 
         android:id="@+id/mask_basic_working6"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_working7"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
         android:visibility="invisible"/> 
     <ImageView 
         android:id="@+id/mask_basic_workingF"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@drawable/mask_basic"
+        android:background="@android:color/black"
+        android:visibility="invisible"/>
+     <ImageView 
+        android:id="@+id/mask_basic_working9"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/basic_squeeze_nine"
+        android:visibility="invisible"/>
+      <ImageView 
+        android:id="@+id/mask_basic_working10"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+       android:background="@drawable/basic_squeeze_ten"
         android:visibility="invisible"/>
         
      <ImageButton
