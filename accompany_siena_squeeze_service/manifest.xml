@@ -1,0 +1,18 @@
+<package>
+  <description brief="accompany_siena_squeeze_service">
+
+    	accompany_siena_squeeze_service
+
+  </description>
+  <author>Marco Bongini</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_siena_squeeze_service</url>
+
+  <depend package="cob_script_server"/>
+  <depend package="dynamic_reconfigure"/>
+	
+
+</package>
+
+
