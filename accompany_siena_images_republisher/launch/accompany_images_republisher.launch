@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<launch>
+	<node pkg="accompany_siena_images_republisher" name="HeadStateDownsampled" type="HeadStateDownsampler"/>
+	<node pkg="accompany_siena_images_republisher" name="AccompanyImagesRepublisher" type="ImagesRepublisher"/>
+</launch>
