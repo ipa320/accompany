@@ -10,7 +10,7 @@
 	<include file="$(find accompany_user_tests_year2)/upload_navigation_goals.launch"/>
 
 	<!-- start navigation -->
-	<include file="$(find cob_navigation_global)/launch/2dnav_ros_dwa.launch">
+	<include file="$(find cob_navigation_global)/launch/intern/2dnav_ipa_extloc.launch">
 		<arg name="map" default="$(find accompany_user_tests_year2)/$(arg robot_env)/map.yaml" />
 	</include>
 
