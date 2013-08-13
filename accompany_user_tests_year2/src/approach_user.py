@@ -20,21 +20,37 @@ from tf.transformations import euler_from_quaternion
 import tf
 import time
 import threading
+from GoToGoalGeneric import *
+from geometry_msgs.msg import Pose2D
 
+from GoToUtils import *
 ############### PARAMETER SETTINGS #######################
 
+
+# value defines perimeter around blocked goals, that are supposed to be
+# approached
+global GOAL_PERIMETER
+GOAL_PERIMETER=1 #[m]
 # threshold defines whether a goal is approached close enough
 global APPROACHED_THRESHOLD
-APPROACHED_THRESHOLD=0.8 #[m]
+APPROACHED_THRESHOLD=0.3 #[m]
 # threshold defines whether a goal is similar to another goal 
 global SIMILAR_GOAL_THRESHOLD
-SIMILAR_GOAL_THRESHOLD=0.1 #[m]
+SIMILAR_GOAL_THRESHOLD=0.3 #[m]
 # predefined goals that can be used throughout the script ( couch is where the person is supposed to be in the beginning, kitchen is the position where something is grabbed afterwards)
 global PREDEFINED_GOALS
+couch_pose=Pose2D()
+couch_pose.x=2
+couch_pose.y=-2
+couch_pose.theta=1.5
+kitchen_pose=Pose2D()
+kitchen_pose.x=0
+kitchen_pose.y=0
+kitchen_pose.theta=0
+
 PREDEFINED_GOALS={
-          "couch":  {"name":"couch","x":0.2,"y":1.5,"theta":1.57},
-        "kitchen": {"name":"kitchen","x":4.8,"y":1.0,"theta":0.0},
-        "middle":  {"name":"middle","x":0.0,"y":0.0,"theta":0.0}
+          "couch":  couch_pose,
+        "kitchen": kitchen_pose
         }
 
 # topic where face labels and positions are obtained by face recognition
@@ -43,33 +59,18 @@ TOPIC_PEOPLE_DETECTION="/cob_people_detection/detection_tracker/face_position_ar
 
 # topic where person positions are provided, tracked by tha accompany tracker
 global TOPIC_TRACKED_HUMANS
-TOPIC_TRACKED_HUMANS="/trackedHumans"
+TOPIC_TRACKED_HUMANS="/accompany/TrackedHumans"
 
 #  bounds of the map where randomized positions are approached if necessary
 global MAP_BOUNDS
+#MAP_BOUNDS=[-1.0,4.5,-0.5,1.5] # x_min,x_max,y_min,y_max
 MAP_BOUNDS=[-1.0,4.5,-0.5,1.5] # x_min,x_max,y_min,y_max
 
 #  set to true if you want to double check if the person is still at the goal
 global DOUBLECHECK
-DOUBLECHECK=False
+DOUBLECHECK=True
 
 
-###############''WORKAROUND FOR TRANSFORMLISTENER ISSUE####################
-_tl=None
-_tl_creation_lock=threading.Lock()
-
-def get_transform_listener():
-  global _tl
-  with _tl_creation_lock:
-    if _tl==None:
-      _tl=tf.TransformListener()
-    return _tl
-
-
-# predefined goals:
-# list of goals that are predefined in the map
-# current goal:
-# coordinates of goal, that is currently being navigated to
 
 ############### SCHEDULER #######################
 # this class controls the scr
@@ -77,8 +78,8 @@ class Scheduler(smach.State):
   def __init__(self):
     smach.State.__init__(self,
       outcomes=['e0_success','e1_success','e2_success','e3_success','e4_success','e5_failure','failed'],
-      input_keys= ['position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving' ,'rotate_while_observing'],
-      output_keys=['position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
+      input_keys= ['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving' ,'rotate_while_observing'],
+      output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
     self.e=0
     self.failure_ctr=0
     self.predefined_goals=PREDEFINED_GOALS
@@ -101,6 +102,27 @@ class Scheduler(smach.State):
 
 
   def execute(self, userdata):
+    #feed predefined stuff  to userdata
+    userdata.predefinitions={"predefined_goals":PREDEFINED_GOALS,
+                            "map_bounds":MAP_BOUNDS,
+                            "double_check":DOUBLECHECK,
+                            "approached_threshold":APPROACHED_THRESHOLD,
+                            "similar_goal_threshold":SIMILAR_GOAL_THRESHOLD,
+                            "goal_perimeter":GOAL_PERIMETER}
+    userdata.callback_config={"argname_frame":["pose","header","frame_id"],
+                   "msg_element":"detections",
+                   "argname_label":["label"],
+                   "argname_position":["pose","pose","position"],
+                   "argname_header":["pose","header"],
+                   "topicname":TOPIC_PEOPLE_DETECTION,
+                   "msgclass":DetectionArray}
+   # userdata.callback_config={"argname_frame":["location","header","frame_id"],
+   #                "msg_element":"trackedHumans",
+   #                "argname_label":["identity"],
+   #                "argname_position":["location","point"],
+   #                "argname_header":["location","header"],
+   #                "topicname":TOPIC_TRACKED_HUMANS,
+   #                "msgclass":TrackedHumans}
     # event 0#################################
     if self.e==0:
       userdata.person_name="NOTSET"
@@ -266,10 +288,6 @@ class GoToGoal_aided(smach.State):
     return False
 
 
-
-
-
-
   def execute(self,userdata):
     print "GO TO GOAL AIDED"
     if userdata.search_while_moving==False:
@@ -277,14 +295,14 @@ class GoToGoal_aided(smach.State):
       stop_base=False
 
       pose=list()
-      pose.append(float(userdata.current_goal["x"]))
-      pose.append(float(userdata.current_goal["y"]))
-      pose.append(float(userdata.current_goal["theta"]))
+      pose.append(float(userdata.current_goal.x))
+      pose.append(float(userdata.current_goal.y))
+      pose.append(float(userdata.current_goal.theta))
       handle_base = sss.move("base", pose,blocking=False)
 
       while not rospy.is_shutdown() and stop_base==False :
         # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener()):
+        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
           sss.stop("base")
           stop_base=True
         rospy.sleep(0.3)
@@ -303,9 +321,9 @@ class GoToGoal_aided(smach.State):
       del self.detections[:]
       print "Length detections %i"%len(self.detections)
       pose=list()
-      pose.append(float(userdata.current_goal["x"]))
-      pose.append(float(userdata.current_goal["y"]))
-      pose.append(float(userdata.current_goal["theta"]))
+      pose.append(float(userdata.current_goal.x))
+      pose.append(float(userdata.current_goal.y))
+      pose.append(float(userdata.current_goal.theta))
       handle_base = sss.move("base", pose,blocking=False)
 
     ## init variables
@@ -325,7 +343,10 @@ class GoToGoal_aided(smach.State):
         if detection is not False:
 
           msg_pos=detection.location.point
-          det_pos={"name":"det","x":msg_pos.x,"y":msg_pos.y,"theta":0.0}
+          #det_pos={"name":"det","x":msg_pos.x,"y":msg_pos.y,"theta":0.0}
+          det_pos.x=msg_pos.x
+          det_pos.x=msg_pos.y
+          det_pos.theta=msg_pos.theta
           # confirm detection of person at goal
           userdata.person_detected_at_goal=True
           if self.utils.update_goal(userdata.current_goal,det_pos):
@@ -340,7 +361,7 @@ class GoToGoal_aided(smach.State):
             print "goal similar to current goal"
 
         # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener()):
+        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
           sss.stop("base")
           stop_base=True
           return 'approached_goal'
@@ -452,14 +473,14 @@ class GoToGoal(smach.State):
       stop_base=False
 
       pose=list()
-      pose.append(float(userdata.current_goal["x"]))
-      pose.append(float(userdata.current_goal["y"]))
-      pose.append(float(userdata.current_goal["theta"]))
+      pose.append(float(userdata.current_goal.x))
+      pose.append(float(userdata.current_goal.y))
+      pose.append(float(userdata.current_goal.theta))
       handle_base = sss.move("base", pose,blocking=False)
 
       while not rospy.is_shutdown() and stop_base==False :
         # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener()):
+        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
           sss.stop("base")
           stop_base=True
         rospy.sleep(0.3) 
@@ -478,9 +499,9 @@ class GoToGoal(smach.State):
       del self.detections[:]
       print "Length detections %i"%len(self.detections)
       pose=list()
-      pose.append(float(userdata.current_goal["x"]))
-      pose.append(float(userdata.current_goal["y"]))
-      pose.append(float(userdata.current_goal["theta"]))
+      pose.append(float(userdata.current_goal.x))
+      pose.append(float(userdata.current_goal.y))
+      pose.append(float(userdata.current_goal.theta))
       handle_base = sss.move("base", pose,blocking=False)
 
     ## init variables
@@ -517,7 +538,7 @@ class GoToGoal(smach.State):
             print "goal similar to current goal"
 
         # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener()):
+        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
           sss.stop("base")
           stop_base=True
           return 'approached_goal'
@@ -878,6 +899,34 @@ class MoveBaseTemp(smach.State):
 #      time.sleep(2)
 #      return 'found'
 
+class Seek_aided_generic(smach.StateMachine):
+    def __init__(self):
+        smach.StateMachine.__init__(self,
+                outcomes=['finished','failed'])
+        with self:
+            smach.StateMachine.add('SCHEDULER',Scheduler(),
+                                   transitions={'e0_success':'GOTOGOALAIDED',
+                                                'e1_success':'OBSERVE',
+                                                'e2_success':'GOTOGOALAIDED',
+                                                'e3_success':'SEARCH',
+                                                'e4_success':'finished',
+                                                'e5_failure':'SELECT_RANDOM_GOAL',
+                                                'failed':'failed'})
+            smach.StateMachine.add('SELECT_RANDOM_GOAL',SelectRandomGoal(),
+                                   transitions={'selected':'GOTOGOALAIDED',
+                                                'not_selected':'failed',
+                                                'failed':'failed'})
+            smach.StateMachine.add('OBSERVE',Observe(),
+                                   transitions={'failed':'failed',
+                                                'detected':'SCHEDULER',
+                                                'not_detected':'SCHEDULER'})
+            smach.StateMachine.add('GOTOGOALAIDED',GoToGoal_aided(),
+                                   transitions={'failed':'failed',
+                                                'update_goal':'GOTOGOALAIDED',
+                                                'approached_goal':'SCHEDULER'})
+            smach.StateMachine.add("SEARCH",SearchPersonGeneric(),
+                                    transitions={'failed':'failed',
+                                                  'finished':'finished'})
 class Seek_aided(smach.StateMachine):
     def __init__(self):
         smach.StateMachine.__init__(self,
@@ -899,56 +948,10 @@ class Seek_aided(smach.StateMachine):
                                    transitions={'failed':'failed',
                                                 'detected':'SCHEDULER',
                                                 'not_detected':'SCHEDULER'})
-
             smach.StateMachine.add('GOTOGOALAIDED',GoToGoal_aided(),
                                    transitions={'failed':'failed',
                                                 'update_goal':'GOTOGOALAIDED',
                                                 'approached_goal':'SCHEDULER'})
-           # smach.StateMachine.add('OBSERVE_search',Observe(),
-           #                        transitions={'failed':'failed',
-           #                                     'detected':'SELECT_GOAL',
-           #                                     'not_detected':'SELECT_GOAL',
-            #smach.StateMachine.add('SETNAME',SetName(),
-            #                       transitions={'set':'SETSTARTGOALNAME',
-            #                                    'failed':'failed'})
-            #smach.StateMachine.add('FAKE_STATE',FakeState(),
-            #                       transitions={'set':'SEARCH',
-            #                                    'failed':'failed'})
-            #smach.StateMachine.add('SETSTARTGOAL',SetStartGoal(),
-            #                       transitions={'set':'GOTOGOAL',
-            #                                    'failed':'failed'})
-           # smach.StateMachine.add('SELECT_GOAL',SelectNavigationGoal(),
-           #                        transitions={'selected':'SEARCH',
-           #                                     'not_selected':'failed',
-           ##                                     'failed':'failed'})
-           # smach.StateMachine.add('MOVE_BASE_TEMP',MoveBaseTemp(),
-           #                        transitions={'reached':'OBSERVE',
-           #                                     'failed':'failed'})
-           # smach.StateMachine.add('MOVE_BASE',ApproachPose(),
-           #                        transitions={'reached':'OBSERVE',
-           #                                     'not_reached':'failed',
-           #                                     'failed':'failed'})
-           # smach.StateMachine.add('GOTOGOAL',GoToGoal(),
-           #                        transitions={'failed':'failed',
-           #                                     'update_goal':'GOTOGOAL',
-           #                                     'approached_goal':'SCHEDULER'})
-            #smach.StateMachine.add('ROTATE',Rotate(),
-            #                       transitions={'finished':'finished',
-            #                                    'failed':'failed'})
-            #smach.StateMachine.add('TALK',Talk(),
-            #                       transitions={'found':'finished',
-            #                                    #'not_found':'failed',
-            #                                    'not_found':'ROTATE',
-            #                                    'failed':'failed'})
-            #smach.StateMachine.add('DETECT',DetectObjectsFrontside(['milk','pringles'],mode="one"),
-            #                       transitions={'detected':'ANNOUNCE',
-            #                                    'not_detected':'ANNOUNCE',
-            #                                    'failed':'failed'})
-
-            #smach.StateMachine.add('ANNOUNCE',AnnounceFoundObjects(),
-            #                       transitions={'announced':'SELECT_GOAL',
-            #                                    'not_announced':'SELECT_GOAL',
-            #                                    'failed':'failed'})
 
 
 class Seek(smach.StateMachine):
@@ -972,11 +975,10 @@ class Seek(smach.StateMachine):
                                    transitions={'failed':'failed',
                                                 'detected':'SCHEDULER',
                                                 'not_detected':'SCHEDULER'})
-
-            smach.StateMachine.add('GOTOGOAL',GoToGoal(),
-                                   transitions={'failed':'failed',
-                                                'update_goal':'GOTOGOAL',
-                                                'approached_goal':'SCHEDULER'})
+          #  smach.StateMachine.add('GOTOGOAL',GoToGoal(),
+          #                         transitions={'failed':'failed',
+          #                                      'update_goal':'GOTOGOAL',
+          #                                      'approached_goal':'SCHEDULER'})
 
   #          smach.StateMachine.add('SETNAME',SetName(),
   #                                 transitions={'set':'SETSTARTGOALNAME',
@@ -1022,97 +1024,96 @@ class Seek(smach.StateMachine):
 
 
 
-class Utils():
-  def __init__(self):
-    print "instatiating Utils"
-  def extract_detection(self,detections,name='NULL'):
-    if name is'NULL':
-      if(len(detections))>0:
-          # TODO return majority of array not first element
-          return detections[0]
-      else:
-        return False
-    else:
-      print "CHECKING DETECTIONS for %s"%name
-      if len(detections)==0:
-        return False
-      for det in detections:
-        #print "checking %s"%str(det.label)
-        if name == str(det.label):
-          print det.label
-          print "NAME FOUND"
-          # when name found  reset detection list
-          return det
-    return False
-
-  def calc_dist(self,x1,y1,x2,y2):
-    dist=math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
-    return dist
-
-  def update_goal(self,old_goal,new_goal):
-    threshold= 1  #[m]
-    dist_between_goals=self.calc_dist(old_goal["x"],old_goal["y"],new_goal["x"],new_goal["y"])
-
-    if dist_between_goals> threshold:
-      return True
-    else:
-      return False
-
-  def goal_approached(self,goal,tl):
-      dist_threshold=APPROACHED_THRESHOLD
-      (transform_possible,current_position,quaternion)=self.getRobotPose(tl)
-      if transform_possible==True:
-        [r,p,y]=euler_from_quaternion(quaternion)
-        #print r
-        #print p
-        #print y
-        print current_position
-        dist_to_goal=self.calc_dist(goal["x"],goal["y"],current_position[0],current_position[1])
-        print "distance to goal= %f"%dist_to_goal
-        if dist_to_goal<=dist_threshold:
-          return True
-        else:
-          return False
-      else:
-        print "No transform available - no goal approached detection"
-        return False
-
-  def transformPose(self,pose,tl):
-    # TODO make this transformation work  - right now detected position is not the right one
-    while not rospy.is_shutdown():
-        try:
-            transformed_pose=tl.transformPose("/map",pose.pose)
-            transform_possible=True
-            print "trafo succcesful"
-            print "================================> transformed_pose: ", transformed_pose
-            break
-        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-          print "error looking up transformation "
-          rospy.sleep(0.5)
-          transformed_pose=pose.pose
-          break
-    #else:
-    #  transformed_pose=pose
-    return transformed_pose
-
-  def getRobotPose(self,tl):
-    transform_possible=False
-    current_position=0
-    quaternion=0
-
-    if tl.frameExists("/base_footprint") and tl.frameExists("/map"):
-        while not rospy.is_shutdown():
-            try:
-                (
-                    current_position, quaternion) = tl.lookupTransform( "/map","/base_footprint",
-                                                                rospy.Time(0))
-                transform_possible=True
-                break
-            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
-              print "error looking up transformation "
-              rospy.sleep(0.5)
-
-    return (transform_possible,current_position,quaternion)
+#class Utils():
+#  def __init__(self):
+#    a=0
+#  def extract_detection(self,detections,name='NULL'):
+#    if name is'NULL':
+#      if(len(detections))>0:
+#          # TODO return majority of array not first element
+#          return detections[0]
+#      else:
+#        return False
+#    else:
+#      print "CHECKING DETECTIONS for %s"%name
+#      if len(detections)==0:
+#        return False
+#      for det in detections:
+#        #print "checking %s"%str(det.label)
+#        if name == str(det.label):
+#          print det.label
+#          print "NAME FOUND"
+#          # when name found  reset detection list
+#          return det
+#    return False
+#
+#  def calc_dist(self,x1,y1,x2,y2):
+#    dist=math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1))
+#    return dist
+#
+#  def update_goal(self,old_goal,new_goal):
+#    threshold= 1  #[m]
+#    dist_between_goals=self.calc_dist(old_goal.x,old_goal.y,new_goal.x,new_goal.y)
+#
+#    if dist_between_goals> threshold:
+#      return True
+#    else:
+#      return False
+#
+#  def goal_approached(self,goal,tl):
+#      dist_threshold=APPROACHED_THRESHOLD
+#      (transform_possible,current_position,quaternion)=self.getRobotPose(tl)
+#      if transform_possible==True:
+#        [r,p,y]=euler_from_quaternion(quaternion)
+#        #print r
+#        #print p
+#        #print y
+#        print current_position
+#        dist_to_goal=self.calc_dist(goal.x,goal.y,current_position[0],current_position[1])
+#        print "distance to goal= %f"%dist_to_goal
+#        if dist_to_goal<=dist_threshold:
+#          return True
+#        else:
+#          return False
+#      else:
+#        print "No transform available - no goal approached detection"
+#        return False
+#
+#  def transformPose(self,pose,tl):
+#    while not rospy.is_shutdown():
+#        try:
+#            transformed_pose=tl.transformPose("/map",pose.pose)
+#            transform_possible=True
+#            print "trafo succcesful"
+#            print "================================> transformed_pose: ", transformed_pose
+#            break
+#        except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+#          print "error looking up transformation "
+#          rospy.sleep(0.5)
+#          transformed_pose=pose.pose
+#          break
+#    #else:
+#    #  transformed_pose=pose
+#    return transformed_pose
+#
+#  def getRobotPose(self,tl):
+#    transform_possible=False
+#    current_position=0
+#    quaternion=0
+#
+#    if tl.frameExists("/base_footprint") and tl.frameExists("/map"):
+#        while not rospy.is_shutdown():
+#            try:
+#                (
+#                    current_position, quaternion) = tl.lookupTransform( "/map","/base_footprint",
+#                                                                rospy.Time(0))
+#                transform_possible=True
+#                break
+#            except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+#              print "error looking up transformation "
+#              rospy.sleep(0.5)
+#
+#    return (transform_possible,current_position,quaternion)
 
 
 class SM(smach.StateMachine):
@@ -1127,6 +1128,13 @@ class SM_aided(smach.StateMachine):
         smach.StateMachine.__init__(self,outcomes=['ended'])
         with self:
             smach.StateMachine.add('STATE',Seek_aided(),
+                transitions={'finished':'ended',
+                      'failed':'ended'})
+class SM_aided_generic(smach.StateMachine):
+    def __init__(self):
+        smach.StateMachine.__init__(self,outcomes=['ended'])
+        with self:
+            smach.StateMachine.add('STATE',Seek_aided_generic(),
                 transitions={'finished':'ended',
                       'failed':'ended'})
 
@@ -1164,9 +1172,11 @@ if __name__=='__main__':
   elif flag=="unaided":
     print "ACCOMPANY UNAIDED"
     sm = SM()
+  elif flag=="ag":
+    print "ACCOMPANY AIDED GENERIC"
+    sm = SM_aided_generic()
   else:
     start_prompt()
-
 
   sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
   sis.start()
