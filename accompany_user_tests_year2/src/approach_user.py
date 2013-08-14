@@ -78,7 +78,8 @@ class Scheduler(smach.State):
   def __init__(self):
     smach.State.__init__(self,
       outcomes=['e0_success','e1_success','e2_success','e3_success','e4_success','e5_failure','failed'],
-      input_keys= ['predefinitions','callback_config'],
+      #input_keys= ['predefinitions','callback_config'],
+      input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
       output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
     self.e=0
     self.failure_ctr=0
@@ -417,8 +418,8 @@ class GoToGoal(smach.State):
   def __init__(self):
     smach.State.__init__(self,
         outcomes=['approached_goal','update_goal','failed'],
-        input_keys=[ 'tl','search_while_moving','current_goal','position_last_seen','person_name'],
-        output_keys=['tl','search_while_moving','current_goal','position_last_seen','person_detected_at_goal','person_name'])
+        input_keys=[ 'search_while_moving','current_goal','position_last_seen','person_name'],
+        output_keys=['search_while_moving','current_goal','position_last_seen','person_detected_at_goal','person_name'])
     rospy.Subscriber(TOPIC_PEOPLE_DETECTION,DetectionArray, self.callback)
     self.detections=list()
 
@@ -479,7 +480,7 @@ class GoToGoal(smach.State):
             det_pose.y=msg_pos.y
             det_pose.theta=0.0#msg_pos.theta
             userdata.position_last_seen=det_pose
-            rospy.logwarn("person has been seen")
+            rospy.loginfo("position last seen has been updated")
           # check if goal has been approached close enough
         if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
           sss.stop("base")
@@ -919,7 +920,7 @@ class Seek_aided_generic(smach.StateMachine):
     def __init__(self):
         smach.StateMachine.__init__(self,
                 outcomes=['finished','failed'],
-                input_keys= ['predefinitions','callback_config'],
+                input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
                 output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
         with self:
             smach.StateMachine.add('SCHEDULER',Scheduler(),
@@ -1080,6 +1081,13 @@ if __name__=='__main__':
                             "approached_threshold":APPROACHED_THRESHOLD,
                             "similar_goal_threshold":SIMILAR_GOAL_THRESHOLD,
                             "goal_perimeter":GOAL_PERIMETER}
+  # dummy initialization
+  sm.userdata.search_while_moving=False
+  sm.userdata.rotate_while_observing=False
+  sm.userdata.person_detected_at_goal=False
+  sm.userdata.person_name=None
+  sm.userdata.current_goal=None
+  sm.userdata.position_last_seen=None
 
 
   sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
