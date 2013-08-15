@@ -1042,9 +1042,13 @@ if __name__=='__main__':
   # DEPRECATED##############################
   if flag=="aided":
     print "ACCOMPANY AIDED"
+    rospy.logerr("Deprecated argument use [tracked_humans] instead"
+    os._exit(1)
     sm = SM_aided()
   elif flag=="unaided":
     print "ACCOMPANY UNAIDED"
+    rospy.logerr("Deprecated argument use [people_detection] instead"
+    os._exit(1)
     sm = SM()
   # DEPRECATED##############################
 
