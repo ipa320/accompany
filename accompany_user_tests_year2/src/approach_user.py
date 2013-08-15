@@ -30,7 +30,7 @@ from GoToUtils import *
 # value defines perimeter around blocked goals, that are supposed to be
 # approached
 global GOAL_PERIMETER
-GOAL_PERIMETER=1 #[m]
+GOAL_PERIMETER=1.3 #[m]
 # threshold defines whether a goal is approached close enough
 global APPROACHED_THRESHOLD
 APPROACHED_THRESHOLD=0.3 #[m]
@@ -40,13 +40,13 @@ SIMILAR_GOAL_THRESHOLD=0.3 #[m]
 # predefined goals that can be used throughout the script ( couch is where the person is supposed to be in the beginning, kitchen is the position where something is grabbed afterwards)
 global PREDEFINED_GOALS
 couch_pose=Pose2D()
-couch_pose.x=2
-couch_pose.y=-2
-couch_pose.theta=1.5
+couch_pose.x=2.2
+couch_pose.y=-0.3
+couch_pose.theta=0.0
 kitchen_pose=Pose2D()
 kitchen_pose.x=0
 kitchen_pose.y=0
-kitchen_pose.theta=0
+kitchen_pose.theta=math.pi
 
 PREDEFINED_GOALS={
           "couch":  couch_pose,
@@ -64,11 +64,11 @@ TOPIC_TRACKED_HUMANS="/accompany/TrackedHumans"
 #  bounds of the map where randomized positions are approached if necessary
 global MAP_BOUNDS
 #MAP_BOUNDS=[-1.0,4.5,-0.5,1.5] # x_min,x_max,y_min,y_max
-MAP_BOUNDS=[-1.0,4.5,-0.5,1.5] # x_min,x_max,y_min,y_max
+MAP_BOUNDS=[-0.5,4.0,-4.5,0.5] # x_min,x_max,y_min,y_max
 
 #  set to true if you want to double check if the person is still at the goal
 global DOUBLECHECK
-DOUBLECHECK=True
+DOUBLECHECK=False
 
 
 
@@ -255,7 +255,7 @@ class GoToGoal_aided(smach.State):
 	pose_received = Detection()
 	pose_received.pose.header = msg.trackedHumans[i].location.header
 	pose_received.pose.pose.position = msg.trackedHumans[i].location.point
-	transformed_pose=self.utils.transformPose(pose_received,get_transform_listener())
+	transformed_pose=self.utils.transformPose(pose_received.pose,get_transform_listener())
 	#print transformed_pose
 	msg.trackedHumans[i].location.point = transformed_pose.pose.position
         self.detections.append(msg.trackedHumans[i])
@@ -472,7 +472,9 @@ class GoToGoal(smach.State):
           # check if goal update is necessary
           if detection is not False:
 
-            transformed_pose=self.utils.transformPose(detection,get_transform_listener())
+            print detection.pose
+            transformed_pose=self.utils.transformPose(detection.pose,get_transform_listener())
+            print transformed_pose
             msg_pos=transformed_pose.pose.position
 
             det_pose=Pose2D()
@@ -522,7 +524,7 @@ class GoToGoal(smach.State):
         # check if goal update is necessary
         if detection is not False:
 
-          transformed_pose=self.utils.transformPose(detection,get_transform_listener())
+          transformed_pose=self.utils.transformPose(detection.pose,get_transform_listener())
           msg_pos=transformed_pose.pose.position
 
           det_pose=Pose2D()
@@ -626,7 +628,7 @@ class Observe_aided(smach.State):
 	pose_received = Detection()
 	pose_received.pose.header = msg.trackedHumans[i].location.header
 	pose_received.pose.pose.position = msg.trackedHumans[i].location.point
-	transformed_pose=self.utils.transformPose(pose_received,get_transform_listener())
+	transformed_pose=self.utils.transformPose(pose_received.pose,get_transform_listener())
 	#print transformed_pose
 	msg.trackedHumans[i].location.point = transformed_pose.pose.position
         self.detections.append(msg.trackedHumans[i])
@@ -663,8 +665,9 @@ class Observe_aided(smach.State):
       rel_pose.append(0)
       rel_pose.append(0)
       rel_pose.append(0.1)
-      for i in xrange(20):
+      for i in xrange(70):
         handle_base = sss.move_base_rel("base", rel_pose,blocking =True)
+        rospy.sleep(0.2)
         det=self.utils.extract_detection(self.detections)
         del self.detections[:]
         if det !=False:
@@ -728,10 +731,11 @@ class Observe(smach.State):
         return 'not_detected'
       else:
         det=self.utils.extract_detection(self.detections)
+        print "extracted detections"
         if(userdata.person_name)==None:
           userdata.person_name=det.label
 
-        transformed_pose=self.utils.transformPose(det,get_transform_listener())
+        transformed_pose=self.utils.transformPose(det.pose,get_transform_listener())
 
         msg_pos=transformed_pose.pose.position
         det_pos=Pose2D()
@@ -750,7 +754,7 @@ class Observe(smach.State):
       rel_pose.append(0)
       rel_pose.append(0)
       rel_pose.append(0.1)
-      for i in xrange(20):
+      for i in xrange(70):
         handle_base = sss.move_base_rel("base", rel_pose,blocking =True)
         det=self.utils.extract_detection(self.detections)
         del self.detections[:]
@@ -760,7 +764,7 @@ class Observe(smach.State):
             sss.stop("base")
             # update goal
             #msg_pos=det.pose.pose.position
-            transformed_pose=self.utils.transformPose(det,get_transform_listener())
+            transformed_pose=self.utils.transformPose(det.pose,get_transform_listener())
 
             msg_pos=transformed_pose.pose.position
 
@@ -1031,67 +1035,71 @@ def start_prompt():
 
 
 if __name__=='__main__':
-  if len(sys.argv)<2:
-    start_prompt()
-  else:
-    flag=sys.argv[1]
-  if len(flag)==0:
-    start_promt()
+  try:
+    if len(sys.argv)<2:
+      start_prompt()
+    else:
+      flag=sys.argv[1]
+    if len(flag)==0:
+      start_promt()
 
-  rospy.init_node('ApproachUser')
-  # DEPRECATED##############################
-  if flag=="aided":
-    print "ACCOMPANY AIDED"
-    sm = SM_aided()
-  elif flag=="unaided":
-    print "ACCOMPANY UNAIDED"
-    sm = SM()
-  # DEPRECATED##############################
-
-
-
-  elif flag=="people_detection":
-    rospy.loginfo("Running approach user with people detections")
-    sm = SM_aided_generic()
-    sm.userdata.callback_config={"argname_frame":["pose","header","frame_id"],
-                   "msg_element":"detections",
-                   "argname_label":["label"],
-                   "argname_position":["pose","pose","position"],
-                   "argname_header":["pose","header"],
-                   "topicname":TOPIC_PEOPLE_DETECTION,
-                   "msgclass":DetectionArray}
+    rospy.init_node('ApproachUser')
+    # DEPRECATED##############################
+    if flag=="aided":
+      print "ACCOMPANY AIDED"
+      sm = SM_aided()
+    elif flag=="unaided":
+      print "ACCOMPANY UNAIDED"
+      sm = SM()
+    # DEPRECATED##############################
 
 
-  elif flag=="tracked_humans":
-    rospy.loginfo("Running approach user with tracked humans")
-    sm = Seek_aided_generic()
-    sm.userdata.callback_config={"argname_frame":["location","header","frame_id"],
-                   "msg_element":"trackedHumans",
-                   "argname_label":["identity"],
-                   "argname_position":["location","point"],
-                   "argname_header":["location","header"],
-                   "topicname":TOPIC_TRACKED_HUMANS,
-                   "msgclass":TrackedHumans}
-  else:
-    start_prompt()
 
-  sm.userdata.predefinitions={"predefined_goals":PREDEFINED_GOALS,
-                            "map_bounds":MAP_BOUNDS,
-                            "double_check":DOUBLECHECK,
-                            "approached_threshold":APPROACHED_THRESHOLD,
-                            "similar_goal_threshold":SIMILAR_GOAL_THRESHOLD,
-                            "goal_perimeter":GOAL_PERIMETER}
-  # dummy initialization
-  sm.userdata.search_while_moving=False
-  sm.userdata.rotate_while_observing=False
-  sm.userdata.person_detected_at_goal=False
-  sm.userdata.person_name=None
-  sm.userdata.current_goal=None
-  sm.userdata.position_last_seen=None
+    elif flag=="people_detection":
+      rospy.loginfo("Running approach user with people detections")
+      sm = SM_aided_generic()
+      sm.userdata.callback_config={"argname_frame":["pose","header","frame_id"],
+                     "msg_element":"detections",
+                     "argname_label":["label"],
+                     "argname_position":["pose","pose","position"],
+                     "argname_header":["pose","header"],
+                     "topicname":TOPIC_PEOPLE_DETECTION,
+                     "msgclass":DetectionArray}
 
 
-  sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
-  sis.start()
-  outcome = sm.execute()
-  rospy.spin()
-  sis.stop()
+    elif flag=="tracked_humans":
+      rospy.loginfo("Running approach user with tracked humans")
+      sm = Seek_aided_generic()
+      sm.userdata.callback_config={"argname_frame":["location","header","frame_id"],
+                     "msg_element":"trackedHumans",
+                     "argname_label":["identity"],
+                     "argname_position":["location","point"],
+                     "argname_header":["location","header"],
+                     "topicname":TOPIC_TRACKED_HUMANS,
+                     "msgclass":TrackedHumans}
+    else:
+      start_prompt()
+
+    sm.userdata.predefinitions={"predefined_goals":PREDEFINED_GOALS,
+                              "map_bounds":MAP_BOUNDS,
+                              "double_check":DOUBLECHECK,
+                              "approached_threshold":APPROACHED_THRESHOLD,
+                              "similar_goal_threshold":SIMILAR_GOAL_THRESHOLD,
+                              "goal_perimeter":GOAL_PERIMETER}
+    # dummy initialization
+    sm.userdata.search_while_moving=False
+    sm.userdata.rotate_while_observing=False
+    sm.userdata.person_detected_at_goal=False
+    sm.userdata.person_name=None
+    sm.userdata.current_goal=None
+    sm.userdata.position_last_seen=None
+
+
+    sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
+    sis.start()
+    outcome = sm.execute()
+    rospy.spin()
+    sis.stop()
+  except:
+    print"exception"
+    os._exit(1)
