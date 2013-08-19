@@ -33,7 +33,7 @@ global GOAL_PERIMETER
 GOAL_PERIMETER=1.3 #[m]
 # threshold defines whether a goal is approached close enough
 global APPROACHED_THRESHOLD
-APPROACHED_THRESHOLD=0.3 #[m]
+APPROACHED_THRESHOLD=0.4 #[m]
 # threshold defines whether a goal is similar to another goal 
 global SIMILAR_GOAL_THRESHOLD
 SIMILAR_GOAL_THRESHOLD=0.3 #[m]
@@ -158,7 +158,7 @@ class Scheduler(smach.State):
       #userdata.person_name="Caro"
       if userdata.position_last_seen!=None:
         userdata.current_goal=userdata.position_last_seen
-      print userdata.current_goal
+      print "userdata.current_goal=", userdata.current_goal
       time.sleep(10)
       userdata.search_while_moving=True
       self.e=4
@@ -168,6 +168,7 @@ class Scheduler(smach.State):
     # event 4#################################
     elif self.e==4:
       if userdata.person_detected_at_goal==True:
+        print "say it e4: Here is your order."
         sss.say(["Here is your order."])
         rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 success -> approached position of target person - finished")
         return 'e4_success'
@@ -175,7 +176,7 @@ class Scheduler(smach.State):
         userdata.rotate_while_observing= True
         self.e=5
         rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 failure -> approached position but didnt find target person - rotating observation")
-        return 'e1_success'
+        return 'e3_success'     # 'e1_success'
     # event 5#################################
     elif self.e==5:
       if userdata.person_detected_at_goal==True:
@@ -267,7 +268,7 @@ class GoToGoal_aided(smach.State):
     for det in detections:
       #print "checking %s"%str(det.label)
       if name == str(det.identity):
-        print det.identity
+        print "det.identity=", det.identity
         print "NAME FOUND"
         # when name found  reset detection list
         del self.detections[:]
@@ -442,7 +443,7 @@ class GoToGoal(smach.State):
     for det in detections:
       #print "checking %s"%str(det.label)
       if name == str(det.label):
-        print det.label
+        print "det.label=", det.label
         print "NAME FOUND"
         # when name found  reset detection list
         del self.detections[:]
@@ -472,15 +473,15 @@ class GoToGoal(smach.State):
           # check if goal update is necessary
           if detection is not False:
 
-            print detection.pose
+            print "detection.pose=", detection.pose
             transformed_pose=self.utils.transformPose(detection.pose,get_transform_listener())
-            print transformed_pose
+            print "transformed_pose=", transformed_pose
             msg_pos=transformed_pose.pose.position
 
             det_pose=Pose2D()
             det_pose.x=msg_pos.x
             det_pose.y=msg_pos.y
-            det_pose.theta=0.0#msg_pos.theta
+            det_pose.theta=0.0#msg_pos.theta # todo: angle
             userdata.position_last_seen=det_pose
             rospy.loginfo("position last seen has been updated")
           # check if goal has been approached close enough
@@ -530,7 +531,7 @@ class GoToGoal(smach.State):
           det_pose=Pose2D()
           det_pose.x=msg_pos.x
           det_pose.y=msg_pos.y
-          det_pose.theta=0.0#msg_pos.theta
+          det_pose.theta=0.0#msg_pos.theta  # todo: angle
           # confirm detection of person at goal
           userdata.person_detected_at_goal=True
           if self.utils.update_goal(userdata.current_goal,det_pos):
@@ -751,8 +752,11 @@ class Observe(smach.State):
       rel_pose=list()
       rel_pose.append(0)
       rel_pose.append(0)
-      rel_pose.append(0.1)
-      for i in xrange(70):
+      rel_pose.append(-0.1)
+      for i in xrange(80):
+        if i==5:
+          rel_pose.pop()
+          rel_pose.append(0.1)
         handle_base = sss.move_base_rel("base", rel_pose,blocking =True)
         det=self.utils.extract_detection(self.detections)
         del self.detections[:]
@@ -769,7 +773,7 @@ class Observe(smach.State):
             det_pos=Pose2D()
             det_pos.x=msg_pos.x
             det_pos.x=msg_pos.y
-            det_pos.theta=0.0
+            det_pos.theta=0.0 # todo: right orientation
             userdata.position_last_seen=det_pos
             if (userdata.person_name)==None:
               userdata.person_name=det.label
@@ -930,7 +934,7 @@ class Seek_aided_generic(smach.StateMachine):
                                                 'e1_success':'OBSERVE',
                                                 'e2_success':'GOTOGOAL',
                                                 'e3_success':'SEARCH',
-                                                'e4_success':'failed', # should not occur
+                                                'e4_success':'finished',  # 'failed', # should not occur
                                                 'e5_failure':'SELECT_RANDOM_GOAL', # should not occur
                                                 'failed':'failed'})
             smach.StateMachine.add('SELECT_RANDOM_GOAL',SelectRandomGoal(),
@@ -947,7 +951,7 @@ class Seek_aided_generic(smach.StateMachine):
                                                 'approached_goal':'SCHEDULER'})
             smach.StateMachine.add("SEARCH",SearchPersonGeneric(),
                                     transitions={'failed':'failed',
-                                                  'finished':'finished'})
+                                                  'finished': 'SCHEDULER'}) #'finished'})
 class Seek_aided(smach.StateMachine):
     def __init__(self):
         smach.StateMachine.__init__(self,
