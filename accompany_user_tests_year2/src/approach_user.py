@@ -481,7 +481,7 @@ class GoToGoal(smach.State):
             det_pose=Pose2D()
             det_pose.x=msg_pos.x
             det_pose.y=msg_pos.y
-            det_pose.theta=0.0#msg_pos.theta # todo: angle
+            det_pose.theta=0.0#msg_pos.theta
             userdata.position_last_seen=det_pose
             rospy.loginfo("position last seen has been updated")
           # check if goal has been approached close enough
@@ -531,7 +531,7 @@ class GoToGoal(smach.State):
           det_pose=Pose2D()
           det_pose.x=msg_pos.x
           det_pose.y=msg_pos.y
-          det_pose.theta=0.0#msg_pos.theta  # todo: angle
+          det_pose.theta=0.0#msg_pos.theta
           # confirm detection of person at goal
           userdata.person_detected_at_goal=True
           if self.utils.update_goal(userdata.current_goal,det_pos):
@@ -773,7 +773,7 @@ class Observe(smach.State):
             det_pos=Pose2D()
             det_pos.x=msg_pos.x
             det_pos.x=msg_pos.y
-            det_pos.theta=0.0 # todo: right orientation
+            det_pos.theta=0.0
             userdata.position_last_seen=det_pos
             if (userdata.person_name)==None:
               userdata.person_name=det.label
