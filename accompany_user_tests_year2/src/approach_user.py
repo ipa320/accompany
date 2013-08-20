@@ -24,6 +24,7 @@ from GoToGoalGeneric import *
 from geometry_msgs.msg import Pose2D
 
 from GoToUtils import *
+from ScreenFormatting import *
 ############### PARAMETER SETTINGS #######################
 
 
@@ -40,7 +41,7 @@ SIMILAR_GOAL_THRESHOLD=0.3 #[m]
 # predefined goals that can be used throughout the script ( couch is where the person is supposed to be in the beginning, kitchen is the position where something is grabbed afterwards)
 global PREDEFINED_GOALS
 couch_pose=Pose2D()
-couch_pose.x=2.2
+couch_pose.x=1.2
 couch_pose.y=-0.3
 couch_pose.theta=0.0
 kitchen_pose=Pose2D()
@@ -72,138 +73,6 @@ DOUBLECHECK=False
 
 
 
-############### SCHEDULER #######################
-# this class controls the scr
-class Scheduler(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-      outcomes=['e0_success','e1_success','e2_success','e3_success','e4_success','e5_failure','failed'],
-      #input_keys= ['predefinitions','callback_config'],
-      input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
-      output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
-    self.e=0
-    self.failure_ctr=0
-    self.predefined_goals=PREDEFINED_GOALS
-    self.utils=Utils()
-
-    # define script script events
-    # e=0 ---> set start goal1 command going there without observing
-    #
-    # e=1 ---> begin observing goal1  without rotating
-    #
-    # e=2 ---> when detection has been made go to goal2 - when detections has
-    # not been made return to e=1 with roating
-    #
-    # e=3 ---> wait at goal2 then proceed to Search
-    #
-    # e=4 ---> check if person was found at goal. If not initiate rotation
-    # observation
-    #
-
-
-
-  def execute(self, userdata):
-    #feed predefined stuff  to userdata
-    # event 0#################################
-    if self.e==0:
-      userdata.position_last_seen=None
-      userdata.person_name=None
-      userdata.person_detected_at_goal=False
-      userdata.rotate_while_observing=False
-      print userdata.callback_config
-      #userdata.current_goal=self.predefined_goals["kitchen"]
-      userdata.current_goal=self.predefined_goals["couch"]
-      userdata.search_while_moving=False
-      # increment event
-      self.e=1
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 0 success -> going to couch")
-      return 'e0_success'
-
-    # event 1#################################
-    elif self.e==1:
-      userdata.rotate_while_observing=False
-      # increment event
-      self.e=2
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 1 success -> observing")
-      return 'e1_success'
-
-    # event 2#################################
-    elif self.e==2:
-      if userdata.person_detected_at_goal==True:
-        userdata.current_goal=self.predefined_goals["kitchen"]
-        #userdata.current_goal=self.predefined_goals["couch"]
-        userdata.search_while_moving=False
-        # increment event
-        self.e=3
-        sss.say(["Thank you for your order %s. I am going to fetch it."%str(userdata.person_name)])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 success -> going to kitchen")
-        return 'e2_success'
-      elif userdata.person_detected_at_goal==False:
-        #check couter so it doesn't get stuck here without finding anyone
-        if self.failure_ctr>=2:
-          rospy.logwarn( "after observation target could still not be found")
-          sss.say(["I found nobody to take an order from. What a pity"])
-          return 'failed'
-        userdata.rotate_while_observing= True
-        # do not increment event ->repeat step
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 failure -> trying with rotation")
-        self.failure_ctr+=1
-        return 'e1_success'
-
-    # event 3#################################
-    elif self.e==3:
-#      userdata.current_goal=userdata.position_last_seen	# hack: does not work for goals within obstacles
-      userdata.current_goal=self.predefined_goals["couch"]
-      #userdata.current_goal=self.predefined_goals["middle"]
-      #userdata.person_name="Caro"
-      if userdata.position_last_seen!=None:
-        userdata.current_goal=userdata.position_last_seen
-      print "userdata.current_goal=", userdata.current_goal
-      time.sleep(10)
-      userdata.search_while_moving=True
-      self.e=4
-      sss.say(["I am coming back to you %s."%str(userdata.person_name)])
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 3 success -> done job in kitchen  - searching begins")
-      return 'e3_success'
-    # event 4#################################
-    elif self.e==4:
-      if userdata.person_detected_at_goal==True:
-        print "say it e4: Here is your order."
-        sss.say(["Here is your order."])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 success -> approached position of target person - finished")
-        return 'e4_success'
-      elif userdata.person_detected_at_goal==False:
-        userdata.rotate_while_observing= True
-        self.e=5
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 failure -> approached position but didnt find target person - rotating observation")
-        return 'e3_success'     # 'e1_success'
-    # event 5#################################
-    elif self.e==5:
-      if userdata.person_detected_at_goal==True:
-        userdata.search_while_moving=True
-        # decrement to event 4
-        self.e=4
-        if self.utils.update_goal(userdata.position_last_seen,userdata.current_goal)==True:
-          return 'e4_success'
-        else:
-          rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> going to new target position")
-          return 'e3_success'
-      elif userdata.person_detected_at_goal==False:
-        userdata.search_while_moving=True
-        userdata.rotate_while_observing= True
-        # decrement to event 4
-        self.e=4
-        sss.say(["Where are you? I will search randomly now."])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> now searching random positions")
-        return 'e5_failure'
-
-    else:
-      rospy.logerr( " FAILURE - not handled event")
-
-
-
-
-
 class SelectRandomGoal(smach.State):
   def __init__(self):
     smach.State.__init__(self,
@@ -212,7 +81,7 @@ class SelectRandomGoal(smach.State):
       output_keys=['current_goal'])
 
   def execute(self, userdata):
-      print "NAVIGATING TO RANDOM GOAL."
+      sf = ScreenFormat("SelectRandomGoal")
       map_bounds=MAP_BOUNDS
       rand_x=random.uniform(map_bounds[0],map_bounds[1]) # x
       rand_y=random.uniform(map_bounds[2],map_bounds[3]) # y
@@ -228,6 +97,7 @@ class FakeState(smach.State):
         output_keys=['script_time','current_goal','person_name','position_last_seen'])
 
   def execute(self,userdata):
+    sf = ScreenFormat("FakeState")
     pos={"name":"fake","x":1.5,"y":-1.5,"theta":0.0}
     userdata.position_last_seen=pos
     userdata.person_name="Caro"
@@ -277,7 +147,7 @@ class GoToGoal_aided(smach.State):
 
 
   def execute(self,userdata):
-    print "GO TO GOAL AIDED"
+    sf = ScreenFormat("GoToGoal_aided")
     if userdata.search_while_moving==False:
       print "moving towards goal without searching"
       stop_base=False
@@ -450,13 +320,8 @@ class GoToGoal(smach.State):
         return det
     return False
 
-
-
-
-
-
   def execute(self,userdata):
-    print "GO TO GOAL UNAIDED"
+    sf = ScreenFormat("GoToGoal")
     if userdata.search_while_moving==False:
       print "moving towards goal without searching"
       stop_base=False
@@ -470,6 +335,7 @@ class GoToGoal(smach.State):
       while not rospy.is_shutdown() and stop_base==False :
         if userdata.person_name!=None:
           detection=self.check_detections(self.detections,userdata.person_name)
+          detection=False
           # check if goal update is necessary
           if detection is not False:
 
@@ -636,6 +502,7 @@ class Observe_aided(smach.State):
     return
 
   def execute(self, userdata):
+    sf = ScreenFormat("Observe_aided")
     if userdata.rotate_while_observing==False:
       # give person time to order and observe in the meantime
       rospy.sleep(2)
@@ -694,8 +561,6 @@ class Observe_aided(smach.State):
 
 
 
-
-
 class Observe(smach.State):
   def __init__(self):
     smach.State.__init__(self,
@@ -719,6 +584,7 @@ class Observe(smach.State):
     return
 
   def execute(self, userdata):
+    sf = ScreenFormat("Observe")
     if userdata.rotate_while_observing==False:
       # give person time to order and observe in the meantime
       rospy.sleep(2)
@@ -739,10 +605,12 @@ class Observe(smach.State):
         msg_pos=transformed_pose.pose.position
         det_pos=Pose2D()
         det_pos.x=msg_pos.x
-        det_pos.x=msg_pos.y
+        det_pos.y=msg_pos.y
         det_pos.theta=0.0
 
         userdata.position_last_seen=det_pos
+        print "observe: userdata.position_last_seen=", userdata.position_last_seen
+
         #userdata.current_goal=userdata.predefined_goals["kitchen"]
         #sss.say(['Thank you for your order, %s.'%str(self.detections[0].label)])
         userdata.person_detected_at_goal=True
@@ -772,9 +640,10 @@ class Observe(smach.State):
 
             det_pos=Pose2D()
             det_pos.x=msg_pos.x
-            det_pos.x=msg_pos.y
+            det_pos.y=msg_pos.y
             det_pos.theta=0.0
             userdata.position_last_seen=det_pos
+            print "observe rot: userdata.position_last_seen=", userdata.position_last_seen
             if (userdata.person_name)==None:
               userdata.person_name=det.label
             userdata.person_detected_at_goal=True
@@ -795,6 +664,7 @@ class MoveBaseTemp(smach.State):
         outcomes=['reached','failed'])
 
     def execute(self,userdata):
+      sf = ScreenFormat("MoveBaseTemp")
       target_pose=list()
       if userdata.current_goal['name'] is "kitchen":
         target_pose.append(0.1)
@@ -921,6 +791,143 @@ class MoveBaseTemp(smach.State):
 #      sss.say(['I have found you, %s! Nice to see you.'%str(name)])
 #      time.sleep(2)
 #      return 'found'
+
+
+############### SCHEDULER #######################
+# this class controls the scr
+class Scheduler(smach.State):
+  def __init__(self):
+    smach.State.__init__(self,
+      outcomes=['e0_success','e1_success','e2_success','e3_success','e4_success','e5_failure','failed'],
+      #input_keys= ['predefinitions','callback_config'],
+      input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
+      output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','use_perimeter_goal','search_while_moving','rotate_while_observing'])
+    self.e=0
+    self.failure_ctr=0
+    self.predefined_goals=PREDEFINED_GOALS
+    self.utils=Utils()
+
+    # define script script events
+    # e=0 ---> set start goal1 command going there without observing
+    #
+    # e=1 ---> begin observing goal1  without rotating
+    #
+    # e=2 ---> when detection has been made go to goal2 - when detections has
+    # not been made return to e=1 with roating
+    #
+    # e=3 ---> wait at goal2 then proceed to Search
+    #
+    # e=4 ---> check if person was found at goal. If not initiate rotation
+    # observation
+    #
+
+  def execute(self, userdata):
+    sf = ScreenFormat("Scheduler")
+    #feed predefined stuff  to userdata
+    # event 0#################################
+    if self.e==0:
+      userdata.position_last_seen=None
+      userdata.person_name=None
+      userdata.person_detected_at_goal=False
+      userdata.rotate_while_observing=False
+      print userdata.callback_config
+      #userdata.current_goal=self.predefined_goals["kitchen"]
+      userdata.current_goal=self.predefined_goals["couch"]
+      userdata.search_while_moving=False
+      # increment event
+      self.e=1
+      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 0 success -> going to couch")
+      return 'e0_success'
+
+    # event 1#################################
+    elif self.e==1:
+      userdata.rotate_while_observing=False
+      # increment event
+      self.e=2
+      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 1 success -> observing")
+      return 'e1_success'
+
+    # event 2#################################
+    elif self.e==2:
+      if userdata.person_detected_at_goal==True:
+        userdata.current_goal=self.predefined_goals["kitchen"]
+        #userdata.current_goal=self.predefined_goals["couch"]
+        userdata.search_while_moving=False
+        print "e2: userdata.position_last_seen=", userdata.position_last_seen
+        # increment event
+        self.e=3
+        sss.say(["Thank you for your order %s. I am going to fetch it."%str(userdata.person_name)])
+        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 success -> going to kitchen")
+        return 'e2_success'
+      elif userdata.person_detected_at_goal==False:
+        #check couter so it doesn't get stuck here without finding anyone
+        if self.failure_ctr>=2:
+          rospy.logwarn( "after observation target could still not be found")
+          sss.say(["I found nobody to take an order from. What a pity"])
+          return 'failed'
+        userdata.rotate_while_observing= True
+        # do not increment event ->repeat step
+        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 failure -> trying with rotation")
+        self.failure_ctr+=1
+        return 'e1_success'
+
+    # event 3#################################
+    elif self.e==3:
+#      userdata.current_goal=userdata.position_last_seen	# hack: does not work for goals within obstacles
+      userdata.current_goal=self.predefined_goals["couch"]
+      userdata.use_perimeter_goal = False
+      #userdata.current_goal=self.predefined_goals["middle"]
+      #userdata.person_name="Caro"
+      print "e3: userdata.position_last_seen=", userdata.position_last_seen
+#     hack: because navigation is imcapable, the following lines are commented out
+#      if userdata.position_last_seen!=None:
+#        userdata.current_goal=userdata.position_last_seen
+#        userdata.use_perimeter_goal = True
+      print "userdata.current_goal=", userdata.current_goal
+      time.sleep(3)
+      userdata.search_while_moving=True
+      self.e=4
+      sss.say(["I am coming back to you %s."%str(userdata.person_name)])
+      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 3 success -> done job in kitchen  - searching begins")
+      return 'e3_success'
+    # event 4#################################
+    elif self.e==4:
+      if userdata.person_detected_at_goal==True:
+        print "say it e4: Here is your order."
+        sss.say(["Here is your order."])
+        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 success -> approached position of target person - finished")
+        return 'e4_success'
+      elif userdata.person_detected_at_goal==False:
+        userdata.rotate_while_observing= True
+        userdata.use_perimeter_goal = True
+        self.e=5
+        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 failure -> approached position but didnt find target person - rotating observation")
+        return 'e3_success'     # 'e1_success'
+    # event 5#################################
+    elif self.e==5:
+      if userdata.person_detected_at_goal==True:
+        userdata.search_while_moving=True
+        # decrement to event 4
+        self.e=4
+        if self.utils.update_goal(userdata.position_last_seen,userdata.current_goal)==True:
+          return 'e4_success'
+        else:
+          rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> going to new target position")
+          userdata.use_perimeter_goal = True
+          return 'e3_success'
+      elif userdata.person_detected_at_goal==False:
+        userdata.search_while_moving=True
+        userdata.rotate_while_observing= True
+        # decrement to event 4
+        self.e=4
+        sss.say(["Where are you? I will search randomly now."])
+        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> now searching random positions")
+        return 'e5_failure'
+
+    else:
+      rospy.logerr( " FAILURE - not handled event")
+
+
 
 class Seek_aided_generic(smach.StateMachine):
     def __init__(self):
