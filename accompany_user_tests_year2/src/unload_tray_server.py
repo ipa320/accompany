@@ -4,6 +4,7 @@ import roslib; roslib.load_manifest('accompany_user_tests_year2')
 import rospy
 import actionlib
 import tf
+import time
 
 from accompany_user_tests_year2.msg import *
 from simple_script_server import *
@@ -23,7 +24,9 @@ class UnloadTrayServer:
 			rospy.logerr("table_height (" + str(goal.table_height) + ") not within limits (0.45...0.60), goal aborted.")
 			self.server.set_aborted()
 			return
-		
+		#turn to user
+ 		sss.move("torso", [[-0.08,0.17,-0.08]])
+ 
 		print "placing object on table with a height of " + str(goal.table_height)
 	
 		#sss.set_light([0,0,1])
@@ -39,15 +42,15 @@ class UnloadTrayServer:
 		handle_arm.wait()
 
 		sss.move("sdh","cylclosed")
-		#handle_arm = sss.move("arm",["intermediatefront"])
+		handle_arm = sss.move("arm",["intermediatefront"])
 
-		table_height = goal.table_height
-		intermediatefront_height = 0.98
-		dz = table_height - intermediatefront_height
+		#table_height = goal.table_height
+		#intermediatefront_height = 0.98
+		#dz = table_height - intermediatefront_height
 
-		current_pose = moveit_get_current_pose("arm")
+		
 
-		goal_pose1 = self.calculate_goal_pose(current_pose, -0.2, -0.3, dz, 0.0, 0.0, -1.5)
+		
 		#if not moveit_cart_goals("arm", "base_link", [goal_pose1], False) == "succeeded":
 		#	sss.set_light("red")
 		#	sss.move("tray","deliverdown")
@@ -70,17 +73,36 @@ class UnloadTrayServer:
 		p12 =[0.4018593500368297, -1.6224102401174605, 1.6058433627476916, 1.3371890399139374, -0.4107816547038965, 0.5068991582957096, 1.2285655857995152]
 		p13 =[0.3740939331401023, -1.6692602596667712, 1.5726137426609057, 1.2441861303086625, -0.41711411235337437, 0.5347730094872531, 1.2570846655944479]
 		p14 =[0.37384849786758423, -1.6693923473358154, 1.5724937915802002, 1.2437162399291992, -0.417205810546875, 0.5350838303565979, 1.258846640586853]
-		handle_arm = sss.move("arm",["intermediatefront", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14])
 
+
+		p15=[-0.5151359438896179, -1.5682907104492188, 1.935489296913147, 0.42959874868392944, -0.7945099472999573, 0.5764082670211792, 1.2594016790390015]
+		p16= [-0.5146042704582214, -1.6116349697113037, 1.917541742324829, 0.353283554315567, -0.7945554852485657, 0.6055818796157837, 1.259820580482483]
+		p17= [-0.3796073794364929, -1.3648346662521362, 1.9743826389312744, 0.7521292567253113, -0.7862803339958191, 0.5338812828063965, 1.2719261646270752]
+		p18= [-0.28245383501052856, -0.818909227848053, 1.8353912830352783, 1.3951565027236938, -0.49456751346588135, 0.18976472318172455, 0.6043481826782227]
+
+		#handle_arm = sss.move("arm",["intermediatefront", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15])
+		handle_arm = sss.move("arm",["intermediatefront", p18, p16])
+		#rospy.sleep(3)
+		#sss.trigger("arm", "stop")
+###
+		
+		#current_pose = moveit_get_current_pose("arm")
+		#goal_pose1 = self.calculate_goal_pose(current_pose, 0.05, 0.05, 0.0, 0.0, 0.0, 0.0)
+		
+######
 		sss.move("sdh","cylopen")
+		handle_arm = sss.move("arm",[p17],True)
+	#rospy.sleep(1)
 		handle_arm = sss.move("arm",["intermediateback","folded"],False)
-		rospy.sleep(3)
+		rospy.sleep(4)
 		sss.move("sdh","home")
+		sss.move("torso","home")
+######
 		#sss.move("tray","store")
-		handle_arm.wait()
+		#handle_arm.wait()
 
 		#sss.set_light("green")
-		self.server.set_succeeded()
+		#self.server.set_succeeded()
 
 	def calculate_goal_pose(self, current_pose, dx, dy, dz, droll, dpitch, dyaw):
 		goal_pose = current_pose.pose
