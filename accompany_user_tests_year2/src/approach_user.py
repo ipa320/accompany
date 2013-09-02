@@ -6,6 +6,7 @@
 ############### PARAMETER SETTINGS #######################
 import roslib
 roslib.load_manifest('cob_generic_states_experimental')
+roslib.load_manifest('accompany_user_tests_year2')
 import rospy
 import math
 import smach
@@ -41,13 +42,13 @@ SIMILAR_GOAL_THRESHOLD=0.3 #[m]
 # predefined goals that can be used throughout the script ( couch is where the person is supposed to be in the beginning, kitchen is the position where something is grabbed afterwards)
 global PREDEFINED_GOALS
 couch_pose=Pose2D()
-couch_pose.x=1.2
-couch_pose.y=-0.3
-couch_pose.theta=0.0
+couch_pose.x=0.2 #1.2
+couch_pose.y=1.4 #-0.3
+couch_pose.theta=math.pi/2.0 #0.0
 kitchen_pose=Pose2D()
-kitchen_pose.x=0
-kitchen_pose.y=0
-kitchen_pose.theta=math.pi
+kitchen_pose.x=4.8 #0
+kitchen_pose.y=1.0 #0
+kitchen_pose.theta=0.0 #math.pi
 
 PREDEFINED_GOALS={
           "couch":  couch_pose,
@@ -64,8 +65,8 @@ TOPIC_TRACKED_HUMANS="/accompany/TrackedHumans"
 
 #  bounds of the map where randomized positions are approached if necessary
 global MAP_BOUNDS
-#MAP_BOUNDS=[-1.0,4.5,-0.5,1.5] # x_min,x_max,y_min,y_max
-MAP_BOUNDS=[-0.5,4.0,-4.5,0.5] # x_min,x_max,y_min,y_max
+MAP_BOUNDS=[-1.5,4.5,-0.5,2.5] # x_min,x_max,y_min,y_max
+#MAP_BOUNDS=[-0.5,4.0,-4.5,0.5] # x_min,x_max,y_min,y_max
 
 #  set to true if you want to double check if the person is still at the goal
 global DOUBLECHECK
@@ -884,7 +885,7 @@ class Scheduler(smach.State):
 #        userdata.current_goal=userdata.position_last_seen
 #        userdata.use_perimeter_goal = True
       print "userdata.current_goal=", userdata.current_goal
-      time.sleep(3)
+      time.sleep(0.1)
       userdata.search_while_moving=True
       self.e=4
       sss.say(["I am coming back to you %s."%str(userdata.person_name)])
@@ -1053,6 +1054,8 @@ if __name__=='__main__':
       start_promt()
 
     rospy.init_node('ApproachUser')
+    time.sleep(1)
+
     # DEPRECATED##############################
     if flag=="aided":
       print "ACCOMPANY AIDED"
