@@ -1,0 +1,9 @@
+cob_version cob3-6
+sampling_rate 5
+output_topic accompany/GUIimage
+input_topic stereo/left/image_color
+head_input_topic head_controller/state
+head_downsampled_control_topic head_controller/state_downsampled
+head_sampling_rate 100
+image_width 1280
+image_heigth 752
