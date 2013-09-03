@@ -61,7 +61,7 @@ TOPIC_PEOPLE_DETECTION="/cob_people_detection/detection_tracker/face_position_ar
 
 # topic where person positions are provided, tracked by tha accompany tracker
 global TOPIC_TRACKED_HUMANS
-TOPIC_TRACKED_HUMANS="/accompany/TrackedHumans"
+TOPIC_TRACKED_HUMANS="/trackedHumans"
 
 #  bounds of the map where randomized positions are approached if necessary
 global MAP_BOUNDS
@@ -97,26 +97,20 @@ class CallName(smach.State):
 	def execute(self, userdata):
 		sf = ScreenFormat("CallName")
 		rospy.sleep(3)
+		detections = self.detections
 		attempts = 0
-		while len(self.detections)==0 and attempts<3:
-			rospy.sleep(3)
+		while len(detections)==0 and attempts<90:
+			rospy.sleep(0.1)
 			attempts = attempts + 1
+			detections = self.detections
 			
-		if len(self.detections)==0:
+		if len(detections)==0:
 			rospy.loginfo("did not detect anybody")
 			return 'finished'
-		
-		# determine robot pose		
-		for i in xrange(10):
-			(trafo_possible,robot_pose,quaternion)=self.utils.getRobotPose(get_transform_listener())
-			rospy.sleep(0.2)
-			if trafo_possible==True:
-				break
-		
-		if trafo_possible==True:
-			for det in detections:
-				if det.pose.pose.position.z < 2.0:
-					sss.say(['Hello %s.'%str(name)])
+
+		for det in detections:
+			if det.pose.pose.position.z < 2.0:
+				sss.say(['Hello %s.'%str(det.label)])
 		return 'finished'
 
 
@@ -124,12 +118,18 @@ class SelectNextUserLocation(smach.State):
 	def __init__(self):
 		smach.State.__init__(self,
 				outcomes=['new_goal','finished','failed'],
-				input_keys=['callback_config',],
+				input_keys=['callback_config','predefinitions'],
 				output_keys=['current_goal', 'use_perimeter_goal'])
 		self.generic_listener=GenericListener(target_frame="/map")
+		self.utils=Utils()
 
 	def execute(self, userdata):
 		sf = ScreenFormat("SelectNextUserLocation")
+		try:
+			tl = get_transform_listener()
+			tl.waitForTransform('/map', '/room_frame', rospy.Time(0), rospy.Duration(10))
+		except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+			rospy.logwarn("SelectNextUserLocation: transform map - room_frame not available")
 		self.generic_listener.reset()
 		self.generic_listener.set_config(userdata.callback_config)
 
@@ -137,11 +137,11 @@ class SelectNextUserLocation(smach.State):
 		rospy.sleep(3)
 		detections = self.generic_listener.get_detections()
 		attempts = 0
-		while len(detections)==0 and attempts<5:
-			rospy.sleep(3)
+		while len(detections)==0 and attempts<1500:
+			rospy.sleep(0.01)
 			attempts = attempts + 1
 			detections = self.generic_listener.get_detections()
-			
+
 		if len(detections)==0:
 			rospy.logerr("No detections received, terminating.")
 			sss.say(["I am so sad. I did not find any user. What a pity."])
@@ -173,9 +173,11 @@ class SelectNextUserLocation(smach.State):
 		  			break
 
 		if closest_pose != False:
-			userdata.current_goal.x = closest_pose.x
-			userdata.current_goal.y = closest_pose.y
-			userdata.current_goal.theta = 0.0
+			current_goal = Pose2D()
+			current_goal.x = closest_pose.x
+			current_goal.y = closest_pose.y
+			current_goal.theta = 0.0
+			userdata.current_goal = current_goal
 			userdata.use_perimeter_goal=True
 			return 'new_goal'
 		
@@ -187,9 +189,53 @@ class GoToGoal(smach.State):
 	def __init__(self):
 		smach.State.__init__(self,
 				outcomes=['finished','failed'],
-				input_keys= ['predefinitions','current_goal'],
+				input_keys= ['predefinitions','current_goal','use_perimeter_goal'],
 				output_keys=['current_goal','use_perimeter_goal'])
-		
+		self.utils=Utils()
+
+	def get_perimeter_goal(self,goal,radius):
+		rospy.loginfo("Computing goal on perimeter")
+
+		rotational_sampling_step = 10.0/180.0*math.pi
+		rospy.wait_for_service('map_accessibility_analysis/map_perimeter_accessibility_check',10)
+		try:
+			get_approach_pose = rospy.ServiceProxy('map_accessibility_analysis/map_perimeter_accessibility_check', CheckPerimeterAccessibility)
+			res = get_approach_pose(goal, radius, rotational_sampling_step)
+			valid_poses=res.accessible_poses_on_perimeter
+		except rospy.ServiceException, e:
+			rospy.logwarn("Service call failed: %s",e)
+			print "logwarn  returing false"
+			return False
+        
+		if len(valid_poses) == 0:
+			return -1
+
+		# try for a while to get robot pose # TODO check if this is necessary
+		for i in xrange(10):
+			(trafo_possible,robot_pose,quaternion)=self.utils.getRobotPose(get_transform_listener())
+			rospy.sleep(0.2)
+			if trafo_possible==True:
+				current_pose=Pose2D()
+				current_pose.x=robot_pose[0]
+				current_pose.y=robot_pose[1]
+				break
+
+		if trafo_possible==True:
+			closest_pose = Pose2D()
+			minimum_distance_squared = 100000.0
+			for pose in valid_poses:
+				dist_squared = (pose.x-current_pose.x)*(pose.x-current_pose.x)+(pose.y-current_pose.y)*(pose.y-current_pose.y)
+				if dist_squared < minimum_distance_squared:
+					minimum_distance_squared = dist_squared
+					closest_pose = pose
+			return closest_pose
+		else:
+			print "logwarn  returing false"
+			rospy.logwarn("Could not get current robot pose - taking first pose in list")
+			return valid_poses[0]
+			#handle_base = sss.move("base", pose,blocking=block_program)
+			#print "commanding move to current goal"
+
 	def execute(self, userdata):
 		sf = ScreenFormat("GoToGoal")
 		rospy.loginfo("navigating to current goal")
@@ -215,6 +261,7 @@ class GoToGoal(smach.State):
 		pose.append(float(userdata.current_goal.theta))
 		handle_base = sss.move("base", pose, blocking=True)
 		rospy.loginfo("Commanding move to current goal")
+		return 'finished'
 
 
 class Rotate(smach.State):
@@ -247,10 +294,9 @@ class IdentifyUsersRandomSearch(smach.StateMachine):
 		with self:
 			smach.StateMachine.add("RANDOMGOAL", SetRandomGoal(),
 								transitions={'failed':'failed',
-											'finished':'finished',
-											'new_goal':'GO'})
+											'finished':'GOTOGOAL'})
 			
-			smach.StateMachine.add("GO", GoToGoal(),
+			smach.StateMachine.add("GOTOGOAL", GoToGoal(),
 								transitions={'failed':'failed',
 											'finished':'ROTATE'})
 			
@@ -265,19 +311,19 @@ class IdentifyUsersGuidedSearch(smach.StateMachine):
 								outcomes=['failed','finished'],
 								input_keys=['predefinitions','callback_config','use_perimeter_goal'],
 								output_keys=[])
-		
 		with self:
-			smach.StateMachine.add("SELECTGOAL", SelectNextUserLocation(),
+			smach.StateMachine.add("SELECTNEXTUSER", SelectNextUserLocation(),
 								transitions={'failed':'failed',
-											'finished':'GO'})
+                                            'finished':'finished',
+											'new_goal':'GOTONEXTUSER'})
 			
-			smach.StateMachine.add("GO", GoToGoal(),
+			smach.StateMachine.add("GOTONEXTUSER", GoToGoal(),
 								transitions={'failed':'failed',
-											'finished':'CALLNAME'})#'SELECTGOAL'})
+											'finished':'CALLNAME'})#'SELECTNEXTUSER'})
 			
 			smach.StateMachine.add("CALLNAME", CallName(),
 								transitions={'failed':'failed',
-											'finished':'SELECTGOAL'})
+											'finished':'SELECTNEXTUSER'})
 
 
 

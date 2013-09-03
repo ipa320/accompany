@@ -61,7 +61,7 @@ TOPIC_PEOPLE_DETECTION="/cob_people_detection/detection_tracker/face_position_ar
 
 # topic where person positions are provided, tracked by tha accompany tracker
 global TOPIC_TRACKED_HUMANS
-TOPIC_TRACKED_HUMANS="/accompany/TrackedHumans"
+TOPIC_TRACKED_HUMANS="/trackedHumans"
 
 #  bounds of the map where randomized positions are approached if necessary
 global MAP_BOUNDS
