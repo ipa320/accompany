@@ -74,217 +74,6 @@ DOUBLECHECK=False
 
 
 
-class SelectRandomGoal(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-      outcomes=['selected','not_selected','failed'],
-      input_keys=['current_goal'],
-      output_keys=['current_goal'])
-
-  def execute(self, userdata):
-      sf = ScreenFormat("SelectRandomGoal")
-      map_bounds=MAP_BOUNDS
-      rand_x=random.uniform(map_bounds[0],map_bounds[1]) # x
-      rand_y=random.uniform(map_bounds[2],map_bounds[3]) # y
-      rand_theta=random.uniform(0,2*3.14) # theta
-      userdata.current_goal={"name":"random","x":rand_x,"y":rand_y,"theta":rand_theta}
-      return 'selected'
-
-class FakeState(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-        outcomes=['set','failed'],
-        input_keys=['script_time','current_goal','position_last_seen','person_name'],
-        output_keys=['script_time','current_goal','person_name','position_last_seen'])
-
-  def execute(self,userdata):
-    sf = ScreenFormat("FakeState")
-    pos={"name":"fake","x":1.5,"y":-1.5,"theta":0.0}
-    userdata.position_last_seen=pos
-    userdata.person_name="Caro"
-    userdata.current_goal=pos
-    #userdata.script_time=3
-    return 'set'
-
-class GoToGoal_aided(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-        outcomes=['approached_goal','update_goal','failed'],
-        input_keys=[ 'tl','search_while_moving','current_goal','position_last_seen','person_name'],
-        output_keys=['tl','search_while_moving','current_goal','position_last_seen','person_detected_at_goal','person_name'])
-    rospy.Subscriber(TOPIC_TRACKED_HUMANS,TrackedHumans, self.callback)
-    self.detections=list()
-    self.utils=Utils()
-
-  def callback(self,msg):
-    # go through list of detections and append them to detection list
-    if len(msg.trackedHumans) >0:
-      #clear detection list
-      #del self.detections[:]
-      for i in xrange( len(msg.trackedHumans)):
-        #print "m------------------------> appending %s."%msg.trackedHumans[i].identity
-	#print msg.trackedHumans[i].location.point
-	pose_received = Detection()
-	pose_received.pose.header = msg.trackedHumans[i].location.header
-	pose_received.pose.pose.position = msg.trackedHumans[i].location.point
-	transformed_pose=self.utils.transformPose(pose_received.pose,get_transform_listener())
-	#print transformed_pose
-	msg.trackedHumans[i].location.point = transformed_pose.pose.position
-        self.detections.append(msg.trackedHumans[i])
-    return
-
-  def check_detections(self,detections,name):
-    if len(detections)==0:
-      return False
-    for det in detections:
-      #print "checking %s"%str(det.label)
-      if name == str(det.identity):
-        print "det.identity=", det.identity
-        print "NAME FOUND"
-        # when name found  reset detection list
-        del self.detections[:]
-        return det
-    return False
-
-
-  def execute(self,userdata):
-    sf = ScreenFormat("GoToGoal_aided")
-    if userdata.search_while_moving==False:
-      print "moving towards goal without searching"
-      stop_base=False
-
-      pose=list()
-      pose.append(float(userdata.current_goal.x))
-      pose.append(float(userdata.current_goal.y))
-      pose.append(float(userdata.current_goal.theta))
-      handle_base = sss.move("base", pose,blocking=False)
-
-      while not rospy.is_shutdown() and stop_base==False :
-        # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
-          sss.stop("base")
-          stop_base=True
-        rospy.sleep(0.3)
-      userdata.person_detected_at_goal=False
-      return 'approached_goal'
-
-
-
-    elif userdata.search_while_moving==True:
-      print "moving towards goal while searching"
-      # try reaching pose
-      if DOUBLECHECK==True:
-        userdata.person_detected_at_goal=False
-
-      # delete old detections
-      del self.detections[:]
-      print "Length detections %i"%len(self.detections)
-      pose=list()
-      pose.append(float(userdata.current_goal.x))
-      pose.append(float(userdata.current_goal.y))
-      pose.append(float(userdata.current_goal.theta))
-      handle_base = sss.move("base", pose,blocking=False)
-
-    ## init variables
-    #stopping_time = 0.0
-    #announce_time = 0.0
-    #freq = 2.0 # Hz
-    #yellow = False
-
-
-      # check for goal status
-      stop_base=False
-      while not rospy.is_shutdown() and stop_base==False :
-        print "looping.."
-        time.sleep(1)
-        detection=self.check_detections(self.detections,userdata.person_name)
-        # check if goal update is necessary
-        if detection is not False:
-
-          msg_pos=detection.location.point
-          #det_pos={"name":"det","x":msg_pos.x,"y":msg_pos.y,"theta":0.0}
-          det_pos=Pose2D()
-          det_pos.x=msg_pos.x
-          det_pos.x=msg_pos.y
-          det_pos.theta=0.0
-          # confirm detection of person at goal
-          userdata.person_detected_at_goal=True
-          if self.utils.update_goal(userdata.current_goal,det_pos):
-            print "updating goal"
-            userdata.current_goal=det_pos
-            userdata.position_last_seen=det_pos
-            print "stop base"
-            sss.stop("base")
-            stop_base=True
-            return 'update_goal'
-          else:
-            print "goal similar to current goal"
-
-        # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
-          sss.stop("base")
-          stop_base=True
-          return 'approached_goal'
-        else:
-         print "not close enough to person"
-
-      return 'failed'
-
-  #	# finished with succeeded
-  #	if (handle_base.get_state() == 3):
-  #		sss.set_light('green')
-  #		return 'reached'
-  #	# finished with aborted
-  #	elif (handle_base.get_state() == 4):
-  #		sss.set_light('green')
-  #		sss.stop("base")
-  #		return 'not_reached'
-  #	# finished with preempted or canceled
-  #	elif (handle_base.get_state() == 2) or (handle_base.get_state() == 8):
-  #		sss.set_light('green')
-  #		sss.stop("base")
-  #		return 'not_reached'
-  #	# return with error
-  #	elif (handle_base.get_error_code() > 0):
-  #		print "error_code = " + str(handle_base.get_error_code())
-  #		sss.set_light('red')
-  #		return 'failed'
-
-  #	# check if the base is moving
-  #	loop_rate = rospy.Rate(freq) # hz
-  #	if not self.is_moving: # robot stands still			
-  #		# increase timers
-  #		stopping_time += 1.0/freq
-  #		announce_time += 1.0/freq
-
-  #		# abort after timeout is reached
-  #		if stopping_time >= self.timeout:
-  #			sss.set_light('green')
-  #			sss.stop("base")
-  #			return 'not_reached'
-  #		
-  #		# announce warning after every 10 sec
-  #		if announce_time >= 10.0:
-  #			sss.say([self.warnings[random.randint(0,len(self.warnings)-1)]],False)
-  #			announce_time = 0.0
-
-  #		# set light to "thinking" after not moving for 2 sec
-  #		if round(stopping_time) >= 2.0:
-  #			sss.set_light("blue")
-  #			yellow = False
-  #	else:
-  #		# robot is moving
-  #		if not yellow:
-  #			sss.set_light("yellow")
-  #			yellow = True
-    
-    # sleep
-    #loop_rate.sleep()
-
-
-
-
-
 
 class GoToGoal(smach.State):
   def __init__(self):
@@ -794,222 +583,6 @@ class MoveBaseTemp(smach.State):
 #      return 'found'
 
 
-############### SCHEDULER #######################
-# this class controls the scr
-class Scheduler(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-      outcomes=['e0_success','e1_success','e2_success','e3_success','e4_success','e5_failure','failed'],
-      #input_keys= ['predefinitions','callback_config'],
-      input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
-      output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','use_perimeter_goal','search_while_moving','rotate_while_observing'])
-    self.e=0
-    self.failure_ctr=0
-    self.predefined_goals=PREDEFINED_GOALS
-    self.utils=Utils()
-
-    # define script script events
-    # e=0 ---> set start goal1 command going there without observing
-    #
-    # e=1 ---> begin observing goal1  without rotating
-    #
-    # e=2 ---> when detection has been made go to goal2 - when detections has
-    # not been made return to e=1 with roating
-    #
-    # e=3 ---> wait at goal2 then proceed to Search
-    #
-    # e=4 ---> check if person was found at goal. If not initiate rotation
-    # observation
-    #
-
-  def execute(self, userdata):
-    sf = ScreenFormat("Scheduler")
-    #feed predefined stuff  to userdata
-    # event 0#################################
-    if self.e==0:
-      userdata.position_last_seen=None
-      userdata.person_name=None
-      userdata.person_detected_at_goal=False
-      userdata.rotate_while_observing=False
-      print userdata.callback_config
-      #userdata.current_goal=self.predefined_goals["kitchen"]
-      userdata.current_goal=self.predefined_goals["couch"]
-      userdata.search_while_moving=False
-      # increment event
-      self.e=1
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 0 success -> going to couch")
-      return 'e0_success'
-
-    # event 1#################################
-    elif self.e==1:
-      userdata.rotate_while_observing=False
-      # increment event
-      self.e=2
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 1 success -> observing")
-      return 'e1_success'
-
-    # event 2#################################
-    elif self.e==2:
-      if userdata.person_detected_at_goal==True:
-        userdata.current_goal=self.predefined_goals["kitchen"]
-        #userdata.current_goal=self.predefined_goals["couch"]
-        userdata.search_while_moving=False
-        print "e2: userdata.position_last_seen=", userdata.position_last_seen
-        # increment event
-        self.e=3
-        sss.say(["Thank you for your order %s. I am going to fetch it."%str(userdata.person_name)])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 success -> going to kitchen")
-        return 'e2_success'
-      elif userdata.person_detected_at_goal==False:
-        #check couter so it doesn't get stuck here without finding anyone
-        if self.failure_ctr>=2:
-          rospy.logwarn( "after observation target could still not be found")
-          sss.say(["I found nobody to take an order from. What a pity"])
-          return 'failed'
-        userdata.rotate_while_observing= True
-        # do not increment event ->repeat step
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 2 failure -> trying with rotation")
-        self.failure_ctr+=1
-        return 'e1_success'
-
-    # event 3#################################
-    elif self.e==3:
-#      userdata.current_goal=userdata.position_last_seen	# hack: does not work for goals within obstacles
-      userdata.current_goal=self.predefined_goals["couch"]
-      userdata.use_perimeter_goal = False
-      #userdata.current_goal=self.predefined_goals["middle"]
-      #userdata.person_name="Caro"
-      print "e3: userdata.position_last_seen=", userdata.position_last_seen
-#     hack: because navigation is imcapable, the following lines are commented out
-#      if userdata.position_last_seen!=None:
-#        userdata.current_goal=userdata.position_last_seen
-#        userdata.use_perimeter_goal = True
-      print "userdata.current_goal=", userdata.current_goal
-      time.sleep(0.1)
-      userdata.search_while_moving=True
-      self.e=4
-      sss.say(["I am coming back to you %s."%str(userdata.person_name)])
-      rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 3 success -> done job in kitchen  - searching begins")
-      return 'e3_success'
-    # event 4#################################
-    elif self.e==4:
-      if userdata.person_detected_at_goal==True:
-        print "say it e4: Here is your order."
-        sss.say(["Here is your order."])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 success -> approached position of target person - finished")
-        return 'e4_success'
-      elif userdata.person_detected_at_goal==False:
-        userdata.rotate_while_observing= True
-        userdata.use_perimeter_goal = True
-        self.e=5
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 4 failure -> approached position but didnt find target person - rotating observation")
-        return 'e3_success'     # 'e1_success'
-    # event 5#################################
-    elif self.e==5:
-      if userdata.person_detected_at_goal==True:
-        userdata.search_while_moving=True
-        # decrement to event 4
-        self.e=4
-        if self.utils.update_goal(userdata.position_last_seen,userdata.current_goal)==True:
-          return 'e4_success'
-        else:
-          rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> going to new target position")
-          userdata.use_perimeter_goal = True
-          return 'e3_success'
-      elif userdata.person_detected_at_goal==False:
-        userdata.search_while_moving=True
-        userdata.rotate_while_observing= True
-        # decrement to event 4
-        self.e=4
-        sss.say(["Where are you? I will search randomly now."])
-        rospy.loginfo( ">>>>>>>>>>>>>>>>>>>>> event 5 success -> now searching random positions")
-        return 'e5_failure'
-
-    else:
-      rospy.logerr( " FAILURE - not handled event")
-
-
-
-class Seek_aided_generic(smach.StateMachine):
-    def __init__(self):
-        smach.StateMachine.__init__(self,
-                outcomes=['finished','failed'],
-                input_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'],
-                output_keys=['predefinitions','callback_config','position_last_seen','person_name','person_detected_at_goal','current_goal','search_while_moving','rotate_while_observing'])
-        with self:
-            smach.StateMachine.add('SCHEDULER',Scheduler(),
-                                   transitions={'e0_success':'GOTOGOAL',
-                                                'e1_success':'OBSERVE',
-                                                'e2_success':'GOTOGOAL',
-                                                'e3_success':'SEARCH',
-                                                'e4_success':'finished',  # 'failed', # should not occur
-                                                'e5_failure':'SELECT_RANDOM_GOAL', # should not occur
-                                                'failed':'failed'})
-            smach.StateMachine.add('SELECT_RANDOM_GOAL',SelectRandomGoal(),
-                                   transitions={'selected':'GOTOGOAL',
-                                                'not_selected':'failed',
-                                                'failed':'failed'})
-            smach.StateMachine.add('OBSERVE',Observe(),
-                                   transitions={'failed':'failed',
-                                                'detected':'SCHEDULER',
-                                                'not_detected':'SCHEDULER'})
-            smach.StateMachine.add('GOTOGOAL',GoToGoal(),
-                                   transitions={'failed':'failed',
-                                                'update_goal':'GOTOGOAL',
-                                                'approached_goal':'SCHEDULER'})
-            smach.StateMachine.add("SEARCH",SearchPersonGeneric(),
-                                    transitions={'failed':'failed',
-                                                  'finished': 'SCHEDULER'}) #'finished'})
-class Seek_aided(smach.StateMachine):
-    def __init__(self):
-        smach.StateMachine.__init__(self,
-                outcomes=['finished','failed'])
-        with self:
-            smach.StateMachine.add('SCHEDULER',Scheduler(),
-                                   transitions={'e0_success':'GOTOGOALAIDED',
-                                                'e1_success':'OBSERVE',
-                                                'e2_success':'GOTOGOALAIDED',
-                                                'e3_success':'GOTOGOALAIDED',
-                                                'e4_success':'finished',
-                                                'e5_failure':'SELECT_RANDOM_GOAL',
-                                                'failed':'failed'})
-            smach.StateMachine.add('SELECT_RANDOM_GOAL',SelectRandomGoal(),
-                                   transitions={'selected':'GOTOGOALAIDED',
-                                                'not_selected':'failed',
-                                                'failed':'failed'})
-            smach.StateMachine.add('OBSERVE',Observe(),
-                                   transitions={'failed':'failed',
-                                                'detected':'SCHEDULER',
-                                                'not_detected':'SCHEDULER'})
-            smach.StateMachine.add('GOTOGOALAIDED',GoToGoal_aided(),
-                                   transitions={'failed':'failed',
-                                                'update_goal':'GOTOGOALAIDED',
-                                                'approached_goal':'SCHEDULER'})
-
-
-class Seek(smach.StateMachine):
-    def __init__(self):
-        smach.StateMachine.__init__(self,
-                outcomes=['finished','failed'])
-        with self:
-            smach.StateMachine.add('SCHEDULER',Scheduler(),
-                                   transitions={'e0_success':'GOTOGOAL',
-                                                'e1_success':'OBSERVE',
-                                                'e2_success':'GOTOGOAL',
-                                                'e3_success':'GOTOGOAL',
-                                                'e4_success':'finished',
-                                                'e5_failure':'SELECT_RANDOM_GOAL',
-                                                'failed':'failed'})
-            smach.StateMachine.add('SELECT_RANDOM_GOAL',SelectRandomGoal(),
-                                   transitions={'selected':'GOTOGOAL',
-                                                'not_selected':'failed',
-                                                'failed':'failed'})
-            smach.StateMachine.add('OBSERVE',Observe(),
-                                   transitions={'failed':'failed',
-                                                'detected':'SCHEDULER',
-                                                'not_detected':'SCHEDULER'})
-
-
 
 
 
@@ -1044,14 +617,34 @@ class SelectNextUserLocation(smach.State):
 		rospy.loginfo("received %i detections"%len(detections))
 		print "detections:"
 		print detections
+
+		# determine robot pose		
+		for i in xrange(10):
+			(trafo_possible,robot_pose,quaternion)=self.utils.getRobotPose(get_transform_listener())
+			rospy.sleep(0.2)
+			if trafo_possible==True:
+				break
 		
+		# select closest next person
+		closest_pose = False
+		minimum_distance_squared = 100000.0
 		for name,pose in detections:
 			if name == str(""):
-				userdata.current_goal.x = pose.x
-				userdata.current_goal.y = pose.y
-				userdata.current_goal.theta = 0.0
-				userdata.use_perimeter_goal=True
-				return 'new_goal'
+				if trafo_possible==True:
+					dist_squared = (pose.x-robot_pose[0])*(pose.x-robot_pose[0])+(pose.y-robot_pose[1])*(pose.y-robot_pose[1])
+					if dist_squared < minimum_distance_squared:
+			  			minimum_distance_squared = dist_squared
+			  			closest_pose = pose
+		  		else:
+		  			closest_pose = pose
+		  			break
+
+		if closest_pose != False:
+			userdata.current_goal.x = closest_pose.x
+			userdata.current_goal.y = closest_pose.y
+			userdata.current_goal.theta = 0.0
+			userdata.use_perimeter_goal=True
+			return 'new_goal'
 		
 		sss.say(["I did not find any further unknown user."])
 		return 'finished'
@@ -1178,7 +771,7 @@ if __name__=='__main__':
 			sm.userdata.use_perimeter_goal=False
 		elif flag=="tracked_humans":
 			rospy.loginfo("Running identify users with tracked humans")
-			sm = Seek_aided_generic()
+			sm = IdentifyUsersGuidedSearch()
 			sm.userdata.callback_config={"argname_frame":["location","header","frame_id"],
 										"msg_element":"trackedHumans",
 										"argname_label":["identity"],
@@ -1196,9 +789,7 @@ if __name__=='__main__':
 									"approached_threshold":APPROACHED_THRESHOLD,
 									"similar_goal_threshold":SIMILAR_GOAL_THRESHOLD,
 									"goal_perimeter":GOAL_PERIMETER}
-		# dummy initialization
-		sm.userdata.current_goal=None
-		
+	
 		
 		sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
 		sis.start()
