@@ -32,7 +32,7 @@ from ScreenFormatting import *
 # value defines perimeter around blocked goals, that are supposed to be
 # approached
 global GOAL_PERIMETER
-GOAL_PERIMETER=1.3 #[m]
+GOAL_PERIMETER=1.7 #[m]
 # threshold defines whether a goal is approached close enough
 global APPROACHED_THRESHOLD
 APPROACHED_THRESHOLD=0.4 #[m]
