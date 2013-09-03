@@ -74,524 +74,50 @@ DOUBLECHECK=False
 
 
 
-
-class GoToGoal(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-        outcomes=['approached_goal','update_goal','failed'],
-        input_keys=[ 'search_while_moving','current_goal','position_last_seen','person_name'],
-        output_keys=['search_while_moving','current_goal','position_last_seen','person_detected_at_goal','person_name'])
-    rospy.Subscriber(TOPIC_PEOPLE_DETECTION,DetectionArray, self.callback)
-    self.detections=list()
-
-    self.utils=Utils()
-
-  def callback(self,msg):
-    # go through list of detections and append them to detection list
-    if len(msg.detections) >0:
-      #clear detection list
-      #del self.detections[:]
-      for i in xrange( len(msg.detections)):
-        self.detections.append(msg.detections[i])
-        #print "appending %s."%msg.detections[i].label
-    return
-
-  def check_detections(self,detections,name):
-    print "CHECKING DETECTIONS for %s"%name
-    if len(detections)==0:
-      return False
-    for det in detections:
-      #print "checking %s"%str(det.label)
-      if name == str(det.label):
-        print "det.label=", det.label
-        print "NAME FOUND"
-        # when name found  reset detection list
-        del self.detections[:]
-        return det
-    return False
-
-  def execute(self,userdata):
-    sf = ScreenFormat("GoToGoal")
-    if userdata.search_while_moving==False:
-      print "moving towards goal without searching"
-      stop_base=False
-
-      pose=list()
-      pose.append(float(userdata.current_goal.x))
-      pose.append(float(userdata.current_goal.y))
-      pose.append(float(userdata.current_goal.theta))
-      handle_base = sss.move("base", pose,blocking=False)
-
-      while not rospy.is_shutdown() and stop_base==False :
-        if userdata.person_name!=None:
-          detection=self.check_detections(self.detections,userdata.person_name)
-          detection=False
-          # check if goal update is necessary
-          if detection is not False:
-
-            print "detection.pose=", detection.pose
-            transformed_pose=self.utils.transformPose(detection.pose,get_transform_listener())
-            print "transformed_pose=", transformed_pose
-            msg_pos=transformed_pose.pose.position
-
-            det_pose=Pose2D()
-            det_pose.x=msg_pos.x
-            det_pose.y=msg_pos.y
-            det_pose.theta=0.0#msg_pos.theta
-            userdata.position_last_seen=det_pose
-            rospy.loginfo("position last seen has been updated")
-          # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
-          sss.stop("base")
-          stop_base=True
-        rospy.sleep(0.3) 
-      userdata.person_detected_at_goal=False
-      return 'approached_goal'
-
-
-
-    elif userdata.search_while_moving==True:
-      print "moving towards goal while searching"
-      # try reaching pose
-      if DOUBLECHECK==True:
-        userdata.person_detected_at_goal=False
-
-      # delete old detections
-      del self.detections[:]
-      print "Length detections %i"%len(self.detections)
-      pose=list()
-      pose.append(float(userdata.current_goal.x))
-      pose.append(float(userdata.current_goal.y))
-      pose.append(float(userdata.current_goal.theta))
-      handle_base = sss.move("base", pose,blocking=False)
-
-    ## init variables
-    #stopping_time = 0.0
-    #announce_time = 0.0
-    #freq = 2.0 # Hz
-    #yellow = False
-
-
-      # check for goal status
-      stop_base=False
-      while not rospy.is_shutdown() and stop_base==False :
-        print "looping.."
-        time.sleep(1)
-        detection=self.check_detections(self.detections,userdata.person_name)
-        # check if goal update is necessary
-        if detection is not False:
-
-          transformed_pose=self.utils.transformPose(detection.pose,get_transform_listener())
-          msg_pos=transformed_pose.pose.position
-
-          det_pose=Pose2D()
-          det_pose.x=msg_pos.x
-          det_pose.y=msg_pos.y
-          det_pose.theta=0.0#msg_pos.theta
-          # confirm detection of person at goal
-          userdata.person_detected_at_goal=True
-          if self.utils.update_goal(userdata.current_goal,det_pos):
-            print "updating goal"
-            userdata.current_goal=det_pos
-            userdata.position_last_seen=det_pos
-            print "stop base"
-            sss.stop("base")
-            stop_base=True
-            return 'update_goal'
-          else:
-            print "goal similar to current goal"
-
-        # check if goal has been approached close enough
-        if self.utils.goal_approached(userdata.current_goal,get_transform_listener(),dist_threshold=APPROACHED_THRESHOLD):
-          sss.stop("base")
-          stop_base=True
-          return 'approached_goal'
-        else:
-         print "not close enough to person"
-
-      return 'failed'
-
-  #	# finished with succeeded
-  #	if (handle_base.get_state() == 3):
-  #		sss.set_light('green')
-  #		return 'reached'
-  #	# finished with aborted
-  #	elif (handle_base.get_state() == 4):
-  #		sss.set_light('green')
-  #		sss.stop("base")
-  #		return 'not_reached'
-  #	# finished with preempted or canceled
-  #	elif (handle_base.get_state() == 2) or (handle_base.get_state() == 8):
-  #		sss.set_light('green')
-  #		sss.stop("base")
-  #		return 'not_reached'
-  #	# return with error
-  #	elif (handle_base.get_error_code() > 0):
-  #		print "error_code = " + str(handle_base.get_error_code())
-  #		sss.set_light('red')
-  #		return 'failed'
-
-  #	# check if the base is moving
-  #	loop_rate = rospy.Rate(freq) # hz
-  #	if not self.is_moving: # robot stands still			
-  #		# increase timers
-  #		stopping_time += 1.0/freq
-  #		announce_time += 1.0/freq
-
-  #		# abort after timeout is reached
-  #		if stopping_time >= self.timeout:
-  #			sss.set_light('green')
-  #			sss.stop("base")
-  #			return 'not_reached'
-  #		
-  #		# announce warning after every 10 sec
-  #		if announce_time >= 10.0:
-  #			sss.say([self.warnings[random.randint(0,len(self.warnings)-1)]],False)
-  #			announce_time = 0.0
-
-  #		# set light to "thinking" after not moving for 2 sec
-  #		if round(stopping_time) >= 2.0:
-  #			sss.set_light("blue")
-  #			yellow = False
-  #	else:
-  #		# robot is moving
-  #		if not yellow:
-  #			sss.set_light("yellow")
-  #			yellow = True
-    
-    # sleep
-    #loop_rate.sleep()
-
-class Observe_aided(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-      outcomes=['detected','not_detected','failed'],
-      input_keys= ['tl', 'person_detected_at_goal','rotate_while_observing','person_name','predefined_goals','current_goal','position_last_seen','script_time'],
-      output_keys=['tl','person_detected_at_goal','rotate_while_observing','person_name','predefined_goals','current_goal','position_last_seen','script_time'])
-    rospy.Subscriber(TOPIC_TRACKED_HUMANS,DetectionArray, self.callback)
-    self.detections=      list()
-    self.false_detections=list()
-    self.rep_ctr=0
-    self.utils=Utils()
-
-  def callback(self,msg):
-    # go through list of detections and append them to detection list
-    if len(msg.trackedHumans) >0:
-      #clear detection list
-      #del self.detections[:]
-      for i in xrange( len(msg.trackedHumans)):
-        #print "o------------------------> appending %s."%msg.trackedHumans[i].identity
-	#print msg.trackedHumans[i].location.point
-	pose_received = Detection()
-	pose_received.pose.header = msg.trackedHumans[i].location.header
-	pose_received.pose.pose.position = msg.trackedHumans[i].location.point
-	transformed_pose=self.utils.transformPose(pose_received.pose,get_transform_listener())
-	#print transformed_pose
-	msg.trackedHumans[i].location.point = transformed_pose.pose.position
-        self.detections.append(msg.trackedHumans[i])
-    return
-
-  def execute(self, userdata):
-    sf = ScreenFormat("Observe_aided")
-    if userdata.rotate_while_observing==False:
-      # give person time to order and observe in the meantime
-      rospy.sleep(2)
-
-      # pick detection label which is majority in list
-      #TODO pick first is temporary hack
-
-      if len(self.detections)==0:
-        userdata.person_detected_at_goal=False
-        return 'not_detected'
-      else:
-        det=self.utils.extract_detection(self.detections)
-        if(userdata.person_name)==None:
-          userdata.person_name=det.label
-        msg_pos=det.location.point
-        det_pos=Pose2D()
-        det_pos.x=msg_pos.x
-        det_pos.x=msg_pos.y
-        det_pos.theta=0.0
-        userdata.position_last_seen=det_pos
-        #userdata.current_goal=userdata.predefined_goals["kitchen"]
-        #sss.say(['Thank you for your order, %s.'%str(self.detections[0].label)])
-        userdata.person_detected_at_goal=True
-        return 'detected'
-    elif userdata.rotate_while_observing==True:
-      del self.detections[:]
-      rel_pose=list()
-      rel_pose.append(0)
-      rel_pose.append(0)
-      rel_pose.append(0.1)
-      for i in xrange(70):
-        handle_base = sss.move_base_rel("base", rel_pose,blocking =True)
-        det=self.utils.extract_detection(self.detections)
-        del self.detections[:]
-        if det !=False:
-            print "person detected while rotating"
-            # stop observation
-            sss.stop("base")
-            # update goal
-            msg_pos=det.location.point
-            det_pos=Pose2D()
-            det_pos.x=msg_pos.x
-            det_pos.x=msg_pos.y
-            det_pos.theta=0.0
-            userdata.position_last_seen=det_pos
-            if (userdata.person_name)==None:
-              userdata.person_name=det.label
-            userdata.person_detected_at_goal=True
-            return 'detected'
-        else:
-            print "person not found at goal"
-            userdata.person_detected_at_goal=False
-            #return 'not_detected'
-
-      return 'not_detected'
-
-
-
-class Observe(smach.State):
-  def __init__(self):
-    smach.State.__init__(self,
-      outcomes=['detected','not_detected','failed'],
-      input_keys=[ 'tl','person_detected_at_goal','rotate_while_observing','person_name','predefined_goals','current_goal','position_last_seen','script_time'],
-      output_keys=['tl','person_detected_at_goal','rotate_while_observing','person_name','predefined_goals','current_goal','position_last_seen','script_time'])
-    rospy.Subscriber(TOPIC_PEOPLE_DETECTION,DetectionArray, self.callback)
-    self.detections=      list()
-    self.false_detections=list()
-    self.rep_ctr=0
-    self.utils=Utils()
-    #self.tf = TransformListener()
-
-  def callback(self,msg):
-    # go through list of detections and append them to detection list
-    if len(msg.detections) >0:
-      #clear detection list
-      #del self.detections[:]
-      for i in xrange( len(msg.detections)):
-        self.detections.append(msg.detections[i])
-    return
-
-  def execute(self, userdata):
-    sf = ScreenFormat("Observe")
-    if userdata.rotate_while_observing==False:
-      # give person time to order and observe in the meantime
-      rospy.sleep(2)
-
-      # pick detection label which is majority in list
-      #TODO pick first is temporary hack
-
-      if len(self.detections)==0:
-        userdata.person_detected_at_goal=False
-        return 'not_detected'
-      else:
-        det=self.utils.extract_detection(self.detections)
-        if(userdata.person_name)==None:
-          userdata.person_name=det.label
-
-        transformed_pose=self.utils.transformPose(det.pose,get_transform_listener())
-
-        msg_pos=transformed_pose.pose.position
-        det_pos=Pose2D()
-        det_pos.x=msg_pos.x
-        det_pos.y=msg_pos.y
-        det_pos.theta=0.0
-
-        userdata.position_last_seen=det_pos
-        print "observe: userdata.position_last_seen=", userdata.position_last_seen
-
-        #userdata.current_goal=userdata.predefined_goals["kitchen"]
-        #sss.say(['Thank you for your order, %s.'%str(self.detections[0].label)])
-        userdata.person_detected_at_goal=True
-        return 'detected'
-    elif userdata.rotate_while_observing==True:
-      del self.detections[:]
-      rel_pose=list()
-      rel_pose.append(0)
-      rel_pose.append(0)
-      rel_pose.append(-0.1)
-      for i in xrange(80):
-        if i==5:
-          rel_pose.pop()
-          rel_pose.append(0.1)
-        handle_base = sss.move_base_rel("base", rel_pose,blocking =True)
-        det=self.utils.extract_detection(self.detections)
-        del self.detections[:]
-        if det !=False:
-            print "person detected while rotating"
-            # stop observation
-            sss.stop("base")
-            # update goal
-            #msg_pos=det.pose.pose.position
-            transformed_pose=self.utils.transformPose(det.pose,get_transform_listener())
-
-            msg_pos=transformed_pose.pose.position
-
-            det_pos=Pose2D()
-            det_pos.x=msg_pos.x
-            det_pos.y=msg_pos.y
-            det_pos.theta=0.0
-            userdata.position_last_seen=det_pos
-            print "observe rot: userdata.position_last_seen=", userdata.position_last_seen
-            if (userdata.person_name)==None:
-              userdata.person_name=det.label
-            userdata.person_detected_at_goal=True
-            return 'detected'
-        else:
-            print "person not found at goal"
-            userdata.person_detected_at_goal=False
-            #return 'not_detected'
-
-      return 'not_detected'
-
-
-
-class MoveBaseTemp(smach.State):
-    def __init__(self):
-      smach.State.__init__(self,
-        input_keys=['current_goal'],
-        outcomes=['reached','failed'])
-
-    def execute(self,userdata):
-      sf = ScreenFormat("MoveBaseTemp")
-      target_pose=list()
-      if userdata.current_goal['name'] is "kitchen":
-        target_pose.append(0.1)
-        target_pose.append(0)
-        target_pose.append(0)
-      elif userdata.current_goal['name'] is "couch":
-        target_pose.append(-0.1)
-        target_pose.append(0)
-        target_pose.append(0)
-      else:
-        target_pose.append(-0.1)
-        target_pose.append(-0.1)
-        target_pose.append(0)
-
-
-      for step in xrange(2):
-        handle_base = sss.move_base_rel("base", target_pose)
-      return 'reached'
-
-
-
-
-#class Rotate(smach.State):
-#  #class handles the rotation until program is stopped
-#  def __init__(self):
-#    self.tf = TransformListener()
-#    smach.State.__init__(self,
-#      outcomes=['finished','failed'],
-#      input_keys=['base_pose','stop_rotating','person_id'],
-#      output_keys=['detected'])
-#    rospy.Subscriber("/cob_people_detection/detection_tracker/face_position_array",DetectionArray, self.callback)
-#    self.stop_rotating=False
-#    self.detections=      list()
-#    self.false_detections=list()
-#
-#  def callback(self,msg):
-#    # go through list of detections and append them to detection list
-#    if len(msg.detections) >0:
-#      #clear detection list
-#      del self.detections[:]
-#      for i in xrange( len(msg.detections)):
-#        self.detections.append(msg.detections[i].label)
-#    return
-#
-#  def execute(self, userdata):
-#    print "ACCOMPANY-> ROTATE"
-#    sss.say(["I am going to take a look around now."])
-#
-#    # get position from tf
-#    if self.tf.frameExists("/base_link") and self.tf.frameExists("/map"):
-#        t = self.tf.getLatestCommonTime("/base_link", "/map")
-#        position, quaternion = self.tf.lookupTransform("/base_link", "/map", t)
-#  # calculate angles from quaternion
-#	[r,p,y]=euler_from_quaternion(quaternion)
-#	#print r
-#	#print p
-#	#print y
-#  #print position
-#    else:
-#        print "No transform available"
-#        return "failed"
-#
-#    time.sleep(1)
-#    self.stop_rotating=False
-#    # create relative pose - x,y,theta
-#    curr_pose=list()
-#    curr_pose.append(0)
-#    curr_pose.append(0)
-#    curr_pose.append(0.1)
-#
-#    while not rospy.is_shutdown() and self.stop_rotating==False and curr_pose[2]< 3.14:
-#      handle_base = sss.move_base_rel("base", curr_pose)
-#
-#      #check in detection and react appropriately
-#      for det in self.detections:
-#        # right person is detected
-#        if det == userdata.id:
-#          self.stop_rotating=True
-#          sss.say(['I have found you, %s! Nice to see you.'%str(det)])
-#        elif det in self.false_detections:
-#        # false person is detected
-#          print "Already in false detections"
-#       #  person detected is unknown - only react the first time
-#        elif det == "Unknown":
-#          print "Unknown face detected"
-#          sss.say(['Hi! Nice to meet you, but I am still searching for %s.'%str(userdata.id)])
-#          self.false_detections.append("Unknown")
-#      # wrong face is detected the first time
-#        else:
-#          self.false_detections.append(det)
-#          print "known - wrong face detected"
-#          sss.say(['Hello %s! Have you seen %s.'%(str(det),str(userdata.id))])
-#      #clear detection list, so it is not checked twice
-
-#      del self.detections[:]
-#      time.sleep(2)
-#
-#    print "-->stop rotating"
-#    return 'finished'
-
-#class Talk(smach.State):
-#  def __init__(self):
-#    smach.State.__init__(self,
-#      outcomes=['found','not_found','failed'],
-#      input_keys=['id','detected']
-#      )
-#
-#    self.phrases=[
-#        "I am looking for ",
-#        "Hello, nice to meet you! I don't know you yet!",
-#        ", nice to see you again",
-#        "No,you are not "
-#        ]
-#
-#  def execute(self, userdata):
-#    name= str(userdata.id)
-#    print "wanted: %s"%name
-#    print "found:  %s"% userdata.detected
-#    if userdata.id != userdata.detected:
-#      #speech=self.phrases[3]+name+" !"
-#      sss.say(['No, I am sorry, but you are not %s.'%str(name)])
-#      return 'not_found'
-#    else:
-#      sss.say(['I have found you, %s! Nice to see you.'%str(name)])
-#      time.sleep(2)
-#      return 'found'
-
-
-
-
-
-
-
-
-
-
-
+class CallName(smach.State):
+	def __init__(self):
+		smach.State.__init__(self,
+		outcomes=['finished','failed'],
+			input_keys=[],
+			output_keys=[])
+		rospy.Subscriber(TOPIC_PEOPLE_DETECTION, DetectionArray, self.callback)
+		self.detections=      list()
+		self.false_detections=list()
+		self.utils=Utils()
+
+	def callback(self,msg):
+		# go through list of detections and append them to detection list
+		if len(msg.detections)>0:
+			#clear detection list
+			del self.detections[:]
+		for i in xrange(len(msg.detections)):
+			self.detections.append(msg.detections[i])
+		return
+
+	def execute(self, userdata):
+		sf = ScreenFormat("CallName")
+		rospy.sleep(3)
+		attempts = 0
+		while len(self.detections)==0 and attempts<3:
+			rospy.sleep(3)
+			attempts = attempts + 1
+			
+		if len(self.detections)==0:
+			rospy.loginfo("did not detect anybody")
+			return 'finished'
+		
+		# determine robot pose		
+		for i in xrange(10):
+			(trafo_possible,robot_pose,quaternion)=self.utils.getRobotPose(get_transform_listener())
+			rospy.sleep(0.2)
+			if trafo_possible==True:
+				break
+		
+		if trafo_possible==True:
+			for det in detections:
+				if det.pose.pose.position.z < 2.0:
+					sss.say(['Hello %s.'%str(name)])
+		return 'finished'
 
 
 class SelectNextUserLocation(smach.State):
@@ -608,12 +134,19 @@ class SelectNextUserLocation(smach.State):
 		self.generic_listener.set_config(userdata.callback_config)
 
 		# wait for callback
-		rospy.sleep(5)
+		rospy.sleep(3)
 		detections = self.generic_listener.get_detections()
-		while len(detections)==0:
+		attempts = 0
+		while len(detections)==0 and attempts<5:
 			rospy.sleep(3)
+			attempts = attempts + 1
 			detections = self.generic_listener.get_detections()
-		
+			
+		if len(detections)==0:
+			rospy.logerr("No detections received, terminating.")
+			sss.say(["I am so sad. I did not find any user. What a pity."])
+			return 'failed'
+				
 		rospy.loginfo("received %i detections"%len(detections))
 		print "detections:"
 		print detections
@@ -646,7 +179,7 @@ class SelectNextUserLocation(smach.State):
 			userdata.use_perimeter_goal=True
 			return 'new_goal'
 		
-		sss.say(["I did not find any further unknown user."])
+		sss.say(["Great, I have identified all unknown users."])
 		return 'finished'
 
 
@@ -739,6 +272,10 @@ class IdentifyUsersGuidedSearch(smach.StateMachine):
 											'finished':'GO'})
 			
 			smach.StateMachine.add("GO", GoToGoal(),
+								transitions={'failed':'failed',
+											'finished':'CALLNAME'})#'SELECTGOAL'})
+			
+			smach.StateMachine.add("CALLNAME", CallName(),
 								transitions={'failed':'failed',
 											'finished':'SELECTGOAL'})
 
