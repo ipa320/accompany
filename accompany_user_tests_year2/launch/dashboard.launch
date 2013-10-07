@@ -14,6 +14,7 @@
 		<!-- upload button parameters, but delete the old ones before -->
 		<rosparam command="load" ns="control_buttons" file="$(arg pkg_robot_config)/$(arg robot)/command_gui_buttons.yaml"/>
 		<rosparam command="load" ns="nav_buttons" file="$(arg pkg_env_config)/config/envs/$(arg robot_env)/command_gui_buttons.yaml"/>
+		<!--rosparam command="load" ns="nav_buttons" file="$(arg pkg_env_config)/$(arg robot_env)/command_gui_buttons.yaml"/-->
 	</node>
 
 </launch>
