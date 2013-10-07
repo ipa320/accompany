@@ -10,8 +10,8 @@ from accompany_user_tests_year2.msg import *
 from simple_script_server import *
 sss = simple_script_server()
 
-from moveit_commander import MoveGroupCommander
-from simple_moveit_interface_accompany import *
+#from moveit_commander import MoveGroupCommander
+#from simple_moveit_interface_accompany import *
 
 
 class UnloadTrayServer:
@@ -28,10 +28,6 @@ class UnloadTrayServer:
  		sss.move("torso", [[-0.08,0.17,-0.08]])
  
 		print "placing object on table with a height of " + str(goal.table_height)
-	
-		#sss.set_light([0,0,1])
-	
-		#sss.move("tray","deliverup")
 		
 		grasp = [-1.023739218711853, -1.0562658309936523, 2.3108131885528564, 1.5178372859954834, -0.08975735306739807, 1.0026973485946655, 0.1390783041715622]
 		
@@ -92,7 +88,7 @@ class UnloadTrayServer:
 ######
 		sss.move("sdh","cylopen")
 		handle_arm = sss.move("arm",[p17],True)
-	#rospy.sleep(1)
+	    #rospy.sleep(1)
 		handle_arm = sss.move("arm",["intermediateback","folded"],False)
 		rospy.sleep(4)
 		sss.move("sdh","home")

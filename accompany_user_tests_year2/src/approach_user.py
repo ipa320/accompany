@@ -43,7 +43,7 @@ SIMILAR_GOAL_THRESHOLD=0.3 #[m]
 global PREDEFINED_GOALS
 couch_pose=Pose2D()
 couch_pose.x=0.2 #1.2
-couch_pose.y=1.4 #-0.3
+couch_pose.y=1.0 #-0.3
 couch_pose.theta=math.pi/2.0 #0.0
 kitchen_pose=Pose2D()
 kitchen_pose.x=4.8 #0
