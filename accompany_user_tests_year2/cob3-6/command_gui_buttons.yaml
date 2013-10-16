@@ -70,6 +70,7 @@ group7:
     [spher. closed,move,spherclosed],
     [spher. open,move,spheropen],
     [point,move,point],
+    [testknopp,move,fist],
     [fist,move,fist]]
 group8:
   group_name: head
