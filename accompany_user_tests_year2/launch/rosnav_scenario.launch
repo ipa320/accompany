@@ -18,7 +18,7 @@
 	<include file="$(find cob_tray_monitor)/ros/launch/tray_monitor.launch"/>
 
 	<!-- add more components -->
-	<include file="$(find cob_moveit_config)/launch/move_group.xml"/>
+<!--	<include file="$(find cob_moveit_config)/launch/move_group.xml"/> -->
 
 
 </launch>

@@ -1,0 +1,48 @@
+1.Make sure mysql connector for c++ is install. Download the "source code" for the c++ version of the Connector/C++ from 
+
+	http://dev.mysql.com/downloads/connector/cpp/#downloads
+
+  The latest version tested was mysql-connector-c++-1.1.3.tar.gz
+  
+  Extract the file with 
+	>tar xfvz mysql-connector-c++-1.1.3.tar.gz
+
+  then follow the installation instractions from the "INSTALL" file in the extracted folder to compile and install the library and the include files.
+
+2.To compile this package, go into the package root directory (i.e. accompany_context_aware_planner folder) and execute the following command
+
+	> make
+
+3.To test this package, you need access to robot house mysql database. You can easilly set this up on your local machine. 
+  The package is currently set to look for the database on the local machine i.e. #define DBHOST "tcp://localhost:3306"
+  If the database is not on your local machine, you need to redefine DBHOST in ContextAwarePlanner.cpp with the new host 
+  machine's ip/hostname and recompile the package.
+	
+   i.e. set #define DBHOST "tcp://NewMachineIP:3306"
+  	or 
+  	set #define DBHOST "tcp://NewMachineHostname:3306"
+  	 	
+4.To make eclipse project files for this package, follow the instructions @ http://www.ros.org/wiki/IDEs#Creating_the_Eclipse_project_files
+  A summary of the instructions is listed below.
+
+  a)Execute the following command in the package root folder (i.e. accompany_context_aware_planner folder)
+
+	>make eclipse-project
+
+  b)Then start Eclipse, select File --> Import --> General --> Existing projects into workspace, 
+	hit next, then browse for your package's directory (select root directory i.e. accompany_context_aware_planner). 
+	Do NOT select Copy projects into workspace. Then finish. 
+
+=======================================================================
+Usage:
+  Running the server
+	>roslaunch accompany_context_aware_planner accompany_context_aware_planner.launch 
+
+  Testing: running the client with the following parameters "userId userPosture X(m) Y(m) Orientation(deg) robotGenericTaskId"
+	i.e. >.getPotentialProxemicsLocations 1 1 0 0 0 3
+	
+//Proxemics Context Aware Planner Server currently require the client to send userId, userPosture, coordinate(x,y,theta) 
+// and the task the robot is going to do. 
+// In the future, only userId and robot's task are needed, the rest of the data will be 
+// retrieved directly from the database.
+

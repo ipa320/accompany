@@ -1,0 +1,13 @@
+#
+Header header
+#
+int32 userId
+#
+int32 userPosture
+#
+geometry_msgs/Pose userPose
+#
+int32 robotGenericTaskId
+---
+#
+geometry_msgs/PoseStamped[] targetPoses
