@@ -10,7 +10,7 @@ from accompany_user_tests_year2.msg import *
 from simple_script_server import *
 sss = simple_script_server()
 
-#from moveit_commander import MoveGroupCommander
+from moveit_commander import MoveGroupCommander
 #from simple_moveit_interface_accompany import *
 
 
@@ -20,10 +20,23 @@ class UnloadTrayServer:
 		self.server.start()
 
 	def execute(self, goal):
+		print " in execute"
 		if goal.table_height <= 0.445 or goal.table_height >= 0.605:
 			rospy.logerr("table_height (" + str(goal.table_height) + ") not within limits (0.45...0.60), goal aborted.")
 			self.server.set_aborted()
 			return
+		#test placement
+		#intermediatefront (alt) -> grasp -> intermediatefront (alt) -> try moveit placement
+		grasp_wine = [-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]
+		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
+		sss.move("arm", grasp_wine)
+		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
+		sss.move("arm",[[-1.4725637435913086, -1.377752661705017, 2.7658369541168213, 0.7250320315361023, -0.46470531821250916, 0.48695826530456543, -1.3995795249938965]])
+	    
+		
+
+
+'''
 		#turn to user
 		if goal.table_height == 0.45:
 	 		sss.move("torso", [[-0.08,0.17,-0.08]])
@@ -31,7 +44,34 @@ class UnloadTrayServer:
 			print "placing object on table with a height of " + str(goal.table_height)
 		
 			grasp = [-1.023739218711853, -1.0562658309936523, 2.3108131885528564, 1.5178372859954834, -0.08975735306739807, 1.0026973485946655, 0.1390783041715622]
-		
+
+#WDR
+
+			#alternative grasp for WDR/QuC: slightly closer to tray for compatibility to small glasses
+			#grasp = [-0.8789247870445251, -1.0868816375732422, 2.198944330215454, 1.510927438735962, 0.054488424211740494, 1.0030218362808228, 0.08623672276735306]
+
+			#grasp position for 2 finger grip
+			# [-0.9046450257301331, -1.0484381914138794, 2.311400890350342, 1.517284870147705, -0.051085032522678375, 1.002856731414795, -1.4088053703308105]
+
+			#sdh grasp for cocktail glass
+			#sss.move("sdh",[[0,-0.17,0.27,-0.2,0.3,-0.2,0.3]])
+
+			#sdh grasp for wine glass or whiskey glass
+			#sss.move("sdh",[[1.57,-0.79,0.5,-0.2,0.45,-0.2,0.45]])
+
+			#sdh grasp for wine glass only (hold up from below)
+			#sss.move("sdh",[[1.07,-0.79,0.5,-0.1,0.45,-0.1,0.45]])
+
+			#intermediatefront alternative for wine and whiskey glass
+			#[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]
+
+			#end position for placing wine or whiskey glass
+			#[-1.4725637435913086, -1.377752661705017, 2.7658369541168213, 0.7250320315361023, -0.46470531821250916, 0.48695826530456543, -1.3995795249938965]
+
+
+#/WDR
+
+
 			handle_arm = sss.move("arm",["intermediateback","intermediatefront",grasp],False)
 			#handle_arm = sss.move("arm",["intermediatefront"],False)
 			rospy.sleep(10)
@@ -44,9 +84,6 @@ class UnloadTrayServer:
 			#table_height = goal.table_height
 			#intermediatefront_height = 0.98
 			#dz = table_height - intermediatefront_height
-
-		
-
 		
 			#if not moveit_cart_goals("arm", "base_link", [goal_pose1], False) == "succeeded":
 			#	sss.set_light("red")
@@ -83,8 +120,8 @@ class UnloadTrayServer:
 			#sss.trigger("arm", "stop")
 	###
 		
-			#current_pose = moveit_get_current_pose("arm")
-			#goal_pose1 = self.calculate_goal_pose(current_pose, 0.05, 0.05, 0.0, 0.0, 0.0, 0.0)
+			current_pose = moveit_get_current_pose("arm")
+			goal_pose1 = self.calculate_goal_pose(current_pose, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0)
 		
 	######
 			sss.move("sdh","cylopen")
@@ -100,25 +137,59 @@ class UnloadTrayServer:
 
 			#sss.set_light("green")
 			#self.server.set_succeeded()
-		else:
-			sss.move("arm",["intermediateback","intermediatefront", [-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],False)
 
-	def calculate_goal_pose(self, current_pose, dx, dy, dz, droll, dpitch, dyaw):
-		goal_pose = current_pose.pose
-		goal_pose.position.x += dx
-		goal_pose.position.y += dy
-		goal_pose.position.z += dz
-		rpy = tf.transformations.euler_from_quaternion([goal_pose.orientation.x, goal_pose.orientation.y, goal_pose.orientation.z, goal_pose.orientation.w])
-		rpy = [rpy[0],rpy[1],rpy[2]]
-		rpy[0] += droll
-		rpy[1] += dpitch
-		rpy[2] += dyaw
-		quat = tf.transformations.quaternion_from_euler(rpy[0], rpy[1], rpy[2])
-		goal_pose.orientation.x = quat[0]
-		goal_pose.orientation.y = quat[1]
-		goal_pose.orientation.z = quat[2]
-		goal_pose.orientation.w = quat[3]
-		return goal_pose
+
+		else:
+			print " in elif"
+			sss.move("arm",["intermediateback","intermediatefront", [-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			rospy.sleep(5)
+			sss.move("arm",["intermediatefront",[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]], True)
+			rospy.sleep(5)
+			sss.move("arm","intermediatefront",True)
+			sss.move("base", [-1,1.2,2.64],False)
+			sss.move("arm", ["intermediateback","folded"],False)
+			rospy.sleep(2)
+			sss.move("torso","front_extreme",False)
+'''
+'''
+#repeat and approach
+			#sss.move("arm","intermediatefront")
+			#sss.move("arm",[[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			#rospy.sleep(3)
+			#sss.move("arm","intermediatefront")
+			#sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move("arm",[[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			rospy.sleep(2)
+			sss.move("arm","intermediatefront")
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move("arm",[[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			rospy.sleep(2)
+			sss.move("arm","intermediatefront")
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move("arm",[[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			rospy.sleep(2)
+			sss.move("arm","intermediatefront")
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move_base_rel("base",[0.1,0,0],False)
+			sss.move("arm",[[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
+			rospy.sleep(1)
+			sss.move("arm","intermediatefront")
+			#sss.move("arm",["intermediatefront",[-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]], True)
+			#rospy.sleep(5)
+			#sss.move("arm","intermediatefront",True)
+			#sss.move("base", [-1,1.2,2.64],False)
+			#sss.move("arm", ["intermediateback","folded"],False)
+			#rospy.sleep(2)
+			#sss.move("torso","front_extreme",False)
+
+			
+			
+			return
+'''
 		
 
 if __name__ == '__main__':
