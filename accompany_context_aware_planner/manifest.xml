@@ -1,0 +1,29 @@
+<package>
+  <description brief="accompany_context_aware_planner">
+
+     accompany_context_aware_planner
+
+  </description>
+  <author>khenglee</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_context_aware_planner</url>
+  <depend package="std_msgs"/>
+  <depend package="roscpp"/>
+  <depend package="rospy"/>
+  <depend package="geometry_msgs"/>
+  <depend package="tf"/>
+  <depend package="opencv2"/>
+  <depend package="nav_msgs"/>
+  
+  <depend package="move_base_msgs"/>
+  <depend package="actionlib"/>
+  <rosdep name="libmysqlclient-dev"/>
+  
+<!--  <export>
+#  <cpp lflags="-lmysqlclient"/>
+#  </export>
+-->
+</package>
+
+

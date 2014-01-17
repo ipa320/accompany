@@ -1,0 +1,14 @@
+<package>
+  <description brief="actionlib_interface">
+  	Manifest to load ROS dependancies for the careobot.py file
+  </description>
+  <author>Nathan Burke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="rospy"/>
+  <depend package="tf"/>
+  <depend package="accompany_context_aware_planner"/>
+  <depend package="geometry_msgs"/>
+</package>
+
+

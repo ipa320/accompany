@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="30"
+   height="21"
+   version="1.1">
+  <path
+     d="m 0,0.1382 0,1.3816 30,0 L 30,0 z M 1.71524,1.7962 0,1.7962 0,15.88821 1.71524,15.888 z M 0,17.68414 c 0,0 5.61882,0.66905 10.9644,0.9661 l -0.13482,0.5537 C 9.21512,19.48033 8.03252,19.51685 6.52461,20.03275 5.32065,20.44502 5.85202,21 5.85202,21 l 18.29604,0 c 0,0 0.53149,-0.55498 -0.6726,-0.96725 -1.50791,-0.5159 -2.69089,-0.55242 -4.30496,-0.82881 L 19.04334,18.68186 C 24.39043,18.40416 30,17.68414 30,17.68414 l 0,-1.51967 -30,0 z m 28.21755,-1.79593 1.78245,0 0,-14.09201 -1.78245,0 0,14.09201"
+     style="fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none" />
+  <path
+     style="fill:#ffffff;stroke:none"
+     d="m 1.991,1.796 0,14.092 25.951,0 0,-14.092 z" />
+  <rect
+     style="fill:#008080;fill-opacity:1;stroke:none"
+     id="rect3008"
+     width="5.1999998"
+     height="10"
+     x="1.9910001"
+     y="1.796" />
+  <rect
+     style="fill:#999999;fill-opacity:1;stroke:none"
+     id="rect3010"
+     width="25.951"
+     height="4.092"
+     x="1.9910001"
+     y="11.796" />
+  <rect
+     style="fill:#008000;fill-opacity:1;stroke:none"
+     id="rect3008-3"
+     width="5.1999998"
+     height="10"
+     x="7.191"
+     y="1.796" />
+  <rect
+     style="fill:#800080;fill-opacity:1;stroke:none"
+     id="rect3008-3-2"
+     width="5.1999998"
+     height="10"
+     x="12.391"
+     y="1.796" />
+  <rect
+     style="fill:#aa0000;fill-opacity:1;stroke:none"
+     id="rect3008-3-2-5"
+     width="5.1999998"
+     height="10"
+     x="17.591"
+     y="1.796" />
+  <rect
+     style="fill:#000080;fill-opacity:1;stroke:none"
+     id="rect3008-3-2-5-1"
+     width="5.1999998"
+     height="10"
+     x="22.742001"
+     y="1.796" />
+</svg>
