@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- context aware planner service node -->
+  <!-- rosparam command="load" ns="/accompany_context_aware_planner" file="$(find accompany_context_aware_planner)/ros/launch/accompany_context_aware_planner_params.yaml"/-->
+  <node name="accompany_context_aware_planner" pkg="accompany_context_aware_planner" ns="/accompany_context_aware_planner" type="accompany_context_aware_planner" output="screen">
+    <!--remap from="name inside your program" to="name in otside world outside"/-->
+
+    <!--param name="data_directory" type="string" value="$(find cob_people_detection)/common/files/"/-->
+  </node>
+
+</launch>

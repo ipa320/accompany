@@ -1,0 +1,33 @@
+<launch>
+
+  <!-- machines in Amsterdam
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="bterwijnDesktop" />
+     <arg name="image_topic" value="camera1/gscam/image_raw" />
+     <arg name="res_path" value="$(find accompany_uva)/res/testRobotHouse/camera1" />
+  </include>
+  
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="ThinkpadX200" />
+     <arg name="image_topic" value="camera1/gscam/image_raw" />
+     <arg name="res_path" value="$(find accompany_uva)/res/testRobotHouse/camera1" />
+  </include>
+  -->
+
+  
+  <!-- machines	in robot house in Cornwall -->
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="omni_cam1_pc" />
+     <arg name="res_path" value="/home/camera1/ros/accompany/accompany_static_camera_localisation/res" />
+     <arg name="image_topic" value="cam1/image_raw" />
+  </include>
+
+  <!--
+  <include file="$(find accompany_uva)/launch/startDetect.launch">
+     <arg name="machine" value="omni_cam2_pc" />
+     <arg name="res_path" value="/home/camera3/ros/accompany/accompany_static_camera_localisation/res" />
+     <arg name="image_topic" value="cam2/image_raw" />
+  </include>
+  -->
+
+</launch>

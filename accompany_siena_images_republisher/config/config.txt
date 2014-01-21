@@ -1,5 +1,5 @@
 cob_version cob3-6
-sampling_rate 5
+sampling_rate 1
 output_topic accompany/GUIimage
 input_topic stereo/left/image_color
 head_input_topic head_controller/state
