@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QtSql>
-#include "/home/accompany/git/uh-adapsys-clone-1308/accompany/UHCore/CppInterface/include/robot.h"
+#include "../UHCore/CppInterface/include/robot.h"
 #include <iostream>
 #include <sstream>
 #include <Python.h>

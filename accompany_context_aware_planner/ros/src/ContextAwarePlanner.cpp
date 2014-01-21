@@ -10,7 +10,7 @@
 
 
 //Heerlen's Setting
-#define DBHOST "tcp://192.168.1.142:3306" //robothouse database ip
+#define DBHOST "127.0.0.1:3306" //robothouse database ip
 #define USER "accompanyUser"
 #define PASSWORD "accompany"
 #define DATABASE "Accompany"

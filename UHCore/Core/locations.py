@@ -84,7 +84,7 @@ class HumanLocationProcessor(LocationProcessor):
         self._ros = ROS()
         self._topic = '/trackedHumans'
         self._tm = None        
-        self._transform = Transform(toTopic='/map', fromTopic='/room_frame')
+        self._transform = Transform(toTopic='/map', fromTopic='/camera_frame')
         
         self._targetName = "Humans"
         self._storedLoc = self._getStoredLoc

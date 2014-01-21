@@ -12,7 +12,7 @@ server_config = {
   #'mysql_log_db':       'Accompany',
   #'mysql_log_table':    'SensorLog',
 
-  'mysql_log_server':   'Accompany1',
+  'mysql_log_server':   'localhost',
   'mysql_log_user':     'accompanyUser',
   'mysql_log_password': 'accompany',
   'mysql_log_db':       'Accompany',
@@ -50,7 +50,7 @@ server_config = {
   'mysql_geo_query':    'CALL expPower',
   
   # Settings for the zwave sensor network,
-  'zwave_ip': '192.168.1.109',
+  'zwave_ip': '10.0.1.57',
 }
 
 locations_config = {

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Oct 10 10:34:35 2013
+** Created: Sat Jan 18 15:39:48 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -50,6 +50,7 @@ public:
     QLabel *label_3;
     QLabel *label_4;
     QLabel *runningAtLabel;
+    QLabel *label;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -58,7 +59,7 @@ public:
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
-        MainWindow->resize(509, 450);
+        MainWindow->resize(509, 491);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         groupBox_2 = new QGroupBox(centralWidget);
@@ -108,16 +109,19 @@ public:
         pushButton_2->setGeometry(QRect(190, 40, 96, 23));
         label_3 = new QLabel(centralWidget);
         label_3->setObjectName(QString::fromUtf8("label_3"));
-        label_3->setGeometry(QRect(80, 10, 351, 21));
+        label_3->setGeometry(QRect(50, 10, 421, 21));
         QFont font;
         font.setPointSize(16);
         label_3->setFont(font);
         label_4 = new QLabel(centralWidget);
         label_4->setObjectName(QString::fromUtf8("label_4"));
-        label_4->setGeometry(QRect(330, 40, 71, 16));
+        label_4->setGeometry(QRect(310, 40, 71, 16));
         runningAtLabel = new QLabel(centralWidget);
         runningAtLabel->setObjectName(QString::fromUtf8("runningAtLabel"));
         runningAtLabel->setGeometry(QRect(400, 40, 71, 16));
+        label = new QLabel(centralWidget);
+        label->setObjectName(QString::fromUtf8("label"));
+        label->setGeometry(QRect(40, 400, 421, 16));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -151,9 +155,10 @@ public:
         groupBox_5->setTitle(QApplication::translate("MainWindow", "User Location", 0, QApplication::UnicodeUTF8));
         groupBox_6->setTitle(QApplication::translate("MainWindow", "Robot Location", 0, QApplication::UnicodeUTF8));
         pushButton_2->setText(QApplication::translate("MainWindow", "Refresh", 0, QApplication::UnicodeUTF8));
-        label_3->setText(QApplication::translate("MainWindow", "ZUYD Apartment Sensor Simulator", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("MainWindow", "ZUYD/TROYES Apartment Sensor Simulator", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Running at:", 0, QApplication::UnicodeUTF8));
         runningAtLabel->setText(QString());
+        label->setText(QApplication::translate("MainWindow", "TextLabel", 0, QApplication::UnicodeUTF8));
     } // retranslateUi
 
 };

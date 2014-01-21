@@ -33,7 +33,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::openbDB()
 {
-    QString host, user, pw;
+    QString host, user, pw, dBase;
     bool ok;
 
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
@@ -63,13 +63,28 @@ void MainWindow::openbDB()
        return;
     };
 
-     ui->runningAtLabel->setText(lv);
+    dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
+                                   "", &ok);
+    if (!ok)
+    {
+       closeDownRequest = true;
+       return;
+    };
+
+
+  //     if (host=="") host = "localhost";
+  //     if (user=="") user = "accompanyUser";
+  //     if (pw=="") pw = "accompany";
+  //     if (dBase=="")  dBase = "Accompany";
+
+
 
     if (lv=="ZUYD")
     {
-       if (host=="") host = "accompany1";
+       if (host=="") host = "loclhost";
        if (user=="") user = "accompanyUser";
        if (pw=="") pw = "accompany";
+       if (dBase=="")  dBase = "Accompany";
 
     }
     else
@@ -77,12 +92,20 @@ void MainWindow::openbDB()
         if (host=="") host = "localhost";
         if (user=="") user = "rhUser";
         if (pw=="") pw = "waterloo";
+        if (dBase=="")  dBase = "AccompanyResources";
     }
+
+
+
+
+     ui->runningAtLabel->setText(lv);
+
+    ui->label->setText(lv + ":" + user + ":" + host + ":" + dBase);
 
     db = QSqlDatabase::addDatabase("QMYSQL");
 
     db.setHostName(host);
-    db.setDatabaseName("Accompany");
+    db.setDatabaseName(dBase);
     db.setUserName(user);
     db.setPassword(pw);
 
@@ -462,10 +485,10 @@ void MainWindow::updateSensorLog(int sensor, int value, QString stat)
             QMessageBox msgBox;
             msgBox.setIcon(QMessageBox::Critical);
 
-            msgBox.setText("Database error - can't update sensorLog table!");
+            msgBox.setText("Database error - can't insert into sensorLog table!");
             msgBox.exec();
 
-            qCritical("Cannot delete: %s (%s)",
+            qCritical("Cannot insert: %s (%s)",
                       db.lastError().text().toLatin1().data(),
                       qt_error_string().toLocal8Bit().data());
 
@@ -603,5 +626,7 @@ void MainWindow::on_userLocationComboBox_currentIndexChanged(QString locn)
 
     query.exec();
 }
+
+
 
 

@@ -152,7 +152,17 @@ class ROS(object):
             command = ['bash', '-i', '-c', ('%s; env' % ". %s/.bashrc" % os.getenv("HOME")).strip('; ')]
             pipe = Popen(command, stdout=PIPE, stderr=PIPE)
             (data, _) = pipe.communicate()
-            env = dict((line.split("=", 1) for line in data.splitlines()))
+            try:
+	        env = dict((line.split("=", 1) for line in data.splitlines()))
+            except:
+            	env = {}
+            	for line in data.splitlines():
+            	    try:
+            	        (key, value) = line.split("=", 1)
+            	        env[key] = value
+    	            except:
+    	                print >> sys.stderr, "Unable to parse environment variable: %s" % (line)
+    	                continue
             ROS._userVars = env
         
         return ROS._userVars
