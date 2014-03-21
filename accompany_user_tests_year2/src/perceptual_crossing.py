@@ -3,6 +3,7 @@
 import roslib
 roslib.load_manifest('accompany_user_tests_year2')
 import rospy
+import math
 import smach
 import smach_ros
 from simple_script_server import *  # import script
@@ -43,25 +44,50 @@ class FollowUser(smach.State):
 		smach.State.__init__(self,
 			outcomes=['succeeded','failed'])
 		rospy.Subscriber("/trackedHumans", TrackedHumans, self.callback)
-		self.user_position = []
+		self.user_position = PointStamped()
+		self.user_speed = Vector3Stamped()
+		self.tracking_user = False
+		self.last_user_position = [0.0,0.0]
 		
 	def callback(self,msg):
 		# go through list of detections and append them to detection list
 		print "callback"
 		print msg.trackedHumans
-		if len(msg.trackedHumans) > 0:
-			print "some person is in the message"
+		for tracked_human in msg.trackedHumans:
+			if tracked_human.identity == "user":  # some conditions that identifies the user
+				if (self.tracking_user == False):
+					self.last_user_position = [0.0,0.0]
+				self.tracking_user = True
+				self.user_position = tracked_human.location
+				speed = math.sqrt(tracked_human.speed.vector.x*tracked_human.speed.vector.x + tracked_human.speed.vector.y*tracked_human.speed.vector.y)
+				if (speed > 0.1): ## todo check
+					self.user_speed = tracked_human.speed
+				print "user found"
 		return
 
 	def execute(self, userdata):
 		sf = ScreenFormat("FollowUser")
 		
 		sss.set_light("yellow")
-		rospy.sleep(100)
+		while True: ## todo: find some finishing criterion
+			if self.tracking_user == True:
+				# check if the user moved enough and whether we have some significant movement speed
+				dist = math.sqrt((self.last_user_position[0]-self.user_position.location.point.x)*(self.last_user_position[0]-self.user_position.location.point.x) +
+						(self.last_user_position[1]-self.user_position.location.point.y)*(self.last_user_position[1]-self.user_position.location.point.y))
+				self.last_user_position[0] = self.user_position.location.point.x
+				self.last_user_position[1] = self.user_position.location.point.y
+				speed = math.sqrt(self.user_speed.vector.x*self.user_speed.vector.x + self.user_speed.vector.y*self.user_speed.vector.y)
+				if dist > 0.2 And speed > 0.1:
+					# compute a robot offset from user
+					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
+					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
+					rx = self.user_position.location.point.x + n_u[0] + v_u[0]*0.3
+					ry = self.user_position.location.point.y + n_u[1] + v_u[1]*0.3
+					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
+					# let the robot move there
+					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
+			rospy.sleep(0.1)
 		sss.set_light("green")
-		
-#		while True:
-#			if self.user
 		
 #		handle_base=sss.move("base",[6.585, 2.7, -3.145], blocking=False)
 #		rospy.sleep(2)
