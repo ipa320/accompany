@@ -41,7 +41,7 @@ class Options(object):
         args = {'sonid': pid }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding='latin-1')
 
 class Command(object):
     exposed = True
@@ -114,7 +114,7 @@ class FullActionList(object):
         args = {'threshold': self._likelihood, 'session': session }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding='latin-1')
 
 class RobotActions(object):
     exposed = True
@@ -153,7 +153,7 @@ class RobotActions(object):
         args = {'threshold': self._likelihood, 'session':session }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding='latin-1')
 
 class SonsActions(object):
     exposed = True
@@ -190,7 +190,7 @@ class SonsActions(object):
         args = {'threshold': self._likelihood, 'session':session, 'parent': pid }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding='latin-1')
 
 class UserActions(object):
     exposed = True
@@ -227,8 +227,9 @@ class UserActions(object):
         args = {'threshold': self._likelihood, 'session': session }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
-
+        return json.dumps(results, encoding='latin-1') #I'd the format isn't recognised?  look a couple more lines down in the error log , en
+       # I see, but I guess that it's not a problem with parameters passed from the GUI, right? It's a problem with the value into db? yeah, should be able to get around it though, one sec.  try that
+       # thanks!
 class SetParameter(object):
     exposed = True
     

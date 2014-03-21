@@ -1901,12 +1901,19 @@ void MainWindow::on_addActionButton_clicked()
        if (ui->trayRaiseRadioButton->isChecked())
        {
             actiontext+="Raised";
-            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",deliverup";
+            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",raised";
        }
-       else
+
+       if (ui->trayLowerRadioButton->isChecked())
        {
-             actiontext+="Lowered";
-             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",store";
+            actiontext+="Intermediate";
+            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",intermediate";
+       }
+
+       if (ui->trayStoreRadioButton->isChecked())
+       {
+             actiontext+="Stored";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",lowered";
        }
 
        if (ui->trayWaitCheckBox->isChecked())
@@ -3415,6 +3422,7 @@ void MainWindow::resetGui()
      ui->robotComboBox->setCurrentIndex(3);
      ui->trayRaiseRadioButton->setChecked(false);
      ui->trayLowerRadioButton->setChecked(true);
+     ui->trayStoreRadioButton->setChecked(false);
      ui->robotTrayGroupBox->setEnabled(false);
 
      ui->TorsoGroupBox->setEnabled(false);

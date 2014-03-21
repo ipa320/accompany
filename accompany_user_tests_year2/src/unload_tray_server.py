@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
-import roslib; roslib.load_manifest('accompany_user_tests_year2')
+import roslib;
+roslib.load_manifest('accompany_user_tests_year2')
 import rospy
 import actionlib
 import tf

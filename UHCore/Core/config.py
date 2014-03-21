@@ -80,7 +80,8 @@ robot_config = {
                                    'tray': { 
                                                 'positions': { 
                                                               'raised': 'up',
-                                                              'lowered': 'down' 
+                                                              'lowered': 'down', 
+                                                              'intermediate': 'up' 
                                                               },
                                                 'size' : 20
                                             },
@@ -101,8 +102,8 @@ robot_config = {
                                    'tray': { 
                                                 'positions': {
                                                               'raised': 'deliverup',
-                                                              'raised': 'home',
-                                                              'lowered': 'store'
+                                                              'lowered': 'storetray',
+                                                              'intermediate': 'deliverdown' 
                                                               },
                                                 'size' : 10
                                             },

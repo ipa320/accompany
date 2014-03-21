@@ -289,7 +289,7 @@ class PoseUpdater(robot.PoseUpdater):
 
         p = []
         for position in averages:
-            p.append(round(position, 3))
+            p.append(round(min(position, self._rangeThreshold * 1.25), 3))
    
         return (p, trayIsEmpty)
 

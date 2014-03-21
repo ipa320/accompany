@@ -230,7 +230,7 @@ class Robot(object):
             if robot_config.has_key(self.name) and robot_config[self.name].has_key(componentName) and robot_config[self.name][componentName].has_key('positions'):
                 positions = robot_config[self.name][componentName]['positions']
                 for key, value in positions.items():
-                    if value == name:
+                    if value.lower() == name.lower():
                         return (key, state)
             return (name, state)
         else:
