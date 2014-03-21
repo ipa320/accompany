@@ -28,18 +28,19 @@ class UnloadTrayServer:
 			return
 		#test placement
 		#intermediatefront (alt) -> grasp -> intermediatefront (alt) -> try moveit placement
-		grasp_wine = [-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]
-		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
-		sss.move("arm", grasp_wine)
-		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
-		sss.move("arm",[[-1.4725637435913086, -1.377752661705017, 2.7658369541168213, 0.7250320315361023, -0.46470531821250916, 0.48695826530456543, -1.3995795249938965]])
+#		grasp_wine = [-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]
+#		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
+#		sss.move("arm", grasp_wine)
+#		sss.move("arm",[[-0.16939754784107208, -0.4330902695655823, 1.784706950187683, 1.8997095823287964, -0.4886315166950226, 0.8417477011680603, -1.316693902015686]])
+#		sss.move("arm",[[-1.4725637435913086, -1.377752661705017, 2.7658369541168213, 0.7250320315361023, -0.46470531821250916, 0.48695826530456543, -1.3995795249938965]])
 	    
 		
 
 
-'''
+
 		#turn to user
-		if goal.table_height == 0.45:
+		print goal.table_height
+		if True:  #goal.table_height == 0.45:
 	 		sss.move("torso", [[-0.08,0.17,-0.08]])
 	 
 			print "placing object on table with a height of " + str(goal.table_height)
@@ -115,18 +116,24 @@ class UnloadTrayServer:
 			p17= [-0.3796073794364929, -1.3648346662521362, 1.9743826389312744, 0.7521292567253113, -0.7862803339958191, 0.5338812828063965, 1.2719261646270752]
 			p18= [-0.28245383501052856, -0.818909227848053, 1.8353912830352783, 1.3951565027236938, -0.49456751346588135, 0.18976472318172455, 0.6043481826782227]
 
+
+			p16_troyes= [-0.5146042704582214, -1.6116349697113037, 1.917541742324829, 0.353283554315567, -0.7945554852485657, 0.6055818796157837, 1.259820580482483]
+			p17_troyes= [-0.3796073794364929, -1.3648346662521362, 1.9743826389312744, 0.7521292567253113, -0.7862803339958191, 0.5338812828063965, 1.2719261646270752]
+			p18_troyes= [-0.28245383501052856, -0.818909227848053, 1.8353912830352783, 1.3951565027236938, -0.49456751346588135, 0.18976472318172455, 0.6043481826782227]
+
 			#handle_arm = sss.move("arm",["intermediatefront", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15])
-			handle_arm = sss.move("arm",["intermediatefront", p18, p16])
+			handle_arm = sss.move("arm",["intermediatefront", p18_troyes, p16_troyes])
+			#raw_input('break')
 			#rospy.sleep(3)
 			#sss.trigger("arm", "stop")
 	###
 		
-			current_pose = moveit_get_current_pose("arm")
-			goal_pose1 = self.calculate_goal_pose(current_pose, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0)
+#			current_pose = moveit_get_current_pose("arm")
+#			goal_pose1 = self.calculate_goal_pose(current_pose, 0.3, 0.0, 0.0, 0.0, 0.0, 0.0)
 		
 	######
 			sss.move("sdh","cylopen")
-			handle_arm = sss.move("arm",[p17],True)
+			handle_arm = sss.move("arm",[p17_troyes],True)
 			#rospy.sleep(1)
 			handle_arm = sss.move("arm",["intermediateback","folded"],False)
 			rospy.sleep(4)
@@ -137,9 +144,9 @@ class UnloadTrayServer:
 			#handle_arm.wait()
 
 			#sss.set_light("green")
-			#self.server.set_succeeded()
-
-
+			self.server.set_succeeded()
+		
+		
 		else:
 			print " in elif"
 			sss.move("arm",["intermediateback","intermediatefront", [-1.5351587533950806, -0.4335061311721802, 2.7396888732910156, 1.5267207622528076, -0.6499853134155273, 0.2883549630641937, 0.025645868852734566]],True)
@@ -151,7 +158,7 @@ class UnloadTrayServer:
 			sss.move("arm", ["intermediateback","folded"],False)
 			rospy.sleep(2)
 			sss.move("torso","front_extreme",False)
-'''
+
 '''
 #repeat and approach
 			#sss.move("arm","intermediatefront")
@@ -191,6 +198,7 @@ class UnloadTrayServer:
 			
 			return
 '''
+#		return
 		
 
 if __name__ == '__main__':
