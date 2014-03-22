@@ -54,7 +54,7 @@ class FollowUser(smach.State):
 		print "callback"
 		print msg.trackedHumans
 		for tracked_human in msg.trackedHumans:
-			if tracked_human.identity == "user":  # some conditions that identifies the user
+			if tracked_human.specialFlag == "1":  # some conditions that identifies the user
 				if (self.tracking_user == False):
 					self.last_user_position = [0.0,0.0]
 				self.tracking_user = True
