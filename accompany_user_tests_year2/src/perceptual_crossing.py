@@ -12,7 +12,17 @@ sss = simple_script_server()
 from accompany_uva_msg.msg import *
 
 from ScreenFormatting import *
+import MySQLdb
 
+db = MySQLdb.connect(host="localhost",
+					user="accompanyUser",
+					passwd="accompany",
+					db="Accompany")
+cur = db.cursor()
+cur.execute("""UPDATE `Accompany`.`Sensors` SET `status`='true' WHERE `sensorId`='535'""")	#need to be commented with scenario running
+cur.execute("""SELECT status FROM Sensors WHERE sensorId=535""")
+for followUser_condition in cur.fetchall():
+	print "follow user condition:  ", followUser_condition
 class Move(smach.State):
 	def __init__(self):
 		smach.State.__init__(self,
@@ -69,7 +79,7 @@ class FollowUser(smach.State):
 		sf = ScreenFormat("FollowUser")
 		
 		sss.set_light("yellow")
-		while True: ## todo: find some finishing criterion
+		while followUser_condition == "true": ## todo: find some finishing criterion
 			if self.tracking_user == True:
 				# check if the user moved enough and whether we have some significant movement speed
 				dist = math.sqrt((self.last_user_position[0]-self.user_position.location.point.x)*(self.last_user_position[0]-self.user_position.location.point.x) +
@@ -86,6 +96,10 @@ class FollowUser(smach.State):
 					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
 					# let the robot move there
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
+					if rx > 8 And ry < 0.8:
+						break
+					else:
+						print "robot moves to", [rx, ry, theta]
 			rospy.sleep(0.1)
 		sss.set_light("green")
 		
