@@ -1,24 +1,17 @@
+""" Generic web and database configurations """
+""" TODO: Sensor configurations should be moved into the locations_config element as they can differ between sites """
 server_config = {
   # The port on which the web server will be running
   # Point your web browser to http://localhost:<http_port>
-  # must be above 104 to avoid root privilage!!
-
+  # must be above 104 to avoid root privilege!!
   'http_port':       1055,
 
   # The settings for the channel logging MySQL server / database / table
-  #'mysql_log_server':   'rh-database',
-  #'mysql_log_user':     'rhUser',
-  #'mysql_log_password': 'waterloo',
-  #'mysql_log_db':       'Accompany',
-  #'mysql_log_table':    'SensorLog',
-
-  'mysql_log_server':   'localhost',
+  'mysql_log_server':   'localhost',#'rh-database',
   'mysql_log_user':     'accompanyUser',
   'mysql_log_password': 'accompany',
-  'mysql_log_db':       'Accompany',
+  'mysql_log_db':       'AccompanyTroyes',
   'mysql_log_table':    'SensorLog',
-
-
   
   'mysql_history_table':'ActionHistory',
   'mysql_sensorHistory_table':'SensorHistory',
@@ -27,6 +20,7 @@ server_config = {
   'mysql_location_table':'Locations',
   'mysql_robot_table':'Robot',
   'mysql_image_table':'Images',
+  'mysql_imageoverhead_table':'ImagesOverhead',
   'mysql_questions_table':'userInterfaceGUI',
   'mysql_responses_table':'userInterfaceGUI',
   'mysql_users_table':'Users',
@@ -38,7 +32,6 @@ server_config = {
   
   # The port on which the program is listening for UDP broadcast messages
   # transmitted by the ZigBee gateway
-
   'udp_listen_port': 5000,
   'zigbee_usb_port': '/dev/ttyUSB0',
 
@@ -53,6 +46,10 @@ server_config = {
   'zwave_ip': '10.0.1.57',
 }
 
+""" Contains configuration information for each experiment site """
+""" The 'sensors' element controlls which sensors classes are loaded when sensors.py is run """
+""" The 'map' element is used to control the conversion between map coordinates and svg image coordinates """
+
 locations_config = {
   'ZUYD Apartment': {
                      'sensors': ['ZWaveHomeController', 'ZigBeeDirect'],
@@ -64,7 +61,8 @@ locations_config = {
                             }
                      },
   'UH Robot House': {
-                     'sensors': ['ZigBee', 'GEOSystem', 'ZigBeeDirect'],
+#                     'sensors': ['ZigBee', 'GEOSystem', 'ZigBeeDirect'],
+                     'sensors': ['ZigBee', 'GEOSystem'],
                      'map': {
                                 'base':'RobotHouseMap.svg',
                                 'scale':0.275,
@@ -74,14 +72,35 @@ locations_config = {
                      }
 }
 
+""" Controlls various magic strings that are specific to individulal robot models
+    Structure is as follows:
+        'Robot Name': {
+                        'componentName': {
+                                            'positions': {
+                                                            'generic': 'robot specific rosparam',
+                                                         }
+                                            ...other component specific settings...
+                                         }
+                     }
+    Some component settings are: 
+        tray:size==Activation range for the phidget sensors (COB Only)
+        head:camera:topic==ros topic to get the image from
+        head:camera:rotate: {
+                                'angle': when to rotate the image
+                                'distance': tolerance (angle+-distance)
+                                'amount': how much to rotate by (img.rotate(amount))
+                            }
+        hostname:override hostname constructed by robotFactory()
+            I.E. COB3.2 default is built as cob3-2-pc1, if hostname is set, it will be used instead
+    
+"""
 robot_config = {
                 'Care-O-Bot 3.2': {
                                    'phidgets': { 'topics': ['/range_0', '/range_1', '/range_2', '/range_3'], 'windowSize': 5 },
                                    'tray': { 
                                                 'positions': { 
                                                               'raised': 'up',
-                                                              'lowered': 'down', 
-                                                              'intermediate': 'up' 
+                                                              'lowered': 'down' 
                                                               },
                                                 'size' : 20
                                             },
@@ -97,15 +116,37 @@ robot_config = {
                                                        }
                                             },
                                    },
+                'Care-O-Bot 3.5': {
+                                   'phidgets': {'topics': ['/tray_sensors/range_0', '/tray_sensors/range_1', '/tray_sensors/range_2', '/tray_sensors/range_3'], 'windowSize': 5 },
+                                   'tray': { 
+                                                'positions': {
+                                                              'raised': 'deliverup',
+                                                              'lowered': 'storetray',
+                                                              },
+                                                'size' : 10
+                                            },
+                                   'head': { 
+                                                'positions': { 'front': 'front', 'back': 'back' },
+                                                'camera': {
+                                                       'topic':'/stereo/right/image_color/compressed',
+                                                       'rotate': {
+                                                                         'angle': 0,
+                                                                         'distance': 90,
+                                                                         'amount': 180
+                                                                         }
+                                                       }
+                                            },
+                                   },
                 'Care-O-Bot 3.6': {
                                    'phidgets': {'topics': ['/tray_sensors/range_0', '/tray_sensors/range_1', '/tray_sensors/range_2', '/tray_sensors/range_3'], 'windowSize': 5 },
                                    'tray': { 
                                                 'positions': {
                                                               'raised': 'deliverup',
                                                               'lowered': 'storetray',
-                                                              'intermediate': 'deliverdown' 
+                                                              'intermediate': 'deliverdown'
                                                               },
                                                 'size' : 10
+
                                             },
                                    'head': { 
                                                 'positions': { 'front': 'front', 'back': 'back' },
@@ -123,7 +164,8 @@ robot_config = {
                                    'hostname': 'sf1-1-pc1',
                                    'tray': { 
                                                 'positions': { 
-                                                              'raised': 'open', 'lowered': 'closed' 
+                                                              'raised': 'open', 
+                                                              'lowered': 'closed',
                                                               }
                                             },
                                    'head': { 
@@ -146,6 +188,7 @@ robot_config = {
                                    },
                 }
 
+""" Threshold level used to indicate when to display an action possibility on the siena gui """
 siena_config = {
     'likelihood': 0.1
 }

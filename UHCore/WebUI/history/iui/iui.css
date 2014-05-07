@@ -33,7 +33,7 @@ body.landscape > *:not(.toolbar) {
     min-height: 268px;
 }
 
-body > *[selected="selected"]{
+body > *[selected="selected"] {
     display: block;
 }
 

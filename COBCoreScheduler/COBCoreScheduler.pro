@@ -6,6 +6,11 @@
 
 QT       += sql
 
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_RELEASE += -O1
+    QMAKE_CXXFLAGS_RELEASE += -g
+
+
 TARGET = COBCoreScheduler
 TEMPLATE = app
 
@@ -18,10 +23,12 @@ HEADERS  += mainwindow.h
 FORMS    += mainwindow.ui
 
 
-INCLUDEPATH +=  /home/accompany/git/uh-adapsys-clone-3008/accompany/UHCore/Core/cpp
+INCLUDEPATH +=  ../UHCore/CppInterface/include
 INCLUDEPATH +=  /usr/include/python2.7/
 
-LIBS += -L/home/accompany/git/uh-adapsys-clone-3008/accompany/UHCore/CppInterface/Debug -lUHCore
+LIBS += -L../UHCore/CppInterface/Debug -lUHCore
 LIBS += -lpython2.7
+
+
 
 

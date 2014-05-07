@@ -18,7 +18,6 @@
   <depend package="smach"/>
   <depend package="smach_ros"/>
   <depend package="cob_generic_states_experimental"/>
-
 </package>
 
 

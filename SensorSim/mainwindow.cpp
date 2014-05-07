@@ -36,8 +36,47 @@ void MainWindow::openbDB()
     QString host, user, pw, dBase;
     bool ok;
 
+
+    QFile file("../UHCore/Core/config.py");
+
+    if (!file.exists())
+    {
+        qDebug()<<"No config.py found!!";
+
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        closeDownRequest = true;
+        return;
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+
+        if (line.contains("mysql_log_user"))
+        {
+            user = line.section("'",3,3);
+        }
+        if (line.contains("mysql_log_password"))
+        {
+            pw = line.section("'",3,3);
+        }
+        if (line.contains("mysql_log_server"))
+        {
+            host = line.section("'",3,3);
+        }
+        if (line.contains("mysql_log_db"))
+        {
+            dBase = line.section("'",3,3);
+        }
+
+    }
+
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
-                                   "", &ok);
+                                   user, &ok);
     if (!ok)
     {
        closeDownRequest = true;
@@ -47,7 +86,7 @@ void MainWindow::openbDB()
 
 
     pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password,
-                                                                    "", &ok);
+                                                                    pw, &ok);
     if (!ok)
     {
        closeDownRequest = true;
@@ -56,7 +95,7 @@ void MainWindow::openbDB()
 
 
     host = QInputDialog::getText ( this, "Accompany DB", "Host:",QLineEdit::Normal,
-                                   "", &ok);
+                                   host, &ok);
     if (!ok)
     {
        closeDownRequest = true;
@@ -64,7 +103,7 @@ void MainWindow::openbDB()
     };
 
     dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
-                                   "", &ok);
+                                   dBase, &ok);
     if (!ok)
     {
        closeDownRequest = true;
@@ -72,33 +111,7 @@ void MainWindow::openbDB()
     };
 
 
-  //     if (host=="") host = "localhost";
-  //     if (user=="") user = "accompanyUser";
-  //     if (pw=="") pw = "accompany";
-  //     if (dBase=="")  dBase = "Accompany";
-
-
-
-    if (lv=="ZUYD")
-    {
-       if (host=="") host = "loclhost";
-       if (user=="") user = "accompanyUser";
-       if (pw=="") pw = "accompany";
-       if (dBase=="")  dBase = "Accompany";
-
-    }
-    else
-    {
-        if (host=="") host = "localhost";
-        if (user=="") user = "rhUser";
-        if (pw=="") pw = "waterloo";
-        if (dBase=="")  dBase = "AccompanyResources";
-    }
-
-
-
-
-     ui->runningAtLabel->setText(lv);
+    ui->runningAtLabel->setText(lv);
 
     ui->label->setText(lv + ":" + user + ":" + host + ":" + dBase);
 

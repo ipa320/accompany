@@ -153,7 +153,8 @@ class Robot(object):
             if blocking is set to false, this function will return immediately with value 'ACTIVE'
         """
         
-        if robot_config.has_key(self.name) and \
+        if type(value) == str and \
+           robot_config.has_key(self.name) and \
            robot_config[self.name].has_key(name) and \
            robot_config[self.name][name].has_key('positions') and \
            robot_config[self.name][name]['positions'].has_key(value):
@@ -230,7 +231,7 @@ class Robot(object):
             if robot_config.has_key(self.name) and robot_config[self.name].has_key(componentName) and robot_config[self.name][componentName].has_key('positions'):
                 positions = robot_config[self.name][componentName]['positions']
                 for key, value in positions.items():
-                    if value.lower() == name.lower():
+                    if value == name:
                         return (key, state)
             return (name, state)
         else:
@@ -264,7 +265,7 @@ class ROSRobot(Robot):
         if self._tf == None:
             try:
                 import rosHelper
-                self._tf = rosHelper.Transform(rosHelper=self._rs, toTopic='/map', fromTopic='/base_footprint')
+                self._tf = rosHelper.Transform(rosHelper=self._rs, toTopic='/base_footprint', fromTopic='/map')
             except Exception as e:
                 print >> sys.stderr, "Error occured while calling transform: %s" % repr(e)
         return self._tf
@@ -316,6 +317,47 @@ class ROSRobot(Robot):
         
         imgBytes.seek(0)
         img.save(imgBytes, retFormat)
+
+        return imgBytes.getvalue()
+
+    def getImageOverhead(self, retFormat='PNG'):
+        """ Returns the image from the overhead camera (topic is '/camera_living/image_raw/compressed' ) """
+        """ While retFormat is taken into account, PIL appers to always return a JPG file, issue has not been investigated """
+        #if not robot_config.has_key(self.name) or not robot_config[self.name]['head'].has_key('camera'):
+        #    return None
+        
+        img_msg = self._ros.getSingleMessage('/camera_living/image_raw/compressed')
+        if img_msg == None:
+            return None
+        
+        from PIL import Image
+        imgBytes = io.BytesIO()
+        imgBytes.write(img_msg.data)
+        
+        #imgBytes.seek(0)
+        #img = Image.open(imgBytes)
+
+        #if robot_config[self._name]['head']['camera'].has_key('rotate'):
+        #    angle = self.getCameraAngle() or 0
+    
+        #    a = abs(angle - robot_config[self._name]['head']['camera']['rotate']['angle'])
+        #    if a > 180:
+        #        a = abs(a - 360)
+            
+            # 0=back, 180=front, 270=top, 90=bottom.  rotate if not front (0-180 are invalid angles, only included for 'buffer')
+            # if angle <= 90 and angle >= 270:
+        #    if a <= robot_config[self._name]['head']['camera']['rotate']['distance']:
+        #        img = img.rotate(robot_config[self._name]['head']['camera']['rotate']['amount'])
+        
+        #retFormat = retFormat.upper()
+        #if retFormat == 'JPG':
+        #    retFormat = 'JPEG'
+            
+        #if retFormat not in Robot._imageFormats:
+        #    retFormat = 'PNG' 
+        
+        #imgBytes.seek(0)
+        #img.save(imgBytes, retFormat)
 
         return imgBytes.getvalue()
     

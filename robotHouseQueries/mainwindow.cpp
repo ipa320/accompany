@@ -21,6 +21,8 @@ bool refresh;
 
 QTimer timer;
 
+bool closeDownRequest;
+
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
@@ -77,25 +79,83 @@ void MainWindow::changeEvent(QEvent *e)
 
 void MainWindow::on_openDBButton_clicked()
 {
-   QString user = QInputDialog::getText ( this, "Accompany DB", "User:");
-   QString pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password);
-   QString host = QInputDialog::getText ( this, "Accompany DB", "Host:");
 
-   ui->locnLabel->setText(lv);
+    QString user, pw, host, dBase;
+    bool ok;
 
-   if (lv=="ZUYD")
-   {
-      if (host=="") host = "accompany1";
-      if (user=="") user = "accompanyUser";
-      if (pw=="") pw = "accompany";
 
-   }
-   else
-   {
-       if (host=="") host = "localhost";
-       if (user=="") user = "rhUser";
-       if (pw=="") pw = "waterloo";
-   }
+    QFile file("../UHCore/Core/config.py");
+
+    if (!file.exists())
+    {
+       qDebug()<<"No config.py found!!";
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        closeDownRequest = true;
+        return;
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+       QString line = in.readLine();
+
+       if (line.contains("mysql_log_user"))
+       {
+          user = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_password"))
+       {
+           pw = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_server"))
+       {
+          host = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_db"))
+       {
+          dBase = line.section("'",3,3);
+       }
+    }
+
+    user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
+                                     user, &ok);
+    if (!ok)
+    {
+       closeDownRequest = true;
+       return;
+    }
+
+    pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password,
+                                                                      pw, &ok);
+    if (!ok)
+    {
+       closeDownRequest = true;
+       return;
+    }
+
+
+    host = QInputDialog::getText ( this, "Accompany DB", "Host:",QLineEdit::Normal,
+                                     host, &ok);
+    if (!ok)
+    {
+      closeDownRequest = true;
+      return;
+    };
+
+    dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
+                                     dBase, &ok);
+    if (!ok)
+    {
+      closeDownRequest = true;
+      return;
+    };
+
+
+
+
 
    ui->Userlabel->setText(user);
    ui->serverlabel->setText(host);
@@ -103,7 +163,7 @@ void MainWindow::on_openDBButton_clicked()
    db = QSqlDatabase::addDatabase("QMYSQL");
 
    db.setHostName(host);
-   db.setDatabaseName("Accompany");
+   db.setDatabaseName(dBase);
    db.setUserName(user);
    db.setPassword(pw);
    dbOpen = db.open();
@@ -220,7 +280,7 @@ void MainWindow::updateSensors()
 
     if (lastMin)
             model->setQuery("SELECT S.sensorId, S.name, L.name'Location',TIMESTAMPDIFF(SECOND,S.lastUpdate,NOW())'seconds',\
-                            S.value,S.lastUpdate,T.sensorType,T.madeBy\
+                            S.value,S.status,S.lastUpdate,T.sensorType,T.madeBy\
                             FROM Sensors S, Locations L, SensorType T\
                             WHERE S.locationId = L.locationId\
                               AND S.sensorTypeId = T.sensorTypeId\
@@ -229,7 +289,7 @@ void MainWindow::updateSensors()
     else
 
         model->setQuery("SELECT S.sensorId, S.name, L.name'Location',TIMESTAMPDIFF(SECOND,S.lastUpdate,NOW())'seconds',\
-                        S.value,S.lastUpdate,T.sensorType,T.madeBy\
+                        S.value,S.status,S.lastUpdate,T.sensorType,T.madeBy\
                         FROM Sensors S, Locations L, SensorType T\
                         WHERE S.locationId = L.locationId\
                           AND S.sensorTypeId = T.sensorTypeId\

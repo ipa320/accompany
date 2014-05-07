@@ -58,7 +58,8 @@ protected:
 private:
 	std::string modulePath;
 	std::map<std::string, PyObject*> pObjectCache;
-	PyThreadState* threadState;
+	static PyThreadState* threadState;
+	static int refCount;
 };
 
 template<typename T, typename R, typename K>

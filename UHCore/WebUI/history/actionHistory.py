@@ -11,7 +11,7 @@ class Root(object):
     exposed = True
     
     def __init__(self):
-        self._index = 'actionHistory.html'
+        self._index = 'actionHistoryAngular.html'
     
     def GET(self, *args, **kwargs):
         if not cherrypy.request.path_info.endswith('/'):
@@ -91,6 +91,9 @@ class Data(object):
             if event['imageId'] != None:
                 event['imageUrl'] = 'images/%s' % event['imageId']
             event.pop('imageId')
+            if event['imageOverheadId'] != None:
+                event['imageOverheadUrl'] = 'imagesOverhead/%s' % event['imageOverheadId']
+            event.pop('imageOverheadId')
             if event['sensors'] != None and len(event['sensors']) > 0:
                 event['sensorMapUrl'] = 'mapHistory/%s' % event['id']
             
@@ -120,6 +123,32 @@ class Images(object):
 
         cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(img['meta']['name'] + '.' + img['meta']['type'])[0]
         return file_generator(data)
+
+class ImagesOverhead(object):
+    exposed = True
+    
+    def __init__(self):
+        self._dao = DataAccess()
+        self._basePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'imagesOverhead')
+        
+    def GET(self, *args, **kwargs):
+        if len(args) < 1:
+            raise cherrypy.HTTPError(403, 'Directory Listing Denied')
+
+        img = self._dao.getBinaryOverhead(args[0])
+        
+        if img['data'] == None:
+            path = os.path.join(self._basePath, args[0])
+            if os.path.exists(path):
+                data = io.FileIO(path)
+            else:
+                raise cherrypy.HTTPError(404)
+        else:
+            data = io.BytesIO(img['data'])
+
+        cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(img['meta']['name'] + '.' + img['meta']['type'])[0]
+        return file_generator(data)
+
 
 class MapHistory(object):
     exposed = True

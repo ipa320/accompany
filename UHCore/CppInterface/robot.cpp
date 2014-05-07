@@ -8,27 +8,32 @@
 Robot::Robot(std::string modulePath, std::string robotName) :
 		PythonInterface(modulePath) {
 	Robot::name = robotName;
+	Robot::pInstance = NULL;
 	Robot::pInstance = getDefaultClassInstance();
+
+	if(Robot::pInstance == NULL) {
+		throw RobotBuildException(("getInstance returned null for robot '" + robotName + "', check console for messages.").c_str());
+	}
 }
 
 PyObject* Robot::getDefaultClassInstance() {
-	if (pInstance == NULL) {
+	if (Robot::pInstance == NULL) {
 		PyObject* pClass = getClassObject("Robots.robotFactory", "Factory");
 		if (pClass == NULL) {
 			std::cerr << "Error locating class object Robots.robotFactory.Factory" << std::endl;
 		} else {
 			if (Robot::name != "") {
 				std::cout << "Getting class for robot: " << name << std::endl;
-				pInstance = callMethod(pClass, "getRobot", Robot::name.c_str());
+				Robot::pInstance = callMethod(pClass, "getRobot", Robot::name.c_str());
 			} else {
 				std::cout << "Getting class for active robot" << std::endl;
-				pInstance = callMethod(pClass, "getCurrentRobot");
+				Robot::pInstance = callMethod(pClass, "getCurrentRobot");
 			}
 
 			{
 				PythonLock lock = PythonLock();
 				const char* pName = strdup("name");
-				PyObject* nm = PyObject_GetAttrString(getDefaultClassInstance(), pName);
+				PyObject* nm = PyObject_GetAttrString(Robot::pInstance, pName);
 				Robot::name = std::string(PyString_AsString(nm));
 				Py_XDECREF(nm);
 				Py_DECREF(pClass);
@@ -36,7 +41,7 @@ PyObject* Robot::getDefaultClassInstance() {
 		}
 	}
 
-	return pInstance;
+	return Robot::pInstance;
 }
 
 std::string Robot::getName() {

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
 from Data.dataAccess import SQLDao, Sensors, Locations
@@ -240,7 +241,11 @@ class ZigBeeDirect(PollingProcessor):
 		super(ZigBeeDirect, self).__init__()
 		import serial
 		from Lib.xbee import ZigBee
-		self._port = serial.Serial(usbPort, baudRate)
+		try:
+			self._port = serial.Serial(usbPort, baudRate)
+		except Exception as e:
+			print >> sys.stderr, "Unable to connect to zigbee port, check that the port name (%s) and permissions are correct (should be a+rw)" % (usbPort)
+			raise e
 		self._zigbee = ZigBee(self._port)
 		
 		# Place for the callback methods to store "static" values.
