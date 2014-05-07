@@ -409,7 +409,7 @@ class ActionHistory(object):
         self._locationTable = locationTable or server_config['mysql_location_table']
         self._sensorTypeTable = sensorTypeTable or server_config['mysql_sensorType_table']
         self._sql = SQLDao()
-        self._selectQuery = "SELECT `actionHistoryId`, `imageId`, `timestamp`, `ruleName`, `tags`, `%(loc)s`.`name` as 'location' \
+        self._selectQuery = "SELECT `actionHistoryId`, `imageId`, `imageOverheadId`, `timestamp`, `ruleName`, `tags`, `%(loc)s`.`name` as 'location' \
                FROM `%(hist)s` \
                INNER JOIN `%(loc)s` ON `%(loc)s`.`locationId` = `%(hist)s`.`locationId`" % {
                                                                                             'hist' : self._historyTable,
@@ -454,6 +454,7 @@ class ActionHistory(object):
                        'name':row['ruleName'],
                        'status': 'activate',
                        'imageId':row['imageId'],
+                       'imageOverheadId':row['imageOverheadId'],
                        'location': row['location'],
                        'tags': eval(row['tags'] or '()'),
                        'time': {
@@ -518,7 +519,7 @@ class ActionHistory(object):
     
     def updateTags(self, historyId, tags):
         sql = "UPDATE `%s`" % (self._historyTable)
-        sql += " SET `tags` = %(tags)s WHERE `actionHistoryId` = %(histid)s" 
+        sql += " SET `timestamp` = `timestamp`,`tags` = %(tags)s WHERE `actionHistoryId` = %(histid)s" 
         args = {
               'tags' : str(tags),
               'histid': historyId
@@ -538,6 +539,18 @@ class ActionHistory(object):
         
         self._sql.saveData(sql, args)
         return imageId
+
+    def saveHistoryImageOverhead(self, historyId, imageBytes, imageType):
+        imageOverheadId = Binary().saveBinaryOverhead('ImageOverhead for history %s' % (historyId), imageBytes, imageType)
+        sql = "UPDATE `%s`" % (self._historyTable)
+        sql += " SET `imageOverheadId` = %(imgoid)s WHERE `actionHistoryId` = %(histid)s" 
+        args = {
+              'imgoid' : imageOverheadId,
+              'histid': historyId
+              }
+        
+        self._sql.saveData(sql, args)
+        return imageOverheadId
 
 class Sensors(object):
     def __init__(self, sensorTable=None, sensorTypeTable=None, sensorLogTable=None, locationTable=None, sensorRange=None, sensorIconTable=None):
@@ -648,7 +661,9 @@ class Binary(object):
     def __init__(self, binaryTable=None, binaryIdCol=None):
         from config import server_config
         self._binaryTable = binaryTable or server_config['mysql_image_table']
+        self._binaryTableOverhead = server_config['mysql_imageoverhead_table']
         self._binaryIdCol = binaryIdCol or 'imageId'
+        self._binaryOverheadIdCol = 'imageOverheadId'
         self._sql = SQLDao()
 
     def getBinary(self, itemId):
@@ -673,8 +688,42 @@ class Binary(object):
                             }
                    }
     
+    def getBinaryOverhead(self, itemId):
+        sql = 'SELECT * FROM `%(table)s` WHERE `%(idCol)s`' % { 'table': self._binaryTableOverhead, 'idCol': self._binaryOverheadIdCol}        
+        sql += " = %(id)s"
+        args = {'id': itemId }
+        
+        data = self._sql.getSingle(sql, args)
+        if data != None:
+            return {
+                   'data': data['bytes'],
+                   'meta': {
+                        'type': data['type'],
+                        'name': data['name']
+                        }}
+        else:
+            return {
+                   'data': None,
+                   'meta': {
+                            'type': '',
+                            'name': ''
+                            }
+                   }
+
     def saveBinary(self, itemName, itemBytes, itemType):
         sql = "INSERT INTO `%s` (`type`, `name`, `bytes`)" % (self._binaryTable) 
+        
+        sql += " VALUES (%(type)s, %(name)s, %(bytes)s)" 
+        args = {
+                  'type' : itemType,
+                  'name': itemName,
+                  'bytes':itemBytes
+                  }
+        
+        return self._sql.saveData(sql, args)
+
+    def saveBinaryOverhead(self, itemName, itemBytes, itemType):
+        sql = "INSERT INTO `%s` (`type`, `name`, `bytes`)" % (self._binaryTableOverhead) 
         
         sql += " VALUES (%(type)s, %(name)s, %(bytes)s)" 
         args = {
@@ -818,12 +867,21 @@ class DataAccess(object):
 
     def saveHistoryImage(self, historyId, imageBytes, imageType):
         return self.actionHistory.saveHistoryImage(historyId, imageBytes, imageType)
+
+    def saveHistoryImageOverhead(self, historyId, imageBytes, imageType):
+        return self.actionHistory.saveHistoryImageOverhead(historyId, imageBytes, imageType)
         
     def getBinary(self, itemId):
         return self.binary.getBinary(itemId)
     
+    def getBinaryOverhead(self, itemId):
+        return self.binary.getBinaryOverhead(itemId)
+
     def saveBinary(self, itemName, itemBytes, itemType):
         return self.binary.saveBinary(itemName, itemBytes, itemType)
+
+    def saveBinaryOverhead(self, itemName, itemBytes, itemType):
+        return self.binary.saveBinaryOverhead(itemName, itemBytes, itemType)
 
     def getSingle(self, sql, args=None, default=None):
         return self.sql.getSingle(sql, args, default)
@@ -890,10 +948,14 @@ class SQLDao(object):
             cursor.close()
             return rows
         except Exception as e:
-            cursor.close()
+            
             # Server connection was forcibly severed from the server side
             # retry the request
             if e.args[0] == 2006:
+                cursor.close()
+                return self.getData(sql, args, trimString)
+
+            if e.args[0] == 2014:
                 return self.getData(sql, args, trimString)
             
             if len(e.args) > 1:

@@ -33,11 +33,17 @@ private slots:
 
     void on_tableWidget_itemActivated(QTableWidgetItem *item);
 
-    void on_tableWidget_itemSelectionChanged();
+ //   void on_tableWidget_itemSelectionChanged();
 
     void on_APDeletePushButton_clicked();
 
     void on_APRefreshPushButton_clicked();
+
+    void on_tableWidget_itemPressed(QTableWidgetItem *item);
+
+    void on_tableWidget_clicked(const QModelIndex &index);
+
+    void on_tableWidget_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::MainWindow *ui;

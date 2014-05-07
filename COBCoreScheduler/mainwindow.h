@@ -3,7 +3,8 @@
 
 #include <QMainWindow>
 #include <QtSql>
-#include "../UHCore/CppInterface/include/robot.h"
+#include "robot.h"
+#include "history.h"
 #include <iostream>
 #include <sstream>
 #include <Python.h>
@@ -18,9 +19,10 @@ public:
 	MainWindow(int argc, char** argv, QWidget *parent = 0);
 	~MainWindow();
 	bool evaluateRules(QString sequenceName, bool display);
+    bool evaluateResources(QString sequenceName);
 	int executeSequence(QString sequenceName, bool display);
 	void logMessage(QString msg);
-	bool fillSequenceTable();
+    bool fillSequenceTable(QString scenario);
 
 	void stopSequence(QString sequenceName);
 
@@ -29,12 +31,13 @@ public:
 	bool closeDownRequest;
 	bool stopExecution;
 	void COB_component(QString component, QString action);
-	bool openDatabase(QString dbName, QString host, QString user, QString pw, QSqlDatabase& db);
-	bool openAllDatabaseConnections(QString host, QString user, QString pw);
+    bool openDatabase(QString dbName, QString host, QString user, QString pw, QString dbase, QSqlDatabase& db);
+    bool openAllDatabaseConnections(QString host, QString user, QString pw, QString dbase);
 	void closeAllDatabaseConnections();
 	void planNavigation(QString destination);
 	int sendScriptServerMsg();
 	void updateGUI(int option);
+
 
 protected:
 	void changeEvent(QEvent *e);
@@ -44,6 +47,9 @@ private:
 	QTimer timer;
 	QTimer schedTimer;
 	void checkStopExecution();
+
+public slots:
+    int  retryMessage(QString msg);
 
 private slots:
 	void on_executePushButton_clicked();
@@ -64,6 +70,7 @@ private slots:
 	void on_GUIradioButton2_clicked();
 	void on_GUIradioButton3_clicked();
 	void on_GUIradioButton4_clicked();
+    void on_speedSpinBox_valueChanged(int arg1);
 };
 
 #endif // MAINWINDOW_H

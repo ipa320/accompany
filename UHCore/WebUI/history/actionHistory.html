@@ -2,11 +2,11 @@
 <html>
 	<head>
 		<title>Visualisation of Robot's Memory</title>
-		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
-		<!--<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.1/jquery.min.js"></script>-->
-		<script src="js/jquery-1.8.2.min.js"></script>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+		<!--script src="js/jquery-1.8.2.min.js"></script-->
 		<link rel="stylesheet" href="iui/iui.css" type="text/css" />
-		<link rel="stylesheet" href="iui/t/default/default-theme.css" type="text/css"/>		
+		<link rel="stylesheet" title="Default" href="iui/t/default/default-theme.css"  type="text/css"/>	
 		<script type="application/x-javascript" src="iui/iui.js"></script>
 		<script src="js/main.js"></script>
 		<script type="text/javascript">
@@ -14,7 +14,7 @@
 				var ui = new uiHelper();
 				var dao = new dataHelper();
 				//var tags = []
-				ui.load(dao.getEvents(''), $('body'));
+				ui.load(dao.getEvents(''), $('body'));//dao.getEvents('') represent the episodes in history
 			})
 		</script>
 	</head>

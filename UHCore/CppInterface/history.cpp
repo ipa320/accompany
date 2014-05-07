@@ -62,6 +62,15 @@ void ActionHistory::addHistoryAsync(std::string ruleName) {
 	}
 }
 
+void ActionHistory::addHistoryCompleteAsync(std::string ruleName) {
+
+	PyObject* pValue = callMethod("addHistoryCompleteAsync", ruleName);
+	{
+		PythonLock lock = PythonLock();
+		Py_DECREF(pValue);
+	}
+}
+
 bool ActionHistory::addHistory(std::string ruleName) {
 	PyObject* pValue = callMethod("addHistory", ruleName);
 	bool ret;

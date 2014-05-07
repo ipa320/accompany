@@ -62,6 +62,49 @@ class ActionHistory(object):
         
         return historyId > 0
 
+    def addHistoryCompleteAsync(self, ruleName, imageBytes=None, imageType=None, imageOverheadBytes=None, imageOverheadType=None):
+        """ asynchronously updates the actionHistory table, returning immediately """  
+        Thread(target=self.addHistoryComplete, args=(ruleName, imageBytes, imageType,imageOverheadBytes,imageOverheadType)).start()
+
+    def addHistoryComplete(self, ruleName, imageBytes=None, imageType=None, imageOverheadBytes=None, imageOverheadType=None):
+        """ updates the action history table, blocking until all data is retrieved and stored """
+        """ returns true on successful update """
+        
+        from Robots.robotFactory import Factory
+        cob = Factory.getCurrentRobot()
+        dao = DataAccess()
+        dateNow = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        location = dao.getRobotByName(cob.name)['locationId']
+        
+        historyId = dao.saveHistory(dateNow, ruleName, location)
+        
+        if(historyId > 0):
+            dao.saveSensorHistory(historyId)
+
+            if imageType == None:
+                imageType = ActionHistory._defaultImageType
+
+            if imageBytes == None:
+                imageBytes = cob.getImage(retFormat=imageType)
+
+            if imageBytes != None:
+                dao.saveHistoryImage(historyId, imageBytes, imageType)
+
+            #the same but for the overhead camera image
+
+            if imageOverheadType == None:
+                imageOverheadType = ActionHistory._defaultImageType
+
+            if imageOverheadBytes == None:
+                imageOverheadBytes = cob.getImageOverhead(retFormat=imageOverheadType)
+
+            if imageOverheadBytes != None:
+                dao.saveHistoryImageOverhead(historyId, imageOverheadBytes, imageOverheadType)
+        
+        return historyId > 0
+
+
+
 ################################################################################
 #
 # Logger thread
@@ -105,10 +148,11 @@ class SensorLog(PollingProcessor):
 
             status = str(sensor['status']).capitalize()
             if self._logCache[uuid]['status'] != status or self._logCache[uuid]['value'] != sensor['value']:
+                val = sensor['value'] if len(sensor['value']) > 1 else sensor['value'][0]
                 timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 success = self._dao.saveSensorLog(
                                                   sensor['id'],
-                                                  sensor['value'],
+                                                  val,
                                                   status,
                                                   timestamp,
                                                   sensor['room'],
@@ -117,7 +161,7 @@ class SensorLog(PollingProcessor):
                     print "Updated sensor log for %(id)s to %(status)s (%(value)s)" % { 
                                                                            'id':sensor['channel'],
                                                                            'status': status,
-                                                                           'value': sensor['value'],
+                                                                           'value': val,
                                                                            }
                     self._logCache[uuid]['value'] = sensor['value']
                     self._logCache[uuid]['status'] = status

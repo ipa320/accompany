@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Sat Jan 18 19:48:30 2014
+** Created: Wed Apr 23 17:04:23 2014
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      17,   14, // methods
+      19,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -31,29 +31,32 @@ static const uint qt_meta_data_MainWindow[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      12,   11,   11,   11, 0x08,
-      43,   11,   11,   11, 0x08,
-      89,   78,   11,   11, 0x08,
-     133,   78,   11,   11, 0x08,
-     183,   11,   11,   11, 0x08,
-     215,   11,   11,   11, 0x08,
-     246,   11,   11,   11, 0x08,
-     284,   11,   11,   11, 0x08,
-     321,   11,   11,   11, 0x08,
-     339,   11,   11,   11, 0x08,
-     360,  352,   11,   11, 0x08,
-     398,   11,   11,   11, 0x08,
-     433,   11,   11,   11, 0x08,
-     468,   11,   11,   11, 0x08,
-     497,   11,   11,   11, 0x08,
-     526,   11,   11,   11, 0x08,
-     555,   11,   11,   11, 0x08,
+      20,   16,   12,   11, 0x0a,
+      42,   11,   11,   11, 0x08,
+      73,   11,   11,   11, 0x08,
+     119,  108,   11,   11, 0x08,
+     163,  108,   11,   11, 0x08,
+     213,   11,   11,   11, 0x08,
+     245,   11,   11,   11, 0x08,
+     276,   11,   11,   11, 0x08,
+     314,   11,   11,   11, 0x08,
+     351,   11,   11,   11, 0x08,
+     369,   11,   11,   11, 0x08,
+     390,  382,   11,   11, 0x08,
+     428,   11,   11,   11, 0x08,
+     463,   11,   11,   11, 0x08,
+     498,   11,   11,   11, 0x08,
+     527,   11,   11,   11, 0x08,
+     556,   11,   11,   11, 0x08,
+     585,   11,   11,   11, 0x08,
+     619,  614,   11,   11, 0x08,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_MainWindow[] = {
-    "MainWindow\0\0on_executePushButton_clicked()\0"
+    "MainWindow\0\0int\0msg\0retryMessage(QString)\0"
+    "on_executePushButton_clicked()\0"
     "on_evaluateAllPushButton_clicked()\0"
     "row,column\0on_sequenceTableWidget_cellClicked(int,int)\0"
     "on_sequenceTableWidget_cellDoubleClicked(int,int)\0"
@@ -68,7 +71,8 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "on_GUIradioButton1_clicked()\0"
     "on_GUIradioButton2_clicked()\0"
     "on_GUIradioButton3_clicked()\0"
-    "on_GUIradioButton4_clicked()\0"
+    "on_GUIradioButton4_clicked()\0arg1\0"
+    "on_speedSpinBox_valueChanged(int)\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -77,23 +81,26 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         Q_ASSERT(staticMetaObject.cast(_o));
         MainWindow *_t = static_cast<MainWindow *>(_o);
         switch (_id) {
-        case 0: _t->on_executePushButton_clicked(); break;
-        case 1: _t->on_evaluateAllPushButton_clicked(); break;
-        case 2: _t->on_sequenceTableWidget_cellClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 3: _t->on_sequenceTableWidget_cellDoubleClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 4: _t->on_evaluatePushButton_clicked(); break;
-        case 5: _t->on_COBTestPushButton_clicked(); break;
-        case 6: _t->on_startSchedulerPushButton_clicked(); break;
-        case 7: _t->on_stopSchedulerPushButton_clicked(); break;
-        case 8: _t->doSchedulerWork(); break;
-        case 9: _t->updateTime(); break;
-        case 10: _t->on_showNonSchedcheckBox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 11: _t->on_testPlannerPushButton_clicked(); break;
-        case 12: _t->on_enableDebugPushButton_clicked(); break;
-        case 13: _t->on_GUIradioButton1_clicked(); break;
-        case 14: _t->on_GUIradioButton2_clicked(); break;
-        case 15: _t->on_GUIradioButton3_clicked(); break;
-        case 16: _t->on_GUIradioButton4_clicked(); break;
+        case 0: { int _r = _t->retryMessage((*reinterpret_cast< QString(*)>(_a[1])));
+            if (_a[0]) *reinterpret_cast< int*>(_a[0]) = _r; }  break;
+        case 1: _t->on_executePushButton_clicked(); break;
+        case 2: _t->on_evaluateAllPushButton_clicked(); break;
+        case 3: _t->on_sequenceTableWidget_cellClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 4: _t->on_sequenceTableWidget_cellDoubleClicked((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 5: _t->on_evaluatePushButton_clicked(); break;
+        case 6: _t->on_COBTestPushButton_clicked(); break;
+        case 7: _t->on_startSchedulerPushButton_clicked(); break;
+        case 8: _t->on_stopSchedulerPushButton_clicked(); break;
+        case 9: _t->doSchedulerWork(); break;
+        case 10: _t->updateTime(); break;
+        case 11: _t->on_showNonSchedcheckBox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 12: _t->on_testPlannerPushButton_clicked(); break;
+        case 13: _t->on_enableDebugPushButton_clicked(); break;
+        case 14: _t->on_GUIradioButton1_clicked(); break;
+        case 15: _t->on_GUIradioButton2_clicked(); break;
+        case 16: _t->on_GUIradioButton3_clicked(); break;
+        case 17: _t->on_GUIradioButton4_clicked(); break;
+        case 18: _t->on_speedSpinBox_valueChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -131,9 +138,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 17)
+        if (_id < 19)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 17;
+        _id -= 19;
     }
     return _id;
 }

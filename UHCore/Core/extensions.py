@@ -28,8 +28,8 @@ class PollingThread(Thread):
             
             if self._delayTime > 0:
                 # To allow for cancellation, we don't want to block for the entire time
-                # Check every 0.05 seconds for a cancel request
-                sleep = 0.05
+                # Check every 0.0001 seconds for a cancel request
+                sleep = 0.0001
                 delay = self._delayTime
                 while delay > 0 and not self._cancelRequested:
                     time.sleep(sleep)

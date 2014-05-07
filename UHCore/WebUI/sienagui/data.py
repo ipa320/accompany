@@ -1,33 +1,58 @@
 from Data.dataAccess import DataAccess
-from config import siena_config
+from config import siena_config, server_config
 import json
+
+
+__encoding = None
+
+
+def encoding():
+    global __encoding
+    if __encoding == None:
+        dao = DataAccess()
+        sql = "SELECT \
+                   default_character_set_name\
+               FROM\
+                   information_schema.SCHEMATA S\
+               WHERE\
+                   schema_name = %(schema)s"
+
+        args = {'schema': server_config['mysql_log_db']}
+        result = dao.sql.getSingle(sql, args)
+        if result:
+            __encoding = result['default_character_set_name']
+        else:
+            __encoding = 'latin1'
+    return __encoding
+
 
 class Login(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
-        
+
     def GET(self, unick=''):
 
         user = self._dao.users.getUserByNickName(unick)
         if user == None:
             return None
 
-        sessionId = self._dao.users.setActiveUser(user['userId'])
-                
-        ret = "%(userId)s,%(languageId)s" % { 'userId':user['userId'], 'languageId':user['languageId'] }
+        self._dao.users.setActiveUser(user['userId'])
+
+        ret = "%(userId)s,%(languageId)s" % {'userId': user['userId'], 'languageId': user['languageId']}
         return ret
+
 
 class Options(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
-        
+
     def GET(self, ulang='-1', pid='-1'):
 
-        sql="SELECT \
+        sql = "SELECT \
                 a.idActionPossibilityOptions AS id, \
                 a.OptionName AS name, \
                 a.PossibleValues AS 'values', \
@@ -38,33 +63,35 @@ class Options(object):
             WHERE \
                 o.idAP = %(sonid)s"
 
-        args = {'sonid': pid }
+        args = {'sonid': pid}
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding=encoding())
+
 
 class Command(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
-        
+
     def GET(self, cmd_id):
-        
+
         if self._dao.sensors.saveSensorLog(cmd_id, True, 'Pressed'):
             return "OK"
-        
+
         return "ERROR"
-        
+
+
 class ExpressionRequest(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
-        
+
     def GET(self, cmd_id='-1'):
 
-        sql=" \
+        sql = " \
             SELECT \
                 expression \
             FROM \
@@ -78,18 +105,19 @@ class ExpressionRequest(object):
         if result == None:
             return "error"
         else:
-            return result['expression']
+            return json.dumps(result['expression'], encoding=encoding())
+
 
 class FullActionList(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
         self._likelihood = siena_config['likelihood']
-        
+
     def GET(self, session='1'):
 
-        sql=" \
+        sql = " \
             SELECT\
                 lt.message as ap_label,\
                 p.message as phraseal_feedback,\
@@ -110,22 +138,23 @@ class FullActionList(object):
                 s.sessionId = %(session)s AND\
                 ap.parentId IS NULL AND\
                 ap.likelihood > %(threshold)s"
-                
+
         args = {'threshold': self._likelihood, 'session': session }
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding=encoding())
+
 
 class RobotActions(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
         self._likelihood = siena_config['likelihood']
-        
+
     def GET(self, session='1', ulang=None, robot=None, uid=None):
 
-        sql=" \
+        sql = " \
             SELECT\
                 lt.message as ap_label,\
                 p.message as phraseal_feedback,\
@@ -149,22 +178,23 @@ class RobotActions(object):
             ORDER BY\
                 ap.likelihood\
             DESC"
-        
-        args = {'threshold': self._likelihood, 'session':session }
+
+        args = {'threshold': self._likelihood, 'session': session}
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding=encoding())
+
 
 class SonsActions(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
         self._likelihood = siena_config['likelihood']
-        
+
     def GET(self, session='1', ulang=None, pid='-1'):
 
-        sql=" \
+        sql = " \
             SELECT\
                 lt.message as ap_label,\
                 p.message as phraseal_feedback,\
@@ -186,22 +216,23 @@ class SonsActions(object):
             ORDER BY\
                 ap.likelihood\
             DESC"
-        
-        args = {'threshold': self._likelihood, 'session':session, 'parent': pid }
+
+        args = {'threshold': self._likelihood, 'session':session, 'parent': pid}
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding=encoding())
+
 
 class UserActions(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
         self._likelihood = siena_config['likelihood']
-        
+
     def GET(self, session='1', uid=None, ulang=None):
 
-        sql=" \
+        sql = " \
             SELECT\
                 lt.message as ap_label,\
                 p.message as phraseal_feedback,\
@@ -223,18 +254,19 @@ class UserActions(object):
             ORDER BY\
                 ap.likelihood\
             DESC"
-        
-        args = {'threshold': self._likelihood, 'session': session }
+
+        args = {'threshold': self._likelihood, 'session': session}
 
         results = self._dao.sql.getData(sql, args)
-        return json.dumps(results)
+        return json.dumps(results, encoding=encoding())
+
 
 class SetParameter(object):
     exposed = True
-    
+
     def __init__(self):
         self._dao = DataAccess()
-        
+
     def GET(self, opt_id='-1', val='-1'):
 
         sql = " \
@@ -245,7 +277,19 @@ class SetParameter(object):
             WHERE \
                 idActionPossibilityOptions = %(optId)s"
 
-        args = { 'value': val, 'optId': opt_id }
+        args = {'value': val, 'optId': opt_id}
 
         self._dao.sql.saveData(sql, args)
         return "OK"
+
+
+if __name__ == '__main__':
+    print encoding()
+    print ExpressionRequest().GET()
+    print FullActionList().GET()
+    print Login().GET()
+    print Options().GET()
+    print RobotActions().GET()
+    print SetParameter().GET()
+    print SonsActions().GET()
+    print UserActions().GET()

@@ -43,7 +43,7 @@ all: UHCoreTest
 UHCoreTest: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/nathan/git/accompany/UHCore/CppInterface/Debug" -o "UHCoreTest" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"../../CppInterface/Debug" -o "UHCoreTest" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -1,4 +1,5 @@
 #include "robot.h"
+#include "history.h"
 #include <iostream>
 #include <sstream>
 #include <time.h>
@@ -103,13 +104,13 @@ void threadChainer(int x) {
 }
 
 int main(int argc, char *argv[]) {
-	string modulePath = "/home/nathan/git/accompany/UHCore/Core";
+	string modulePath = "../../Core";
 	rob = new Robot(modulePath); //use the current robot specified in the sessioncontrol table
 	cout << "Got interface for: " << rob->getName() << endl;
 
-//	ActionHistory *hist = new ActionHistory(modulePath);
-//	string ruleName = "testPythonInterface";
-//	cout << hist->addHistory(ruleName) << '\n';
+	ActionHistory *hist = new ActionHistory(modulePath);
+	string ruleName = "testPythonInterface";
+	cout << hist->addHistory(ruleName) << endl;
 //	hist->addHistoryAsync(ruleName);
 
 //	for (int i = 0; i < 10; i++) {

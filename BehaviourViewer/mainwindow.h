@@ -34,6 +34,8 @@ private slots:
     void on_checkBox_toggled(bool checked);
     void on_comboBox_currentIndexChanged(QString );
     void on_pushButton_clicked();
+    void fillScenarioCombo();
+    void on_scenComboBox_currentIndexChanged(const QString &arg1);
 };
 
 #endif // MAINWINDOW_H
