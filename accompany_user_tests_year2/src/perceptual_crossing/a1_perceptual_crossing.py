@@ -11,7 +11,8 @@ import heapq
 from simple_script_server import *  # import script
 sss = simple_script_server()
 #from sensor_msgs.msg import *
-from geometry_msgs.msg import PolygonStamped
+#from geometry_msgs.msg import *
+from accompany_uva_msg.msg import *
 import tf
 from tf.transformations import *
 from ScreenFormatting import *
@@ -31,74 +32,71 @@ class FollowUser(smach.State):
 	def __init__(self):
 		smach.State.__init__(self,
 			outcomes=['succeeded','failed'])
-#		rospy.Subscriber("/scan_top", LaserScan, self.callback)
-		rospy.Subscriber("/leg_detection/detected_humans_laser", PolygonStamped, self.callback)
+#		rospy.Subscriber("/trackedHumans", TrackedHumans, self.callback)
+		rospy.Subscriber("/leg_detection/detected_humans_laser", TrackedHumans, self.callback)
 		self.listener = tf.TransformListener(True, rospy.Duration(20.0))
-		self.human_x_relative=0
-		self.human_y_relative=0
+		self.user_position = PointStamped()
+		self.user_speed = Vector3Stamped()
+		self.tracking_user = False
+		self.last_user_position = [0.0,0.0]
 		
 	def callback(self,msg):
 
-#		print "msg.polygon.points:",msg.polygon.points
-		self.human_x_relative=msg.polygon.points[0].x
-		self.human_y_relative=msg.polygon.points[0].y
-#		print "x,y:" , self.human_x_relative, self.human_y_relative
+#		print "msg.trackedHumans:",msg.trackedHumans
+		for tracked_human in msg.trackedHumans:
+			#if tracked_human.specialFlag == 1:
+			if (self.tracking_user == False):
+				self.last_user_position = [0.0,0.0]
+				self.tracking_user = True
+			speed = math.sqrt(tracked_human.speed.vector.x*tracked_human.speed.vector.x + tracked_human.speed.vector.y*tracked_human.speed.vector.y)
+			if (speed > 0.2): ## todo check
+				self.user_speed = tracked_human.speed
+				self.user_position = tracked_human.location
+#			print "user found"
+
 		return
 
 	def execute(self, userdata):
 		sf = ScreenFormat("FollowUser")
 
 		sss.set_light("yellow")
+		while followUser_condition[0] == "1": ## todo: find some finishing criterion
 
-		while 1:
-			if self.human_x_relative != 0 and self.human_y_relative != 0:
-				try:
-					t = rospy.Time(0)
-					self.listener.waitForTransform('/map', '/base_link', t,rospy.Duration(10))
-					#robot_pose = self.listener.lookupTransform('/map', '/base_link',t)
-					(robot_pose_translation, robot_pose_rotation) = self.listener.lookupTransform('/map', '/base_link',t)
-					#print "robot pose: ", robot_pose[0][0], robot_pose[0][1]
-				except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException), e:
-					print "Could not lookup robot pose: %s" %e
-				robot_pose_rotation_euler = tf.transformations.euler_from_quaternion(robot_pose_rotation, 'rzyx')
-				print "robot pose: ", robot_pose_translation[0],robot_pose_translation[1],robot_pose_rotation_euler[0]
-				robot_theta=robot_pose_rotation_euler[0]*180/math.pi 
-				dist = math.hypot(self.human_x_relative,self.human_y_relative)
-				angle_relative = math.atan2(self.human_y_relative,self.human_x_relative)
-				speed_human=math.hypot(self.human_x_relative,self.human_y_relative)
-				print "human position(to robot): [", self.human_x_relative, ", ", self.human_y_relative, "]"
-				angle=robot_theta - angle_relative
-				delta_x=math.cos(dist)
-				delta_y=math.sin(dist)
-				print "delta", delta_x, delta_y
-				human_x=robot_pose_translation[0] + delta_x
-				human_y=robot_pose_translation[1] - delta_y
-				print "human position:[" ,human_x,",",human_y,"]" 
-#			print "distance=",dist
-#			print "speed=:",speed_human
-#			if dist > 0 and speed_human > 0:
-#
-#				v_u = [human_x/speed_human, human_y/speed_human]
-#				n_u = [-human_y/speed_human, human_x/speed_human]
-#				rx= human_x+n_u[0]*1+v_u[0]*0.5
-#				ry= human_y+n_u[1]*1+v_u[1]*0.5
-#				theta = math.atan2(human_y, human_x)
-#
-#				handle_base=sss.move("base",[rx, ry, theta], blocking=False,mode='linear')
-#				if rx > 8 and ry < 0.8:
-#					print "robot stops moving"
-#					break
-#				else:
-#					print "robot moves to", [rx, ry, theta]
-				self.human_x_relative=0
-				self.human_y_relative=0
-			else:
-				print "no human detected"
+			if self.user_position.point.x >= 1 and self.user_position.point.y >= -1 and self.user_position.point.y <= 1.2:#and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
+			#if self.tracking_user == True:
+				# check if the user moved enough and whether we have some significant movement speed
+				dist = math.sqrt((self.last_user_position[0]-self.user_position.point.x)*(self.last_user_position[0]-self.user_position.point.x) +
+						(self.last_user_position[1]-self.user_position.point.y)*(self.last_user_position[1]-self.user_position.point.y))
+				self.last_user_position[0] = self.user_position.point.x
+				self.last_user_position[1] = self.user_position.point.y
+				speed = math.sqrt(self.user_speed.vector.x*self.user_speed.vector.x + self.user_speed.vector.y*self.user_speed.vector.y)
+				if dist > 0.05: # and speed > 0.2:
+					# compute a robot offset from user
+					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
+					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
+					rx = self.user_position.point.x - 1*n_u[0] + v_u[0]*0.3
+					ry = self.user_position.point.y - 1*n_u[1] + v_u[1]*0.3
+					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
+#					rx = self.user_position.point.x + 0.8*math.cos(theta)
+#					ry = self.user_position.point.y + 0.8*math.sin(theta)
+					print "human position: ", self.user_position.point.x, self.user_position.point.y
+					# let the robot move there
+					print "robot gets the position:", [rx, ry, theta]
+					handle_base=sss.move("base",[rx, ry, theta], blocking=False,mode='linear')
+#					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
+					if rx < 0.5 and ry > -1:
+						print "experiment is over."
+						break
+					else:
+						print "robot moves to", [rx, ry, theta]
+			self.user_position.point.x = 0
+			self.user_position.point.y = 0
 			rospy.sleep(0.1)
 
 		sss.set_light("green")
+		
 
-		return 'succeeded'
+                return 'succeeded'
 
 class SM(smach.StateMachine):
 	def __init__(self):
