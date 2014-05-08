@@ -67,32 +67,29 @@ class FollowUser(smach.State):
 		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
 		while True: #self.user_position.point.x > 1.0:
 			print "human position: ", self.user_position.point.x, self.user_position.point.y
-			if self.user_position.point.x >= 1 and self.user_position.point.y >= -0.8 and self.user_position.point.y <= 1.2:
+			if self.user_position.point.x >= 1 and self.user_position.point.y >= -0.8 and self.user_position.point.y <= 1.2 and self.user_position.point.x <= 5:
 				# check if the user moved enough and whether we have some significant movement speed
 				dist = math.sqrt((self.last_user_position[0]-self.user_position.point.x)*(self.last_user_position[0]-self.user_position.point.x) +
 						(self.last_user_position[1]-self.user_position.point.y)*(self.last_user_position[1]-self.user_position.point.y))
 				self.last_user_position[0] = self.user_position.point.x
 				self.last_user_position[1] = self.user_position.point.y
 				speed = math.sqrt(self.user_speed.vector.x*self.user_speed.vector.x + self.user_speed.vector.y*self.user_speed.vector.y)
-				if dist > 0.05: # and speed > 0.2:
+				print "distance: ", dist
+				if dist > 0.1: # and speed > 0.2:
 					# compute a robot offset from user
 					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
 					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
 					rx = self.user_position.point.x - 1.0*n_u[0] + v_u[0]*0.3
 					ry = self.user_position.point.y - 1.0*n_u[1] + v_u[1]*0.3
 					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
-#					print "human position: ", self.user_position.point.x, self.user_position.point.y
 					# let the robot move there
-					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False,mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if rx < 0.5 and ry > -1:
+					if self.user_position.point.x < 0.8:
 						print "experiment is over."
 						break
 					else:
 						print "robot moves to", [rx, ry, theta]
-			self.user_position.point.x = 0
-			self.user_position.point.y = 0
 			rospy.sleep(0.1)
 
 		sss.set_light("green")
