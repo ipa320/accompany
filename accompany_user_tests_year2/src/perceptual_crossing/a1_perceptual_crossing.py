@@ -66,9 +66,8 @@ class FollowUser(smach.State):
 			
 		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
 		while True: #self.user_position.point.x > 1.0:
-
-			if self.user_position.point.x >= 1 and self.user_position.point.y >= -1 and self.user_position.point.y <= 1.2:#and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
-			#if self.tracking_user == True:
+			print "human position: ", self.user_position.point.x, self.user_position.point.y
+			if self.user_position.point.x >= 1 and self.user_position.point.y >= -0.8 and self.user_position.point.y <= 1.2:
 				# check if the user moved enough and whether we have some significant movement speed
 				dist = math.sqrt((self.last_user_position[0]-self.user_position.point.x)*(self.last_user_position[0]-self.user_position.point.x) +
 						(self.last_user_position[1]-self.user_position.point.y)*(self.last_user_position[1]-self.user_position.point.y))
@@ -82,9 +81,7 @@ class FollowUser(smach.State):
 					rx = self.user_position.point.x - 1.0*n_u[0] + v_u[0]*0.3
 					ry = self.user_position.point.y - 1.0*n_u[1] + v_u[1]*0.3
 					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
-#					rx = self.user_position.point.x + 0.8*math.cos(theta)
-#					ry = self.user_position.point.y + 0.8*math.sin(theta)
-					print "human position: ", self.user_position.point.x, self.user_position.point.y
+#					print "human position: ", self.user_position.point.x, self.user_position.point.y
 					# let the robot move there
 					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False,mode='linear')
