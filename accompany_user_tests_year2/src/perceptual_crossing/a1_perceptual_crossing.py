@@ -18,15 +18,15 @@ from tf.transformations import *
 from ScreenFormatting import *
 import MySQLdb
 
-db = MySQLdb.connect(host="localhost",
-					user="accompanyUser",
-					passwd="accompany",
-					db="AccompanyTroyes")
-cur = db.cursor()
-cur.execute("""UPDATE Sensors SET value = True WHERE sensorId = 535""")	#need to be commented with scenario running
-cur.execute("""SELECT value FROM Sensors WHERE sensorId=535""")
-for followUser_condition in cur.fetchall():
-	print "follow user condition:  ", followUser_condition[0]
+#db = MySQLdb.connect(host="localhost",
+#					user="accompanyUser",
+#					passwd="accompany",
+#					db="AccompanyTroyes")
+#cur = db.cursor()
+#cur.execute("""UPDATE Sensors SET value = True WHERE sensorId = 535""")	#need to be commented with scenario running
+#cur.execute("""SELECT value FROM Sensors WHERE sensorId=535""")
+#for followUser_condition in cur.fetchall():
+#	print "follow user condition:  ", followUser_condition[0]
 
 class FollowUser(smach.State):
 	def __init__(self):
@@ -45,13 +45,14 @@ class FollowUser(smach.State):
 #		print "msg.trackedHumans:",msg.trackedHumans
 		for tracked_human in msg.trackedHumans:
 			#if tracked_human.specialFlag == 1:
-			if (self.tracking_user == False):
-				self.last_user_position = [0.0,0.0]
-				self.tracking_user = True
 			speed = math.sqrt(tracked_human.speed.vector.x*tracked_human.speed.vector.x + tracked_human.speed.vector.y*tracked_human.speed.vector.y)
 			if (speed > 0.2): ## todo check
 				self.user_speed = tracked_human.speed
 				self.user_position = tracked_human.location
+				if (self.tracking_user == False):
+					self.last_user_position = [0.0,0.0]
+					self.tracking_user = True
+
 #			print "user found"
 
 		return
@@ -60,7 +61,11 @@ class FollowUser(smach.State):
 		sf = ScreenFormat("FollowUser")
 
 		sss.set_light("yellow")
-		while followUser_condition[0] == "1": ## todo: find some finishing criterion
+		while self.tracking_user==False:
+			rospy.sleep(0.2)
+			
+		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
+		while True: #self.user_position.point.x > 1.0:
 
 			if self.user_position.point.x >= 1 and self.user_position.point.y >= -1 and self.user_position.point.y <= 1.2:#and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
 			#if self.tracking_user == True:
@@ -74,8 +79,8 @@ class FollowUser(smach.State):
 					# compute a robot offset from user
 					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
 					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
-					rx = self.user_position.point.x - 1*n_u[0] + v_u[0]*0.3
-					ry = self.user_position.point.y - 1*n_u[1] + v_u[1]*0.3
+					rx = self.user_position.point.x - 1.0*n_u[0] + v_u[0]*0.3
+					ry = self.user_position.point.y - 1.0*n_u[1] + v_u[1]*0.3
 					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
 #					rx = self.user_position.point.x + 0.8*math.cos(theta)
 #					ry = self.user_position.point.y + 0.8*math.sin(theta)
