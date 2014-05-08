@@ -85,11 +85,10 @@ class FollowUser(smach.State):
 					# let the robot move there
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False,mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if self.user_position.point.x < 0.8:
-						print "experiment is over."
-						break
-					else:
-						print "robot moves to", [rx, ry, theta]
+					print "robot moves to", [rx, ry, theta]
+			if self.user_position.point.x < 0.8:
+				print "experiment is over."
+				break
 			rospy.sleep(0.1)
 
 		sss.set_light("green")
