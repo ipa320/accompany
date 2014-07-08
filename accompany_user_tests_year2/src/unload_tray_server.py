@@ -124,6 +124,11 @@ class UnloadTrayServer:
 			p20_troyes= [-0.38394495844841003, -1.320127010345459, 1.8003597259521484, 0.7238268256187439, -0.7106886506080627, 0.42305076122283936, 0.995434582233429]
 			p21_troyes= [-0.0701594352722168, -1.4082157611846924, 1.6199039220809937, 1.0523432493209839, -0.4672948718070984, 0.3977415859699249, 0.9647517204284668]
 
+
+			p22_troyes= [2.2882933616638184, -1.2500675916671753, 2.0379726886749268, 1.8452539443969727, -0.4981473386287689, 1.5209976434707642, 0.8092219233512878]
+
+
+
 			#handle_arm = sss.move("arm",["intermediatefront", p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15])
 			handle_arm = sss.move("arm",["intermediatefront", p18_troyes, p19_troyes])
 			#raw_input('break')
@@ -138,7 +143,10 @@ class UnloadTrayServer:
 			sss.move("sdh","cylopen")
 			handle_arm = sss.move("arm",[p21_troyes],True)
 			#rospy.sleep(1)
-			handle_arm = sss.move("arm",["intermediateback","folded"],False)
+			handle_arm = sss.move("arm",[p22_troyes],True)
+			sss.move("sdh","home")
+			handle_arm = sss.move("arm",["folded"],True)
+			#handle_arm = sss.move("arm",["intermediateback","folded"],False)
 			rospy.sleep(4)
 			sss.move("sdh","home")
 			sss.move("torso","home")
@@ -158,6 +166,10 @@ class UnloadTrayServer:
 			rospy.sleep(5)
 			sss.move("arm","intermediatefront",True)
 			sss.move("base", [-1,1.2,2.64],False)
+			
+			
+			#handle_arm = sss.move("arm",[p22_troyes],True)
+			#handle_arm = sss.move("arm",["folded"],True)
 			sss.move("arm", ["intermediateback","folded"],False)
 			rospy.sleep(2)
 			sss.move("torso","front_extreme",False)

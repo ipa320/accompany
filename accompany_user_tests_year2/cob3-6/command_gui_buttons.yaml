@@ -31,6 +31,8 @@ group3:
     [recover,trigger,recover],
     [deliverup,move,deliverup],
     [deliverdown,move,deliverdown],
+    [displayup,move,displayup],
+    [displaydown,move,displaydown],
     [storetray,move,storetray]]
 group4:
   group_name: arm settings

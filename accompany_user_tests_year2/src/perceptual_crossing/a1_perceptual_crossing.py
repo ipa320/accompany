@@ -69,10 +69,10 @@ class FollowUser(smach.State):
 		self.last_user_position = [0.0,0.0]
 
 		# tracking area (only humans in this area are considered)
-		self.min_x = -1.0
-		self.max_x = 3.0
-		self.min_y = -4.8
-		self.max_y = -2.2
+		self.min_x = 0.5
+		self.max_x = 5.0
+		self.min_y = -1.0
+		self.max_y = 2.0
 		
 	def callback(self,msg):
 
@@ -86,6 +86,7 @@ class FollowUser(smach.State):
 				if (self.tracking_user == False):
 					self.last_user_position = [0.0,0.0]
 					self.tracking_user = True
+					self.last_user_speed = [0.0,0.0]
 #			print "user found"
 
 		return
@@ -109,11 +110,16 @@ class FollowUser(smach.State):
 					# compute a robot offset from user (2 variants, left and right, take the one which is closer)
 					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
 					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
-					rx_1 = self.user_position.point.x - 1*n_u[0] + v_u[0]*0.3
-					ry_1 = self.user_position.point.y - 1*n_u[1] + v_u[1]*0.3
-					rx_2 = self.user_position.point.x + 1*n_u[0] + v_u[0]*0.3
-					ry_2 = self.user_position.point.y + 1*n_u[1] + v_u[1]*0.3
+					rx_1 = self.user_position.point.x - 0.8*n_u[0] + v_u[0]*0.3
+					ry_1 = self.user_position.point.y - 0.8*n_u[1] + v_u[1]*0.3
+					rx_2 = self.user_position.point.x + 0.8*n_u[0] + v_u[0]*0.3
+					ry_2 = self.user_position.point.y + 0.8*n_u[1] + v_u[1]*0.3
 					theta = math.atan2(self.user_speed.vector.y, self.user_speed.vector.x)
+					last_theta = math.atan2(self.last_user_speed[1], self.last_user_speed[0])
+#					if math.fabs(last_theta - theta) < 30 * math.pi / 180:
+#						theta = last_theta
+#					print "diff:" , math.fabs(last_theta - theta)
+					
 					rx = rx_1
 					ry = ry_1
 
@@ -133,19 +139,20 @@ class FollowUser(smach.State):
 					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False, mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if self.user_position.point.x < -0.5 and self.user_position.point.y > -4.2 and self.user_position.point.y < -3.2:
+					if self.user_position.point.x < 1.2 and self.user_position.point.y > -1.0 and self.user_position.point.y < 1.0:
 						print "experiment is over."
 						break
 					#else:
 					#	print "robot moves to", [rx, ry, theta]
+				self.last_user_speed[0] = self.user_speed.vector.x
+				self.last_user_speed[1] = self.user_speed.vector.y		
 			#self.user_position.point.x = 0
 			#self.user_position.point.y = 0
 			rospy.sleep(0.05)
 
 		sss.set_light("green")
 		
-
-                return 'succeeded'
+		return 'succeeded'
 
 class SM(smach.StateMachine):
 	def __init__(self):

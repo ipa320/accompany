@@ -9,7 +9,7 @@
     <!-- start navigation -->
     <!--- Run map_server -->
     <!--arg name="map" default="$(find cob_default_env_config)/$(arg robot_env)/map.yaml" /-->
-        <node name="map_server" pkg="map_server" type="map_server" args="$(find accompany_user_tests_year2)/$(arg robot_env)/map-ipa-apartment-small.yaml"/> 
+        <node name="map_server" pkg="map_server" type="map_server" args="$(find accompany_user_tests_year2)/$(arg robot_env)/IPA-ACCOMPANY.yaml"/> 
 
         <!--- Run AMCL -->
         <include file="$(find cob_navigation_global)/launch/amcl_node.xml" />
@@ -21,8 +21,14 @@
     
         <!-- start linear navigation -->
         <include file="$(find cob_navigation_global)/launch/2dnav_linear.xml" >
-      <arg name="robot" value="$(arg robot)"/>
-    </include>
+      			<arg name="robot" value="$(arg robot)"/>
+    	</include>
+    
+      	<node pkg="laser_filters" type="scan_to_scan_filter_chain" name="laser_filter">
+    			<rosparam command="load" file="$(find accompany_user_tests_year2)/troyes/laser_config.yaml" />
+    			<remap from="scan" to="scan_top" />
+    			<remap from="scan_filtered" to="scan_top_filter" />
+  		</node>
   
 </launch>
 
