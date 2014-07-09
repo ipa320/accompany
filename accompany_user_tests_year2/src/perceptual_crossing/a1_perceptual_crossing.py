@@ -57,10 +57,40 @@ def currentRobotPose():
 	return (robot_pose_translation, robot_pose_rotation, robot_pose_rotation_euler)
 
 
+class GoToUser(smach.State):
+	def __init__(self):
+		smach.State.__init__(self, outcomes=['succeeded','failed'])
+
+	def execute(self, userdata):
+		sf = ScreenFormat("GoToUser")
+
+		sss.set_light("yellow")
+		#first part
+		rospy.sleep(10)
+		handle_base=sss.move("base",[0.588, -0.979, 2.2],True,mode='linear')
+		handle_base.wait()
+		handle_base=sss.move("base",[0.733, -1.247, 2.2],True,mode='linear')
+		handle_base.wait()
+		handle_base=sss.move("base",[0.588, -0.979, 2.2],True,mode='linear')
+		handle_base.wait()
+
+		handle_base=sss.move("base",[0.733, -1.247, 2.2],True,mode='linear')
+		handle_base.wait()
+		handle_base=sss.move("base",[0.588, -0.979, 2.2],True,mode='linear')
+		handle_base=sss.move("base",[0.22, -1.220, 0.918],False,mode='linear')
+		sss.set_light("yellow")
+		sss.move("torso", [[-0.1,-0.2,-0.15]], True)
+		handle_base.wait()
+
+		sss.set_light("green")
+		rospy.sleep(3)
+		sss.move("torso", "home", True)	
+		
+		return 'succeeded'
+
 class FollowUser(smach.State):
 	def __init__(self):
-		smach.State.__init__(self,
-			outcomes=['succeeded','failed'])
+		smach.State.__init__(self, outcomes=['succeeded','failed'])
 #		rospy.Subscriber("/trackedHumans", TrackedHumans, self.callback)
 		rospy.Subscriber("/leg_detection/detected_humans_laser", TrackedHumans, self.callback)
 		self.user_position = PointStamped()
@@ -71,35 +101,48 @@ class FollowUser(smach.State):
 		# tracking area (only humans in this area are considered)
 		self.min_x = 0.5
 		self.max_x = 5.0
-		self.min_y = -1.0
-		self.max_y = 2.0
+		self.min_y = -3.0
+		self.max_y = 0.5
 		
 	def callback(self,msg):
+
+		# read out current robot pose
+		(robot_pose_translation, robot_pose_rotation, robot_pose_rotation_euler) = currentRobotPose()
+		if robot_pose_translation==None:
+			return
+		min_distance_to_robot = 1000000.0
+		tracking_user = False
 
 #		print "msg.trackedHumans:",msg.trackedHumans
 		for tracked_human in msg.trackedHumans:
 			#if tracked_human.specialFlag == 1:
 			speed = math.sqrt(tracked_human.speed.vector.x*tracked_human.speed.vector.x + tracked_human.speed.vector.y*tracked_human.speed.vector.y)
-			if (speed > 0.15 and tracked_human.location.point.x >= self.min_x and tracked_human.location.point.x <= self.max_x and tracked_human.location.point.y <= self.max_y and tracked_human.location.point.y >= self.min_y): ## todo check
+			distance_to_robot = math.sqrt((robot_pose_translation[0]-tracked_human.location.point.x)*(robot_pose_translation[0]-tracked_human.location.point.x) + (robot_pose_translation[1]-tracked_human.location.point.y)*(robot_pose_translation[1]-tracked_human.location.point.y))
+			if (distance_to_robot>0.4 and distance_to_robot<min_distance_to_robot and speed > 0.15 and tracked_human.location.point.x >= self.min_x and tracked_human.location.point.x <= self.max_x and tracked_human.location.point.y <= self.max_y and tracked_human.location.point.y >= self.min_y): ## todo check
+				min_distance_to_robot = distance_to_robot
 				self.user_speed = tracked_human.speed
 				self.user_position = tracked_human.location
 				if (self.tracking_user == False):
 					self.last_user_position = [0.0,0.0]
-					self.tracking_user = True
+					tracking_user = True
 					self.last_user_speed = [0.0,0.0]
 #			print "user found"
+		if tracking_user == True:
+			self.tracking_user = True
+			print "self.user_position", self.user_position
 
 		return
 
 	def execute(self, userdata):
 		sf = ScreenFormat("FollowUser")
 
-		sss.set_light("yellow")
+		print "before the while loop"
 		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
 		while True:
-
+			print "in the while loop"
 			if self.user_position.point.x >= self.min_x and self.user_position.point.x <= self.max_x and self.user_position.point.y <= self.max_y and self.user_position.point.y >= self.min_y:  #and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
 			#if self.tracking_user == True:
+				print "people are in the square !"
 				# check if the user moved enough and whether we have some significant movement speed
 				dist = math.sqrt((self.last_user_position[0]-self.user_position.point.x)*(self.last_user_position[0]-self.user_position.point.x) +
 						(self.last_user_position[1]-self.user_position.point.y)*(self.last_user_position[1]-self.user_position.point.y))
@@ -107,6 +150,7 @@ class FollowUser(smach.State):
 				self.last_user_position[1] = self.user_position.point.y
 				speed = math.sqrt(self.user_speed.vector.x*self.user_speed.vector.x + self.user_speed.vector.y*self.user_speed.vector.y)
 				if dist > 0.05: # and speed > 0.2:
+					print "let's move"
 					# compute a robot offset from user (2 variants, left and right, take the one which is closer)
 					v_u = [self.user_speed.vector.x/speed, self.user_speed.vector.y/speed]	# normalized speed vector 2D
 					n_u = [-self.user_speed.vector.y/speed, self.user_speed.vector.x/speed]	# normalized normal to speed vector 2D
@@ -139,8 +183,8 @@ class FollowUser(smach.State):
 					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False, mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if self.user_position.point.x < 1.2 and self.user_position.point.y > -1.0 and self.user_position.point.y < 1.0:
-						print "experiment is over."
+					if self.user_position.point.x > 3 and self.user_position.point.y > -4.0 and self.user_position.point.y < 0.0:
+						print "finished walk with me state"
 						break
 					#else:
 					#	print "robot moves to", [rx, ry, theta]
@@ -149,18 +193,53 @@ class FollowUser(smach.State):
 			#self.user_position.point.x = 0
 			#self.user_position.point.y = 0
 			rospy.sleep(0.05)
-
+		
+	
 		sss.set_light("green")
 		
 		return 'succeeded'
+
+
+class LetUserEnterDoor(smach.State):
+	def __init__(self):
+		smach.State.__init__(self, outcomes=['succeeded','failed'])
+
+	def execute(self, userdata):
+		sf = ScreenFormat("LetUserEnterDoor")
+
+		# let user enter door first
+		sss.set_light("green")
+		handle_base=sss.move("base",[3.263, -2.525, -0.033],False,mode='linear')
+		sss.move("torso", [[0.0,-0.2,0.0]], False)
+		handle_base.wait()
+		rospy.sleep(5)
+		sss.move("torso", "home", True)
+
+		# move through door
+		#handle_base=sss.move("base",[4.437, -2.736, -1.319],True,mode='linear')
+		#handle_base.wait()
+		#handle_base=sss.move("base",[4.746, -4.201,-1.303],True,mode='linear')
+		#handle_base.wait()
+		
+		return 'succeeded'
+
 
 class SM(smach.StateMachine):
 	def __init__(self):
 		smach.StateMachine.__init__(self,outcomes=['ended'])
 		with self:
+			smach.StateMachine.add('GO_TO_USER', GoToUser(),
+			transitions={'succeeded':'FOLLOW_USER',
+					'failed':'ended'})
+
 			smach.StateMachine.add('FOLLOW_USER', FollowUser(),
+			transitions={'succeeded':'LET_USER_ENTER_DOOR',
+					'failed':'ended'})
+
+			smach.StateMachine.add('LET_USER_ENTER_DOOR', LetUserEnterDoor(),
 			transitions={'succeeded':'ended',
 					'failed':'ended'})
+
 if __name__=='__main__':
 	try:
 		rospy.init_node('Move')
@@ -168,7 +247,7 @@ if __name__=='__main__':
 		sis = smach_ros.IntrospectionServer('SM', sm, 'SM')
 		sis.start()
 		outcome = sm.execute()
-		rospy.spin()
+		#rospy.spin()
 		sis.stop()
 	except:
 		print('EXCEPTION THROWN')
