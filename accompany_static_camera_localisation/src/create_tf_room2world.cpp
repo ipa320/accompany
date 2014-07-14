@@ -184,11 +184,11 @@ int main(int argc, char **argv)
   cout << "-------------------------------------" << endl;
 
   Mat dst_points = Mat::zeros(Size(2, 3), CV_32F);
-  cout << "input the world coordinates of point " << text[0] << ", separate with SPACE" << endl;
+  cout << "input the world coordinates of point (ONLY TWO NUMBERS!) " << text[0] << ", separate with SPACE" << endl;
   cin >> dst_points.at<float>(0, 0) >> dst_points.at<float>(0, 1);
-  cout << "input the world coordinates of point " << text[1] << ", separate with SPACE" << endl;
+  cout << "input the world coordinates of point (ONLY TWO NUMBERS!)" << text[1] << ", separate with SPACE" << endl;
   cin >> dst_points.at<float>(1, 0) >> dst_points.at<float>(1, 1);
-    cout << "input the world coordinates of point " << text[2] << ", separate with SPACE" << endl;
+  cout << "input the world coordinates of point (ONLY TWO NUMBERS!)" << text[2] << ", separate with SPACE" << endl;
   cin >> dst_points.at<float>(2, 0) >> dst_points.at<float>(2, 1);
 //  cout << "input the world coordinates of 'Y', separate with SPACE" << endl;
 //  dst_points.at<float>(2, 0) = dst_points.at<float>(1, 1) * (-1);
@@ -226,18 +226,13 @@ int main(int argc, char **argv)
   cout<<"create some frame and write to file '"<<filename<<"'"<<endl;
   geometry_msgs::TransformStamped transformStamped;
   tf::Transform transform = tf::Transform(
-        btMatrix3x3(rot_corrected.at<double>(0,0),rot_corrected.at<double>(0,1),0,// rotation matrix
-                  rot_corrected.at<double>(1,0),rot_corrected.at<double>(1,1),0,
-                  0,0,1), 
-        btVector3(new_translation_matrix.at<double>(0,0),new_translation_matrix.at<double>(1,0),0));// translation vector
+					  tf::Matrix3x3(rot_corrected.at<double>(0,0),rot_corrected.at<double>(0,1),0,// rotation matrix
+							rot_corrected.at<double>(1,0),rot_corrected.at<double>(1,1),0,
+							0,0,1), 
+					  tf::Vector3(new_translation_matrix.at<double>(0,0),new_translation_matrix.at<double>(1,0),0));// translation vector
+ 
 
-  
-
-#if ROS_VERSION_MINIMUM(1,8,0)
-  tf::Matrix3x3 ma= transform.getBasis();      
-#else
-  btMatrix3x3 ma= transform.getBasis();
-#endif  
+  tf::Matrix3x3 ma= transform.getBasis();
 
   cout << ma.getRow(0)[0] << "," << ma.getRow(0)[1] << "," << ma.getRow(0)[2] << endl;
   cout << ma.getRow(1)[0] << "," << ma.getRow(1)[1] << "," << ma.getRow(1)[2] << endl;

@@ -41,7 +41,8 @@ void xml2yaml(std::string calib_xml, std::string& calib_yaml)
 
   boost::filesystem::path p(calib_xml);
   boost::filesystem::path dir = p.parent_path();
-  calib_yaml = dir.string() + "/camera_intrinsic.yaml";
+  // calib_yaml = dir.string() + "/camera_intrinsic.yaml";
+  calib_yaml = "camera_intrinsic.yaml";
 
   cv::FileStorage fs1(calib_xml, cv::FileStorage::READ);
   cv::FileStorage fs2(calib_yaml,cv::FileStorage::WRITE);
@@ -67,7 +68,7 @@ void xml2yaml(std::string calib_xml, std::string& calib_yaml)
 
   fs2 << "rectification_matrix" << cv::Mat::eye(3,3,CV_32F);
   fs2 << "projection_matrix" << projection_matrix;
-  
+
   fs1.release();
   fs2.release();
 
@@ -89,7 +90,7 @@ int main(int argc, char** argv)
     ("help,h","show help message")
     ("sync,s", po::value<bool>(&sync)->default_value(true),"parent frame\n")
     ("frame_id,f", po::value<std::string>(&frame_id)->default_value("gscam_optical_frame"),"assign camera frame with frame_id\n")
-    ("intrinsic_xml,i", po::value<std::string>(&calib_xml)->default_value("../camera_parameters.txt"),"load intrinsic parameters, use image_proc for image undistortion\n");
+    ("intrinsic_xml,i", po::value<std::string>(&calib_xml)->default_value(""),"load intrinsic parameters, use image_proc for image undistortion\n");
 
   po::variables_map variablesMap;
 
@@ -132,7 +133,6 @@ int main(int argc, char** argv)
   GstCaps * caps = gst_caps_new_simple("video/x-raw-rgb", NULL);
   gst_app_sink_set_caps(GST_APP_SINK(sink), caps);
   gst_caps_unref(caps);
-
 
   if (sync)
     gst_base_sink_set_sync(GST_BASE_SINK(sink),TRUE);
@@ -190,23 +190,29 @@ int main(int argc, char** argv)
   // We could probably do something with the camera name, check
   // errors or something, but at the moment, we don't care.
   std::string camera_name;
-  ROS_INFO("loading calibration file %s", calib_xml.c_str());
 
-  xml2yaml(calib_xml,calib_yaml);
+  camera_info.header.frame_id = frame_id;
 
-  if (camera_calibration_parsers::readCalibrationYml(calib_yaml, camera_name, camera_info)) 
+//  if (variablesMap.count("intrinsic_xml"))
+  if (!calib_xml.empty())
   {
-    ROS_INFO("Successfully read camera calibration. Return camera calibrator if it is incorrect.");
-    camera_info.header.frame_id = frame_id; 
-    if (variablesMap.count("frame_id") == 0)
-      ROS_WARN("No frame_id specified, use default: %s\n Use option -f to specify which frame to associate", frame_id.c_str());
+    ROS_INFO("loading calibration file %s", calib_xml.c_str());
+
+    xml2yaml(calib_xml,calib_yaml);
+
+    if (camera_calibration_parsers::readCalibrationYml(calib_yaml, camera_name, camera_info))
+    {
+      ROS_INFO("Successfully read camera calibration. Return camera calibrator if it is incorrect.");
+      if (variablesMap.count("frame_id") == 0)
+        ROS_WARN("No frame_id specified, use default: %s\n Use option -f to specify which frame to associate", frame_id.c_str());
+      else
+        ROS_INFO("Use the specified frame_id: %s", frame_id.c_str());
+    }
     else
-      ROS_INFO("Use the specified frame_id: %s", frame_id.c_str());
-  }
-  else 
-  {
-    ROS_WARN("No camera_parameters.txt file found.  Use default file if no other is available.");
-    ROS_WARN("Use -i option to load the intrinsic parameters");
+    {
+      ROS_WARN("No camera_parameters.txt file found.  Use default file if no other is available.");
+      ROS_WARN("Use -i option to load the intrinsic parameters");
+    }
   }
 
 
@@ -246,7 +252,7 @@ int main(int argc, char** argv)
   gstreamerPad = true;
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
   while(nh.ok()) {
-    // This should block until a new frame is awake, this way, we'll run at the 
+    // This should block until a new frame is awake, this way, we'll run at the
     // actual capture framerate of the device.
     GstBuffer* buf = gst_app_sink_pull_buffer(GST_APP_SINK(sink));
     if (!buf) break;
@@ -264,7 +270,7 @@ int main(int argc, char** argv)
     msg.header.stamp = camera_info.header.stamp;
     msg.header.frame_id = camera_info.header.frame_id;
 
-    msg.width = width; 
+    msg.width = width;
     msg.height = height;
     msg.encoding = "rgb8";
     msg.is_bigendian = false;

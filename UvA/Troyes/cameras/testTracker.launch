@@ -1,0 +1,42 @@
+<launch>
+
+  <!-- use sime time -->
+  <param name="use_sim_time" value="true" />
+   
+
+  <!-- camera kitchen -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera_kitchen/image_raw raw out:=/camera_kitchen/image_raw"/>
+  <!-- camera sofa -->
+  <node pkg="image_transport" type="republish" name="$(anon republish)" 
+        args="theora in:=/camera_sofa/image_raw raw out:=/camera_sofa/image_raw"/>
+         
+  <!--     
+  <node pkg="image_view" type="image_view" name="$(anon image_view)"
+        args="image:=/camera_kitchen/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon image_view)"
+        args="image:=/camera_sofa/image_raw"/>
+  -->
+
+  <!-- detect -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization"
+        args="-p $(find accompany_uva)/../UvA/Troyes/cameras/params.xml -n 2 -t 4 -v"/>
+  
+
+  <!-- track humans using localisation data -->
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
+        args="-p $(find accompany_uva)/../UvA/Troyes/cameras"/>
+
+  <node pkg="rosbag" type="play" name="rosbag"
+   args="--clock -l -d 1 -r 0.5
+     --topics /camera_kitchen/camera_info
+              /camera_kitchen/image_raw/theora
+              /camera_sofa/camera_info
+              /camera_sofa/image_raw/theora
+              /map
+              /tf
+     --bags $(find accompany_uva)/../UvA/Troyes/cameras/2014-02-09-13-26-26.bag
+     "/>
+
+
+</launch>

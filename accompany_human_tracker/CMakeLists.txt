@@ -50,6 +50,14 @@ rosbuild_add_executable(human_tracker
   src/IDToName.cpp)
 target_link_libraries(human_tracker hull MsgToMarkerArray boost_program_options vnl vnl_algo)
 
+rosbuild_add_executable(face_detect
+  src/face_detect.cpp)
+target_link_libraries(face_detect boost_program_options)
+
+rosbuild_add_executable(IDToNameTest 
+  src/IDToNameTest.cpp
+  src/IDToName.cpp)
+
 #rosbuild_add_executable(view_tracks src/view_tracks.cpp)
 #target_link_libraries(view_tracks ${OpenCV_LIBS} boost_program_options)
 

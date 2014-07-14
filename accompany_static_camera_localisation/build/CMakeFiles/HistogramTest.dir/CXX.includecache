@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/Histogram.h
+vector
+-
+iostream
+-
+
+/home/accompany/git/accompany/accompany_static_camera_localisation/src/HistogramTest.cpp
+Histogram.h
+-
+stdlib.h
+-
+iostream
+-
+

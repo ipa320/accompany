@@ -1,0 +1,6 @@
+height of chair: 1040
+y distance to the window: 290
+
+origin: -3000 0
+center bar window: 1420 5290
+fridge corner: 6180 1710

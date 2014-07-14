@@ -21,7 +21,7 @@ void printTransformStamped(const geometry_msgs::TransformStamped &transformStamp
 {
   cout<<transformStamped;
   geometry_msgs::Quaternion rot=transformStamped.transform.rotation;
-  btMatrix3x3 mat(btQuaternion(rot.x,rot.y,rot.z,rot.w));
+  tf::Matrix3x3 mat(tf::Quaternion(rot.x,rot.y,rot.z,rot.w));
   cout<<"conversion to 3x3 rotation matrix:"<<endl;
   for (int i=0;i<3;i++)    
     cout<<"|"<<setw(12)<<mat[i].x()<<" "<<setw(12)<<mat[i].y()<<" "<<setw(12)<<mat[i].z()<<"|"<<endl;
@@ -152,10 +152,10 @@ int main(int argc, char **argv)
 
   
   // create transform message
-  tf::Transform transform=tf::Transform(btMatrix3x3( cos(a*M_PI/180),sin(a*M_PI/180),0, // rotation matrix
+  tf::Transform transform=tf::Transform(tf::Matrix3x3( cos(a*M_PI/180),sin(a*M_PI/180),0, // rotation matrix
                                                     -sin(a*M_PI/180),cos(a*M_PI/180),0,
                                                      0              ,0              ,1),  
-                                        btVector3(x,y,z)); // translation vector
+                                        tf::Vector3(x,y,z)); // translation vector
   tf::StampedTransform stampedTransform=tf::StampedTransform(transform,     // the transform
                                                              ros::Time(0),  // time, not used here
                                                              parent,        // parent coordinate frame

@@ -63,23 +63,6 @@ rosbuild_add_library( hull
   ${PROJECT_SOURCE_DIR}/src/Hull.cpp
   )
 
-ADD_LIBRARY( staticCam
-  ${PROJECT_SOURCE_DIR}/src//Helpers.hh
-  ${PROJECT_SOURCE_DIR}/src/Helpers.cc
-  ${PROJECT_SOURCE_DIR}/src/Background.hh
-  ${PROJECT_SOURCE_DIR}/src/Background.cc
-  ${PROJECT_SOURCE_DIR}/src/ImgProducer.hh
-  ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
-  ${PROJECT_SOURCE_DIR}/src/CamCalib.hh
-  ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
-  ${PROJECT_SOURCE_DIR}/src/ImageMask.h
-  ${PROJECT_SOURCE_DIR}/src/ImageMask.cpp
-  )
-
-ADD_LIBRARY( calib
-  ${PROJECT_SOURCE_DIR}/src/cameraModel.cpp
-  ${PROJECT_SOURCE_DIR}/src/xmlUtil.cpp
-  )
 
 SET( OPENCV_INCLUDE_DIR /usr/local/include)
 SET( OPENCV_LIB_DIR /usr/local/lib)
@@ -123,6 +106,25 @@ SET( MY_STANDARD_LIBS
   ${XML2_LDFLAGS}
   MsgToMarkerArray
   # yaml-cpp # *!*!*!* causes errors in readCalibrationYml() *!*!*!*
+  )
+
+
+rosbuild_add_library( staticCam
+  ${PROJECT_SOURCE_DIR}/src//Helpers.hh
+  ${PROJECT_SOURCE_DIR}/src/Helpers.cc
+  ${PROJECT_SOURCE_DIR}/src/Background.hh
+  ${PROJECT_SOURCE_DIR}/src/Background.cc
+  ${PROJECT_SOURCE_DIR}/src/ImgProducer.hh
+  ${PROJECT_SOURCE_DIR}/src/ImgProducer.cc
+  ${PROJECT_SOURCE_DIR}/src/CamCalib.hh
+  ${PROJECT_SOURCE_DIR}/src/CamCalib.cc
+  ${PROJECT_SOURCE_DIR}/src/ImageMask.h
+  ${PROJECT_SOURCE_DIR}/src/ImageMask.cpp
+  )
+
+rosbuild_add_library( calib
+  ${PROJECT_SOURCE_DIR}/src/cameraModel.cpp
+  ${PROJECT_SOURCE_DIR}/src/xmlUtil.cpp
   )
 
 # rosbuild
@@ -199,6 +201,9 @@ target_link_libraries(publish_tf_from_extrinsic ${MY_STANDARD_LIBS})
 
 rosbuild_add_executable(project_tf_to_camera src/project_tf_to_camera.cpp)
 target_link_libraries(project_tf_to_camera ${MY_STANDARD_LIBS})
+
+rosbuild_add_executable(publishFrame src/publishFrame.cpp)
+target_link_libraries(publishFrame boost_program_options)
 
 rosbuild_add_executable(HistogramTest 
   src/Histogram.h

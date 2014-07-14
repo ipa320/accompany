@@ -1,0 +1,1 @@
+../Troyes/cameras/start_camera_sofa.sh

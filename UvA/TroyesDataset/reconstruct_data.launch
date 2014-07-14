@@ -1,0 +1,28 @@
+
+<launch>
+
+   <!-- ASUS Xtion rgb -->
+   <node pkg="image_transport" type="republish" name="rgb"
+         args="compressed in:=/rgb/image raw out:=/rgb/image" />
+
+   <!-- ASUS Xtion depth -->
+   <node pkg="image_transport" type="republish" name="depth"
+         args="compressedDepth in:=/depth/image raw out:=/depth/image" />
+         
+   <!-- overhead cam kitchen -->
+   <node pkg="image_transport" type="republish" name="camera_kitchen"
+         args="compressed in:=/camera_kitchen/image_raw raw out:=/camera_kitchen/image_raw" />
+
+   <!-- overhead cam kitchen -->
+   <node pkg="image_transport" type="republish" name="camera_sofa"
+         args="compressed in:=/camera_sofa/image_raw raw out:=/camera_sofa/image_raw" />
+
+
+   <!-- view images -->
+   <node pkg="image_view" type="image_view" name="$(anon image_view)" args="image:=/rgb/image"  />
+   <node pkg="image_view" type="image_view" name="$(anon image_view)" args="image:=/depth/image"  />
+   <node pkg="image_view" type="image_view" name="$(anon image_view)" args="image:=/camera_kitchen/image_raw"  />
+   <node pkg="image_view" type="image_view" name="$(anon image_view)" args="image:=/camera_sofa/image_raw"  />
+   
+
+</launch>

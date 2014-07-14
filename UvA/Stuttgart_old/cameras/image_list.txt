@@ -1,0 +1,1 @@
+../camera_kitchen/frame0000.jpg ../camera_sofa/frame0000.jpg

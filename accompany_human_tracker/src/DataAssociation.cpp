@@ -18,6 +18,7 @@ DataAssociation::DataAssociation()
  */
 void DataAssociation::clear(unsigned e1,unsigned e2)
 {
+  //cout<<"DataAssociation::clear("<<e1<<","<<e2<<")"<<endl;
   size1=e1;
   size2=e2;
   associations.resize(size1);
@@ -45,6 +46,7 @@ void DataAssociation::clear(unsigned e1,unsigned e2)
  */
 void DataAssociation::set(unsigned e1,unsigned e2,double association)
 {
+  //cout<<"DataAssociation::set["<<e1<<"]["<<e2<<"]="<<association<<endl;
   associations[e1][e2]=association;
 }
   
@@ -122,5 +124,6 @@ std::pair<int,int> DataAssociation::getMax(double threshold,int order)
     assign1[ret.first]=ret.second;
   if (ret.second>=0)
     assign2[ret.second]=ret.first;
+  //cout<<"getMax: "<<ret.first<<" "<<ret.second<<endl;
   return ret;
 }

@@ -7,6 +7,7 @@ using namespace std;
 #define DIMENSION 2
 #define KL_MIN 0.00000001
 
+
 unsigned Track::nextID=0;
 
 vnl_matrix<double> toMatrix(vnl_vector<double> v)
@@ -35,18 +36,78 @@ vnl_matrix<double> addSpeed(vnl_matrix<double> m)
   return s;
 }
 
+vnl_vector<double> getPoint(const geometry_msgs::PointStamped& pointStamped)
+{
+  vnl_vector<double> state(DIMENSION);
+  state[0]=pointStamped.point.x;
+  state[1]=pointStamped.point.y;
+  return state;
+}
+
+vnl_matrix<double> getPointCovariance(const geometry_msgs::PointStamped& pointStamped)
+{
+  vnl_matrix<double> covariance(DIMENSION,DIMENSION);
+  covariance.set_identity();
+  return covariance;
+}
+
+/**
+ * Constructor
+ * @param pointStamped detection info to initialize a track
+ * @param maxCovar maxium of covariance diagonal elements
+ */
+Track::Track(const geometry_msgs::PointStamped& pointStamped,double maxCovar)
+  : kalmanFilter(addSpeed(getPoint(pointStamped)),
+                 addSpeed(getPointCovariance(pointStamped))*maxCovar/2)
+{
+  appearanceValid=false;
+  init();
+  matchCount=100;
+  isRobotFlag=true;
+}
+
 /**
  * Constructor
  * @param humanDetection detection info to initialize a track
+ * @param maxCovar maxium of covariance diagonal elements
  */
-Track::Track(const accompany_uva_msg::HumanDetection& humanDetection)
+Track::Track(const accompany_uva_msg::HumanDetection& humanDetection,double maxCovar)
   : kalmanFilter(addSpeed(getObs(humanDetection)),
-                 addSpeed(getObsCovariance(humanDetection)))
+                 addSpeed(getObsCovariance(humanDetection))*maxCovar/2)
 {
   appearance=humanDetection.appearance;
+  appearanceValid=true;
+  init();
+}
+
+void Track::init()
+{
   id=++nextID;
   matchCount=0;
   unmatchedCount=0;
+  humanProb=0;
+  isRobotFlag=false;
+  isHumanFlag=false;
+}
+
+bool Track::isRobot()
+{
+  return isRobotFlag;
+}
+
+void Track::setRobot(bool value)
+{
+  isRobotFlag=value;
+}
+
+bool Track::isHuman()
+{
+  return isHumanFlag;
+}
+
+void Track::setHuman(bool value)
+{
+  isHumanFlag=value;
 }
 
 /**
@@ -63,18 +124,31 @@ double Track::match(const accompany_uva_msg::HumanDetection& humanDetection,
                     double appearanceThreshold)
 {
   double state=matchState(humanDetection,obsModel);
+  
+  cout<<id<<" state-match-score: "<<state;
   if (state<stateThreshold)
   {
-    cout<<"state="<<state<<" < stateThreshold="<<stateThreshold<<endl;
+    cout<<" < stateThreshold="<<stateThreshold<<endl;
     return -numeric_limits<double>::max();
   }
-  double appearance=matchAppearance(humanDetection);
-  if (appearance<appearanceThreshold)
+  else
+    cout<<endl;
+
+  double appearance=appearanceThreshold/2;// default
+  if (appearanceValid)
   {
-    cout<<"appearance="<<appearance<<" < appearanceThreshold="<<appearanceThreshold<<endl;
-    return -numeric_limits<double>::max();
+    appearance=matchAppearance(humanDetection);
+    cout<<id<<" appearance-match-score: "<<appearance;
+    if (appearance<appearanceThreshold)
+    {
+      cout<<" < appearanceThreshold="<<appearanceThreshold<<endl;
+      return -numeric_limits<double>::max();
+    }
+    else
+      cout<<endl;
   }
-  return state+appearance;
+  
+  return state*appearance;
 }
 
 /**
@@ -99,36 +173,50 @@ double Track::matchState(const accompany_uva_msg::HumanDetection& humanDetection
   vnl_matrix<double> covar=obsModel*kalmanFilter.getCovariance()*obsModel.transpose();
   vnl_vector<double> obs=getObs(humanDetection);
   vnl_matrix<double> diff=toMatrix(obs-state);
+  double det=vnl_determinant(covar);
+  vnl_matrix<double> inv=vnl_matrix_inverse<double>(covar);
+  vnl_matrix<double> expo=diff.transpose()*inv*diff;
+  double match=/*1/(sqrt(pow(2*M_PI,2)*det))**/exp(-(double)(expo[0][0])/2.0);
+  
   /*
   cout<<endl;
+  cout<<"---------- matchState"<<endl;
   cout<<"state:"<<state<<endl;
   cout<<"covar:"<<endl<<covar;
   cout<<"obs:"<<obs<<endl;
   cout<<"diff:"<<endl<<diff;
+  cout<<"det:"<<det<<endl;
+  cout<<"inv:"<<endl<<inv;
+  cout<<"expo:"<<endl<<expo;
+  cout<<"match: "<<match<<endl;
   */
-  double det=vnl_determinant(covar);
-  vnl_matrix<double> inv=vnl_matrix_inverse<double>(covar);
-  //cout<<"inv:"<<endl<<inv;
-  vnl_matrix<double> exp=diff.transpose()*inv*diff;
-  //cout<<"exp:"<<endl<<exp;
-  return -(DIMENSION*log(2*M_PI) + log(det) + exp[0][0])/2; // multivariate gaussian distribution
+
+  return match;
 }
 
 /**
  * Compute the match of this track with the detection based on the appearance
  * @param humanDetection human detection
- * @param obsModel observation model that maps the kalman state to the kalman observation space
  * @return the match value
  */
 double Track::matchAppearance(const accompany_uva_msg::HumanDetection& humanDetection)
 {
+  /* // 
   unsigned dim=appearance.histogram.size();
   vnl_matrix<double> diff(dim,1);
-  double var=0.02;
+  double var=0.2;
   for (unsigned i=0;i<dim;i++)
     diff[i][0]=appearance.histogram[i]-humanDetection.appearance.histogram[i];
   vnl_matrix<double> exp=diff.transpose()*diff/var;
-  return -(DIMENSION*(log(2*M_PI) + log(var)) + exp[0][0])/2; // multivariate gaussian distribution
+  double match=-exp[0][0];
+  return match;
+  */
+  double intersect=0;
+  for (unsigned i=0;i<appearance.histogram.size();i++)
+    intersect+=(appearance.histogram[i]<humanDetection.appearance.histogram[i])?
+      appearance.histogram[i]:
+      humanDetection.appearance.histogram[i]; // min
+  return intersect;
 }
 
 /**
@@ -137,10 +225,12 @@ double Track::matchAppearance(const accompany_uva_msg::HumanDetection& humanDete
  * @param transCovariance kalman transition covariance
  */
 void Track::transition(const vnl_matrix<double>& transModel,
-                       const vnl_matrix<double>& transCovariance)
+                       const vnl_matrix<double>& transCovariance,
+                       double maxCovar)
 {
   kalmanFilter.transition(transModel,
                           transCovariance);
+  limitCovariance(maxCovar);
 }
 
 /**
@@ -150,16 +240,74 @@ void Track::transition(const vnl_matrix<double>& transModel,
  * @param obsCovariance kalman observation covariance
  */
 void Track::observation(const accompany_uva_msg::HumanDetection& humanDetection,
+                        const double appearanceUpdate,
                         const vnl_matrix<double>& obsModel,
-                        const vnl_matrix<double>& obsCovariance)
+                        const vnl_matrix<double>& obsCovariance,
+                        double maxCovar)
 {
   vnl_vector<double> obs=getObs(humanDetection);
   kalmanFilter.observation(obs,
                            obsModel,
                            obsCovariance);
-  updateAppearance(0.1,humanDetection.appearance);
+  if (appearanceValid)
+  {
+    updateAppearance(appearanceUpdate,humanDetection.appearance);
+  }
+  else
+  {
+    appearance=humanDetection.appearance;
+    appearanceValid=true;
+  }
   matchCount++;
   unmatchedCount=0;
+  limitCovariance(maxCovar);
+}
+
+/**
+ * Updates the track with a robot tf point
+ * @param humanDetection human detection information
+ * @param obsModel kalman observation model
+ * @param obsCovariance kalman observation covariance
+ */
+void Track::updateRobot(const geometry_msgs::PointStamped& pointStamped,
+                        const vnl_matrix<double>& obsModel,
+                        const vnl_matrix<double>& obsCovariance,
+                        double maxCovar)
+{
+  vnl_vector<double> obs=getPoint(pointStamped);
+  kalmanFilter.observation(obs,
+                           obsModel,
+                           obsCovariance);
+  matchCount++;
+  unmatchedCount=0;
+  limitCovariance(maxCovar);
+}
+
+/**
+ * Returns distance from this track to other track
+ * @param track to which to compute distance
+ * @return distance
+ */
+double Track::distanceTo(Track &track)
+{
+  cout<<"v1: "<<this->getPosition()<<" v2:"<<track.getPosition()<<" distance:"<<sqrt(vnl_vector_ssd(this->getPosition(),track.getPosition()))<<endl;
+  return sqrt(vnl_vector_ssd(this->getPosition(),track.getPosition()));
+}
+
+/**
+ * Reduces the speed to maxSpeed
+ */
+void Track::maxSpeed(double maxSpeed)
+{
+  double dx=kalmanFilter.getState()[2];
+  double dy=kalmanFilter.getState()[3];
+  double speed=sqrt(dx*dx+dy*dy);
+  if (speed>maxSpeed)
+  {
+    double factor=maxSpeed/speed;
+    kalmanFilter.getState()[2]*=factor;
+    kalmanFilter.getState()[3]*=factor;
+  }
 }
 
 /**
@@ -196,26 +344,32 @@ void Track::reduceSpeed(double reduction)
  */
 void Track::updateAppearance(double weight,const accompany_uva_msg::Appearance& newAppearance)
 {
-  weight=1;
-  //cout<<*this<<endl;
-  double weight1=appearance.sumPixelWeights*(1-weight);
-  double weight2=newAppearance.sumPixelWeights*weight;
-  double sumPixelWeights=weight1+weight2;
-  weight1/=sumPixelWeights;
-  weight2/=sumPixelWeights;
-  
+  double weight1=(1-weight);
+  double weight2=weight;  
   for (unsigned i=0;i<appearance.histogram.size();i++)
   {
-    appearance.histogram[i]=
-      appearance.histogram[i]*weight1+
-      newAppearance.histogram[i]*weight2;
+    appearance.histogram[i]=appearance.histogram[i]*weight1+newAppearance.histogram[i]*weight2;
   }
-  appearance.sumPixelWeights=
-    appearance.sumPixelWeights*(1-weight)+
-    newAppearance.sumPixelWeights*weight;
-  appearance.sumTemplatePixelSize=
-    appearance.sumTemplatePixelSize*(1-weight)+
-    newAppearance.sumTemplatePixelSize*weight;
+  appearance.sumPixelWeights=appearance.sumPixelWeights*weight1+newAppearance.sumPixelWeights*weight2;
+  appearance.sumTemplatePixelSize=appearance.sumTemplatePixelSize*weight1+newAppearance.sumTemplatePixelSize*weight2;
+}
+
+vnl_vector<double> Track::getPosition()
+{
+  vnl_vector<double> v(3,0);
+  v[0]=kalmanFilter.getState()[0];
+  v[1]=kalmanFilter.getState()[1];
+  v[2]=0;
+  return v;
+}
+
+vnl_vector<double> Track::getSpeed()
+{
+  vnl_vector<double> v(3,0);
+  v[0]=kalmanFilter.getState()[2];
+  v[1]=kalmanFilter.getState()[3];
+  v[2]=0;
+  return v;
 }
 
 /**
@@ -231,6 +385,14 @@ void Track::writeMessage(accompany_uva_msg::TrackedHuman& trackedHuman)
   trackedHuman.speed.vector.y=kalmanFilter.getState()[3];
   trackedHuman.speed.vector.z=0;
   trackedHuman.id=id;
+  if (this->isRobot())
+    trackedHuman.identity="robot";
+  else
+    trackedHuman.identity="";
+  if (this->isHuman())
+    trackedHuman.specialFlag=1;
+  else
+    trackedHuman.specialFlag=0;
 }
 
 /**
@@ -261,17 +423,36 @@ vnl_matrix<double> Track::getObsCovariance(const accompany_uva_msg::HumanDetecti
  */
 std::ostream& operator<<(std::ostream& out,const Track& track)
 {
-  out<<"Track:"<<endl;
+  out<<"Track: "<<track.id<<endl;
   out<<track.kalmanFilter;
-  out<<"appearance:"<<endl;
-  out<<"  sumTemplatePixelSize:"<<track.appearance.sumTemplatePixelSize<<endl;
-  out<<"  sumPixelWeights:"<<track.appearance.sumPixelWeights<<endl;
-  out<<"  matchCount:"<<track.matchCount<<endl;
-  out<<"  unmatchedCount:"<<track.unmatchedCount<<endl;
-  out<<"  ";
-  for (unsigned i=0;i<track.appearance.histogram.size();i++)
-    out<<track.appearance.histogram[i]<<" ";
-  out<<endl;
+  if (track.appearanceValid)
+  {
+    out<<"appearance:"<<endl;
+    out<<"  sumTemplatePixelSize:"<<track.appearance.sumTemplatePixelSize<<endl;
+    out<<"  sumPixelWeights:"<<track.appearance.sumPixelWeights<<endl;
+    out<<"  matchCount:"<<track.matchCount<<endl;
+    out<<"  unmatchedCount:"<<track.unmatchedCount<<endl;
+    out<<"  isRobotFlag:"<<track.isRobotFlag<<endl;
+    out<<"  humanProb:"<<track.humanProb<<endl;
+    out<<"  isHumanFlag:"<<track.isHumanFlag<<endl;
+    out<<"  ";
+    for (unsigned i=0;i<track.appearance.histogram.size();i++)
+      out<<track.appearance.histogram[i]<<" ";
+    out<<endl;
+  }
   return out;
 }
 
+/**
+ * Limit the covariance to max
+ * @param max maximum value of elements in covariance matrix
+ */
+void Track::limitCovariance(double max)
+{
+  // limit covariance
+  vnl_matrix<double>& covar=kalmanFilter.getCovariance();
+  for (unsigned i=0;i<covar.rows();i++)
+    for (unsigned j=0;j<covar.cols();j++)
+      if (covar(i,j)>max)
+        covar(i,j)=max;
+}

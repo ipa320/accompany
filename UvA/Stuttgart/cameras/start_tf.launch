@@ -1,0 +1,15 @@
+<launch>
+
+  <!-- cameras tf -->
+
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_sofa -e /home/accompany/git/accompany/UvA/Stuttgart/camera_sofa/camera_extrinsic.xml"/>
+
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_kitchen -e /home/accompany/git/accompany/UvA/Stuttgart/camera_kitchen/camera_extrinsic.xml"/>
+
+   <!-- Map server -->
+  <node pkg="map_server" type="map_server" name="map_server" args="/home/accompany/git/accompany/UvA/Stuttgart/cameras/IPA-ACCOMPANY.yaml"/>
+
+
+</launch>

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <iostream>
 
 class IDToName
 {
@@ -11,6 +12,8 @@ class IDToName
 
   void setIDName(unsigned id,std::string name);
   std::string getIDName(unsigned id);
+
+  friend std::ostream& operator<<(std::ostream& out,const IDToName& itn);
 
  private:
 

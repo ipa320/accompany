@@ -144,14 +144,37 @@ Create a image list:
   rosrun accompany_static_camera_localisation create_calibration_list calib_list.xml *.jpg
   cat calib_list.xml
     
-Intrinsic calibration:
+Intrinsic calibration: (calibration improved by adding masks)
 
-  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -m ../mask_large.png -k 5 -a 1 -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml
+  rosrun accompany_static_camera_localisation calibration_intrinsic -w 6 -h 8 -m ../mask_large.png -k 5 -a 1 -rm -p -zt -o ../camera_intrinsic.xml calib_list.xml 
 
-Test:
+
+
+Test intrinsic calibration:
+
+  - undistort single frame -
 
   roscd accompany_static_camera_localisation/res/calib_frames
+
   rosrun accompany_static_camera_localisation undistortion_test -s [image] -i [camera_intrinsic] -f
+
+
+  - show live stream -
+
+  restart gscam node with
+
+    roscd accompany_static_camera_localisation/res
+
+    rosrun gscam gscam -s 0 -i camera_intrinsic.xml
+
+  generate undistorted stream
+
+    ROS_NAMESPACE=/gscam rosrun image_proc image_proc 
+
+  view live stream
+
+    rosrun image_view image_view image:=/gscam/image_rect_color
+    
 
 ----------------------------------------
 
@@ -202,7 +225,7 @@ Modify param.xml and set SCALE according to the desired resolution
 
 ----------------------------------------
 
-#-- Build background model --#
+#-- Build background model --# (adaptive background integrated, no need for this part any more)
 
 roscd accompany_static_camera_localisation/scripts/
 
@@ -229,9 +252,32 @@ Both:
 Select a walkable region:
 
   roscd accompany_static_camera_localisation/res
-
-  rosrun accompany_static_camera_localisation create_prior -l background_images/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
   
+
+  rosrun accompany_static_camera_localisation create_prior -l ./image_list.txt -p ./params.xml
+
+  columns of image_list.txt are camera index
+
+  #rosrun accompany_static_camera_localisation create_prior -l ./marker_list.txt -p ./params.xml
+  #rosrun accompany_static_camera_localisation create_prior -l background_images/background_list.txt -p params.xml -o prior.txt -i camera_intrinsic.xml -e camera_extrinsic.xml
+  
+---------------------------------------
+
+#-- Create Entrance Area --#
+
+NOTE!!
+image_list.txt has filename of images from multiple cameras on one line sperated by whitespace
+temperarily set SCALE in params.xml to 1
+
+rosrun accompany_static_camera_localisation create_entry_exit_areas -l ./image_list.txt -p ./params.xml
+
+
+#-- Create --#
+Create mapping between camera room coordinates and care-o-bot
+       
+       rosrun accompany_static_camera_localisation create_tf_room2world -m ./map.pgm -p ./map.yaml -n room_frame
+
+
 ----------------------------------------
 
 #-- Check calibration --#

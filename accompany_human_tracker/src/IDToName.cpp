@@ -36,6 +36,17 @@ string IDToName::getIDName(unsigned id)
   return name;
 }
 
+std::ostream& operator<<(std::ostream& out,const IDToName& itn)
+{
+  out<<"--- idToName:"<<endl;
+  for (std::map<unsigned,std::string>::const_iterator it=itn.idToName.begin(); it!=itn.idToName.end(); ++it) 
+    out<<it->first<<" "<<it->second<<endl;
+  out<<"--- nameToID:"<<endl;
+  for (std::map<std::string,unsigned>::const_iterator it=itn.nameToID.begin(); it!=itn.nameToID.end(); ++it) 
+    out<<it->first<<" "<<it->second<<endl;
+  return out;
+}
+
 void IDToName::setIDNameHelper(unsigned id,std::string name)
 {
   try

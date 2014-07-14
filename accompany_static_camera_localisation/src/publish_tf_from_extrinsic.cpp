@@ -19,19 +19,14 @@ class TransformSender
       cout << endl << "tf: " << frame_id << " -> " << child_frame_id << endl;
       cout << "rotation matrix:" << endl << rmat << endl;
       tf::Transform transform = tf::Transform(
-          btMatrix3x3(
-            rmat.at<double>(0,0),rmat.at<double>(0,1),rmat.at<double>(0,2),// rotation matrix
-            rmat.at<double>(1,0),rmat.at<double>(1,1),rmat.at<double>(1,2),
-            rmat.at<double>(2,0),rmat.at<double>(2,1),rmat.at<double>(2,2)), 
-          btVector3(tvec.at<double>(0,0),tvec.at<double>(1,0),tvec.at<double>(2,0))// translation vector
+					      tf::Matrix3x3(
+							    rmat.at<double>(0,0),rmat.at<double>(0,1),rmat.at<double>(0,2),// rotation matrix
+							    rmat.at<double>(1,0),rmat.at<double>(1,1),rmat.at<double>(1,2),
+							    rmat.at<double>(2,0),rmat.at<double>(2,1),rmat.at<double>(2,2)), 
+					      tf::Vector3(tvec.at<double>(0,0),tvec.at<double>(1,0),tvec.at<double>(2,0))// translation vector
           );
       std::cout << "translation vector:" << endl << tvec << endl;
-
-#if ROS_VERSION_MINIMUM(1,8,0)
-      tf::Matrix3x3 ma= transform.getBasis();      
-#else
-      btMatrix3x3 ma= transform.getBasis();
-#endif  
+      tf::Matrix3x3 ma= transform.getBasis();
 
       transform_ = tf::StampedTransform(transform, time, frame_id, child_frame_id );
     };
