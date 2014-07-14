@@ -64,6 +64,7 @@ class GoToUser(smach.State):
 	def execute(self, userdata):
 		sf = ScreenFormat("GoToUser")
 
+		sss.move("head", "front", False)
 		sss.set_light("yellow")
 		#first part
 		rospy.sleep(10)
@@ -118,7 +119,7 @@ class FollowUser(smach.State):
 			#if tracked_human.specialFlag == 1:
 			speed = math.sqrt(tracked_human.speed.vector.x*tracked_human.speed.vector.x + tracked_human.speed.vector.y*tracked_human.speed.vector.y)
 			distance_to_robot = math.sqrt((robot_pose_translation[0]-tracked_human.location.point.x)*(robot_pose_translation[0]-tracked_human.location.point.x) + (robot_pose_translation[1]-tracked_human.location.point.y)*(robot_pose_translation[1]-tracked_human.location.point.y))
-			if (distance_to_robot>0.4 and distance_to_robot<min_distance_to_robot and speed > 0.15 and tracked_human.location.point.x >= self.min_x and tracked_human.location.point.x <= self.max_x and tracked_human.location.point.y <= self.max_y and tracked_human.location.point.y >= self.min_y): ## todo check
+			if (distance_to_robot>0.25 and distance_to_robot<min_distance_to_robot and speed > 0.15 and tracked_human.location.point.x >= self.min_x and tracked_human.location.point.x <= self.max_x and tracked_human.location.point.y <= self.max_y and tracked_human.location.point.y >= self.min_y): ## todo check
 				min_distance_to_robot = distance_to_robot
 				self.user_speed = tracked_human.speed
 				self.user_position = tracked_human.location
@@ -139,10 +140,8 @@ class FollowUser(smach.State):
 		print "before the while loop"
 		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
 		while True:
-			print "in the while loop"
 			if self.user_position.point.x >= self.min_x and self.user_position.point.x <= self.max_x and self.user_position.point.y <= self.max_y and self.user_position.point.y >= self.min_y:  #and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
 			#if self.tracking_user == True:
-				print "people are in the square !"
 				# check if the user moved enough and whether we have some significant movement speed
 				dist = math.sqrt((self.last_user_position[0]-self.user_position.point.x)*(self.last_user_position[0]-self.user_position.point.x) +
 						(self.last_user_position[1]-self.user_position.point.y)*(self.last_user_position[1]-self.user_position.point.y))
@@ -212,12 +211,12 @@ class LetUserEnterDoor(smach.State):
 		handle_base=sss.move("base",[3.263, -2.525, -0.033],False,mode='linear')
 		sss.move("torso", [[0.0,-0.2,0.0]], False)
 		handle_base.wait()
-		rospy.sleep(5)
+		rospy.sleep(2)
 		sss.move("torso", "home", True)
 
 		# move through door
-		#handle_base=sss.move("base",[4.437, -2.736, -1.319],True,mode='linear')
-		#handle_base.wait()
+		handle_base=sss.move("base",[4.437, -2.736, -1.319],True,mode='linear')
+		handle_base.wait()
 		#handle_base=sss.move("base",[4.746, -4.201,-1.303],True,mode='linear')
 		#handle_base.wait()
 		

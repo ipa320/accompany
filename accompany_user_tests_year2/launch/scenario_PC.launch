@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<launch>
+
+	<arg name="robot" default="$(optenv ROBOT !!NO_ROBOT_SET!!)"/>
+	<arg name="robot_env" default="$(optenv ROBOT_ENV !!NO_ROBOT_ENV_SET!!)"/>
+	<arg name="pkg_robot_config" default="$(find cob_default_robot_config)"/>
+	<arg name="pkg_env_config" default="$(find accompany_user_tests_year2)"/>
+
+	<!-- upload default configuration parameters -->
+	<include file="$(find accompany_user_tests_year2)/upload_navigation_goals.launch"/>
+
+	<!-- start navigation -->
+	<include file="$(find cob_navigation_global)/launch/intern/2dnav_ipa_extloc.launch">
+		<arg name="map" default="$(find accompany_user_tests_year2)/$(arg robot_env)/PC_map.yaml" />
+	</include>
+
+	<!-- start tray monitor -->
+	<include file="$(find cob_tray_monitor)/ros/launch/tray_monitor.launch"/>
+
+	<!-- add more components -->
+<!--	<include file="$(find cob_moveit_config)/launch/move_group.xml"/> -->
+
+
+</launch>

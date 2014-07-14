@@ -24,7 +24,7 @@ def handle_emphasis_request(req):
 
 	#print "min vel: %s"%min_vel
 	#print "max_vel: %s"%max_vel
-	val=float(req.action)
+	val=float(req.action)/2.0
 	#print "value:   %f"%val
 	if (val<0.01):
 		print "reset..."
@@ -36,10 +36,13 @@ def handle_emphasis_request(req):
 	print "Squeeze value: %s <--> Robot speed value: %f" % (req.action,val)	
 
 	params={'max_rot_vel':val, 'max_trans_vel':val,'max_vel_x':val,'max_vel_y':val,'min_vel_x':-val,'min_vel_y':-val}
+	print "update config"
 	config=client.update_configuration(params);
 	
 	#little modification
-	sss.move("base",[2.750,-0.449,2.325],False)
+	print "move now"
+	#sss.move("base",[2.750,-0.449,2.325],False)
+	sss.move("base",[1.50,-1.8,1.711],False)
 	
 	return 1
 

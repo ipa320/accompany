@@ -82,7 +82,7 @@ sss.move("base", [2.293, -2.746, 1.717],True,mode='linear')
 sss.move("base", [2.293, -2.765, 1.717],True,mode='linear')
 
 
-
+#sss.move("torso", [[-0.20,0.00,-0.00]])
 handle_arm = sss.move("arm",[p26_troyes],True)
 handle_arm = sss.move("arm",[p27_troyes],True)
 
@@ -121,7 +121,7 @@ except rospy.ServiceException, e:
 
 
 sss.move("sdh","cylclosed",True)
-
+#sss.move("torso","home")
 sss.move("base", [2.293, -2.934, 1.721],True,mode='linear')
 sss.move("base", [2.293, -2.746, 1.721],True,mode='linear')
 sss.move("base", [2.293, -2.388, 1.721],True,mode='linear')
@@ -141,18 +141,14 @@ rospy.sleep(1)
 sss.move("tray", "deliverup")
 
 handle_arm = sss.move("arm",[p24_troyes],True)
-rospy.sleep(1)
 handle_arm = sss.move("arm",["intermediateback"],True)
-rospy.sleep(1)
 handle_arm = sss.move("arm",["intermediatefront", grasp3],True)
-rospy.sleep(1)
+
 sss.move("sdh","cylopen")
-rospy.sleep(1)
 
 handle_arm = sss.move("arm",[grasp3,"intermediatefront"],True)
 sss.move("sdh","home")
 handle_arm = sss.move("arm",["intermediatefront","intermediateback"],True)
-rospy.sleep(1)
 handle_arm = sss.move("arm",["folded"],True)
 ##
 #sss.move("base", [1.724, -1.110, -3.025],True,mode='linear')
