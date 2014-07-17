@@ -22,7 +22,7 @@
   <!-- human detection -->
 
   <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization"
-        args="-p /home/accompany/git/accompany/UvA/Stuttgart/cameras/params.xml -t 4 -v
+        args="-p /home/accompany/git/accompany/UvA/Stuttgart/cameras/params.xml -t 12 -v
               -n 3"/>
 
 
