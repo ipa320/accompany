@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam
+CMAKE_SOURCE_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam/build
+CMAKE_BINARY_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/gscam.dir/depend.make
@@ -72,17 +72,17 @@ CMakeFiles/gscam.dir/src/gscam.cpp.o: /opt/ros/groovy/share/geometry_msgs/packag
 CMakeFiles/gscam.dir/src/gscam.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/gscam.dir/src/gscam.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/gscam.dir/src/gscam.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/ros/accompany/UvA/dependencies/gscam/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/UvA/dependencies/gscam/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/gscam.dir/src/gscam.cpp.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/gscam.dir/src/gscam.cpp.o -c /home/accompany/ros/accompany/UvA/dependencies/gscam/src/gscam.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -o CMakeFiles/gscam.dir/src/gscam.cpp.o -c /home/accompany/git/accompany/UvA/dependencies/gscam/src/gscam.cpp
 
 CMakeFiles/gscam.dir/src/gscam.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/gscam.dir/src/gscam.cpp.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/accompany/ros/accompany/UvA/dependencies/gscam/src/gscam.cpp > CMakeFiles/gscam.dir/src/gscam.cpp.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -E /home/accompany/git/accompany/UvA/dependencies/gscam/src/gscam.cpp > CMakeFiles/gscam.dir/src/gscam.cpp.i
 
 CMakeFiles/gscam.dir/src/gscam.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/gscam.dir/src/gscam.cpp.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/accompany/ros/accompany/UvA/dependencies/gscam/src/gscam.cpp -o CMakeFiles/gscam.dir/src/gscam.cpp.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -W -Wall -Wno-unused-parameter -fno-strict-aliasing -pthread -S /home/accompany/git/accompany/UvA/dependencies/gscam/src/gscam.cpp -o CMakeFiles/gscam.dir/src/gscam.cpp.s
 
 CMakeFiles/gscam.dir/src/gscam.cpp.o.requires:
 .PHONY : CMakeFiles/gscam.dir/src/gscam.cpp.o.requires
@@ -118,6 +118,6 @@ CMakeFiles/gscam.dir/clean:
 .PHONY : CMakeFiles/gscam.dir/clean
 
 CMakeFiles/gscam.dir/depend:
-	cd /home/accompany/ros/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build/CMakeFiles/gscam.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/accompany/git/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build/CMakeFiles/gscam.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/gscam.dir/depend
 

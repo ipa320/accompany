@@ -98,7 +98,7 @@ CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/cameraModelTest.dir/src/cameraModelTest.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

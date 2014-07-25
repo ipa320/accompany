@@ -75,7 +75,7 @@ CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/build_background_model.dir/src/build_background_model.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

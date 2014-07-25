@@ -45,7 +45,7 @@ bool gotoTarget(float x, float y, float theta)
   while (!ac.waitForServer(ros::Duration(5.0)))
     ROS_INFO("Waiting for the move_base action server to come up");
 
-  //we'll send a goal to the robot to move 1 meter forward
+  //we'll send a goal to the robot in map coordinate frame
   goal.target_pose.header.frame_id = "map";//"base_footprint"; //"base_link";
   goal.target_pose.header.stamp = ros::Time::now();
 

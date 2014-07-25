@@ -1,7 +1,0 @@
-# Kinect skeleton tracking
-rosrun openni_tracker openni_tracker
-roslaunch skeleton_markers skeleton.launch
-
-# Kinect color image
-rosrun openni_camera openni_node
-rosrun image_view image_view image:=/camera/rgb/image_color

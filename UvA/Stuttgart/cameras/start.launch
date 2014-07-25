@@ -3,7 +3,7 @@
 
   <!-- camera_sofa -->
 
-  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.0.1.160:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.0.1.161:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
 
   <node pkg="gscam" type="gscam" name="gscam_sofa"
         args="-f camera_sofa gscam:=/camera_sofa -i /home/accompany/git/accompany/UvA/Stuttgart/cameras/camera_intrinsic_sofa.xml --sync false"/>
@@ -12,7 +12,7 @@
 
   <!-- camera_kitchen -->
 
-  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.10.1.161:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.0.1.160:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
 
   <node pkg="gscam" type="gscam" name="gscam_kitchen"
         args="-f camera_kitchen gscam:=/camera_kitchen -i /home/accompany/git/accompany/UvA/Stuttgart/cameras/camera_intrinsic_kitchen.xml --sync false"/>

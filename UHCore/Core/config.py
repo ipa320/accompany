@@ -43,7 +43,7 @@ server_config = {
   'mysql_geo_query':    'CALL expPower',
   
   # Settings for the zwave sensor network,
-  'zwave_ip': '10.0.1.57',
+  'zwave_ip': '10.0.1.150',
 }
 
 """ Contains configuration information for each experiment site """

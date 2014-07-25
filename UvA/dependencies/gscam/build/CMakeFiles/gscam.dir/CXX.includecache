@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/accompany/ros/accompany/UvA/dependencies/gscam/src/gscam.cpp
+/home/accompany/git/accompany/UvA/dependencies/gscam/src/gscam.cpp
 stdlib.h
 -
 unistd.h

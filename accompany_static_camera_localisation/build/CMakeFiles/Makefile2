@@ -244,8 +244,8 @@ clean: CMakeFiles/_catkin_empty_exported_target.dir/clean
 
 # All Build rule for target.
 CMakeFiles/add_camera_info.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/add_camera_info.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/add_camera_info.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/add_camera_info.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/add_camera_info.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/add_camera_info.dir/build.make CMakeFiles/add_camera_info.dir/depend
 	$(MAKE) -f CMakeFiles/add_camera_info.dir/build.make CMakeFiles/add_camera_info.dir/build
@@ -282,8 +282,8 @@ clean: CMakeFiles/add_camera_info.dir/clean
 
 # All Build rule for target.
 CMakeFiles/annotate_image_points.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/annotate_image_points.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/annotate_image_points.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/annotate_image_points.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/annotate_image_points.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/annotate_image_points.dir/build.make CMakeFiles/annotate_image_points.dir/depend
 	$(MAKE) -f CMakeFiles/annotate_image_points.dir/build.make CMakeFiles/annotate_image_points.dir/build
@@ -320,8 +320,8 @@ clean: CMakeFiles/annotate_image_points.dir/clean
 
 # All Build rule for target.
 CMakeFiles/annotate_pos.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/annotate_pos.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/annotate_pos.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/annotate_pos.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/annotate_pos.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/annotate_pos.dir/build.make CMakeFiles/annotate_pos.dir/depend
 	$(MAKE) -f CMakeFiles/annotate_pos.dir/build.make CMakeFiles/annotate_pos.dir/build
@@ -358,8 +358,8 @@ clean: CMakeFiles/annotate_pos.dir/clean
 
 # All Build rule for target.
 CMakeFiles/build_background_model.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/build_background_model.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/build_background_model.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/build_background_model.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/build_background_model.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/build_background_model.dir/build.make CMakeFiles/build_background_model.dir/depend
 	$(MAKE) -f CMakeFiles/build_background_model.dir/build.make CMakeFiles/build_background_model.dir/build
@@ -431,8 +431,8 @@ clean: CMakeFiles/calib.dir/clean
 
 # All Build rule for target.
 CMakeFiles/calibration_extrinsic.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/calibration_extrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/calibration_extrinsic.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/calibration_extrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/calibration_extrinsic.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/calibration_extrinsic.dir/build.make CMakeFiles/calibration_extrinsic.dir/depend
 	$(MAKE) -f CMakeFiles/calibration_extrinsic.dir/build.make CMakeFiles/calibration_extrinsic.dir/build
@@ -469,8 +469,8 @@ clean: CMakeFiles/calibration_extrinsic.dir/clean
 
 # All Build rule for target.
 CMakeFiles/calibration_intrinsic.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/calibration_intrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/calibration_intrinsic.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/calibration_intrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/calibration_intrinsic.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/calibration_intrinsic.dir/build.make CMakeFiles/calibration_intrinsic.dir/depend
 	$(MAKE) -f CMakeFiles/calibration_intrinsic.dir/build.make CMakeFiles/calibration_intrinsic.dir/build
@@ -542,8 +542,8 @@ clean: CMakeFiles/cameraModelTest.dir/clean
 
 # All Build rule for target.
 CMakeFiles/camera_localization.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/camera_localization.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/camera_localization.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/camera_localization.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/camera_localization.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/camera_localization.dir/build.make CMakeFiles/camera_localization.dir/depend
 	$(MAKE) -f CMakeFiles/camera_localization.dir/build.make CMakeFiles/camera_localization.dir/build
@@ -611,8 +611,8 @@ clean: CMakeFiles/clean_test_results.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_background_list.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_background_list.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_background_list.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_background_list.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_background_list.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_background_list.dir/build.make CMakeFiles/create_background_list.dir/depend
 	$(MAKE) -f CMakeFiles/create_background_list.dir/build.make CMakeFiles/create_background_list.dir/build
@@ -649,8 +649,8 @@ clean: CMakeFiles/create_background_list.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_calibration_list.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_calibration_list.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_calibration_list.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_calibration_list.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_calibration_list.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_calibration_list.dir/build.make CMakeFiles/create_calibration_list.dir/depend
 	$(MAKE) -f CMakeFiles/create_calibration_list.dir/build.make CMakeFiles/create_calibration_list.dir/build
@@ -687,8 +687,8 @@ clean: CMakeFiles/create_calibration_list.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_entry_exit_areas.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_entry_exit_areas.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_entry_exit_areas.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_entry_exit_areas.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_entry_exit_areas.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_entry_exit_areas.dir/build.make CMakeFiles/create_entry_exit_areas.dir/depend
 	$(MAKE) -f CMakeFiles/create_entry_exit_areas.dir/build.make CMakeFiles/create_entry_exit_areas.dir/build
@@ -725,8 +725,8 @@ clean: CMakeFiles/create_entry_exit_areas.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_frame.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_frame.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_frame.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_frame.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_frame.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_frame.dir/build.make CMakeFiles/create_frame.dir/depend
 	$(MAKE) -f CMakeFiles/create_frame.dir/build.make CMakeFiles/create_frame.dir/build
@@ -763,8 +763,8 @@ clean: CMakeFiles/create_frame.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_occlusion_by_background_mask.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_occlusion_by_background_mask.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_occlusion_by_background_mask.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_occlusion_by_background_mask.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_occlusion_by_background_mask.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_occlusion_by_background_mask.dir/build.make CMakeFiles/create_occlusion_by_background_mask.dir/depend
 	$(MAKE) -f CMakeFiles/create_occlusion_by_background_mask.dir/build.make CMakeFiles/create_occlusion_by_background_mask.dir/build
@@ -801,8 +801,8 @@ clean: CMakeFiles/create_occlusion_by_background_mask.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_prior.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_prior.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_prior.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_prior.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_prior.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_prior.dir/build.make CMakeFiles/create_prior.dir/depend
 	$(MAKE) -f CMakeFiles/create_prior.dir/build.make CMakeFiles/create_prior.dir/build
@@ -839,8 +839,8 @@ clean: CMakeFiles/create_prior.dir/clean
 
 # All Build rule for target.
 CMakeFiles/create_tf_room2world.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/create_tf_room2world.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_tf_room2world.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/create_tf_room2world.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/create_tf_room2world.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/create_tf_room2world.dir/build.make CMakeFiles/create_tf_room2world.dir/depend
 	$(MAKE) -f CMakeFiles/create_tf_room2world.dir/build.make CMakeFiles/create_tf_room2world.dir/build
@@ -943,8 +943,8 @@ clean: CMakeFiles/hull.dir/clean
 
 # All Build rule for target.
 CMakeFiles/image_saver.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/image_saver.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/image_saver.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/image_saver.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/image_saver.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/image_saver.dir/build.make CMakeFiles/image_saver.dir/depend
 	$(MAKE) -f CMakeFiles/image_saver.dir/build.make CMakeFiles/image_saver.dir/build
@@ -981,8 +981,8 @@ clean: CMakeFiles/image_saver.dir/clean
 
 # All Build rule for target.
 CMakeFiles/kinect_driver.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/kinect_driver.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/kinect_driver.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/kinect_driver.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/kinect_driver.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/kinect_driver.dir/build.make CMakeFiles/kinect_driver.dir/depend
 	$(MAKE) -f CMakeFiles/kinect_driver.dir/build.make CMakeFiles/kinect_driver.dir/build
@@ -1019,8 +1019,8 @@ clean: CMakeFiles/kinect_driver.dir/clean
 
 # All Build rule for target.
 CMakeFiles/project_tf_to_camera.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/project_tf_to_camera.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/project_tf_to_camera.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/project_tf_to_camera.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/project_tf_to_camera.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/project_tf_to_camera.dir/build.make CMakeFiles/project_tf_to_camera.dir/depend
 	$(MAKE) -f CMakeFiles/project_tf_to_camera.dir/build.make CMakeFiles/project_tf_to_camera.dir/build
@@ -1092,8 +1092,8 @@ clean: CMakeFiles/publishFrame.dir/clean
 
 # All Build rule for target.
 CMakeFiles/publish_image.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/publish_image.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/publish_image.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/publish_image.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/publish_image.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/publish_image.dir/build.make CMakeFiles/publish_image.dir/depend
 	$(MAKE) -f CMakeFiles/publish_image.dir/build.make CMakeFiles/publish_image.dir/build
@@ -1130,8 +1130,8 @@ clean: CMakeFiles/publish_image.dir/clean
 
 # All Build rule for target.
 CMakeFiles/publish_tf_from_extrinsic.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/publish_tf_from_extrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/publish_tf_from_extrinsic.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/publish_tf_from_extrinsic.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/publish_tf_from_extrinsic.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/publish_tf_from_extrinsic.dir/build.make CMakeFiles/publish_tf_from_extrinsic.dir/depend
 	$(MAKE) -f CMakeFiles/publish_tf_from_extrinsic.dir/build.make CMakeFiles/publish_tf_from_extrinsic.dir/build
@@ -1168,8 +1168,8 @@ clean: CMakeFiles/publish_tf_from_extrinsic.dir/clean
 
 # All Build rule for target.
 CMakeFiles/resize_image.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/resize_image.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/resize_image.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/resize_image.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/resize_image.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/resize_image.dir/build.make CMakeFiles/resize_image.dir/depend
 	$(MAKE) -f CMakeFiles/resize_image.dir/build.make CMakeFiles/resize_image.dir/build
@@ -1584,8 +1584,8 @@ clean: CMakeFiles/test-results-run.dir/clean
 
 # All Build rule for target.
 CMakeFiles/testCameraModel.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/testCameraModel.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/testCameraModel.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/testCameraModel.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/testCameraModel.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/testCameraModel.dir/build.make CMakeFiles/testCameraModel.dir/depend
 	$(MAKE) -f CMakeFiles/testCameraModel.dir/build.make CMakeFiles/testCameraModel.dir/build
@@ -1622,8 +1622,8 @@ clean: CMakeFiles/testCameraModel.dir/clean
 
 # All Build rule for target.
 CMakeFiles/test_transform.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/test_transform.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/test_transform.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/test_transform.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/test_transform.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/test_transform.dir/build.make CMakeFiles/test_transform.dir/depend
 	$(MAKE) -f CMakeFiles/test_transform.dir/build.make CMakeFiles/test_transform.dir/build
@@ -1691,8 +1691,8 @@ clean: CMakeFiles/tests.dir/clean
 
 # All Build rule for target.
 CMakeFiles/undistortion_test.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/undistortion_test.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/undistortion_test.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/undistortion_test.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/undistortion_test.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/undistortion_test.dir/build.make CMakeFiles/undistortion_test.dir/depend
 	$(MAKE) -f CMakeFiles/undistortion_test.dir/build.make CMakeFiles/undistortion_test.dir/build
@@ -1729,8 +1729,8 @@ clean: CMakeFiles/undistortion_test.dir/clean
 
 # All Build rule for target.
 CMakeFiles/video_publisher.dir/all: CMakeFiles/rosbuild_precompile.dir/all
-CMakeFiles/video_publisher.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/video_publisher.dir/all: CMakeFiles/hull.dir/all
+CMakeFiles/video_publisher.dir/all: CMakeFiles/staticCam.dir/all
 CMakeFiles/video_publisher.dir/all: CMakeFiles/calib.dir/all
 	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/depend
 	$(MAKE) -f CMakeFiles/video_publisher.dir/build.make CMakeFiles/video_publisher.dir/build

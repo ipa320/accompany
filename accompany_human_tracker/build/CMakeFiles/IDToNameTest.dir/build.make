@@ -79,7 +79,7 @@ CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/roslib
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToNameTest.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml
@@ -145,7 +145,7 @@ CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/roslib/pac
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/IDToNameTest.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

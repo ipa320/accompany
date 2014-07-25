@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam
+CMAKE_SOURCE_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam/build
+CMAKE_BINARY_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam/build
 
 # Utility rule file for doxygen.
 
@@ -43,7 +43,7 @@ CMAKE_BINARY_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam/build
 include CMakeFiles/doxygen.dir/progress.make
 
 CMakeFiles/doxygen:
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/ros/accompany/UvA/dependencies/gscam/build/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/UvA/dependencies/gscam/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "doxygen found"
 
 doxygen: CMakeFiles/doxygen
@@ -59,6 +59,6 @@ CMakeFiles/doxygen.dir/clean:
 .PHONY : CMakeFiles/doxygen.dir/clean
 
 CMakeFiles/doxygen.dir/depend:
-	cd /home/accompany/ros/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build/CMakeFiles/doxygen.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/accompany/git/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build/CMakeFiles/doxygen.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/doxygen.dir/depend
 

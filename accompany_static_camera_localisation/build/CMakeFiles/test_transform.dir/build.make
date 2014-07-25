@@ -75,7 +75,7 @@ CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/ro
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/test_transform.dir/src/test_transform.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

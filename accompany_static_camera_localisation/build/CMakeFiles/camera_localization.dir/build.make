@@ -75,7 +75,7 @@ CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groov
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/camera_localization.dir/src/camera_localization.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml
@@ -138,7 +138,7 @@ CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groov
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/camera_localization.dir/src/AppearanceExtractor.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

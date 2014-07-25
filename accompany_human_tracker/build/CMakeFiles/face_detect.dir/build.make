@@ -79,7 +79,7 @@ CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/roslib/p
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/pluginlib/package.xml
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/image_transport/package.xml
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/camera_calibration_parsers/package.xml
-CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /home/accompany/git/accompany/test/UvA/dependencies/gscam/manifest.xml
+CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /home/accompany/git/accompany/UvA/dependencies/gscam/manifest.xml
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/rosgraph/package.xml
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/rospy/package.xml
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o: /opt/ros/groovy/share/topic_tools/package.xml

@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam
+CMAKE_SOURCE_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam/build
+CMAKE_BINARY_DIR = /home/accompany/git/accompany/UvA/dependencies/gscam/build
 
 # Utility rule file for clean_test_results.
 
@@ -43,7 +43,7 @@ CMAKE_BINARY_DIR = /home/accompany/ros/accompany/UvA/dependencies/gscam/build
 include CMakeFiles/clean_test_results.dir/progress.make
 
 CMakeFiles/clean_test_results:
-	/usr/bin/cmake -E remove_directory /home/accompany/ros/accompany/UvA/dependencies/gscam/build/test_results
+	/usr/bin/cmake -E remove_directory /home/accompany/git/accompany/UvA/dependencies/gscam/build/test_results
 
 clean_test_results: CMakeFiles/clean_test_results
 clean_test_results: CMakeFiles/clean_test_results.dir/build.make
@@ -58,6 +58,6 @@ CMakeFiles/clean_test_results.dir/clean:
 .PHONY : CMakeFiles/clean_test_results.dir/clean
 
 CMakeFiles/clean_test_results.dir/depend:
-	cd /home/accompany/ros/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build /home/accompany/ros/accompany/UvA/dependencies/gscam/build/CMakeFiles/clean_test_results.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/accompany/git/accompany/UvA/dependencies/gscam/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build /home/accompany/git/accompany/UvA/dependencies/gscam/build/CMakeFiles/clean_test_results.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/clean_test_results.dir/depend
 
