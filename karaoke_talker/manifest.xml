@@ -1,0 +1,17 @@
+<package>
+  <description brief="karaoke_talker">
+
+     karaoke_talker
+
+  </description>
+  <author>Marco Bongini, Fabrice Rougeau</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/karaoke_talker</url>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <rosdep name="sfml-dev"/>
+  <rosdep name="libmysqlclient-dev"/>
+</package>
+
+

@@ -1,0 +1,23 @@
+3 [start]
+3 Dashing through the snow
+3 In a one-horse open sleigh
+3 O'er the fields we go
+3 Laughing all the way
+3 Bells on bob tails ring
+3 Making spirits bright
+3 What fun it is to laugh and sing
+3 A sleighing song tonight
+3 [clear]
+3 [clear]
+3 Oh, Jingle bells, jingle bells
+3 Jingle all the way
+3 Oh, what fun
+3 it is to ride
+3 In a one-horse open sleigh.
+3 Jingle bells, jingle bells
+3 Jingle all the way 
+3 Oh, what fun
+3 it is to ride
+3 In a one-horse open sleigh.
+3 [clear]
+3 [stop]
