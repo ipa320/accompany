@@ -17,13 +17,13 @@ from accompany_uva_msg.msg import *
 import tf
 from tf.transformations import *
 from ScreenFormatting import *
-#import MySQLdb
+import MySQLdb
 
-#db = MySQLdb.connect(host="localhost",
-#					user="accompanyUser",
-#					passwd="accompany",
-#					db="AccompanyTroyes")
-#cur = db.cursor()
+db = MySQLdb.connect(host="10.0.1.207",
+					user="accompanyUser",
+					passwd="accompany",
+					db="AccompanyTroyes")
+cur = db.cursor()
 #cur.execute("""UPDATE Sensors SET value = True WHERE sensorId = 535""")	#need to be commented with scenario running
 #cur.execute("""SELECT value FROM Sensors WHERE sensorId=535""")
 #for followUser_condition in cur.fetchall():
@@ -60,12 +60,36 @@ def currentRobotPose():
 class GoToUser(smach.State):
 	def __init__(self):
 		smach.State.__init__(self, outcomes=['succeeded','failed'])
+		rospy.Subscriber("/trackedHumans", TrackedHumans, self.callback)
+		self.user_position = PointStamped()
+		self.min_x2 = 0.0
+		self.max_x2 = 5.0
+		self.min_y2 = -5.0
+		self.max_y2 = -2.7
+		self.min_x3 = 2.5
+		self.max_x3 = 6.0
+		self.min_y3 = -5.0
+		self.max_y3 = 3.0
+		self.tracking_user = False
+
+		
+	def callback(self,msg):
+		for tracked_human in msg.trackedHumans:
+			self.user_position = tracked_human.location
+			self.tracking_user = True
 
 	def execute(self, userdata):
 		sf = ScreenFormat("GoToUser")
+		while self.tracking_user == False:
+			print "not tracked yet"
+		print self.user_position.point.x
+		print self.user_position.point.y
+		while (self.user_position.point.x >= self.min_x2 and self.user_position.point.x <= self.max_x2 and self.user_position.point.y <= self.max_y2 and 	self.user_position.point.y >= self.min_y2) or (self.user_position.point.x >= self.min_x3 and self.user_position.point.x <= self.max_x3 and self.user_position.point.y <= self.max_y3 and 	self.user_position.point.y >= self.min_y3):
+			print "still in the zone"
 
 		#sss.move("head", "front", False)
 		sss.set_light("yellow")
+		handle_base=sss.move("base",[1.233, -2.625, 1.674],True, mode='linear')
 		#first part
 		#rospy.sleep(10)
 		#handle_base=sss.move("base",[0.588, -0.979, 2.2],True,mode='linear')
@@ -82,6 +106,7 @@ class GoToUser(smach.State):
 		#sss.set_light("yellow")
 		#sss.move("torso", [[-0.1,-0.2,-0.15]], True)
 		#handle_base.wait()
+
 		sss.set_light("green")
 		#rospy.sleep(3)
 		#sss.move("torso", "home", True)	
@@ -91,7 +116,6 @@ class GoToUser(smach.State):
 class FollowUser(smach.State):
 	def __init__(self):
 		smach.State.__init__(self, outcomes=['succeeded','failed'])
-#		rospy.Subscriber("/trackedHumans", TrackedHumans, self.callback)
 		rospy.Subscriber("/leg_detection/detected_humans_laser", TrackedHumans, self.callback)
 		self.user_position = PointStamped()
 		self.user_speed = Vector3Stamped()
@@ -99,10 +123,10 @@ class FollowUser(smach.State):
 		self.last_user_position = [0.0,0.0]
 
 		# tracking area (only humans in this area are considered)
-		self.min_x = 2.0
-		self.max_x = 5.0
-		self.min_y = -2.0
-		self.max_y = -1.0
+		self.min_x = 0.0
+		self.max_x = 2.0
+		self.min_y = -3.0
+		self.max_y = -0.5
 		
 	def callback(self,msg):
 
@@ -181,7 +205,8 @@ class FollowUser(smach.State):
 					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False, mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if self.user_position.point.x > 2 and self.user_position.point.y < -1.7:
+					print self.user_position.point.y
+					if self.user_position.point.y > -0.8 and self.user_position.point.x < 2:
 						print "finished walk with me state"
 						break
 					#else:
@@ -198,20 +223,19 @@ class FollowUser(smach.State):
 		return 'succeeded'
 
 
-class LetUserEnterDoor(smach.State):
+class LetUserEnterKitchen(smach.State):
 	def __init__(self):
 		smach.State.__init__(self, outcomes=['succeeded','failed'])
 
 	def execute(self, userdata):
-		sf = ScreenFormat("LetUserEnterDoor")
+		sf = ScreenFormat("LetUserEnterKitchen")
 
 		# let user enter door first
 		sss.set_light("green")
-		handle_base=sss.move("base",[3.655, -2.639, -0.419],False)
-		#sss.move("torso", [[0.0,-0.2,0.0]], False)
+		handle_base=sss.move("base",[0.152, -0.687, 1.151],False)
+		cur.execute("""UPDATE Sensors SET value = 'True' WHERE sensorId = 534""")
 		handle_base.wait()
-		#rospy.sleep(2)
-		#sss.move("torso", "home", True)
+		rospy.sleep(2)
 
 		# move through door
 		#handle_base=sss.move("base",[4.437, -2.736, -1.319],True,mode='linear')
@@ -231,10 +255,10 @@ class SM(smach.StateMachine):
 					'failed':'ended'})
 
 			smach.StateMachine.add('FOLLOW_USER', FollowUser(),
-			transitions={'succeeded':'LET_USER_ENTER_DOOR',
+			transitions={'succeeded':'LET_USER_ENTER_KITCHEN',
 					'failed':'ended'})
 
-			smach.StateMachine.add('LET_USER_ENTER_DOOR', LetUserEnterDoor(),
+			smach.StateMachine.add('LET_USER_ENTER_KITCHEN', LetUserEnterKitchen(),
 			transitions={'succeeded':'ended',
 					'failed':'ended'})
 
