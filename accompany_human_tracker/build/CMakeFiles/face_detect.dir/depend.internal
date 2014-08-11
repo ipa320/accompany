@@ -3,10 +3,10 @@
 
 CMakeFiles/face_detect.dir/src/face_detect.cpp.o
  /home/accompany/git/accompany/accompany_human_tracker/src/face_detect.cpp
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
  /opt/ros/groovy/include/XmlRpcDecl.h
  /opt/ros/groovy/include/XmlRpcValue.h
  /opt/ros/groovy/include/geometry_msgs/Point.h

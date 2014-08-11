@@ -59,7 +59,8 @@ Visualization Manager:
       Marker Topic: /visualization_marker_array
       Name: MarkerArray
       Namespaces:
-        room_frame: true
+        /room_frame: true
+        trackedHumans: true
       Queue Size: 100
       Value: true
     - Alpha: 0.7
@@ -73,13 +74,121 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
+        /arm_0_link:
+          Value: true
+        /arm_1_link:
+          Value: true
+        /arm_2_link:
+          Value: true
+        /arm_3_link:
+          Value: true
+        /arm_4_link:
+          Value: true
+        /arm_5_link:
+          Value: true
+        /arm_6_link:
+          Value: true
+        /arm_7_link:
+          Value: true
+        /base_footprint:
+          Value: true
+        /base_laser_front_link:
+          Value: true
+        /base_laser_rear_link:
+          Value: true
+        /base_laser_top_link:
+          Value: true
+        /base_link:
+          Value: true
+        /bl_caster_r_wheel_link:
+          Value: true
+        /bl_caster_rotation_link:
+          Value: true
+        /br_caster_r_wheel_link:
+          Value: true
+        /br_caster_rotation_link:
+          Value: true
         /camera_kitchen:
           Value: true
         /camera_sofa:
           Value: true
+        /fl_caster_r_wheel_link:
+          Value: true
+        /fl_caster_rotation_link:
+          Value: true
+        /fr_caster_r_wheel_link:
+          Value: true
+        /fr_caster_rotation_link:
+          Value: true
+        /head_axis_link:
+          Value: true
+        /head_base_link:
+          Value: true
+        /head_cam3d_frame:
+          Value: true
+        /head_cam3d_link:
+          Value: true
+        /head_cam_reference_link:
+          Value: true
+        /head_color_camera_l_frame:
+          Value: true
+        /head_color_camera_l_link:
+          Value: true
+        /head_color_camera_r_frame:
+          Value: true
+        /head_color_camera_r_link:
+          Value: true
+        /head_cover_link:
+          Value: true
+        /lookat_base_link:
+          Value: true
         /map:
           Value: true
+        /odom_combined:
+          Value: true
         /room_frame:
+          Value: true
+        /sdh_finger_11_link:
+          Value: true
+        /sdh_finger_12_link:
+          Value: true
+        /sdh_finger_13_link:
+          Value: true
+        /sdh_finger_21_link:
+          Value: true
+        /sdh_finger_22_link:
+          Value: true
+        /sdh_finger_23_link:
+          Value: true
+        /sdh_grasp_link:
+          Value: true
+        /sdh_palm_link:
+          Value: true
+        /sdh_thumb_1_link:
+          Value: true
+        /sdh_thumb_2_link:
+          Value: true
+        /sdh_thumb_3_link:
+          Value: true
+        /sdh_tip_link:
+          Value: true
+        /torso_base_link:
+          Value: true
+        /torso_upper_neck_tilt_link:
+          Value: true
+        /tray_3_link:
+          Value: true
+        /tray_left_link:
+          Value: true
+        /tray_right_link:
+          Value: true
+        /tray_sensors_0_link:
+          Value: true
+        /tray_sensors_1_link:
+          Value: true
+        /tray_sensors_2_link:
+          Value: true
+        /tray_sensors_3_link:
           Value: true
         All Enabled: true
       Marker Scale: 1
@@ -89,6 +198,54 @@ Visualization Manager:
       Show Names: true
       Tree:
         /map:
+          /odom_combined:
+            /base_footprint:
+              /base_link:
+                /arm_0_link:
+                  /arm_1_link:
+                    /arm_2_link:
+                      /arm_3_link:
+                        /arm_4_link:
+                          /arm_5_link:
+                            /arm_6_link:
+                              /arm_7_link:
+                                /sdh_palm_link:
+                                  /sdh_finger_11_link:
+                                    /sdh_finger_12_link:
+                                      /sdh_finger_13_link:
+                                        {}
+                                  /sdh_finger_21_link:
+                                    /sdh_finger_22_link:
+                                      /sdh_finger_23_link:
+                                        {}
+                                  /sdh_grasp_link:
+                                    {}
+                                  /sdh_thumb_1_link:
+                                    /sdh_thumb_2_link:
+                                      /sdh_thumb_3_link:
+                                        {}
+                                  /sdh_tip_link:
+                                    {}
+                /base_laser_front_link:
+                  {}
+                /base_laser_rear_link:
+                  {}
+                /base_laser_top_link:
+                  {}
+                /bl_caster_rotation_link:
+                  /bl_caster_r_wheel_link:
+                    {}
+                /br_caster_rotation_link:
+                  /br_caster_r_wheel_link:
+                    {}
+                /fl_caster_rotation_link:
+                  /fl_caster_r_wheel_link:
+                    {}
+                /fr_caster_rotation_link:
+                  /fr_caster_r_wheel_link:
+                    {}
+                /torso_base_link:
+                  {}
           /room_frame:
             /camera_kitchen:
               {}
@@ -162,26 +319,23 @@ Visualization Manager:
   Value: true
   Views:
     Current:
-      Class: rviz/XYOrbit
-      Distance: 12.8783
-      Focal Point:
-        X: 1.26004
-        Y: 2.41858
-        Z: 2.38419e-06
+      Angle: -6.23999
+      Class: rviz/TopDownOrtho
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.409797
+      Scale: 63.3278
       Target Frame: <Fixed Frame>
-      Value: XYOrbit (rviz)
-      Yaw: 3.12858
+      Value: TopDownOrtho (rviz)
+      X: 2.61771
+      Y: 0.127872
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: false
+    collapsed: true
   Height: 1176
-  Hide Left Dock: false
+  Hide Left Dock: true
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000001fd00000452fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000002800000452000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000015300000452fc0200000007fb000000160073006f00660061005f0064006500740065006300740100000028000001030000001600fffffffb0000001c006b00690074006300680065006e005f0064006500740065006300740100000131000001070000001600fffffffb0000001e0073006f00660061005f006200610063006b00670072006f0075006e0064010000023e000001110000001600fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb00000024006b00690074006300680065006e005f006200610063006b00670072006f0075006e00640100000355000001250000001600fffffffb0000000a00560069006500770073000000026a00000210000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006500000000000000073f000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000005e60000045200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001fd00000452fc0200000008fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000002800000452000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261000000010000018700000452fc0200000007fb000000160073006f00660061005f0064006500740065006300740100000028000001080000001600fffffffb0000001c006b00690074006300680065006e005f00640065007400650063007401000001360000010d0000001600fffffffb0000001e0073006f00660061005f006200610063006b00670072006f0075006e00640100000249000001160000001600fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb00000024006b00690074006300680065006e005f006200610063006b00670072006f0075006e00640100000365000001150000001600fffffffb0000000a00560069006500770073000000025f0000021b000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000073f000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006500000000000000073f000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000004720000045200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -190,9 +344,9 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1855
-  X: 57
-  Y: -4
+  Width: 1535
+  X: 58
+  Y: 24
   kitchen_background:
     collapsed: false
   kitchen_detect:

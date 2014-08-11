@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Apr 29 13:47:20 2014
+** Created: Tue Jul 1 14:23:25 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -466,10 +466,12 @@ public:
     QGroupBox *UserLocGroupBox_6;
     QCheckBox *robotTrayCheckBox;
     QGroupBox *robotTrayGroupBox;
-    QRadioButton *trayRaiseRadioButton;
-    QRadioButton *trayLowerRadioButton;
+    QRadioButton *trayDispDown;
+    QRadioButton *trayDelDown;
     QCheckBox *trayWaitCheckBox;
-    QRadioButton *trayStoreRadioButton;
+    QRadioButton *trayStore;
+    QRadioButton *trayDispUp;
+    QRadioButton *trayDelUp;
     QGroupBox *robotTorsoGroupBox;
     QCheckBox *robotTorsoCheckBox;
     QGroupBox *TorsoGroupBox;
@@ -1906,22 +1908,28 @@ public:
         UserLocGroupBox_6->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         robotTrayCheckBox = new QCheckBox(UserLocGroupBox_6);
         robotTrayCheckBox->setObjectName(QString::fromUtf8("robotTrayCheckBox"));
-        robotTrayCheckBox->setGeometry(QRect(10, 10, 131, 23));
+        robotTrayCheckBox->setGeometry(QRect(10, 10, 101, 23));
         robotTrayGroupBox = new QGroupBox(UserLocGroupBox_6);
         robotTrayGroupBox->setObjectName(QString::fromUtf8("robotTrayGroupBox"));
-        robotTrayGroupBox->setGeometry(QRect(160, 0, 431, 31));
-        trayRaiseRadioButton = new QRadioButton(robotTrayGroupBox);
-        trayRaiseRadioButton->setObjectName(QString::fromUtf8("trayRaiseRadioButton"));
-        trayRaiseRadioButton->setGeometry(QRect(10, 10, 99, 21));
-        trayLowerRadioButton = new QRadioButton(robotTrayGroupBox);
-        trayLowerRadioButton->setObjectName(QString::fromUtf8("trayLowerRadioButton"));
-        trayLowerRadioButton->setGeometry(QRect(80, 10, 121, 21));
+        robotTrayGroupBox->setGeometry(QRect(110, 0, 481, 31));
+        trayDispDown = new QRadioButton(robotTrayGroupBox);
+        trayDispDown->setObjectName(QString::fromUtf8("trayDispDown"));
+        trayDispDown->setGeometry(QRect(250, 10, 91, 21));
+        trayDelDown = new QRadioButton(robotTrayGroupBox);
+        trayDelDown->setObjectName(QString::fromUtf8("trayDelDown"));
+        trayDelDown->setGeometry(QRect(80, 10, 91, 21));
         trayWaitCheckBox = new QCheckBox(robotTrayGroupBox);
         trayWaitCheckBox->setObjectName(QString::fromUtf8("trayWaitCheckBox"));
-        trayWaitCheckBox->setGeometry(QRect(360, 10, 61, 23));
-        trayStoreRadioButton = new QRadioButton(robotTrayGroupBox);
-        trayStoreRadioButton->setObjectName(QString::fromUtf8("trayStoreRadioButton"));
-        trayStoreRadioButton->setGeometry(QRect(210, 10, 101, 21));
+        trayWaitCheckBox->setGeometry(QRect(410, 10, 61, 23));
+        trayStore = new QRadioButton(robotTrayGroupBox);
+        trayStore->setObjectName(QString::fromUtf8("trayStore"));
+        trayStore->setGeometry(QRect(340, 10, 61, 21));
+        trayDispUp = new QRadioButton(robotTrayGroupBox);
+        trayDispUp->setObjectName(QString::fromUtf8("trayDispUp"));
+        trayDispUp->setGeometry(QRect(170, 10, 71, 21));
+        trayDelUp = new QRadioButton(robotTrayGroupBox);
+        trayDelUp->setObjectName(QString::fromUtf8("trayDelUp"));
+        trayDelUp->setGeometry(QRect(0, 10, 71, 21));
         robotTorsoGroupBox = new QGroupBox(tab_6);
         robotTorsoGroupBox->setObjectName(QString::fromUtf8("robotTorsoGroupBox"));
         robotTorsoGroupBox->setGeometry(QRect(0, 100, 601, 51));
@@ -2731,10 +2739,12 @@ public:
         label_15->setText(QApplication::translate("MainWindow", "Orientation", 0, QApplication::UnicodeUTF8));
         robotTrayCheckBox->setText(QApplication::translate("MainWindow", "Robot Tray", 0, QApplication::UnicodeUTF8));
         robotTrayGroupBox->setTitle(QString());
-        trayRaiseRadioButton->setText(QApplication::translate("MainWindow", "Raise", 0, QApplication::UnicodeUTF8));
-        trayLowerRadioButton->setText(QApplication::translate("MainWindow", "Intermediate", 0, QApplication::UnicodeUTF8));
+        trayDispDown->setText(QApplication::translate("MainWindow", "Disp.Down", 0, QApplication::UnicodeUTF8));
+        trayDelDown->setText(QApplication::translate("MainWindow", "Del.Down", 0, QApplication::UnicodeUTF8));
         trayWaitCheckBox->setText(QApplication::translate("MainWindow", "Wait  ", 0, QApplication::UnicodeUTF8));
-        trayStoreRadioButton->setText(QApplication::translate("MainWindow", "Store", 0, QApplication::UnicodeUTF8));
+        trayStore->setText(QApplication::translate("MainWindow", "Store", 0, QApplication::UnicodeUTF8));
+        trayDispUp->setText(QApplication::translate("MainWindow", "Disp.Up", 0, QApplication::UnicodeUTF8));
+        trayDelUp->setText(QApplication::translate("MainWindow", "Del.Up", 0, QApplication::UnicodeUTF8));
         robotTorsoCheckBox->setText(QApplication::translate("MainWindow", "Robot Torso", 0, QApplication::UnicodeUTF8));
         TorsoGroupBox->setTitle(QString());
         TorsoBFGroupBox->setTitle(QString());

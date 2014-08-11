@@ -159,10 +159,10 @@ CMakeFiles/human_tracker.dir/src/Tracker.cpp.o
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/HumanLocations.h
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/TrackedHuman.h
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/TrackedHumans.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
  /opt/ros/groovy/include/XmlRpcDecl.h
  /opt/ros/groovy/include/XmlRpcValue.h
  /opt/ros/groovy/include/geometry_msgs/Point.h
@@ -270,10 +270,10 @@ CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/HumanLocations.h
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/TrackedHuman.h
  /home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include/accompany_uva_msg/TrackedHumans.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
- /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Detection.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/DetectionArray.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Mask.h
+ /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include/cob_people_detection_msgs/Rect.h
  /opt/ros/groovy/include/XmlRpcDecl.h
  /opt/ros/groovy/include/XmlRpcValue.h
  /opt/ros/groovy/include/geometry_msgs/Point.h

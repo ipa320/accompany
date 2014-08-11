@@ -1965,21 +1965,33 @@ void MainWindow::on_addActionButton_clicked()
        actiontext = "move tray on " + ui->robotComboBox->currentText() + " to ";
 
 
-       if (ui->trayRaiseRadioButton->isChecked())
+       if (ui->trayDelUp->isChecked())
        {
-            actiontext+="Raised";
+            actiontext+="DeliverUp";
             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",raised";
        }
 
-       if (ui->trayLowerRadioButton->isChecked())
+       if (ui->trayDelDown->isChecked())
        {
-            actiontext+="Intermediate";
+            actiontext+="DeliverDown";
             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",intermediate";
        }
 
-       if (ui->trayStoreRadioButton->isChecked())
+       if (ui->trayDispUp->isChecked())
        {
-             actiontext+="Stored";
+             actiontext+="DisplayUp";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",displayup";
+       }
+
+       if (ui->trayDispDown->isChecked())
+       {
+             actiontext+="DisplayDown";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",displaydown";
+       }
+
+       if (ui->trayStore->isChecked())
+       {
+             actiontext+="StoreTray";
              action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",lowered";
        }
 
@@ -2019,8 +2031,15 @@ void MainWindow::on_addActionButton_clicked()
        height.setNum(ui->armHeightSpinBox->value());
 
        actiontext = "arm to " + ui->armComboBox->currentText() + " height " + height ;
-       action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",trayToTable," + height;
 
+       if (ui->armComboBox->currentText().contains("vase"))
+       {
+          action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",vaseToTray," + height;
+       }
+       else
+       {
+            action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",trayToTable," + height;
+       }
        if (ui->armWaitCheckBox->isChecked())
        {
             actiontext+=" and wait for completion";
@@ -3609,9 +3628,11 @@ void MainWindow::resetGui()
      }
 
      ui->robotComboBox->setCurrentIndex(actual);
-     ui->trayRaiseRadioButton->setChecked(false);
-     ui->trayLowerRadioButton->setChecked(true);
-     ui->trayStoreRadioButton->setChecked(false);
+     ui->trayDelUp->setChecked(false);
+     ui->trayDelDown->setChecked(true);
+     ui->trayStore->setChecked(false);
+     ui->trayDispDown->setChecked(false);
+     ui->trayDispUp->setChecked(false);
      ui->robotTrayGroupBox->setEnabled(false);
 
 
@@ -3630,6 +3651,7 @@ void MainWindow::resetGui()
 
      ui->robotArmGroupBox->setEnabled(false);
      ui->armComboBox->addItem("Grasp from tray, place on table");
+     ui->armComboBox->addItem("Grasp vase from shelf, place on tray");
      ui->armHeightSpinBox->setValue(0.45);
      ui->armWaitCheckBox->setChecked(true);
 
@@ -3649,6 +3671,11 @@ void MainWindow::resetGui()
      ui->colourComboBox->addItem("yellow");
      ui->colourComboBox->addItem("blue");
      ui->colourComboBox->addItem("white");
+     ui->colourComboBox->addItem("flashing red");
+     ui->colourComboBox->addItem("flashing green");
+     ui->colourComboBox->addItem("flashing yellow");
+     ui->colourComboBox->addItem("flashing blue");
+     ui->colourComboBox->addItem("flashing white");
 
       ui->colourGroupBox->setEnabled(false);
 

@@ -66,7 +66,7 @@ Tracker::Tracker(const ros::Publisher& trackedHumansPub,
   const double oc[]={2,0,
                      0,2};
   obsCovariance=vnl_matrix<double>(oc,2,2);
-  coordFrame="";// set coordinate frame of HumanDetections to unkown
+  coordFrame="";// set coordinate frame of HumanDetections to unknown
   trackerCount=0;
   robot=NULL;
 }
@@ -460,19 +460,19 @@ void Tracker::publishTracks()
   
   for (unsigned i=0;i<tracks.size();i++)
   {
-    trackedHuman.identity=IDToName::unkown;
+    trackedHuman.identity=IDToName::unknown;
     trackedHuman.specialFlag=0;
     if (tracks[i].matchCount>=minMatchCount) // only tracks with proper match count
     {
       tracks[i].writeMessage(trackedHuman);
       string name=idToName.getIDName(tracks[i].getID());
-      if (trackedHuman.identity.compare(IDToName::unkown)==0)
+      //if (trackedHuman.identity.compare(IDToName::unknown)==0)
         trackedHuman.identity=name;
       trackedHumans.trackedHumans.push_back(trackedHuman);
     }
   }
   trackedHumansPub.publish(trackedHumans);
-  markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualisation
+  markerArrayPub.publish(msgToMarkerArray.toMarkerArray(trackedHumans,"trackedHumans")); // publish visualization
   
 }
 

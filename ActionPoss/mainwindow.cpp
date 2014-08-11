@@ -337,7 +337,7 @@ void MainWindow::fillDisplayArea()
     ui->tableWidget->clear();
 
     QStringList m_TableHeader;
-    m_TableHeader<<"Id"<<"Text"<<"Phrase"<<"Threshold"<<"Predicate"<<"Value";
+    m_TableHeader<<"Id"<<"Text"<<"Phrase"<<"Likelihood"<<"Predicate"<<"Value";
 
     ui->tableWidget->setHorizontalHeaderLabels(m_TableHeader);
 
