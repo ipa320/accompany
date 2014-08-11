@@ -20,6 +20,9 @@ rospy.init_node('my_node_name')
 
 local_costmap_dynamic_reconfigure_client = dynamic_reconfigure.client.Client("/local_costmap_node/costmap")
 
+p18_troyes= [-0.28245383501052856, -0.818909227848053, 1.8353912830352783, 1.3951565027236938, -0.49456751346588135, 0.18976472318172455, 0.6043481826782227]
+p19_troyes= [-0.5147042870521545, -1.614356517791748, 1.911279559135437, 0.2446887046098709, -0.7736456990242004, 0.6056444644927979, 1.1150140762329102]
+
 p21_troyes= [-0.0701594352722168, -1.4082157611846924, 1.6199039220809937, 1.0523432493209839, -0.4672948718070984, 0.3977415859699249, 0.9647517204284668]
 p22_troyes= [2.2882933616638184, -1.2500675916671753, 2.0379726886749268, 1.8452539443969727, -0.4981473386287689, 1.5209976434707642, 0.8092219233512878]
 
@@ -48,7 +51,6 @@ p27_troyes = [2.8876755237579346, -0.6779902577400208, 2.4924793243408203, 0.272
 p28_troyes = [2.912111282348633, -0.8155454993247986, 1.6875264644622803, 0.6187270879745483, 0.10598322749137878, 0.9390687346458435, 1.34400475025177]
 
 p29_troyes =[2.946211814880371, -0.9938393235206604, 1.6254980564117432, 1.05857515335083, -3.062791109085083, -0.2328193485736847, 1.3772428035736084]
-rospy.sleep(5)
 
 p30_troyes =[2.946011781692505, -0.9943867921829224, 1.625508189201355, 0.17798008024692535, -3.062870979309082, -1.1878408193588257, 1.595353126525879]
 p31_troyes =[2.946017026901245, -0.9943814873695374, 1.625508189201355, 1.0266671180725098, -3.062870979309082, -0.3526380956172943, 1.595353126525879]
@@ -64,7 +66,7 @@ p35_troyes =[2.5616562366485596, -0.8061017394065857, 1.6321569681167603, 0.6079
 #- Rotation: in Quaternion [0.000, 0.000, 0.757, 0.654]
 #            in RPY [0.000, -0.000, 1.716]
 
-
+rospy.sleep(10)
 # adjust base footprint
 local_config = local_costmap_dynamic_reconfigure_client.get_configuration(5.0)
 local_costmap_dynamic_reconfigure_client.update_configuration({"footprint": "[[0.45,0.37],[0.45,-0.37],[-0.35,-0.37],[-0.35,0.37]]"})
@@ -78,20 +80,7 @@ except rospy.ServiceException, e:
 
 sss.move("base", [2.293, -2.388, 1.717],True,mode='linear')
 sss.move("base", [2.293, -2.746, 1.717],True,mode='linear')
-#sss.move("base", [2.293, -2.829, 1.717],True,mode='linear')
-sss.move("base", [2.293, -2.765, 1.717],True,mode='linear')
-
-
-#sss.move("torso", [[-0.20,0.00,-0.00]])
-handle_arm = sss.move("arm",[p26_troyes],True)
-handle_arm = sss.move("arm",[p27_troyes],True)
-
-
-#handle_arm = sss.move("arm",[p32_troyes],True)
-sss.move("sdh","cylopen",True)
-handle_arm = sss.move("arm",[p33_troyes],True)
-handle_arm = sss.move("arm",[p35_troyes],True)
-
+sss.move("base", [2.293, -2.755, 1.717],True,mode='linear')
 
 # reset footprint
 if local_config["footprint"] != None:
@@ -108,6 +97,20 @@ except rospy.ServiceException, e:
 	print "Service call to /update_footprint failed: %s" % e
 
 
+
+sss.move("torso", [[-0.15,0.00,-0.00]])
+handle_arm = sss.move("arm",[p26_troyes],True)
+handle_arm = sss.move("arm",[p27_troyes],True)
+
+
+#handle_arm = sss.move("arm",[p32_troyes],True)
+sss.move("sdh","cylopen",True)
+handle_arm = sss.move("arm",[p33_troyes],True)
+handle_arm = sss.move("arm",[p35_troyes],True)
+
+
+
+
 #sss.move("base", [2.293, -2.829, 1.717],True,mode='linear')
 #handle_arm = sss.move("arm",[p31_troyes],True)
 
@@ -122,34 +125,40 @@ except rospy.ServiceException, e:
 
 sss.move("sdh","cylclosed",True)
 #sss.move("torso","home")
+sss.move("torso", "home")
 sss.move("base", [2.293, -2.934, 1.721],True,mode='linear')
 sss.move("base", [2.293, -2.746, 1.721],True,mode='linear')
 sss.move("base", [2.293, -2.388, 1.721],True,mode='linear')
-#sss.move("base", [1.724, -1.110, -3.025],True,mode='linear')
+
 
 
 
 grasp  = [-1.023739218711853, -1.0562658309936523, 2.3108131885528564, 1.5178372859954834, -0.08975735306739807, 1.0026973485946655, 0.1390783041715622]
 grasp2 = [-1.0235339403152466, -1.0605928897857666, 2.1852147579193115, 1.5356091260910034, -0.08200012892484665, 1.0033462047576904, 0.1387641429901123]
 grasp3 = [-1.0245234966278076, -1.0662885904312134, 2.245345115661621, 1.543674111366272, -0.07828371226787567, 1.0038584470748901, 0.138010174036026]
-
+grasp4 = [-1.0084997415542603, -0.9687349796295166, 2.296692132949829, 1.5443871021270752, -0.18893949687480927, 1.102556824684143, 0.1598965972661972]
 
 p24_troyes = [2.9579718112945557, -1.0143165588378906, 1.626341700553894, 1.0011065006256104, -3.06079363822937, -0.39361539483070374, 1.375096082687378]
 
 ##good
-rospy.sleep(1)
+#rospy.sleep(1)
 sss.move("tray", "deliverup")
 
-handle_arm = sss.move("arm",[p24_troyes],True)
-handle_arm = sss.move("arm",["intermediateback"],True)
-handle_arm = sss.move("arm",["intermediatefront", grasp3],True)
+handle_arm = sss.move("arm",[p24_troyes,"intermediateback","intermediatefront", grasp4],True)
+#handle_arm = sss.move("arm",["intermediateback"],True)
+#handle_arm = sss.move("arm",["intermediatefront", grasp3],True)
 
 sss.move("sdh","cylopen")
 
-handle_arm = sss.move("arm",[grasp3,"intermediatefront"],True)
+handle_arm = sss.move("arm",[grasp4,"intermediatefront",p22_troyes,"folded"],False)
+rospy.sleep(4)
 sss.move("sdh","home")
-handle_arm = sss.move("arm",["intermediatefront","intermediateback"],True)
-handle_arm = sss.move("arm",["folded"],True)
+
+#rospy.sleep(1)
+#handle_arm = sss.move("arm",[p22_troyes,"folded"],True)
+
+#handle_arm = sss.move("arm",["intermediatefront","intermediateback"],True)
+#handle_arm = sss.move("arm",["folded"],True)
 ##
 #sss.move("base", [1.724, -1.110, -3.025],True,mode='linear')
 

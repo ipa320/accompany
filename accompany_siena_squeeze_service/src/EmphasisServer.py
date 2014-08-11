@@ -42,8 +42,8 @@ def handle_emphasis_request(req):
 	#little modification
 	print "move now"
 	#sss.move("base",[2.750,-0.449,2.325],False)
-	sss.move("base",[1.50,-1.8,1.711],False)
-	
+	#sss.move("base",[1.50,-1.8,1.711],False)
+	sss.move("base",[2.731,-0.849,1.795],False)
 	return 1
 
 def emphasis_server():

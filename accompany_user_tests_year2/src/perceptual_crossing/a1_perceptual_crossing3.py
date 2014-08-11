@@ -82,6 +82,7 @@ class GoToUser(smach.State):
 		#sss.set_light("yellow")
 		#sss.move("torso", [[-0.1,-0.2,-0.15]], True)
 		#handle_base.wait()
+		handle_base=sss.move("base",[0.52, -1.202, -1.357],False)
 		sss.set_light("green")
 		#rospy.sleep(3)
 		#sss.move("torso", "home", True)	
@@ -99,9 +100,9 @@ class FollowUser(smach.State):
 		self.last_user_position = [0.0,0.0]
 
 		# tracking area (only humans in this area are considered)
-		self.min_x = 2.0
-		self.max_x = 5.0
-		self.min_y = -2.0
+		self.min_x = -0.3
+		self.max_x = 2.0
+		self.min_y = -2.7
 		self.max_y = -1.0
 		
 	def callback(self,msg):
@@ -181,7 +182,7 @@ class FollowUser(smach.State):
 					print "robot gets the position:", [rx, ry, theta]
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False, mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
-					if self.user_position.point.x > 2 and self.user_position.point.y < -1.7:
+					if self.user_position.point.x > 0 and self.user_position.point.y < -2.5:
 						print "finished walk with me state"
 						break
 					#else:
@@ -207,7 +208,7 @@ class LetUserEnterDoor(smach.State):
 
 		# let user enter door first
 		sss.set_light("green")
-		handle_base=sss.move("base",[3.655, -2.639, -0.419],False)
+		handle_base=sss.move("base",[1.214, -2.384, -1.982],False)
 		#sss.move("torso", [[0.0,-0.2,0.0]], False)
 		handle_base.wait()
 		#rospy.sleep(2)
