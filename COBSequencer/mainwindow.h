@@ -145,6 +145,8 @@ private slots:
     void on_playSoundCheckBox_toggled(bool checked);
     void on_robotSaveMemoryCheckBox_toggled(bool checked);
     void on_UHcupLevelCheckBox_toggled(bool checked);
+
+    void on_systemCallCheckbox_toggled(bool checked);
 };
 
 #endif // MAINWINDOW_H

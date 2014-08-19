@@ -1609,7 +1609,8 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
         // run a script
         if (cname == "systemcall")
         {
-            system();
+            //std::cout << "pname: " << pname.toStdString() << std::endl;
+            system(pname.toStdString().c_str());
         }
 
         // -----------

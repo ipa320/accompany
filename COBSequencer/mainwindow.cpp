@@ -1892,6 +1892,18 @@ void MainWindow::on_robotTrayCheckBox_toggled(bool checked)
          }
 }
 
+void MainWindow::on_systemCallCheckbox_toggled(bool checked)
+{
+         if (checked)
+         {
+            actionCount++;
+         }
+         else
+         {
+             actionCount--;
+         }
+}
+
 void MainWindow::on_addActionButton_clicked()
 {
     // add new actions
@@ -2338,6 +2350,14 @@ void MainWindow::on_addActionButton_clicked()
     }
     //------------------------------------------
 
+
+    //systemcall,3,~/git/accompany/accompany_user_tests_year2/src/walkTogetherToDoorClient.py
+    if (ui->systemCallCheckbox->isChecked())
+    {
+        actiontext = "Make system call to " + ui->systemCallText->currentText();
+        action = "systemcall," + ui->robotComboBox->currentText().section("::", 1, 1) + "," + ui->systemCallText->currentText();
+        updateActionDB("systemcall", sequenceName, actiontext, action);
+    }
 
     if (ui->robotGUI->isChecked())
     {

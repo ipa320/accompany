@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Mon Aug 18 18:06:28 2014
+** Created: Tue Aug 19 14:44:08 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -10,6 +10,7 @@
 #ifndef UI_MAINWINDOW_H
 #define UI_MAINWINDOW_H
 
+#include <QtCore/QLocale>
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
@@ -566,6 +567,9 @@ public:
     QDoubleSpinBox *apSpinBox;
     QComboBox *apComboBox;
     QLabel *label_29;
+    QWidget *tab_12;
+    QComboBox *systemCallText;
+    QCheckBox *systemCallCheckbox;
     QLabel *seqLabel_4;
     QGroupBox *sensorActiveGroupBox;
     QCheckBox *sensorActiveCheckBox;
@@ -1873,7 +1877,7 @@ public:
         robotComboBox->setGeometry(QRect(140, 10, 241, 25));
         SiennaGUI = new QTabWidget(actionGroupBox);
         SiennaGUI->setObjectName(QString::fromUtf8("SiennaGUI"));
-        SiennaGUI->setGeometry(QRect(10, 60, 621, 291));
+        SiennaGUI->setGeometry(QRect(10, 60, 641, 291));
         tab_6 = new QWidget();
         tab_6->setObjectName(QString::fromUtf8("tab_6"));
         UserLocGroupBox_5 = new QGroupBox(tab_6);
@@ -2259,6 +2263,18 @@ public:
         label_29->setObjectName(QString::fromUtf8("label_29"));
         label_29->setGeometry(QRect(90, 10, 111, 20));
         SiennaGUI->addTab(tab_11, QString());
+        tab_12 = new QWidget();
+        tab_12->setObjectName(QString::fromUtf8("tab_12"));
+        tab_12->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+        systemCallText = new QComboBox(tab_12);
+        systemCallText->setObjectName(QString::fromUtf8("systemCallText"));
+        systemCallText->setGeometry(QRect(10, 80, 621, 31));
+        systemCallText->setEditable(true);
+        systemCallCheckbox = new QCheckBox(tab_12);
+        systemCallCheckbox->setObjectName(QString::fromUtf8("systemCallCheckbox"));
+        systemCallCheckbox->setGeometry(QRect(20, 50, 151, 22));
+        systemCallCheckbox->setChecked(false);
+        SiennaGUI->addTab(tab_12, QString());
         seqLabel_4 = new QLabel(centralWidget);
         seqLabel_4->setObjectName(QString::fromUtf8("seqLabel_4"));
         seqLabel_4->setGeometry(QRect(720, 390, 151, 16));
@@ -2813,6 +2829,15 @@ public:
         label_28->setText(QApplication::translate("MainWindow", "Set Likelyhood to", 0, QApplication::UnicodeUTF8));
         label_29->setText(QApplication::translate("MainWindow", "Action Possibility", 0, QApplication::UnicodeUTF8));
         SiennaGUI->setTabText(SiennaGUI->indexOf(tab_11), QApplication::translate("MainWindow", "Sienna GUI", 0, QApplication::UnicodeUTF8));
+        systemCallText->clear();
+        systemCallText->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToDoorClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToKitchenClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToSofaClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/take_object_client.py", 0, QApplication::UnicodeUTF8)
+        );
+        systemCallCheckbox->setText(QApplication::translate("MainWindow", "Make System Call", 0, QApplication::UnicodeUTF8));
+        SiennaGUI->setTabText(SiennaGUI->indexOf(tab_12), QApplication::translate("MainWindow", "System Call", 0, QApplication::UnicodeUTF8));
         seqLabel_4->setText(QApplication::translate("MainWindow", "RULES and ACTIONS", 0, QApplication::UnicodeUTF8));
         sensorActiveGroupBox->setTitle(QString());
         sensorActiveCheckBox->setText(QApplication::translate("MainWindow", "Sensor Active Since (secs)", 0, QApplication::UnicodeUTF8));
