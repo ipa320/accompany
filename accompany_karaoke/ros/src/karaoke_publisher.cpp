@@ -58,13 +58,16 @@ void KaraokePublisher::do_publish()
 	// publishing rate
 	ros::Rate loop_rate(10);
 
-  	string DBHOST="tcp://127.0.0.1:3306";
+  //	string DBHOST="tcp://127.0.0.1:3306";
+  //	string USER="accompanyUser";
+  //	string PASSWORD="accompany";
+  //	string DATABASE="AccompanyTroyes";
+
+
+	string DBHOST="tcp://10.0.1.181:3306";
   	string USER="accompanyUser";
   	string PASSWORD="accompany";
   	string DATABASE="AccompanyTroyes";
-
-
-
 
 	
 	/**
@@ -78,14 +81,30 @@ void KaraokePublisher::do_publish()
 		/**
 		 * This is a message object. You stuff it with data, and then publish it.
 		 */
+		// search my.cnf in the server PC for example in one of this folder
+		//    /etc/my.cnf
+		//    /etc/mysql/my.cnf
+		//    $MYSQL_HOME/my.cnf
+		//    [datadir]/my.cnf
+		//    ~/.my.cnf
+		// and comment skip-networking and bind-address = 127.0.0.1 by using #
+		// restart your database as explain below
 
-
+		//to have mysql working do 
+		//grant mysql> CREATE USER 'monty'@'%' IDENTIFIED BY 'some_pass';
+        //mysql> GRANT ALL PRIVILEGES ON *.* TO 'monty'@'%'
+        //->     WITH GRANT OPTION;
+		//restart the mysqlserver : sudo service mysql restart
+	
 		// Load a music to play
+		
 		sf::Music music;
 		if (!music.OpenFromFile("nice_music.wav"))
 		{
 			cerr << "unable to read the music !" << endl;
 		}
+
+
 		// Play the music
 		music.Play();
 		//sleep(5);
@@ -135,7 +154,10 @@ void KaraokePublisher::do_publish()
 				string_publisher_.publish(msg);
 				sleep(seconds);
 				//if database not do break
-
+				
+				int i;
+				//for(i=0; i<seconds; i=i+1)
+				//{
 				Driver *driver;
 				Connection *con;
 				Statement *stmt;
@@ -174,12 +196,14 @@ void KaraokePublisher::do_publish()
 
    				delete result;
    				delete stmt;
-    				con->close();
-    				delete con;
-				
+    			con->close();
+    			delete con;
+				//sleep(5);
 
         		}
+        		//}
                 	fichier.close();  // on ferme le fichier
+              
         	}
         	else  // sinon
                 	cerr << "unable to read the file !" << endl;

@@ -14,7 +14,7 @@ if __name__ == '__main__':
 	goal = TakeObjectShelfGoal()	
 	# Fill in the goal here
 	client.send_goal(goal)
-	if not client.wait_for_result(rospy.Duration.from_sec(90.0)):
+	if not client.wait_for_result():
 		print "not finished within time"
 	print "result=", client.get_state()
 

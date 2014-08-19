@@ -5,8 +5,10 @@ roslib.load_manifest('accompany_siena_squeeze_service')
 import rospy;
 import sys
 import os
+import math
 
 from accompany_siena_squeeze_service.srv import *
+import MySQLdb
 
 
 from simple_script_server import *
@@ -19,9 +21,16 @@ DEFAULT_DEFAULT_SPEED=0.25
 MAX_VEL=0.51
 MIN_VEL=0.05
 client = dynamic_reconfigure.client.Client("/move_base/DWAPlannerROS")
+db = MySQLdb.connect(host="10.0.1.207",
+					user="accompanyUser",
+					passwd="accompany",
+					db="AccompanyTroyes")
+cur = db.cursor()
+
 
 def handle_emphasis_request(req):
 
+	cur.execute("""UPDATE Sensors SET value = 'True' WHERE sensorId = 592""")
 	#print "min vel: %s"%min_vel
 	#print "max_vel: %s"%max_vel
 	val=float(req.action)/2.0
@@ -35,7 +44,8 @@ def handle_emphasis_request(req):
 		val=max_vel
 	print "Squeeze value: %s <--> Robot speed value: %f" % (req.action,val)	
 
-	params={'max_rot_vel':val, 'max_trans_vel':val,'max_vel_x':val,'max_vel_y':val,'min_vel_x':-val,'min_vel_y':-val}
+	val2 = math.sqrt(2)*val
+	params={'max_rot_vel':val2, 'max_trans_vel':val2,'max_vel_x':val,'max_vel_y':val,'min_vel_x':-val,'min_vel_y':-val}
 	print "update config"
 	config=client.update_configuration(params);
 	
@@ -43,7 +53,10 @@ def handle_emphasis_request(req):
 	print "move now"
 	#sss.move("base",[2.750,-0.449,2.325],False)
 	#sss.move("base",[1.50,-1.8,1.711],False)
-	sss.move("base",[2.731,-0.849,1.795],False)
+	#sss.set_light("flashing yellow")
+	#sss.move("base",[2.731,-0.849,1.795],False)
+	
+	
 	return 1
 
 def emphasis_server():
