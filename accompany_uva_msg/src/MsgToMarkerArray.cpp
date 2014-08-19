@@ -137,9 +137,11 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
     else
       markerArray.markers[ind].color=red;
     stringstream ss;
-    ss<<msg.trackedHumans[i].id;
-    if (msg.trackedHumans[i].identity.size()>0)
-      ss<<","<<msg.trackedHumans[i].identity;
+    //can show the ID
+    //ss<<msg.trackedHumans[i].id;
+    if (msg.trackedHumans[i].identity.size()>0 && msg.trackedHumans[i].identity.compare("unknown")!=0 && msg.trackedHumans[i].identity.compare("Unknown")!=0)
+    	ss<<msg.trackedHumans[i].identity;
+
     markerArray.markers[ind].text=ss.str();
     markerArray.markers[ind].lifetime = ros::Duration(10);
     ind++;
@@ -169,30 +171,27 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
     // requested size in previous call
     unsigned prevSize=nameToSize[name];
     
-    // reduce length after deleting in previous step
-    unsigned reduce=prevSize;
-    if (size>reduce)
-      reduce=size;
-    if (reduce<it->second.markers.size())
-      it->second.markers.resize(reduce);
-
-    // delete unused markers
-    for (unsigned i=size;i<it->second.markers.size();i++)
-      it->second.markers[i].action = visualization_msgs::Marker::DELETE;
+    // increase array size if necessary
+    if (size >= prevSize)
+    	it->second.markers.resize(size);
 
     // add markers
-    for (unsigned i=it->second.markers.size();i<size;i++)
+    for (unsigned i=0;i<prevSize;i++)
     {
-      visualization_msgs::Marker marker;
-      marker.ns = name;
-      marker.id = i;
-      marker.action = visualization_msgs::Marker::ADD;
-      it->second.markers.push_back(marker);
+      it->second.markers[i].ns = name;
+      it->second.markers[i].id = i;
+      it->second.markers[i].action = visualization_msgs::Marker::MODIFY;
+    }
+    for (unsigned i=prevSize;i<size;i++)
+    {
+      it->second.markers[i].ns = name;
+      it->second.markers[i].id = i;
+      it->second.markers[i].action = visualization_msgs::Marker::ADD;
     }
 
-    // reactivate previously deleted markers
-    for (unsigned i=prevSize;i<size;i++)
-      it->second.markers[i].action=visualization_msgs::Marker::ADD;
+    // delete unused markers
+    for (unsigned i=size;i<prevSize;i++)
+      it->second.markers[i].action = visualization_msgs::Marker::DELETE;
   }
   nameToSize[name]=size;
   return it->second;

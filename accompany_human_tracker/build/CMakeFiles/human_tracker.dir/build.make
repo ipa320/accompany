@@ -65,7 +65,7 @@ CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/geom
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/message_filters/package.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/tf/package.xml
-CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/manifest.xml
+CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/manifest.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/visualization_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/manifest.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/catkin/package.xml
@@ -89,7 +89,7 @@ CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/ross
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_utils/manifest.xml
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/accompany_static_camera_localisation/manifest.xml
-CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/generated
+CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/generated
 CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/accompany_human_tracker/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/human_tracker.dir/src/human_tracker.cpp.o"
@@ -131,7 +131,7 @@ CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/geometry_m
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/message_filters/package.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/tf/package.xml
-CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/manifest.xml
+CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/manifest.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/visualization_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/manifest.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/catkin/package.xml
@@ -155,7 +155,7 @@ CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/rosservice
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_utils/manifest.xml
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/accompany_static_camera_localisation/manifest.xml
-CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/generated
+CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/generated
 CMakeFiles/human_tracker.dir/src/Tracker.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/accompany_human_tracker/build/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/human_tracker.dir/src/Tracker.cpp.o"
@@ -197,7 +197,7 @@ CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/geometry_msg
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/message_filters/package.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/tf/package.xml
-CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/manifest.xml
+CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/manifest.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/visualization_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/manifest.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/catkin/package.xml
@@ -221,7 +221,7 @@ CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/rosservice/p
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/accompany_uva_utils/manifest.xml
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/accompany_static_camera_localisation/manifest.xml
-CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/generated
+CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/generated
 CMakeFiles/human_tracker.dir/src/Track.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/accompany_human_tracker/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/human_tracker.dir/src/Track.cpp.o"
@@ -263,7 +263,7 @@ CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/ge
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/message_filters/package.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/tf/package.xml
-CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/manifest.xml
+CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/manifest.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/visualization_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/manifest.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/catkin/package.xml
@@ -287,7 +287,7 @@ CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/ro
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/accompany_uva_utils/manifest.xml
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/accompany_static_camera_localisation/manifest.xml
-CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/generated
+CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/generated
 CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/accompany_human_tracker/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/human_tracker.dir/src/DataAssociation.cpp.o"
@@ -329,7 +329,7 @@ CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/geometry_
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/message_filters/package.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/sensor_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/tf/package.xml
-CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/manifest.xml
+CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/manifest.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/visualization_msgs/package.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/manifest.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/catkin/package.xml
@@ -353,7 +353,7 @@ CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/rosservic
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /opt/ros/groovy/share/dynamic_reconfigure/package.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/accompany_uva_utils/manifest.xml
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/accompany_static_camera_localisation/manifest.xml
-CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/generated
+CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/generated
 CMakeFiles/human_tracker.dir/src/IDToName.cpp.o: /home/accompany/git/accompany/accompany_uva_msg/msg_gen/generated
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/accompany/git/accompany/accompany_human_tracker/build/CMakeFiles $(CMAKE_PROGRESS_5)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/human_tracker.dir/src/IDToName.cpp.o"

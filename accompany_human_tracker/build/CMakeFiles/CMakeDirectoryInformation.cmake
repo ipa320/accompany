@@ -11,7 +11,7 @@ SET(CMAKE_FORCE_UNIX_PATHS 1)
 # The C and CXX include file search paths:
 SET(CMAKE_C_INCLUDE_PATH
   "../include"
-  "/home/accompany/git/accompany/cob_people_detection_msgs/msg_gen/cpp/include"
+  "/home/accompany/git/care-o-bot/cob_people_detection_msgs/msg_gen/cpp/include"
   "/home/accompany/git/accompany/accompany_uva_msg/include"
   "/home/accompany/git/accompany/accompany_uva_msg/msg_gen/cpp/include"
   "/home/accompany/git/accompany/accompany_static_camera_localisation/include"

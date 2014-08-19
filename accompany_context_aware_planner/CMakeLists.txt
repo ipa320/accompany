@@ -49,6 +49,8 @@ rosbuild_add_executable(empathicBehaviour ros/src/empathicBehaviour.cpp
 					  ros/src/CobLightControllerClient.cpp
 					  ros/src/CobBaseControllerClient.cpp
 					  ros/src/CobTorsoControllerClient.cpp)
+
+#rosbuild_add_executable(cobLightControllerService ros/src/CobLightControllerService.cpp)
 										  
 #rosbuild_add_executable(test1 ros/src/test.cpp  ros/src/CobLightControllerClient.cpp)
 

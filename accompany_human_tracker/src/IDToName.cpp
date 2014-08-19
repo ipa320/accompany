@@ -4,7 +4,7 @@
 using namespace std;
 
 // static member init
-const char IDToName::unkown[]="unkown";
+const char IDToName::unknown[]="unknown";
 
 void IDToName::setIDName(unsigned id,string name)
 {
@@ -25,7 +25,7 @@ void IDToName::setIDName(unsigned id,string name)
 
 string IDToName::getIDName(unsigned id)
 {
-  string name=IDToName::unkown;
+  string name=IDToName::unknown;
   try
   {
     name=idToName.at(id);
