@@ -38,6 +38,7 @@
 #include <fstream>
 #include <stdio.h>
 #include <SFML/Audio.hpp>
+#include <unistd.h>
 
 /* MySQL Connector/C++ specific headers */
 #include <cppconn/driver.h>
@@ -74,7 +75,7 @@ void callback(const std_msgs::String::ConstPtr& msg)
 	int count = 0;
 	ros::Rate loop_rate(0.5);
 
-  	string DBHOST="tcp://127.0.0.1:3306";
+  	string DBHOST="tcp://10.0.1.207:3306";
   	string USER="accompanyUser";
   	string PASSWORD="accompany";
   	string DATABASE="AccompanyTroyes";
@@ -95,7 +96,24 @@ void callback(const std_msgs::String::ConstPtr& msg)
 		 */
 
 		// Load a music to play
+		Driver *driver;
+		Connection *con;
+		Statement *stmt;
+		ResultSet *result;
+		string sql;
+
+		driver = get_driver_instance();
+ 		con = driver->connect(DBHOST, USER, PASSWORD); // create a database connection using the Driver
+  		con->setAutoCommit(0); // turn off the autocommit
+  		con->setSchema(DATABASE); // select appropriate database schema
+  		stmt = con->createStatement(); // create a statement object
+		sql = "UPDATE Sensors SET value = \'True\' WHERE sensorId = 594";
+  		stmt->executeUpdate(sql);
+		usleep(15000000);
 		sf::Music music;
+		
+		
+		//if (!music.OpenFromFile("Jinglebells.mp3"))
 		if (!music.OpenFromFile("nice_music.wav"))
 		{
 			cerr << "unable to read the music !" << endl;
@@ -125,10 +143,10 @@ void callback(const std_msgs::String::ConstPtr& msg)
 				std::size_t found = ss.str().find(" ");
 				string ligne2;
 				ligne2 = ss.str().substr(found+1);
-				cout << "line :" << ligne2 << endl;
+				//cout << "line :" << ligne2 << endl;
 				msg.data = ligne2;
 				chatter_pub.publish(msg);
-				sleep(seconds);
+				usleep(seconds*1000);
 				//if database not do break
 
 				Driver *driver;
@@ -147,7 +165,7 @@ void callback(const std_msgs::String::ConstPtr& msg)
 				//sql  = "SELECT value FROM Sensors WHERE sensorId = 302";
 				sql = "SELECT * FROM Sensors WHERE sensorId = 302 AND lastStatus = \"On\" and lastUpdate+INTERVAL 60 SECOND >= NOW()";
   				result = stmt->executeQuery(sql);
-				cout << result  << endl;
+				//cout << result  << endl;
 				if (result->next())
   				{
 				
