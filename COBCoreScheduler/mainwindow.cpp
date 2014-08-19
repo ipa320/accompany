@@ -72,6 +72,7 @@ QString rname;
 QString pname;
 QString pname1;
 QString wait;
+QString mname;
 QString dname;
 
 bool debugEnabled;
@@ -1058,6 +1059,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
         pname = str.section(',', 2, 2);
         pname1 = str.section(',', 3, 3);
         wait = str.section(',', 4, 4);
+        mname = str.section(',', 5, 5);
 
         // lock the Sienna GUI if doing anything but sleeping
         QSqlQuery Lockquery(db7);
@@ -1254,7 +1256,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
                         if (runWithROS)
                         {
                             checkStopExecution();
-                            returnRes = robot->setComponentState(cname.toStdString(), "userLocation", blocking);
+                            returnRes = robot->setComponentState(cname.toStdString(), "userLocation", blocking, mname.toStdString());
                             outcome = QString::fromStdString(returnRes);
                         }
 
@@ -1269,7 +1271,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
 
                              qDebug()<<msg;
 
-                             returnRes = robot->setComponentState(cname.toStdString(), pname.toStdString(), blocking);
+                             returnRes = robot->setComponentState(cname.toStdString(), pname.toStdString(), blocking, mname.toStdString());
                              outcome = QString::fromStdString(returnRes);
 
                              if (outcome != "SUCCEEDED")
@@ -1317,7 +1319,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
                             qDebug() << pos[0];
                             qDebug() << pos[1];
                             qDebug() << pos[2];
-                            returnRes = robot->setComponentState(cname.toStdString(), pos, blocking);
+                            returnRes = robot->setComponentState(cname.toStdString(), pos, blocking, mname.toStdString());
                             outcome = QString::fromStdString(returnRes);
                         }
 
@@ -1334,7 +1336,7 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
 
                             qDebug()<<msg;
 
-                            returnRes = robot->setComponentState(cname.toStdString(), pos, blocking);
+                            returnRes = robot->setComponentState(cname.toStdString(), pos, blocking, mname.toStdString());
                             outcome = QString::fromStdString(returnRes);
 
                             if (outcome != "SUCCEEDED")
@@ -1602,6 +1604,12 @@ int MainWindow::executeSequence(QString sequenceName, bool display)
             }
 
             db6.database().commit();
+        }
+
+        // run a script
+        if (cname == "systemcall")
+        {
+            system();
         }
 
         // -----------

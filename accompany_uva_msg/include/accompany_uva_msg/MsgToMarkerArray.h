@@ -14,6 +14,11 @@ class MsgToMarkerArray
 {
  public:
 
+	MsgToMarkerArray()
+	{
+		sequence_counter_ = 0;
+	}
+
    visualization_msgs::MarkerArray &toMarkerArray(const accompany_uva_msg::HumanLocations& msg,
                                                   std::string name="");
    visualization_msgs::MarkerArray &toMarkerArray(const accompany_uva_msg::HumanDetections& msg,
@@ -35,6 +40,8 @@ class MsgToMarkerArray
    std::map<std::string,std_msgs::ColorRGBA> nameToColor;
    std::map<std::string,visualization_msgs::MarkerArray> nameToMarkerArray;
    std::map<std::string,int> nameToSize;
+
+   unsigned int sequence_counter_;
 };
 
 #endif

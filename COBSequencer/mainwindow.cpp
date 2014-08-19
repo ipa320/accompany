@@ -1952,6 +1952,20 @@ void MainWindow::on_addActionButton_clicked()
             actiontext+=" and wait for completion";
             action +=   ",wait";
        }
+       else
+       {
+           action += ",";
+       }
+
+       if (ui->moveLinearCheckBox->isChecked())
+       {
+            actiontext+=" and use mode linear";
+            action +=   ",linear";
+       }
+       else
+       {
+           action += ",";
+       }
 
        updateActionDB("base", sequenceName,actiontext,action);
 
@@ -3676,6 +3690,11 @@ void MainWindow::resetGui()
      ui->colourComboBox->addItem("flashing yellow");
      ui->colourComboBox->addItem("flashing blue");
      ui->colourComboBox->addItem("flashing white");
+     ui->colourComboBox->addItem("breathing red");
+     ui->colourComboBox->addItem("breathing green");
+     ui->colourComboBox->addItem("breathing yellow");
+     ui->colourComboBox->addItem("breathing blue");
+     ui->colourComboBox->addItem("breathing white");
 
       ui->colourGroupBox->setEnabled(false);
 

@@ -457,6 +457,22 @@ void Tracker::publishTracks()
   accompany_uva_msg::TrackedHuman trackedHuman;
   trackedHuman.location.header.stamp=ros::Time::now();
   trackedHuman.location.header.frame_id=coordFrame;
+
+  // hack: for removing bubble at robot
+  double min_dist = 1e10;
+  int index_min_dist = -1;
+  for (unsigned i=0;i<tracks.size();i++)
+  {
+	  if (robot!=NULL)
+	  {
+		double dist=robot->distanceTo(tracks[i]);
+		if (dist < min_dist && dist < 0.8)
+		{
+			min_dist = dist;
+			index_min_dist = i;
+		}
+	  }
+  }
   
   for (unsigned i=0;i<tracks.size();i++)
   {
@@ -468,7 +484,10 @@ void Tracker::publishTracks()
       string name=idToName.getIDName(tracks[i].getID());
       //if (trackedHuman.identity.compare(IDToName::unknown)==0)
         trackedHuman.identity=name;
-      trackedHumans.trackedHumans.push_back(trackedHuman);
+      if (trackedHuman.identity.compare("")==0)
+    	  trackedHuman.identity = "unknown";
+      if (i!=index_min_dist) // hack: condition to remove robot bubble
+        trackedHumans.trackedHumans.push_back(trackedHuman);
     }
   }
   trackedHumansPub.publish(trackedHumans);

@@ -31,7 +31,7 @@ class CareOBot(robot.ROSRobot):
             
         return angle
                 
-    def setComponentState(self, name, value, blocking=True):
+    def setComponentState(self, name, value, blocking=True, mode=''):
         # check if the component has been initialised, and init if it hasn't
         if len(self._ros.getTopics('/%(name)s_controller' % { 'name': name })) == 0:
             self._robInt.initComponent(name)
@@ -40,7 +40,7 @@ class CareOBot(robot.ROSRobot):
         if name == 'arm' and str(value).startswith('trayToTable'):
             return self.unloadTray(str(value).split(':')[1], blocking)
         
-        return super(CareOBot, self).setComponentState(name, value, blocking)
+        return super(CareOBot, self).setComponentState(name, value, blocking, mode)
     
     def play(self, fileName, blocking=True):
         self.executeFunction("play", {
@@ -145,7 +145,7 @@ class ScriptServer(object):
         else:
             func = ScriptServer._specialCases[name]['function']
             mode = ScriptServer._specialCases[name]['mode']
-            
+        
         return self.runFunction(func, 
                                 {
                                    'component_name':name, 

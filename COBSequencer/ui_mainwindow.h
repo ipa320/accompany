@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Tue Jul 1 14:23:25 2014
+** Created: Mon Aug 18 18:06:28 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -462,6 +462,7 @@ public:
     QCheckBox *moveWaitCheckBox;
     QComboBox *moveRobotComboBox;
     QSpinBox *moveRobotSpinBox;
+    QCheckBox *moveLinearCheckBox;
     QLabel *label_15;
     QGroupBox *UserLocGroupBox_6;
     QCheckBox *robotTrayCheckBox;
@@ -1877,7 +1878,7 @@ public:
         tab_6->setObjectName(QString::fromUtf8("tab_6"));
         UserLocGroupBox_5 = new QGroupBox(tab_6);
         UserLocGroupBox_5->setObjectName(QString::fromUtf8("UserLocGroupBox_5"));
-        UserLocGroupBox_5->setGeometry(QRect(0, 0, 601, 51));
+        UserLocGroupBox_5->setGeometry(QRect(0, 0, 611, 51));
         UserLocGroupBox_5->setFont(font);
         UserLocGroupBox_5->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         moveRobotCheckBox = new QCheckBox(UserLocGroupBox_5);
@@ -1888,19 +1889,22 @@ public:
         moveWaitGroupBox->setGeometry(QRect(130, 20, 461, 31));
         moveWaitCheckBox = new QCheckBox(moveWaitGroupBox);
         moveWaitCheckBox->setObjectName(QString::fromUtf8("moveWaitCheckBox"));
-        moveWaitCheckBox->setGeometry(QRect(400, 10, 61, 23));
+        moveWaitCheckBox->setGeometry(QRect(330, 10, 61, 23));
         moveRobotComboBox = new QComboBox(moveWaitGroupBox);
         moveRobotComboBox->setObjectName(QString::fromUtf8("moveRobotComboBox"));
         moveRobotComboBox->setEnabled(false);
-        moveRobotComboBox->setGeometry(QRect(10, 10, 331, 25));
+        moveRobotComboBox->setGeometry(QRect(10, 10, 251, 25));
         moveRobotSpinBox = new QSpinBox(moveWaitGroupBox);
         moveRobotSpinBox->setObjectName(QString::fromUtf8("moveRobotSpinBox"));
-        moveRobotSpinBox->setGeometry(QRect(350, 10, 54, 24));
+        moveRobotSpinBox->setGeometry(QRect(270, 10, 54, 24));
         moveRobotSpinBox->setMinimum(-180);
         moveRobotSpinBox->setMaximum(180);
+        moveLinearCheckBox = new QCheckBox(moveWaitGroupBox);
+        moveLinearCheckBox->setObjectName(QString::fromUtf8("moveLinearCheckBox"));
+        moveLinearCheckBox->setGeometry(QRect(390, 10, 71, 23));
         label_15 = new QLabel(UserLocGroupBox_5);
         label_15->setObjectName(QString::fromUtf8("label_15"));
-        label_15->setGeometry(QRect(480, 10, 71, 16));
+        label_15->setGeometry(QRect(400, 10, 81, 16));
         UserLocGroupBox_6 = new QGroupBox(tab_6);
         UserLocGroupBox_6->setObjectName(QString::fromUtf8("UserLocGroupBox_6"));
         UserLocGroupBox_6->setGeometry(QRect(0, 60, 601, 41));
@@ -2322,7 +2326,7 @@ public:
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1363, 22));
+        menuBar->setGeometry(QRect(0, 0, 1363, 25));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -2736,6 +2740,7 @@ public:
         moveRobotCheckBox->setText(QApplication::translate("MainWindow", "Move Robot To", 0, QApplication::UnicodeUTF8));
         moveWaitGroupBox->setTitle(QString());
         moveWaitCheckBox->setText(QApplication::translate("MainWindow", "Wait  ", 0, QApplication::UnicodeUTF8));
+        moveLinearCheckBox->setText(QApplication::translate("MainWindow", "Linear", 0, QApplication::UnicodeUTF8));
         label_15->setText(QApplication::translate("MainWindow", "Orientation", 0, QApplication::UnicodeUTF8));
         robotTrayCheckBox->setText(QApplication::translate("MainWindow", "Robot Tray", 0, QApplication::UnicodeUTF8));
         robotTrayGroupBox->setTitle(QString());

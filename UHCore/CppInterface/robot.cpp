@@ -114,7 +114,7 @@ Robot::Location Robot::getLocation() {
 	return l;
 }
 
-std::string Robot::setComponentState(std::string name, std::vector<double> jointGoals, bool blocking) {
+std::string Robot::setComponentState(std::string name, std::vector<double> jointGoals, bool blocking, std::string mode) {
 
 	PyObject* g;
 	{
@@ -125,11 +125,21 @@ std::string Robot::setComponentState(std::string name, std::vector<double> joint
 		}
 	}
 
-	std::string format = "(s, O, b)";
+    std::string format = "(s, O, b)";
+    if (mode.length() > 0)
+        format = "(s, O, b, s)";
 	char* n = strdup(name.c_str());
 	char* f = strdup(format.c_str());
 
-	PyObject *pValue = callMethod("setComponentState", f, n, g, blocking);
+    PyObject *pValue;
+    if (mode.length() > 0)
+    {
+        char* m = strdup(mode.c_str());
+        pValue = callMethod("setComponentState", f, n, g, blocking, m);
+    }
+    else
+        pValue = callMethod("setComponentState", f, n, g, blocking);
+
 	/** pValue = "SUCCESS" **/
 
 	std::string ret;
@@ -151,11 +161,22 @@ std::string Robot::setComponentState(std::string name, std::vector<double> joint
 	return ret;
 }
 
-std::string Robot::setComponentState(std::string name, std::string value, bool blocking) {
-
+std::string Robot::setComponentState(std::string name, std::string value, bool blocking, std::string mode)
+{
+    std::string format = "(s,s, b)";
+    if (mode.length() > 0)
+        format = "(s,s, b, s)";
+    char* f = strdup(format.c_str());
 	char* n = strdup(name.c_str());
 	char* v = strdup(value.c_str());
-	PyObject *pValue = callMethod("setComponentState", "(s,s, b)", n, v, blocking);
+    PyObject *pValue;
+    if (mode.length() > 0)
+    {
+        char* m = strdup(mode.c_str());
+        pValue = callMethod("setComponentState", f, n, v, blocking, m);
+    }
+    else
+        pValue = callMethod("setComponentState", f, n, v, blocking);
 	/** pValue = "SUCCESS" **/
 
 	std::string ret;

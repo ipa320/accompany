@@ -1064,7 +1064,7 @@ int main(int argc, char **argv)
   
   image_transport::ImageTransport it(n);
   humanDetectionsPub = n.advertise<accompany_uva_msg::HumanDetections>(resolved_humanDetections, 10);
-  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
+  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("camera_localization_visualization_marker_array",0);
 
   frameCounter=new FrameCounter(cam.size());
   backgroundsPub=new image_transport::Publisher[cam.size()];

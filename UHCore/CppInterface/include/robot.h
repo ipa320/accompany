@@ -99,10 +99,10 @@ public:
 	Location getLocation();
 
 	// set the named component to the named state
-	std::string setComponentState(std::string name, std::string value, bool blocking = true);
+    std::string setComponentState(std::string name, std::string value, bool blocking = true, std::string mode="");
 
 	// set the named component to the specified position
-	std::string setComponentState(std::string name, std::vector<double> jointGoals, bool blocking = true);
+    std::string setComponentState(std::string name, std::vector<double> jointGoals, bool blocking = true, std::string mode="");
 
 	// return all possible positions for a component
 	std::vector<Position> getComponentPositions(std::string componentName);

@@ -138,7 +138,7 @@ class Robot(object):
         """ Set the light to the named colour or [R,G,B] """
         self._robInt.runComponent('light', colour)
 
-    def setComponentState(self, name, value, blocking=True):
+    def setComponentState(self, name, value, blocking=True, mode=''):
         """
             Set the named component to the given value
             value can be a string for a named position, or an array of floats for specific joint values
@@ -169,7 +169,7 @@ class Robot(object):
                                                                         user['yCoord'], 
                                                                         user['orientation'])
 
-        status = self._robInt.runComponent(name, value, None, blocking)
+        status = self._robInt.runComponent(name, value, mode, blocking)
         return _states[status]
     
     def getComponentPositions(self, componentName):
@@ -379,7 +379,7 @@ class ROSRobot(Robot):
         else:
             return Data.dataAccess.Locations.resolveLocation(pos)
 
-    def setComponentState(self, name, value, blocking=True):
+    def setComponentState(self, name, value, blocking=True, mode=''):
         """
             Set the named component to the given value
             value can be a string for a named position, or an array of floats for specific joint values
@@ -413,7 +413,7 @@ class ROSRobot(Robot):
                                                                                                             user['yCoord'], 
                                                                                                             user['orientation'])
         
-        status = super(ROSRobot, self).setComponentState(name, value, blocking)
+        status = super(ROSRobot, self).setComponentState(name, value, blocking, mode)
         # There is a bug in the Gazebo COB interface that prevents proper trajectory tracking
         # this causes most status messages to come back as aborted while the operation is still
         # commencing, time delay to attempt to compensate...

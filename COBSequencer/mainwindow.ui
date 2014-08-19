@@ -5373,7 +5373,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>601</width>
+         <width>611</width>
          <height>51</height>
         </rect>
        </property>
@@ -5414,7 +5414,7 @@
         <widget class="QCheckBox" name="moveWaitCheckBox">
          <property name="geometry">
           <rect>
-           <x>400</x>
+           <x>330</x>
            <y>10</y>
            <width>61</width>
            <height>23</height>
@@ -5432,7 +5432,7 @@
           <rect>
            <x>10</x>
            <y>10</y>
-           <width>331</width>
+           <width>251</width>
            <height>25</height>
           </rect>
          </property>
@@ -5440,7 +5440,7 @@
         <widget class="QSpinBox" name="moveRobotSpinBox">
          <property name="geometry">
           <rect>
-           <x>350</x>
+           <x>270</x>
            <y>10</y>
            <width>54</width>
            <height>24</height>
@@ -5453,13 +5453,26 @@
           <number>180</number>
          </property>
         </widget>
+        <widget class="QCheckBox" name="moveLinearCheckBox">
+         <property name="geometry">
+          <rect>
+           <x>390</x>
+           <y>10</y>
+           <width>71</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Linear</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QLabel" name="label_15">
         <property name="geometry">
          <rect>
-          <x>480</x>
+          <x>400</x>
           <y>10</y>
-          <width>71</width>
+          <width>81</width>
           <height>16</height>
          </rect>
         </property>
@@ -7113,7 +7126,7 @@
      <x>0</x>
      <y>0</y>
      <width>1363</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
