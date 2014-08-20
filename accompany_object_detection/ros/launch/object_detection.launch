@@ -1,0 +1,21 @@
+
+<launch>
+	<!--node ns="surface_classification" pkg="nodelet" type="nodelet" name="object_segmentation_pass_through" args="standalone pcl/PassThrough" output="screen">
+		<remap from="~input" to="/cam3d/rgb/points" />
+		<rosparam>
+			filter_field_name: z
+			filter_limit_min: 0.0
+			filter_limit_max: 2.0
+			keep_organized: true
+		</rosparam>
+	</node-->
+	
+	<!-- send parameters to parameter server -->
+	<rosparam command="load" ns="object_detection/object_detection" file="$(find accompany_object_detection)/ros/launch/object_detection.yaml"/>
+	
+	<node ns="object_detection" name="object_detection" pkg="accompany_object_detection" type="object_detection" output="screen">
+		<!--remap from="pointcloud_in" to="object_segmentation_pass_through/output"/-->
+		<remap from="pointcloud_in" to="/cam3d/depth/points_xyzrgb"/>
+		<remap from="colorimage_in" to="/cam3d/rgb/image"/>
+	</node>
+</launch>
