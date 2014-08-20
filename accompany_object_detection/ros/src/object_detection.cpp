@@ -73,6 +73,7 @@
 // opencv
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
+#include <opencv/ml.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
@@ -109,14 +110,20 @@ public:
 		sync_input_->connectInput(colorimage_sub_, pointcloud_sub_);
 
 		if (operation_mode_ == 2)
-			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackTraining, this, _1, _2));
+		{
+			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios::in);
+			trainObjects();
+		}
 		else if (operation_mode_ == 1)
 		{
 			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios::app);
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackCapture, this, _1, _2));
 		}
 		else
+		{
+			mlp_.load("accompany_object_detection/classifier/nn.yaml");
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackDetection, this, _1, _2));
+		}
 	}
 
 	~ObjectDetection()
@@ -126,7 +133,7 @@ public:
 		if (sync_input_ != 0)
 			delete sync_input_;
 
-		if (operation_mode_ == 1)
+		if (training_data_file_.is_open() == true)
 			training_data_file_.close();
 	}
 
@@ -143,9 +150,45 @@ public:
 		image = image_ptr->image;
 	}
 
+
+	void computeFeatures(const cv::Mat& image, cv::Mat& features)
+	{
+		const int RES_X = 128;
+		const int RES_Y = 128;
+
+		cv::HOGDescriptor hog;
+
+		//		cv::Mat circle = cv::Mat::zeros(cv::Size(RES_X,RES_Y),CV_8U);
+//		int thickness=-1, lineType=8;
+//		cv::circle(circle, cv::Size(circle.cols/2, circle.rows/2),circle.rows/2, 255, thickness, lineType );
+
+		//selecting parameters for the HOG feature extractor. There are two feature extractor, one for each cell size (8x8, 16x16)
+		hog.blockSize= cv::Size(16,16);
+		hog.winSize= cv::Size(RES_X,RES_Y);
+		hog.blockStride=cv::Size(8,8);
+		hog.cellSize= cv::Size(8,8);
+
+		cv::Mat image2, im;
+		cv::resize(image, im, cv::Size(RES_X,RES_Y));
+		//im.copyTo(image2, circle);
+		im.copyTo(image2);
+
+		//Computing the histogram of oriented gradients features
+		const cv::Size trainingPadding = cv::Size(0,0);
+		const cv::Size winStride = cv::Size(8,8);//Strid 16= no overlap
+		std::vector<cv::Point> locations;
+		std::vector<float> featureVector;
+		hog.compute(image2, featureVector, winStride, trainingPadding, locations);
+		features.create(1, featureVector.size(), CV_32FC1);
+
+		for(unsigned int j=0; j<featureVector.size(); ++j)
+			features.at<float>(0,j)= featureVector.at(j);
+	}
+
 	void inputCallbackDetection(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
 	{
-		ROS_INFO("Input Callback Detection");
+		//ROS_INFO("Input Callback Detection");
+
 		// convert color image to cv::Mat
 		cv_bridge::CvImageConstPtr color_image_ptr;
 		cv::Mat color_image;
@@ -154,6 +197,29 @@ public:
 		// get color image from point cloud
 		// pcl::PointCloud < pcl::PointXYZRGB > point_cloud_src;
 		// pcl::fromROSMsg(*pointcloud_msg, point_cloud_src);
+
+		int stride_x = 10;
+		int stride_y = 1000;
+		int roi_width = 130;
+		int roi_height = 160;
+		for (int y=160; y<color_image.rows-roi_height; y+=stride_y)
+		{
+			for (int x=0; x<color_image.cols-roi_width; x+=stride_x)
+			{
+				cv::Rect window(x, y, roi_width, roi_height);
+				cv::Mat roi = color_image(window);
+
+				cv::Mat features;
+				computeFeatures(roi, features);
+
+				cv::Mat response;
+				mlp_.predict(features, response);
+
+				//std::cout << "This is class " << response.at<float>(0,0) << std::endl;
+				if (response.at<float>(0,0) > 0.75)
+					cv::rectangle(color_image, window, CV_RGB(0, 255, 0), 2);
+			}
+		}
 
 		cv::imshow("color_image", color_image);
 		cv::waitKey(10);
@@ -168,6 +234,78 @@ public:
 		// color_image.at<cv::Point3_<unsigned char> >(v,u) = cv::Point3_<unsigned char>(point.b, point.g, point.r);
 		// }
 		// }
+	}
+
+	void trainObjects()
+	{
+		// compute feature data
+		cv::Mat feature_mat;
+		cv::Mat label_mat;
+		while (training_data_file_.eof() == false)
+		{
+			int class_id = 0;
+			std::string filename;
+			training_data_file_ >> class_id >> filename;
+			if (class_id == 0 && filename.length() == 0)
+				break;
+
+			std::cout << "Reading sample with class_id: " << class_id << "   filename: " << filename << std::endl;
+
+			cv::Mat image = cv::imread(filename);
+
+			cv::Mat label(1,1,CV_32FC1);
+			label.at<float>(0,0) = (float)class_id;
+			cv::Mat features;
+			computeFeatures(image, features);
+
+//			cv::imshow("image", image);
+//			cv::waitKey();
+
+			feature_mat.push_back(features);
+			label_mat.push_back(label);
+		}
+
+		std::cout << "feature_mat: " << feature_mat.rows << " " << feature_mat.cols << std::endl;
+		std::cout << "label_mat: " << label_mat.rows << " " << label_mat.cols << std::endl;
+//		for (int v=0; v<feature_mat.rows; ++v)
+//		{
+//			for (int u=0; u<feature_mat.cols; ++u)
+//				std::cout << feature_mat.at<float>(v,u) << "\t";
+//			std::cout << std::endl;
+//		}
+
+		// train classifier
+		//	Neural Network
+		cv::Mat input;
+		feature_mat.convertTo(input, CV_32F);
+		cv::Mat output=cv::Mat::zeros(feature_mat.rows, 1, CV_32FC1);
+		cv::Mat labels;
+		label_mat.convertTo(labels, CV_32F);
+		for(int i=0; i<feature_mat.rows; ++i)
+			output.at<float>(i,0) = labels.at<float>(i,0);
+
+		cv::Mat layers = cv::Mat(3,1,CV_32SC1);
+
+		layers.row(0) = cv::Scalar(feature_mat.cols);
+		layers.row(1) = cv::Scalar(10);
+		layers.row(2) = cv::Scalar(1);
+
+		CvANN_MLP_TrainParams params;
+		CvTermCriteria criteria;
+		criteria.max_iter = 100;//100;
+		criteria.epsilon  = 0.0001f; // farhadi:0.0001f, handcrafted:0.00001f;
+		criteria.type     = CV_TERMCRIT_ITER | CV_TERMCRIT_EPS;
+
+		params.train_method    = CvANN_MLP_TrainParams::BACKPROP;
+		params.bp_dw_scale     = 0.1f;
+		params.bp_moment_scale = 0.1f;
+		params.term_crit       = criteria;
+
+		mlp_.create(layers,CvANN_MLP::SIGMOID_SYM, 0.4, 1.0);			// 0.4, except for dominant/sec. dom. color: 0.2
+		int iterations = mlp_.train(input, output, cv::Mat(), cv::Mat(), params);
+		std::cout << "Neural network training completed after " << iterations << " iterations." << std::endl;
+
+		mlp_.save("accompany_object_detection/classifier/nn.yaml");
 	}
 
 	void inputCallbackCapture(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
@@ -253,11 +391,6 @@ public:
 			exit(0);
 	}
 
-	void inputCallbackTraining(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
-	{
-		ROS_INFO("Input Callback Training");
-	}
-
 private:
 	ros::NodeHandle node_handle_;
 
@@ -267,7 +400,9 @@ private:
 	message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud_sub_;
 	message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::PointCloud2> >* sync_input_;
 
-	std::ofstream training_data_file_;
+	std::fstream training_data_file_;
+
+	CvANN_MLP mlp_;
 
 	// parameters
 	int operation_mode_;		// 0=detect, 1=capture training images, 2=train classifier
