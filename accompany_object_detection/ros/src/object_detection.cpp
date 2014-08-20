@@ -58,26 +58,35 @@
 ****************************************************************/
 // ROS includes
 #include <ros/ros.h>
+
 // ROS message includes
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud2.h>
+
 // topics
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 #include <image_transport/image_transport.h>
 #include <image_transport/subscriber_filter.h>
+
 // opencv
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
+
 // boost
 #include <boost/bind.hpp>
+
 // point cloud
 #include <pcl/point_types.h>
 #include <pcl_ros/point_cloud.h>
 #include <accompany_object_detection/object_detection.h>
+
+#include <sstream>
+#include <ctime>
+#include <fstream>
 
 
 class ObjectDetection
@@ -102,7 +111,10 @@ public:
 		if (operation_mode_ == 2)
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackTraining, this, _1, _2));
 		else if (operation_mode_ == 1)
+		{
+			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios::app);
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackCapture, this, _1, _2));
+		}
 		else
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackDetection, this, _1, _2));
 	}
@@ -113,6 +125,9 @@ public:
 			delete it_;
 		if (sync_input_ != 0)
 			delete sync_input_;
+
+		if (operation_mode_ == 1)
+			training_data_file_.close();
 	}
 
 	// Converts a color image message to cv::Mat format.
@@ -157,7 +172,85 @@ public:
 
 	void inputCallbackCapture(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
 	{
-		ROS_INFO("Input Callback Capture");
+		//ROS_INFO("Input Callback Capture");
+
+		// convert color image to cv::Mat
+		cv_bridge::CvImageConstPtr color_image_ptr;
+		cv::Mat color_image;
+		convertColorImageMessageToMat(color_image_msg, color_image_ptr, color_image);
+
+		// get color image from point cloud
+		pcl::PointCloud < pcl::PointXYZRGB > point_cloud_src;
+		pcl::fromROSMsg(*pointcloud_msg, point_cloud_src);
+
+		cv::imshow("color_image", color_image);
+		int key = cv::waitKey(10);
+
+		// capture image
+		if (key == 'b' || key=='f' || key=='v')
+		{
+//			cv::Mat gray_image;
+//			cv::cvtColor(color_image, gray_image, CV_BGR2GRAY);
+//			double min_gray=0.0, max_gray=255.0;
+//			cv::minMaxLoc(gray_image, &min_gray, &max_gray);
+//			int white_threshold = max_gray - 0.4*(max_gray-min_gray);
+
+			// compute roi
+			int min_u = color_image.cols, max_u = 0;
+			int min_v = color_image.rows, max_v = 0;
+			for (int v=0; v<color_image.rows; ++v)
+			{
+				for (int u=0; u<color_image.cols; ++u)
+				{
+					//cv::Vec3b& pixel = color_image.at<cv::Vec3b>(v,u);
+					pcl::PointXYZRGB point = point_cloud_src(u,v);
+					//if (gray_image.at<unsigned char>(v,u) >= white_threshold)
+					if (point.z == point.z && point.z < 1.2)
+					{
+						if (min_u > u) min_u = u;
+						if (max_u < u) max_u = u;
+						if (min_v > v) min_v = v;
+						if (max_v < v) max_v = v;
+					}
+				}
+			}
+			if (max_u-min_u < 1 || max_v-min_v < 1)
+				return;
+
+			cv::Mat roi = color_image(cv::Rect(min_u, min_v, max_u-min_u, max_v-min_v));
+
+			// store to disk
+			time_t tim;
+			std::stringstream ss;
+			ss << "image_" << time(&tim) << ".png";
+			std::string filename = "accompany_object_detection/images/";
+			if (key == 'b')
+			{
+				filename += "background/";
+				training_data_file_ << 0 << "\t";
+			}
+			else if (key == 'f')
+			{
+				filename += "flowers/";
+				training_data_file_ << 1 << "\t";
+			}
+			else if (key == 'v')
+			{
+				filename += "vase/";
+				training_data_file_ << 2 << "\t";
+			}
+			filename += ss.str();
+			training_data_file_ << filename << std::endl;
+
+			cv::imwrite(filename, roi);
+
+			cv::imshow("captured image", roi);
+			cv::waitKey(10);
+
+			ROS_INFO("Image captured and stored to %s.", filename.c_str());
+		}
+		else if (key=='q')
+			exit(0);
 	}
 
 	void inputCallbackTraining(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
@@ -173,6 +266,8 @@ private:
 	image_transport::SubscriberFilter colorimage_sub_; ///< Color camera image topic
 	message_filters::Subscriber<sensor_msgs::PointCloud2> pointcloud_sub_;
 	message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::PointCloud2> >* sync_input_;
+
+	std::ofstream training_data_file_;
 
 	// parameters
 	int operation_mode_;		// 0=detect, 1=capture training images, 2=train classifier
