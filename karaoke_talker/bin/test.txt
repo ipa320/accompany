@@ -1,4 +1,4 @@
-2000 [clear]
+2000 [start]
 1000 Dashing through the snow
 1000 In a one-horse open sleigh
 1000 O'er the fields we go

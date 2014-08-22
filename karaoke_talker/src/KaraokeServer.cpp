@@ -79,7 +79,8 @@ void callback(const std_msgs::String::ConstPtr& msg)
   	string USER="accompanyUser";
   	string PASSWORD="accompany";
   	string DATABASE="AccompanyTroyes";
-
+		
+		
 
 
 	
@@ -109,7 +110,15 @@ void callback(const std_msgs::String::ConstPtr& msg)
   		stmt = con->createStatement(); // create a statement object
 		sql = "UPDATE Sensors SET value = \'True\' WHERE sensorId = 594";
   		stmt->executeUpdate(sql);
-		usleep(15000000);
+  		
+  		delete result;
+   		delete stmt;
+    	con->close();
+    	delete con;
+  		
+		cout << "have been updated" << endl;
+		usleep(13000000);
+	
 		sf::Music music;
 		
 		
@@ -126,15 +135,16 @@ void callback(const std_msgs::String::ConstPtr& msg)
 		std_msgs::String msg;
 		//FILE * fichier;
 		//fichier = fopen ("test.txt","rb");
-
-		ifstream fichier("test.txt", ios::in);  // on ouvre le fichier en lecture
-	 	
+		cout<< "music played now opening the file" << endl;
+		ifstream fichier("test.txt", ios::in);  // on ouvre le fichier en lecture	 	
 		if(fichier)  // si l'ouverture a réussi
         	{
             		// instructions
+            		cout<< "folder opened with success" << endl;
 			string ligne;
         		while(getline(fichier, ligne))  // tant que l'on peut mettre la ligne dans "contenu"
         		{
+        		cout<< "reading...." << endl;
 				sleep(1);
 				std::stringstream ss;
                		 	ss << ligne;  // on l'affiche
@@ -143,28 +153,28 @@ void callback(const std_msgs::String::ConstPtr& msg)
 				std::size_t found = ss.str().find(" ");
 				string ligne2;
 				ligne2 = ss.str().substr(found+1);
-				//cout << "line :" << ligne2 << endl;
 				msg.data = ligne2;
+				cout<< msg.data << " " << ligne2 << endl;
 				chatter_pub.publish(msg);
 				usleep(seconds*1000);
 				//if database not do break
 
-				Driver *driver;
-				Connection *con;
-				Statement *stmt;
-				ResultSet *result;
-				string sql;
+				Driver *driver2;
+				Connection *con2;
+				Statement *stmt2;
+				ResultSet *result2;
+				string sql2;
 
-				driver = get_driver_instance();
- 				con = driver->connect(DBHOST, USER, PASSWORD); // create a database connection using the Driver
-  				con->setAutoCommit(0); // turn off the autocommit
-  				con->setSchema(DATABASE); // select appropriate database schema
-  				stmt = con->createStatement(); // create a statement object
+				driver2 = get_driver_instance();
+ 				con2 = driver2->connect(DBHOST, USER, PASSWORD); // create a database connection using the Driver
+  				con2->setAutoCommit(0); // turn off the autocommit
+  				con2->setSchema(DATABASE); // select appropriate database schema
+  				stmt2 = con2->createStatement(); // create a statement object
 
 
 				//sql  = "SELECT value FROM Sensors WHERE sensorId = 302";
-				sql = "SELECT * FROM Sensors WHERE sensorId = 302 AND lastStatus = \"On\" and lastUpdate+INTERVAL 60 SECOND >= NOW()";
-  				result = stmt->executeQuery(sql);
+				sql2 = "SELECT * FROM Sensors WHERE sensorId = 302 AND lastStatus = \"On\" and lastUpdate+INTERVAL 60 SECOND >= NOW()";
+  				result = stmt2->executeQuery(sql2);
 				//cout << result  << endl;
 				if (result->next())
   				{
@@ -186,10 +196,10 @@ void callback(const std_msgs::String::ConstPtr& msg)
 
   				}
 
-   				delete result;
-   				delete stmt;
-    				con->close();
-    				delete con;
+   				delete result2;
+   				delete stmt2;
+    				con2->close();
+    				delete con2;
 				
 
         		}
