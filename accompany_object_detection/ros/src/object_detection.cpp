@@ -111,12 +111,22 @@ public:
 
 		if (operation_mode_ == 2)
 		{
-			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios::in);
+			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios_base::in);
+			if (training_data_file_.is_open() == false)
+			{
+				std::cout << "Error: Could not open data annotation file." << std::endl;
+				return;
+			}
 			trainObjects();
 		}
 		else if (operation_mode_ == 1)
 		{
-			training_data_file_.open("accompany_object_detection/images/data.txt", std::ios::app);
+			training_data_file_.open("accompany_object_detection/images/data.txt", std::fstream::out | std::fstream::app);
+			if (training_data_file_.is_open() == false)
+			{
+				std::cout << "Error: Could not open data annotation file." << std::endl;
+				return;
+			}
 			sync_input_->registerCallback(boost::bind(&ObjectDetection::inputCallbackCapture, this, _1, _2));
 		}
 		else
@@ -151,38 +161,36 @@ public:
 	}
 
 
-	void computeFeatures(const cv::Mat& image, cv::Mat& features)
+	void computeFeatures(const cv::Mat& image, cv::Mat& features, const cv::Size window_size=cv::Size(128,128), const cv::Size window_stride = cv::Size(8,8), const std::vector<cv::Point>& locations = std::vector<cv::Point>())
 	{
-		const int RES_X = 128;
-		const int RES_Y = 128;
-
 		cv::HOGDescriptor hog;
-
-		//		cv::Mat circle = cv::Mat::zeros(cv::Size(RES_X,RES_Y),CV_8U);
-//		int thickness=-1, lineType=8;
-//		cv::circle(circle, cv::Size(circle.cols/2, circle.rows/2),circle.rows/2, 255, thickness, lineType );
 
 		//selecting parameters for the HOG feature extractor. There are two feature extractor, one for each cell size (8x8, 16x16)
 		hog.blockSize= cv::Size(16,16);
-		hog.winSize= cv::Size(RES_X,RES_Y);
+		hog.winSize= window_size;
 		hog.blockStride=cv::Size(8,8);
 		hog.cellSize= cv::Size(8,8);
 
-		cv::Mat image2, im;
-		cv::resize(image, im, cv::Size(RES_X,RES_Y));
-		//im.copyTo(image2, circle);
-		im.copyTo(image2);
+//		cv::Mat image2, im;
+//		cv::resize(image, im, cv::Size(RES_X,RES_Y));
+//		//im.copyTo(image2, circle);
+//		im.copyTo(image2);
 
 		//Computing the histogram of oriented gradients features
 		const cv::Size trainingPadding = cv::Size(0,0);
-		const cv::Size winStride = cv::Size(8,8);//Strid 16= no overlap
-		std::vector<cv::Point> locations;
 		std::vector<float> featureVector;
-		hog.compute(image2, featureVector, winStride, trainingPadding, locations);
-		features.create(1, featureVector.size(), CV_32FC1);
+		hog.compute(image, featureVector, window_stride, trainingPadding, locations);
+		//std::cout << "featureVector.size()=" << featureVector.size() << "   locations.size()=" << locations.size() << std::endl;
 
-		for(unsigned int j=0; j<featureVector.size(); ++j)
-			features.at<float>(0,j)= featureVector.at(j);
+		if (locations.size() == 0)
+			features.create(1, featureVector.size(), CV_32FC1);
+		else
+			features.create(locations.size(), featureVector.size()/locations.size(), CV_32FC1);
+
+		unsigned int j=0;
+		for (int r=0; r<features.rows; ++r)
+			for(int c=0; c<features.cols; ++c, ++j)
+				features.at<float>(r,c)= featureVector.at(j);
 	}
 
 	void inputCallbackDetection(const sensor_msgs::Image::ConstPtr& color_image_msg, const sensor_msgs::PointCloud2::ConstPtr& pointcloud_msg)
@@ -198,28 +206,57 @@ public:
 		// pcl::PointCloud < pcl::PointXYZRGB > point_cloud_src;
 		// pcl::fromROSMsg(*pointcloud_msg, point_cloud_src);
 
-		int stride_x = 10;
-		int stride_y = 1000;
-		int roi_width = 130;
-		int roi_height = 160;
-		for (int y=160; y<color_image.rows-roi_height; y+=stride_y)
+		cv::Size window_size(128,128);
+		cv::Size window_stride(16,16);
+		std::vector<cv::Point> locations;
+		for (int y=32; y<color_image.rows-window_size.height-32; y+=window_stride.height)
 		{
-			for (int x=0; x<color_image.cols-roi_width; x+=stride_x)
+			for (int x=192; x<color_image.cols-window_size.width-32; x+=window_stride.width)
 			{
-				cv::Rect window(x, y, roi_width, roi_height);
-				cv::Mat roi = color_image(window);
-
-				cv::Mat features;
-				computeFeatures(roi, features);
-
-				cv::Mat response;
-				mlp_.predict(features, response);
-
-				//std::cout << "This is class " << response.at<float>(0,0) << std::endl;
-				if (response.at<float>(0,0) > 0.75)
-					cv::rectangle(color_image, window, CV_RGB(0, 255, 0), 2);
+				locations.push_back(cv::Point(x,y));
 			}
 		}
+//		locations.push_back(cv::Point(256,176));
+//		cv::rectangle(color_image, cv::Rect(locations[0].x, locations[0].y, window_size.width, window_size.height), CV_RGB(255, 0, 0), 2);
+		cv::Mat features;
+		computeFeatures(color_image, features, window_size, window_stride, locations);
+
+		cv::Mat responses;
+		mlp_.predict(features, responses);
+		//std::cout << "responses (r,c)=(" << responses.rows << ", " << responses.cols << ")" << std::endl;
+
+		//std::cout << "This is class " << responses.at<float>(0,0) << std::endl;
+		for (unsigned int i=0; i<locations.size(); ++i)
+		{
+			if (responses.at<float>(i,0) > 0.9)
+			{
+				std::cout << "Found object with response=" << responses.at<float>(i,0) << std::endl;
+				cv::rectangle(color_image, cv::Rect(locations[i].x, locations[i].y, window_size.width, window_size.height), CV_RGB(0, 255, 0), 2);
+			}
+		}
+
+//		int stride_x = 10;
+//		int stride_y = 1000;
+//		int roi_width = 130;
+//		int roi_height = 160;
+//		for (int y=160; y<color_image.rows-roi_height; y+=stride_y)
+//		{
+//			for (int x=0; x<color_image.cols-roi_width; x+=stride_x)
+//			{
+//				cv::Rect window(x, y, roi_width, roi_height);
+//				cv::Mat roi = color_image(window);
+//
+//				cv::Mat features;
+//				computeFeatures(roi, features);
+//
+//				cv::Mat response;
+//				mlp_.predict(features, response);
+//
+//				//std::cout << "This is class " << response.at<float>(0,0) << std::endl;
+//				if (response.at<float>(0,0) > 0.75)
+//					cv::rectangle(color_image, window, CV_RGB(0, 255, 0), 2);
+//			}
+//		}
 
 		cv::imshow("color_image", color_image);
 		cv::waitKey(10);
@@ -256,7 +293,11 @@ public:
 			cv::Mat label(1,1,CV_32FC1);
 			label.at<float>(0,0) = (float)class_id;
 			cv::Mat features;
-			computeFeatures(image, features);
+			const int RES_X = 128;
+			const int RES_Y = 128;
+			cv::Mat image2;
+			cv::resize(image, image2, cv::Size(RES_X,RES_Y));
+			computeFeatures(image2, features);
 
 //			cv::imshow("image", image);
 //			cv::waitKey();
@@ -321,7 +362,10 @@ public:
 		pcl::PointCloud < pcl::PointXYZRGB > point_cloud_src;
 		pcl::fromROSMsg(*pointcloud_msg, point_cloud_src);
 
-		cv::imshow("color_image", color_image);
+		cv::Rect roi_rect(256, 176, 128, 128);
+		cv::Mat display_image = color_image.clone();
+		cv::rectangle(display_image, roi_rect, CV_RGB(255, 0, 0), 2);
+		cv::imshow("color_image", display_image);
 		int key = cv::waitKey(10);
 
 		// capture image
@@ -333,29 +377,30 @@ public:
 //			cv::minMaxLoc(gray_image, &min_gray, &max_gray);
 //			int white_threshold = max_gray - 0.4*(max_gray-min_gray);
 
-			// compute roi
-			int min_u = color_image.cols, max_u = 0;
-			int min_v = color_image.rows, max_v = 0;
-			for (int v=0; v<color_image.rows; ++v)
-			{
-				for (int u=0; u<color_image.cols; ++u)
-				{
-					//cv::Vec3b& pixel = color_image.at<cv::Vec3b>(v,u);
-					pcl::PointXYZRGB point = point_cloud_src(u,v);
-					//if (gray_image.at<unsigned char>(v,u) >= white_threshold)
-					if (point.z == point.z && point.z < 1.2)
-					{
-						if (min_u > u) min_u = u;
-						if (max_u < u) max_u = u;
-						if (min_v > v) min_v = v;
-						if (max_v < v) max_v = v;
-					}
-				}
-			}
-			if (max_u-min_u < 1 || max_v-min_v < 1)
-				return;
+//			// compute roi
+//			int min_u = color_image.cols, max_u = 0;
+//			int min_v = color_image.rows, max_v = 0;
+//			for (int v=0; v<color_image.rows; ++v)
+//			{
+//				for (int u=0; u<color_image.cols; ++u)
+//				{
+//					//cv::Vec3b& pixel = color_image.at<cv::Vec3b>(v,u);
+//					pcl::PointXYZRGB point = point_cloud_src(u,v);
+//					//if (gray_image.at<unsigned char>(v,u) >= white_threshold)
+//					if (point.z == point.z && point.z < 1.2)
+//					{
+//						if (min_u > u) min_u = u;
+//						if (max_u < u) max_u = u;
+//						if (min_v > v) min_v = v;
+//						if (max_v < v) max_v = v;
+//					}
+//				}
+//			}
+//			if (max_u-min_u < 1 || max_v-min_v < 1)
+//				return;
 
-			cv::Mat roi = color_image(cv::Rect(min_u, min_v, max_u-min_u, max_v-min_v));
+//			cv::Mat roi = color_image(cv::Rect(min_u, min_v, max_u-min_u, max_v-min_v));
+			cv::Mat roi = color_image(roi_rect);
 
 			// store to disk
 			time_t tim;
