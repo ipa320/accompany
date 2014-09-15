@@ -99,6 +99,8 @@ public:
 		it_ = 0;
 		sync_input_ = 0;
 
+		counter_ = 340;
+
 		std::cout << "\n--------------------------\nObject Detection Parameters:\n--------------------------\n";
 		node_handle_.param("object_detection/operation_mode", operation_mode_, 0);
 		std::cout << "operation_mode = " << operation_mode_ << std::endl;
@@ -226,13 +228,29 @@ public:
 		//std::cout << "responses (r,c)=(" << responses.rows << ", " << responses.cols << ")" << std::endl;
 
 		//std::cout << "This is class " << responses.at<float>(0,0) << std::endl;
+		cv::Mat display_image = color_image.clone();
+		std::vector<cv::Point> flowers;
 		for (unsigned int i=0; i<locations.size(); ++i)
 		{
 			if (responses.at<float>(i,0) > 0.9)
 			{
 				std::cout << "Found object with response=" << responses.at<float>(i,0) << std::endl;
-				cv::rectangle(color_image, cv::Rect(locations[i].x, locations[i].y, window_size.width, window_size.height), CV_RGB(0, 255, 0), 2);
+				flowers.push_back(locations[i]);
+//				cv::Mat roi = color_image(cv::Rect(locations[i].x, locations[i].y, window_size.width, window_size.height));
+//				std::stringstream filename;
+//				filename << "accompany_object_detection/image" << counter_++ << ".png";
+//				cv::imwrite(filename.str(), roi);
 			}
+		}
+		if (flowers.size() > 0)
+		{
+			cv::Point mean(0,0);
+			for (size_t i=0; i<flowers.size(); ++i)
+				mean += flowers[i];
+			mean.x /= flowers.size();
+			mean.y /= flowers.size();
+			cv::rectangle(display_image, cv::Rect(mean.x, mean.y, window_size.width, window_size.height), CV_RGB(0, 255, 0), 2);
+			cv::putText(display_image, "flowers", cv::Point(mean.x, mean.y+window_size.height+25), cv::FONT_HERSHEY_SIMPLEX, 1.0, CV_RGB(0, 255, 0), 2);
 		}
 
 //		int stride_x = 10;
@@ -258,8 +276,8 @@ public:
 //			}
 //		}
 
-		cv::imshow("color_image", color_image);
-		cv::waitKey(10);
+		cv::imshow("color_image", display_image);
+		cv::waitKey(20);
 
 		// cv::Mat color_image = cv::Mat::zeros(point_cloud_src.height, point_cloud_src.width, CV_8UC3);
 		// for (unsigned int v=0; v<point_cloud_src.height; v++)
@@ -451,6 +469,8 @@ private:
 
 	// parameters
 	int operation_mode_;		// 0=detect, 1=capture training images, 2=train classifier
+
+	int counter_;
 };
 
 
