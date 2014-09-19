@@ -204,6 +204,11 @@ public:
 		cv::Mat color_image;
 		convertColorImageMessageToMat(color_image_msg, color_image_ptr, color_image);
 
+		// hack: rotate image
+//		cv::Mat temp;
+//		cv::flip(color_image, temp, -1);
+//		color_image = temp;
+
 		// get color image from point cloud
 		// pcl::PointCloud < pcl::PointXYZRGB > point_cloud_src;
 		// pcl::fromROSMsg(*pointcloud_msg, point_cloud_src);
@@ -238,7 +243,7 @@ public:
 				flowers.push_back(locations[i]);
 //				cv::Mat roi = color_image(cv::Rect(locations[i].x, locations[i].y, window_size.width, window_size.height));
 //				std::stringstream filename;
-//				filename << "accompany_object_detection/image" << counter_++ << ".png";
+//				filename << "accompany_object_detection/frame" << counter_++ << ".png";
 //				cv::imwrite(filename.str(), roi);
 			}
 		}
@@ -250,7 +255,7 @@ public:
 			mean.x /= flowers.size();
 			mean.y /= flowers.size();
 			cv::rectangle(display_image, cv::Rect(mean.x, mean.y, window_size.width, window_size.height), CV_RGB(0, 255, 0), 2);
-			cv::putText(display_image, "flowers", cv::Point(mean.x, mean.y+window_size.height+25), cv::FONT_HERSHEY_SIMPLEX, 1.0, CV_RGB(0, 255, 0), 2);
+			cv::putText(display_image, "vase", cv::Point(mean.x, mean.y+window_size.height+25), cv::FONT_HERSHEY_SIMPLEX, 1.0, CV_RGB(0, 255, 0), 2);
 		}
 
 //		int stride_x = 10;
