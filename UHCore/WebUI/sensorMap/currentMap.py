@@ -2,30 +2,40 @@ import io, cherrypy, mimetypes
 from cherrypy.lib import file_generator
 
 from SensorMap.processor import MapProcessor
-from Data.dataAccess import DataAccess
-from Data.sensors import StateResolver
-from Robots.careobot import CareOBot
+from Data.dataAccess import DataAccess, Locations, Robots
+from Data.stateResolver import StateResolver
+from config import locations_config
 
 class MapImage(object):
     exposed = True
     
     def __init__(self):
-        self._robotName = CareOBot().name
+        #TODO: Handle multiple robots
         self._dao = DataAccess()
         self._sr = StateResolver()
+        activeLocation = Locations().getActiveExperimentLocation()
+        if activeLocation == None:
+            return cherrypy.HTTPError(500, "Unable to determine active location")
+
+        robot = Robots().getRobot(activeLocation['activeRobot'])
+        self._robotName = robot['robotName']
+        
+        self._emptyMap = locations_config[activeLocation['location']]['map']
         
     def GET(self, *args, **kwargs):
         #if len(args) < 1:
             #raise cherrypy.HTTPError(403, 'Directory Listing Denied')
 
-        mp = MapProcessor()
+        mp = MapProcessor(self._emptyMap)
         sensors = self._sr.resolveStates(self._dao.findSensors())
-        sensors = self._sr.appendSensorMetadata(sensors) #adds location and type
+        #sensors = self._sr.appendSensorMetadata(sensors, self._emptyMap) #adds location and type
         cob = self._dao.getRobotByName(self._robotName)
         robot = {
-               'type':'robot', 
+               'icon':self._dao.sensors.getSensorIconByName('robot')['id'], 
                'name':cob['robotName'], 
-               'location': (cob['xCoord'], cob['yCoord'], '%sd' % (cob['orientation'] * -1)), #svg rotates opposite of our cooridnate system
+               'xCoord': cob['xCoord'],
+               'yCoord': cob['yCoord'],
+               'orientation': '%sd' % cob['orientation'],
                'id':'r%s' % (cob['robotId'])
                }
 

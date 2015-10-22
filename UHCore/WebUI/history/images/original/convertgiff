@@ -1,0 +1,6 @@
+#!/bin/bash
+
+convert -delay 100 -size 200x150 -loop 0 th_r53.jpg th_r54.jpg th_r55.jpg th_r56.jpg th_r57.jpg th_r58.jpg th_r59.jpg th_r60.jpg th_r61.jpg th_r62.jpg th_r63.jpg th_Drink reminder.gif
+
+convert -delay 100 -size 200x150 -loop 0 th_r65.jpg th_r66.jpg th_r67.jpg th_r68.jpg th_r69.jpg th_r70.jpg th_r71.jpg th_r72.jpg th_r73.jpg th_r74.jpg th_Medicine reminder.gif
+

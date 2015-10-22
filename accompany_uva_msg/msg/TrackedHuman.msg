@@ -4,3 +4,4 @@ int32 id
 string identity
 time firstSeen
 time lastSeen
+int32 specialFlag

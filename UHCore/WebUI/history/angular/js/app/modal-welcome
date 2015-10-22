@@ -1,0 +1,9 @@
+<div class="modal-body">
+    <!--a ng-href="{{event.imageUrl}}" target="_blank" class="thumb"><img ng-src="{{event.imageUrl}}"></a-->
+    <p>"{{event.imageUrl}}"</p>
+    <p>"{{modal.content}}"</p>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn" ng-click="hide()">Close</button>
+</div>
+ 

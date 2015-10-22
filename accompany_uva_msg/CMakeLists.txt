@@ -35,3 +35,6 @@ rosbuild_add_library(MsgToMarkerArray
 
 rosbuild_add_executable(MsgToMarkerArrayTest src/MsgToMarkerArrayTest.cpp)
 target_link_libraries(MsgToMarkerArrayTest MsgToMarkerArray)
+
+rosbuild_add_executable(MsgToMarkerArrayPublisher src/MsgToMarkerArrayPublisher.cpp)
+target_link_libraries(MsgToMarkerArrayPublisher MsgToMarkerArray)

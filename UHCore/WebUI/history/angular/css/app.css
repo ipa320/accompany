@@ -1,0 +1,48 @@
+body {
+  padding-top: 20px;
+}
+
+.episodes {
+  list-style: none;
+}
+
+.thumb > img {
+  float: left;
+  margin: -1em 1em 1.5em 0em;
+  padding-bottom: 1em;
+  height: 100px;
+  width: 100px;
+}
+
+.episodes li {
+  clear: both;
+  height: 135px;
+  padding-top: 15px;
+}
+
+.narrative{
+  width: 176px;
+  height: 40px;
+  float: left;
+}
+
+.inner {
+    /*outline: solid 1px;*/
+    float: left; 
+    width: 220px; 
+    height: 200px; 
+    padding-top: 2px;
+    margin: 2px; 
+}
+
+
+.clearfix:before,
+.clearfix:after {
+    content: "";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+

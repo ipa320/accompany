@@ -1,0 +1,244 @@
+ #!/bin/bash         
+
+echo "Extracting sensor log info from Isael's data...."
+
+# run this routine in the userNNN directory - e.g. ../scripts/extract 001 1 BATCH
+#
+# needs Logs_SQL_User-NNN.csv e.g. Logs_SQL_User-001.csv 
+#
+# observer analysis should be extracted from Experiments analysis -Session 1.xlsx into csv files called
+# userNNN_level1.csv e.g. user001_level4.csv
+#
+# the scruot will create a classified analysis file (Inferences.data). A C5.0 names file (Inferences.names) is
+# also present (there is a copy in the scripts directory).
+#
+# C5.0 is then run with boosting enabled
+#
+ 
+if [ -z $1 ] 
+then echo 'ERROR --> need 3 parameters user, level and batch e.g. 001 1 BATCH parameter 1 missing!'
+     exit
+fi
+
+if [ -z $2 ] 
+then echo 'ERROR --> need 3 parameters user, level and batch e.g. 001 1 BATCH parameter 2 missing!'
+     exit
+fi
+
+if [ -z $3 ] 
+then echo 'ERROR --> need 3 parameters user, level and batch e.g. 001 1 BATCH (or BATCHNORM) parameter 3 missing!'
+     exit
+fi
+
+echo 'User is: ' $1 '  Learning level is: ' $2 '  Normalisation is: ' $3
+
+echo 'Removing existing files...'
+
+rm -f behaviourLog.sql
+rm -rf $2
+
+mkdir $2 
+chmod a+w $2
+
+#-----------------------------------------------------------------------------------------------------
+
+### Section 1 - create the sensorLog table on the DB using Ismael's data
+ 
+echo 'Extract the relevant columns...'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -sep ';' -smq -o sensors-01.csv -f 2,4,9 Logs_SQL_User-$1.csv
+
+echo 'Getting rid of empty rows...'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -skip '$1 == ""' -o sensors-02.csv -f 1,2,3 sensors-01.csv
+
+echo 'Creating sql insert statements....'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix sql_insert -t BehaviourLog -o behaviourLog.sql  -f 1:timestamp,2:sensorId,3:status sensors-02.csv
+
+echo 'Drop and recreate BehaviourLog table...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/behaviourLogCreate.sql
+
+echo 'Executing sql on database...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < behaviourLog.sql
+
+echo 'Modifying date on database...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/behaviourLogDate.sql
+
+### Section 1 - finished
+
+#--------------------------------------------------------------------------------------------------------
+### Section 2 - Create a sensorStateHistory table populating with values fomr the just created sensorLog
+
+echo 'Creating sensorStateHitory...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/sensorStateHistoryCreate.sql
+
+echo 'Updating sensorHistory with senslog info...'
+
+~/git/accompany/houseLearner/houseLearner -l $3
+
+echo 'Creating ruleStateHitory...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/ruleStateHistoryCreate.sql
+
+### Section 2 finished  
+
+#-----------------------------------------------------------------------------------------------------
+
+### Section 3 - get the observation data - $2 defines the name of this observation set manually
+###                                        extracted from Ismaels observation analysis held in
+###                                        Experiments Analysis Session (1/2) Events Logs.xlsx
+
+echo 'Getting modified observation data..'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -skip '$1 == ""' -sep ',' -smq  -o user$1-$2-classes.csv -f 1,2 user$1-$2.csv
+
+echo 'Creating sql insert statements for classes'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix sql_insert -t TeachingLog -o user$1-$2-classes.sql -f 1:relativeTime,2:class  user$1-$2-classes.csv
+
+echo 'Creating teachingLog...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/teachingLogCreate.sql
+
+echo 'Inserting observation data into teachingLog...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < user$1-$2-classes.sql
+
+echo 'Updating ruleStateHistory with class info...'
+
+~/git/accompany/classUpdate/classUpdate -l BATCH
+
+### Section 3 finished  
+
+#-----------------------------------------------------------------------------------------------------
+
+### Section 4 - generate files needed by C5.0
+
+# note the app armor must change see the extractData script below
+# You need to update apparmor to allow sql writes!
+# sudo gedit /etc/apparmor.d/local/usr.sbin.mysqld
+# add the path/to/folder
+# sudo /etc/init.d/apparmor restart
+
+echo 'Extracting file for use by C5.0...'
+
+rm -fr /home/joe/Documents/ACCOMPANY/Ismael/houseLearner/user$1/$2/*
+
+cp ../scripts/Inferences.names $2
+
+mysql -h localhost -u rhUser -pwaterloo Accompany -e "SELECT * FROM ruleStateHistory
+INTO OUTFILE '/home/joe/Documents/ACCOMPANY/Ismael/houseLearner/user$1/$2/Inferences.data'
+  FIELDS TERMINATED BY ','  
+  LINES TERMINATED BY '\n'"
+
+#-----------------------------------------------------------------------------------------------------
+
+### Section 5 - now generate a test file from the session 2 stats 
+###             create the sensorLog table on the DB using Ismael's S2 data
+ 
+echo 'Extract the relevant columns...'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -sep ';' -smq -o sensors-01.csv -f 2,4,9 Logs_SQL_User-$1-S2.csv
+
+echo 'Getting rid of empty rows...'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -skip '$1 == ""' -o sensors-02.csv -f 1,2,3 sensors-01.csv
+
+echo 'Creating sql insert statements....'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix sql_insert -t BehaviourLog -o behaviourLog.sql  -f 1:timestamp,2:sensorId,3:status sensors-02.csv
+
+echo 'Drop and recreate BehaviourLog table...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/behaviourLogCreate.sql
+
+echo 'Executing sql on database...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < behaviourLog.sql
+
+echo 'Modifying date on database...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/behaviourLogDate.sql
+
+### Section 5 - finished
+#--------------------------------------------------------------------------------------------------------
+
+### Section 6 - Create a sensorStateHistory table populating with values from the just created sensorLog
+
+echo 'Creating sensorStateHitory...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/sensorStateHistoryCreate.sql
+
+echo 'Updating sensorHistory with senslog info...'
+
+~/git/accompany/houseLearner/houseLearner -l $3
+
+echo 'Creating ruleStateHitory...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/ruleStateHistoryCreate.sql
+
+### Section 6 finished 
+#-----------------------------------------------------------------------------------------------------
+
+### Section 7 - get the observation data - $2 defines the name of this observation set manually
+###                                        extracted from Ismaels observation analysis held in
+###                                        Experiments Analysis Session (1/2) Events Logs.xlsx
+
+echo 'Getting modified observation data..'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix order -skip '$1 == ""' -sep ',' -smq  -o user$1-$2-classes.csv -f 1,2 user$1-$2-S2.csv
+
+echo 'Creating sql insert statements for classes'
+
+~/neilb-csvfix-dd1333175fbf/csvfix/bin/csvfix sql_insert -t TeachingLog -o user$1-$2-classes.sql -f 1:relativeTime,2:class  user$1-$2-classes.csv
+
+echo 'Creating teachingLog...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < ../scripts/teachingLogCreate.sql
+
+echo 'Inserting observation data into teachingLog...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany < user$1-$2-classes.sql
+
+echo 'Updating ruleStateHistory with class info...'
+
+~/git/accompany/classUpdate/classUpdate -l BATCH
+
+### Section 7 finished  
+#-----------------------------------------------------------------------------------------------------
+
+### Section 8 - generate test files needed by C5.0
+
+# note the app armor must change see the extractData script below
+# You need to update apparmor to allow sql writes!
+# sudo gedit /etc/apparmor.d/local/usr.sbin.mysqld
+# add the path/to/folder
+# sudo /etc/init.d/apparmor restart
+
+echo 'Extracting test file for use by C5.0...'
+
+mysql -h localhost -u rhUser -pwaterloo Accompany -e "SELECT * FROM ruleStateHistory
+INTO OUTFILE '/home/joe/Documents/ACCOMPANY/Ismael/houseLearner/user$1/$2/Inferences.test'
+  FIELDS TERMINATED BY ','  
+  LINES TERMINATED BY '\n'"
+
+#--------------------------------------------------------------------------------------
+
+### Section 5 - run C5.0
+
+echo 'Running C5.0...'
+
+cp ../scripts/Inferences.names $2
+
+~/C50/c5.0 -f $2/Inferences -b
+
+echo 'Finished'
+
+
+
+

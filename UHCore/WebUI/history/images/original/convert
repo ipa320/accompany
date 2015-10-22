@@ -1,0 +1,6 @@
+#!/bin/bash
+for i in r*
+do
+echo "Processing image $i ..."
+convert -thumbnail 200 $i ../th_$(basename $i .png).jpg
+done

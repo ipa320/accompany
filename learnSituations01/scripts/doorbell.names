@@ -1,0 +1,73 @@
+| This is a template used in the ShowMe system
+| It contains all the sensor names in the UH robot house
+| plus the classes to be classified
+| The template only contains 1 class - undefined
+| the suite os shoeMe programs add the other classes to this file
+| to create the 'real' names file - typically doorbell.names or watchingTV.names etc.
+
+
+activity.                     | the target attribute
+
+location:				discrete 50
+Water Pipe Sink Hot:			on, off 
+Water Pipe Sink Cold:			on, off 
+Ceiling cupboard door left:		on, off 
+Ceiling cupboard door middle:		on, off 
+Ceiling cupboard door right:		on, off 
+Floor cupboard drawer middle:		on, off 
+Floor cupboard drawer right:		on, off 
+Floor cupboard door middle:		on, off 
+Floor cupboard door right:		on, off 
+Floor cupboard door left:		on, off 
+Water Pipe Washbasin Hot:		on, off 
+Water Pipe Washbasin Cold:		on, off 
+Bathroom door:				on, off 
+Toilet flush:				on, off 
+Sofa Seatplace 0:			on, off 
+Sofa Seatplace 1:			on, off 
+Sofa Seatplace 2:			on, off 
+Sofa Seatplace 3:			on, off 
+Sofa Seatplace 4:			on, off 
+Chair Seatplace 0:			on, off 
+Chair Seatplace 1:			on, off 
+Table Pressure 2:			on, off 
+Living room door:			on, off 
+Big cupboard drawer bottom:		on, off 
+Big cupboard drawer top:		on, off 
+Small cupboard door left:		on, off 
+Small cupboard door right:		on, off 
+Small cupboard drawer bottom:		on, off 
+Small cupboard drawer middle:		on, off 
+Small cupboard drawer top:		on, off 
+Desk drawer bottom:			on, off 
+Desk drawer middle:			on, off 
+Desk drawer top:			on, off 
+Desk door:				on, off 
+Office chair:				on, off 
+Bedroom door:				on, off 
+Bed contact:				on, off 
+Wardrobe door left:			on, off 
+Wardrobe door middle:			on, off 
+Wardrobe door right:			on, off 
+Exterior lights:			on, off 
+Upstairs lights:			on, off 
+Downstairs lights:			on, off 
+Cooker:					on, off 
+Garage:					on, off 
+Sockets:				on, off 
+Sockets exterior and garden:		on, off 
+Mains supply:				on, off 
+TV:					on, off 
+Fridge:					on, off 
+Kettle:					on, off 
+Computer Bedroom 1:			on, off 
+Table lamp:				on, off 
+Microwave:				on, off 
+Dishwasher:				on, off 
+Toaster:				on, off 
+Computer Dining Area:			on, off 
+Coffee Machine:				on, off 
+Doorbell:				on, off 
+UH Cup: 				on, off 
+activity:				undefined,
+                                        doorbell

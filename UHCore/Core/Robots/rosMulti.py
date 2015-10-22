@@ -3,7 +3,12 @@ import os
 
 import rosHelper
 
-class ROS(object):
+class ROSMulti(object):
+    """ Experimental ros interface wrapping the complexities of communicating with multiple ros masters """
+    """ Creates a new process, configured with the appropriate variables and uses pipes to relay data """
+    """ to and from the current process.  The hope is to stablise this to the point that it can """
+    """ replace direct calls to rosHelper, allowing for communication and control of multiple robots """
+    """ from the same top level process. """
     def __init__(self, version=None, packagePath=None, packageName=None, rosMaster=None, overlayPath=None):
         localPipe, remotePipe = Pipe()
         self._pipe = localPipe
@@ -26,6 +31,10 @@ class ROS(object):
         msg = Message('getMessageType', {'topic':topic})
         return self._send(msg)
     
+    def getParam(self, paramName):
+        msg = Message('getParam', {'paramName': paramName})
+        return self._send(msg)
+    
     def _send(self, msg):
         self._pipeLock.acquire()
         try:
@@ -41,6 +50,14 @@ class ROS(object):
                 return ret
         finally:
             self._pipeLock.release()
+
+class Transform(rosHelper.Transform):
+    def __init__(self, rosHelper=None, fromTopic=None, toTopic=None):
+        if(rosHelper == None):
+            self._ros = ROS()
+        else:
+            self._ros = rosHelper
+        super(Transform, self).__init__(rosHelper, fromTopic, toTopic)
         
 class _RosMulti(Process):
     def __init__(self, version, rosMaster, overlayPath, pipe):
@@ -56,7 +73,7 @@ class _RosMulti(Process):
         self._pipe.close()
     
     def run(self):
-        #everthing inside here is run in a separate process space
+        # everthing inside here is run in a separate process space
         os.environ = rosHelper.ROS.parseRosBash('electric', False)
         rosHelper.ROS.configureROS(version=self._version, rosMaster=self._rosMaster, overlayPath=self._overlayPath)
         self._ros = rosHelper.ROS()

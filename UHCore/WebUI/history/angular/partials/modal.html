@@ -1,0 +1,23 @@
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, , user-scalable=1">
+</head>
+<div class="container">
+		<div class="row-fluid">
+			<div class="span2">
+				</br></br></br></br></br></br></br></br></br></br>
+				<p ng-click="goback(eventId2Show)"><img ng-src="images/back03.png"></p>
+				</select-->
+			</div>
+
+			<div class="span9">
+				<div ng-repeat="eps in img.episodes | filter:{eventId : eventId2Show}">
+					<div ng-repeat="event in eps.events | filter:{imageUrl : img2Show}">
+						<p style="font-size:25px"><b> {{event.name}} on {{event.time.real}}</b></p>
+						<div align="center"><img ng-src="{{event.imageUrl}}"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
+
+	

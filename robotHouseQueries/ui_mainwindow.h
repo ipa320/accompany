@@ -1,8 +1,8 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Thu Sep 27 16:31:32 2012
-**      by: Qt User Interface Compiler version 4.6.2
+** Created: Fri Jan 17 11:58:35 2014
+**      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -47,6 +47,7 @@ public:
     QPushButton *emptyLogButton;
     QCheckBox *sensorCheckBox;
     QCheckBox *refreshButton;
+    QLabel *locnLabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -79,10 +80,10 @@ public:
         robotButton->setGeometry(QRect(360, 30, 102, 24));
         Userlabel = new QLabel(centralWidget);
         Userlabel->setObjectName(QString::fromUtf8("Userlabel"));
-        Userlabel->setGeometry(QRect(250, 0, 151, 16));
+        Userlabel->setGeometry(QRect(320, 0, 151, 16));
         serverlabel = new QLabel(centralWidget);
         serverlabel->setObjectName(QString::fromUtf8("serverlabel"));
-        serverlabel->setGeometry(QRect(440, 0, 141, 16));
+        serverlabel->setGeometry(QRect(460, 0, 141, 16));
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QString::fromUtf8("groupBox"));
         groupBox->setGeometry(QRect(500, 20, 431, 91));
@@ -105,6 +106,9 @@ public:
         refreshButton = new QCheckBox(groupBox);
         refreshButton->setObjectName(QString::fromUtf8("refreshButton"));
         refreshButton->setGeometry(QRect(80, 70, 121, 21));
+        locnLabel = new QLabel(centralWidget);
+        locnLabel->setObjectName(QString::fromUtf8("locnLabel"));
+        locnLabel->setGeometry(QRect(250, 0, 53, 14));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
@@ -138,6 +142,7 @@ public:
         emptyLogButton->setText(QApplication::translate("MainWindow", "Clear Sensor Log", 0, QApplication::UnicodeUTF8));
         sensorCheckBox->setText(QApplication::translate("MainWindow", "In the Last 60 seconds", 0, QApplication::UnicodeUTF8));
         refreshButton->setText(QApplication::translate("MainWindow", "Auto refresh", 0, QApplication::UnicodeUTF8));
+        locnLabel->setText(QString());
     } // retranslateUi
 
 };

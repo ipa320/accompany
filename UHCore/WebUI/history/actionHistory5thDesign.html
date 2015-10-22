@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" ng-app="historyApp">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<title>Care-O-bot Memory Visualization</title>
+
+    <link rel="stylesheet" href="angular/css/bootstrap.css">
+    <link rel="stylesheet" href="angular/css/bootstrap-responsive.min.css">
+    <script src="angular/lib/angular/angular.min.js"></script>
+    <script src="js/ui-bootstrap-tpls-0.10.0.js"></script>
+    <!--link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.js"></script>
+    <script src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.10.0.js"></script-->
+
+    <!--link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.css" rel="stylesheet"-->
+    <!-- required libraries -->
+    <!--script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-strap/0.7.5/angular-strap.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script-->
+	<!-- optional libraries -->
+    <!--script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/0.6.0/fastclick.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js"></script-->
+
+  	<link rel="stylesheet" href="angular/css/app.css">
+  	<!--link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet"-->
+  	<!--link rel="stylesheet" href="angular/css/bootstrap.css"-->
+
+	<!--script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script-->
+  	<!-- GOOD ONE script src="angular/lib/jquery/jquery-1.10.2.js"></script-->
+
+  	<!--script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.8/angular.min.js"></script-->
+  	<script src="angular/lib/angular/angular-route.js"></script>
+    <script src="angular/lib/angular/angular-touch.js"></script>
+
+  	<script src="angular/js/controllers.js"></script>
+  	<script src="angular/js/app.js"></script>
+    
+
+    
+
+
+</head>
+
+<body>
+  
+
+  <div ng-view id="page"></div>
+
+  <script src="js/hideaddressbar.js"></script>
+  <script>hideAddressbar('#page');</script>
+
+</body>
+
+</html>
+

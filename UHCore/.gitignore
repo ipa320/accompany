@@ -1,0 +1,8 @@
+#Python generated files
+*pyc
+*py~
+
+#Cpp generated files
+*.d
+*.a
+*.o

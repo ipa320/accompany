@@ -1,0 +1,51 @@
+ #!/bin/bash         
+
+echo "Copying classisifcation data...."
+
+# run this routine in the userNNN directory - e.g. ../scripts/extract 001 1 BATCH
+#
+# needs Logs_SQL_User-NNN.csv e.g. Logs_SQL_User-001.csv 
+#
+# observer analysis should be extracted from Experiments analysis -Session 1.xlsx into csv files called
+# userNNN_level1.csv e.g. user001_level4.csv
+#
+# the scruot will create a classified analysis file (Inferences.data). A C5.0 names file (Inferences.names) is
+# also present (there is a copy in the scripts directory).
+#
+# C5.0 is then run with boosting enabled
+#
+ 
+if [ -z $1 ] 
+then echo 'ERROR --> need user number parameter e.g. user001 or combined!'
+     exit
+fi
+
+echo 'User is: ' $1  
+
+echo 'Removing existing files...'
+
+
+cd ~/git/accompany/testC5/data/
+rm -f *.names
+rm -f *.cases
+rm -f *.res
+rm -f *.tree
+ 
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Food/Inferences.names ./Preparing_Food.names
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Food/Inferences.test ./Preparing_Food.cases
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Food/Inferences.tree ./Preparing_Food.tree 
+
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Hot_Drink/Inferences.names ./Preparing_Hot_Drink.names
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Hot_Drink/Inferences.test ./Preparing_Hot_Drink.cases
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Hot_Drink/Inferences.tree ./Preparing_Hot_Drink.tree 
+
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Cold_Drink/Inferences.names ./Preparing_Cold_Drink.names
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Cold_Drink/Inferences.test ./Preparing_Cold_Drink.cases
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Preparing_Cold_Drink/Inferences.tree ./Preparing_Cold_Drink.tree 
+
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Using_Toaster/Inferences.names ./Using_Toaster.names
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Using_Toaster/Inferences.test ./Using_Toaster.cases
+cp ~/Documents/ACCOMPANY/Ismael/houseLearner/$1/Using_Toaster/Inferences.tree ./Using_Toaster.tree 
+
+
+echo 'Finished'

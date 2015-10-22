@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en" ng-app="historyApp">
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  	<title>Care-O-bot Memory Visualization</title>
+  
+
+	<link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="//cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.css" rel="stylesheet">
+    <!-- required libraries -->
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.1/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-strap/0.7.5/angular-strap.js"></script>
+    <script src="//angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.7.0.js"></script>
+	<!-- optional libraries -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.0.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/fastclick/0.6.0/fastclick.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js"></script>
+
+  	<link rel="stylesheet" href="angular/css/app.css">
+  	<script src="angular/js/controllers.js"></script>
+
+</head>
+<body ng-controller="EpisodesListCtrl" >
+	<div class="container"><!-- was class="container-fluid"-->
+
+		<h1 align="center">Care-O-bot Memory Visualization</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				
+				<!--Sidebar content>
+				<p> Sessions: {{episodes.Episodes.length}}</p>
+				@TODO preload the bs-typeahead for ruleName> 			{{loadRuleName()}}-->	
+
+				<b>>Search by</b></br>
+				<input class="span9" type="text" ng-click="clear_eventquery()" ng-model="eventquery.name" bs-typeahead="ruleName" placeholder="Name (e.g. drink)"></br>
+				<!--input type="text" ng-change="loadRuleName('lola')" ng-model="eventquery.name" bs-typeahead="ruleName" placeholder="Name"></br--> <!-- bs-typeahead="location" -->
+				
+				<input class="span9" type="text" ng-click="clear_locationquery()" ng-model="locationquery.location" bs-typeahead="locationName" placeholder="Place (e.g. sofa)"></br><!-- bs-typeahead="location" -->
+				
+				<b>>Sort by</b></br>
+				<select class="span9" ng-model="orderProp">
+				  <option value="location">Location</option>
+				  <option value="name">Rule</option>
+				  <option value="-time.narrative">Newest</option>
+				  <option value="time.narrative">Oldest</option>
+				</select>
+
+				</br><b>>Show</b></br>
+				<select class="span9"  ng-model="statusquery.tags">
+					<option value="">All</option>
+					<option ng-repeat="item in tagsItems" value="{{item.value}}">{{item.label}}</option>
+					<!--option value="important">Important</option>
+					<option value="question">Unclear</option-->
+				</select>	
+
+			</div>
+		
+			<div class="span9">
+					<div class="clearfix" ng-repeat="ep in episodes.episodes">
+							<h3>Episode: {{ep.scenario}} to <span style="color: #ff0000;">{{ep.events[0].nickname}}</span> </h3>
+							<!--div> {{ep.description}} </div></br-->
+							<!--div ng-controller="ModalCtrl" ng-click="viaService()" class="narrative" ng-repeat="event in ep.events"> {{event.name}} </div></br></br></br></br></br></br></br></br-->
+							<div data-ng-init="loadRuleName(event.name)" ng-controller="ModalCtrl" ng-click="viaService()" ng-repeat="event in ep.events | filter:locationquery:strict  | filter:eventquery:strict  | orderBy:orderProp | filter:statusquery" class="inner">
+								<div align="center" data-ng-init="loadLocationName(event.location)"><img ng-src="{{event.imageThUrl}}"></div>
+							<div>
+
+					</div>
+			</div>
+		</div>	
+
+
+
+	<!--ul ng-repeat="EV in episodes.Episodes">
+			<li ng-repeat="EVE in EV.Events">
+				<p>{{EVE.tags[0]}}</p>
+				{{setRadioValue(EVE.tags[0])}}
+					<div class="btn-group" ng-model="tagsValue" bs-buttons-radio>
+						<button ng-repeat="item in tagsItems" type="button" class="btn" value="{{item.value}}">{{item.label}}</button>
+					</div>
+				<p>{{tagsValue}}</p>
+				{{loadRuleName(EVE.name)}}
+				 {{setName2Set(EVE.name)}}
+				 <script type="text/javascript">
+						$scope.ruleName.push(EVE.name);
+					</script>
+			</li>
+	</ul-->
+
+	<!--input type="button" ng-click="loadRuleName('putapariu')" value="Add Item" /><br/-->
+
+	<!-- <ul ng-repeat="EV in episodes.Episodes">
+			<li ng-repeat="EVE in EV.Events">
+				<input type="button" ng-click="loadRuleName(EVE.name)" value="Add Item" /><br/>
+				
+				<p>Name {{EVE.name}}</p>
+			</li>
+	</ul>
+
+	{{ruleName.length}}
+	{{ruleName}}
+	</div> -->
+
+	
+	
+</body>
+</html>
+

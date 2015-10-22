@@ -1,0 +1,74 @@
+| This is a template used in the ShowMe system
+| It cOntains all the sensor names in the UH robot house
+| plus the classes to be classified
+| The template Only cOntains 1 class - 'undefined'
+| the suite of shoeMe programs add the other classes to this file
+| to create the 'real' names file - typically doorbell.names or watchingTV.names etc.
+
+
+activity.		                  | the target attribute
+
+last update:				ignore	
+sensor location:			ignore | discrete 50
+Water Pipe Sink Hot:			On, Off 
+Water Pipe Sink Cold:			On, Off 
+Ceiling cupboard door left:		Open,Closed 
+Ceiling cupboard door middle:		Open,Closed 
+Ceiling cupboard door right:		Open,Closed 
+Floor cupboard drawer middle:		Open,Closed 
+Floor cupboard drawer right:		Open,Closed 
+Floor cupboard door middle:		Open,Closed 
+Floor cupboard door right:		Open,Closed 
+Floor cupboard door left:		Open,Closed 
+Water Pipe Washbasin Hot:		On, Off 
+Water Pipe Washbasin Cold:		On, Off 
+Bathroom door:				Open,Closed  
+Toilet flush:				High,Low
+Sofa Seatplace 0:			Free,Occupied
+Sofa Seatplace 1:			Free,Occupied
+Sofa Seatplace 2:			Free,Occupied
+Sofa Seatplace 3:			Free,Occupied
+Sofa Seatplace 4:			Free,Occupied
+Chair Seatplace 0:			Free,Occupied
+Chair Seatplace 1:			Free,Occupied
+Table Pressure 2:			Free,Occupied
+Living room door:			Open,Closed 
+Big cupboard drawer bottom:		Open,Closed 
+Big cupboard drawer top:		Open,Closed 
+Small cupboard door left:		Open,Closed 
+Small cupboard door right:		Open,Closed 
+Small cupboard drawer bottom:		Open,Closed 
+Small cupboard drawer middle:		Open,Closed 
+Small cupboard drawer top:		Open,Closed 
+Desk drawer bottom:			Open,Closed 
+Desk drawer middle:			Open,Closed 
+Desk drawer top:			Open,Closed 
+Desk door:				Open,Closed 
+Office chair:				Free,Occupied
+Bedroom door:				Open,Closed 
+Bed contact:				Free,Occupied
+Wardrobe door left:			Open,Closed 
+Wardrobe door middle:			Open,Closed 
+Wardrobe door right:			Open,Closed 
+Exterior lights:			On, Off 
+Upstairs lights:			On, Off 
+Downstairs lights:			On, Off 
+Cooker:					On, Off 
+Garage:					On, Off 
+Sockets:				On, Off 
+Sockets exterior and garden:		On, Off 
+Mains supply:				On, Off 
+TV:					On, Off 
+Fridge:					On, Off 
+Kettle:					On, Off 
+Computer Bedroom 1:			On, Off 
+Table lamp:				On, Off 
+Microwave:				On, Off 
+Dishwasher:				On, Off 
+Toaster:				On, Off 
+Computer Dining Area:			On, Off 
+Coffee Machine:				On, Off 
+Doorbell:				On, Off 
+UH Cup: 				Full,Empty 
+sensorId:                               ignore
+activity:				undefined,

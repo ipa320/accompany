@@ -1,0 +1,58 @@
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, , user-scalable=1">
+</head>
+<div class="container">
+<!--h1 align="center">Care-O-bot Memory Visualization</h1-->
+		<div class="row-fluid">
+			<div ng-click="goback()" class="span2">
+				</br></br></br></br></br></br></br></br></br></br>
+				<p ng-click="goback()"><img ng-src="images/back03.png"></p>
+				<!--/br></br></br></br><b>>Search by</b></br>
+				<input class="span9" type="text" ng-click="clearEventQuery()" ng-model="eventquery.name" bs-typeahead="ruleName" placeholder="Name (e.g. drink)"></br>
+
+				<input class="span9" type="text" ng-click="clearLocationQuery()" ng-model="locationquery.location" bs-typeahead="locationName" placeholder="Location (e.g. sofa)"></br>
+				
+				<b>>Sort by</b></br>
+				<select class="span9" ng-model="orderProp">
+				  <option value="location">Location</option>
+				  <option value="name">Rule</option>
+				  <option value="-time.narrative">Newest</option>
+				  <option value="time.narrative">Oldest</option>
+				</select>
+
+				</br><b>>Show</b></br>
+				<select class="span9" ng-model="statusquery.tags">
+					<option value="">All</option>
+					<option ng-repeat="item in tagsItems" value="{{item.value}}">{{item.label}}</option>
+				</select-->
+			</div>
+
+			<div class="span10">
+				<div class="clearfix" ng-repeat="eps in episodes.episodes | filter:{eventId : eventId2Show}">
+					<h1 align="center" >{{eps.scenario}} </h1>
+					<h5>{{eps.whentime}}</h5></br>
+					<p style="font-size:x-large" >{{eps.description}}</p></br>
+					<div ng-click="go2(event.imageUrl)" ng-repeat="event in eps.events" class="inner">
+							<p align="center" data-ng-init="loadLocationName(event.location)"><img ng-src="{{event.imageThUrl}}"><img ng-src="images/next.png"></p>
+
+							<p align="center" style="font-size:16px" data-ng-init="loadRuleName(event.name)" ><b> {{event.name}}</b></p>
+					<div>
+				</div>
+			</div>
+		</div>
+</div>
+
+<!--ul ng-repeat="eps in episodes.episodes | filter:{eventId : eventId2Show}">
+	<h3>{{eps.scenario}} to <span style="color: #ff0000;">{{eps.events[0].nickname}}</span> </h3>
+</ul-->
+
+
+<!--ul class="episodes" ng-repeat="ep in episodes.episodes">
+							<h3>{{ep.scenario}} to <span style="color: #ff0000;">{{ep.events[0].nickname}}</span> </h3>
+							<li data-ng-init="loadRuleName(event.name)" ng-controller="ModalCtrl" ng-click="viaService()" ng-repeat="event in ep.events | filter:locationquery:strict  | filter:eventquery:strict  | orderBy:orderProp | filter:statusquery" class="thumbnail">
+								<a align="center" data-ng-init="loadLocationName(event.location)" class="thumb"><img ng-src="{{event.imageThUrl}}"></a>
+							<li>
+
+					</ul-->
+
+	

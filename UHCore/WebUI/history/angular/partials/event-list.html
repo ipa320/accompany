@@ -1,0 +1,90 @@
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=1">
+</head>
+
+	<div class="container"><!-- was class="container-fluid"-->
+
+		<h1 align="center">Care-O-bot Memory Visualization</h1>
+		<div class="row-fluid">
+			<div class="span3">
+				
+				<!--Sidebar content>
+				<p> Sessions: {{episodes.Episodes.length}}</p>
+				@TODO preload the bs-typeahead for ruleName> 			{{loadRuleName()}}-->	
+
+				<b>>Search by</b></br>
+				<input class="span9" type="text" ng-model="scenarioquery.scenario" bs-typeahead="ruleName" placeholder="Name (e.g. drink)"></br>
+				<!--input class="span9" type="text" ng-click="clearScenarioQuery()" ng-model="scenarioquery.scenario" bs-typeahead="ruleName" placeholder="Name (e.g. drink)"></br-->
+				
+				<!--input class="span9" type="text" ng-click="clear_locationquery()" ng-model="locationquery.location" bs-typeahead="locationName" placeholder="Place (e.g. sofa)"></br-->
+				
+				<b>>Sort by</b></br>
+				<select class="span9" ng-model="orderEpisodes">
+				  <!--option value="location">Location</option>
+				  <option value="name">Rule</option-->
+				  <option value="-endTime">Newest</option>
+				  <option value="endTime">Oldest</option>
+				</select>
+
+				<!--/br><b>>Show</b></br>
+				<select class="span9"  ng-model="statusquery.tags">
+					<option value="">All</option>
+					<option ng-repeat="item in tagsItems" value="{{item.value}}">{{item.label}}</option>
+					
+				</select-->	
+
+			</div>
+		
+			<div class="span9">
+					<ul class="episodes" ng-repeat="ep in episodes.episodes | orderBy:orderEpisodes | filter:scenarioquery" ng-click="go(ep.eventId)">
+						<li class="thumbnail" >
+							<a class="thumb"><img ng-src="{{ep.imageArt}}"></a>
+							<p style="font-size:large"><b>{{ep.scenario}}</b></p>
+							<p style="font-size:large" >{{ep.shortDescription}}</p>
+							<p style="font-size:large">{{ep.whentime}}</p>
+							
+						</li>
+					</ul>
+			</div>
+		</div>	
+
+
+					<!--ul class="episodes" ng-repeat="ep in episodes.episodes">
+							<h3>{{ep.scenario}} to <span style="color: #ff0000;">{{ep.events[0].nickname}}</span> </h3>
+							<li data-ng-init="loadRuleName(event.name)" ng-controller="ModalCtrl" ng-click="viaService()" ng-repeat="event in ep.events | filter:locationquery:strict  | filter:eventquery:strict  | orderBy:orderProp | filter:statusquery" class="thumbnail">
+								<a align="center" data-ng-init="loadLocationName(event.location)" class="thumb"><img ng-src="{{event.imageThUrl}}"></a>
+							<li>
+
+					</ul-->
+
+
+	<!--ul ng-repeat="EV in episodes.Episodes">
+			<li ng-repeat="EVE in EV.Events">
+				<p>{{EVE.tags[0]}}</p>
+				{{setRadioValue(EVE.tags[0])}}
+					<div class="btn-group" ng-model="tagsValue" bs-buttons-radio>
+						<button ng-repeat="item in tagsItems" type="button" class="btn" value="{{item.value}}">{{item.label}}</button>
+					</div>
+				<p>{{tagsValue}}</p>
+				{{loadRuleName(EVE.name)}}
+				 {{setName2Set(EVE.name)}}
+				 <script type="text/javascript">
+						$scope.ruleName.push(EVE.name);
+					</script>
+			</li>
+	</ul-->
+
+	<!--input type="button" ng-click="loadRuleName('putapariu')" value="Add Item" /><br/-->
+
+	<!-- <ul ng-repeat="EV in episodes.Episodes">
+			<li ng-repeat="EVE in EV.Events">
+				<input type="button" ng-click="loadRuleName(EVE.name)" value="Add Item" /><br/>
+				
+				<p>Name {{EVE.name}}</p>
+			</li>
+	</ul>
+
+	{{ruleName.length}}
+	{{ruleName}}
+	</div> -->
+

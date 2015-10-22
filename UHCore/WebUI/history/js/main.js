@@ -69,32 +69,32 @@ uiHelper.prototype = {
 		$(root).append(list);
 
 		for (index in episodes) {
-			var episode = episodes[index];
+			var episode = episodes[index];//get each episode
 			var newEp = $('<li></li>')
-			newEp.prop('class', 'group');
 			newEp.text('Interactive Session ' + (index + 1));
 			list.append(newEp);
 
-			var events = episode['Events'];
-			for (eventIndex in events) {
+			var events = episode['Events'];	//get the events in the episode
+			for (eventIndex in events) {	//for each event
 				if (eventIndex == 0 || events[eventIndex]['status'] == 'activate') {
 					var event = events[eventIndex];
-					var newEv = $('<li></li>');
-					var newLnk = $('<a></a>');
-					var timestamp = event['time']['narrative'];
-					newLnk.prop('href', '#' + timestamp);
-					newLnk.text(event['time']['real'] + ': ' + event['name']);
+					var newEv = $('<li></li>');	//event is a li
+					var newLnk = $('<a></a>');	//link to the event
+					var timestamp = event['time']['narrative'];	//timestamp of the event
+					newLnk.prop('href', '#' + timestamp);	//the url of the link
+					newLnk.text(event['time']['real'] + ': ' + event['name']);	//the text of the link
 					newEv.append(newLnk);
 
-					var details = $('<ul></ul>');
+					var details = $('<ul></ul>');	//details of the event is ul
 					$(details).prop('id', timestamp);
 					$(details).prop('title', 'Event Details');
-					this.appendDetail(details, 'Time', event['time'], 'real');
-					this.appendDetail(details, 'Location', event, 'location');
-					this.appendDetail(details, 'Action Name', event, 'name');
-					this.appendDetail(details, 'Target', event, 'target');
-
-					if (event['imageUrl'] != undefined) {
+					this.appendDetail(details, 'Time', event['time'], 'real');	//creates a li for Time
+					this.appendDetail(details, 'Location', event, 'location');	//creates a li for Location
+					this.appendDetail(details, 'Action Name', event, 'name');	//creates a li for Action Name
+					this.appendDetail(details, 'Target', event, 'target');		//creates a li for Target
+					
+					
+					if (event['imageUrl'] != undefined) {//li for image
 						details.append(this.createListItem('group', 'Image'));
 						var img = $('<img></img>');
 						var self = this;
@@ -108,7 +108,7 @@ uiHelper.prototype = {
 						details.append(this.createListItem(null, img));
 					}
 
-					if (event['parameters'] != undefined && event['parameters'].length > 0) {
+					if (event['parameters'] != undefined && event['parameters'].length > 0) {//li for other information
 						details.append(this.createListItem('group', 'Other Information'));
 						for (index in event['parameters']) {
 							details.append(this.createListItem(null, event['parameters'][index]['name'] + ': ' + event['parameters'][index]['value']));
@@ -119,7 +119,7 @@ uiHelper.prototype = {
 						event['tags'] = []
 					}
 					
-					details.append(this.createListItem('group', 'Event Tags'));
+					details.append(this.createListItem('group', 'Event Tags'));//li for event tags
 					var alltags = ['important', 'question'];
 					var tags = this.createListItem(null, null);
 					$(tags).data('tags', event['tags']);
@@ -146,7 +146,7 @@ uiHelper.prototype = {
 					
 					details.append(tags);
 
-					if (event['sensorMapUrl'] != undefined) {
+					if (event['sensorMapUrl'] != undefined) {//li for sensor Map
 						details.append(this.createListItem('group', 'Sensor Map'));
 						var img = $('<img></img>');
 						$(img).prop('src', event['sensorMapUrl']);
@@ -160,7 +160,7 @@ uiHelper.prototype = {
 						details.append(this.createListItem(null, img));
 					}
 
-					if (event['sensors'] != undefined && event['sensors'].length > 0) {
+					if (event['sensors'] != undefined && event['sensors'].length > 0) {//li for sensor snapshot
 						details.append(this.createListItem('group', 'Sensor Snapshot'));
 						for (sensorIndex in event['sensors']) {
 							details.append(this.createListItem(null, event['sensors'][sensorIndex]['location'] + ' ' + event['sensors'][sensorIndex]['name'] + ': ' + event['sensors'][sensorIndex]['value']));

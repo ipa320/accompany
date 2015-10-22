@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #Add project reference
 import sys, os
 path = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../' + 'Core')
@@ -9,6 +10,7 @@ import questions
 import sensorMap
 import sensorDetails
 import listRoot
+#import sienagui
 
 from config import server_config
 
@@ -33,5 +35,7 @@ listRoot.setLinks((
               ('question', questions),
               ('details', sensorDetails),
               ('liveMap', sensorMap)))
+
+#root.sienagui = sienagui.root
 
 cherrypy.quickstart(root, '/', conf)

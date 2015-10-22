@@ -1,6 +1,6 @@
 from Data.dataAccess import DataAccess
 from SensorMap.processor import MapProcessor
-from Data.sensors import StateResolver
+from Data.stateResolver import StateResolver
 
 import cherrypy
 from cherrypy.lib import file_generator
@@ -11,7 +11,7 @@ class Root(object):
     exposed = True
     
     def __init__(self):
-        self._index = 'actionHistory.html'
+        self._index = 'actionHistory5thDesign.html'
     
     def GET(self, *args, **kwargs):
         if not cherrypy.request.path_info.endswith('/'):
@@ -58,7 +58,7 @@ class Data(object):
                 tags = kwargs['tags'].split(',')
             else:
                 tags = ()
-            obj = self.getEvents(dataKey, tags)
+            obj = self.getEventsOrdered(dataKey, tags)
         else :
             raise cherrypy.HTTPError(400)
         
@@ -81,6 +81,30 @@ class Data(object):
             else:
                 raise cherrypy.HTTPError(500)
 
+    def getEventsOrdered(self, key, tags):
+        hists = self._dao.getHistoryOrdered(key, tags)
+        #if len(events) == 0:
+        #    raise cherrypy.HTTPError(404)
+        
+        for hist in hists:
+            if hist['scenario'] != None:
+                #hist['gifThUrl'] = 'images/th_%s.gif' % hist['scenario']
+                hist['imageArt'] = 'images/%s.jpg' % hist['imageArt']
+            for event in hist['events']:
+                if event['imageId'] != None:
+                    event['imageUrl'] = 'images/%s' % event['imageId']
+                    event['imageThUrl'] = 'images/th_r%s.jpg' % event['imageId']
+                event.pop('imageId')
+                if event['imageOverheadId'] != None:
+                    event['imageOverheadUrl'] = 'imagesOverhead/%s' % event['imageOverheadId']
+                event.pop('imageOverheadId')
+
+        for hist in hists:
+            filename = 'history/json/%s.json' %hist['eventId']
+            with open(filename, 'wb') as outfile:
+                json.dump(hist, outfile)
+
+        return {'episodes': hists}
 
     def getEvents(self, key, tags):
         events = self._dao.getHistory(key, tags)
@@ -89,10 +113,13 @@ class Data(object):
         
         for event in events:
             if event['imageId'] != None:
-                event['imageUrl'] = 'images/%s' % event['imageId']
+                event['imageThUrl'] = 'images/th_r%s.jpg' % event['imageId']
             event.pop('imageId')
-            if event['sensors'] != None and len(event['sensors']) > 0:
-                event['sensorMapUrl'] = 'mapHistory/%s' % event['id']
+            if event['imageOverheadId'] != None:
+                event['imageOverheadUrl'] = 'imagesOverhead/%s' % event['imageOverheadId']
+            event.pop('imageOverheadId')
+            #if event['sensors'] != None and len(event['sensors']) > 0:
+            #    event['sensorMapUrl'] = 'mapHistory/%s' % event['id']
             
         return {'Episodes': [{'Events': events}]}
 
@@ -107,7 +134,45 @@ class Images(object):
         if len(args) < 1:
             raise cherrypy.HTTPError(403, 'Directory Listing Denied')
 
-        img = self._dao.getBinary(args[0])
+        from PIL import Image
+        fileName, fileExtension = os.path.splitext(args[0])
+        if fileExtension=='.jpg':
+            #path = os.path.join(self._basePath, args[0])
+            data = Image.open(os.path.join(self._basePath, args[0]))
+            img = {
+                   'data': None,
+                   'meta': {
+                            'type': '',
+                            'name': ''
+                            }
+                   }
+        else:
+            img = self._dao.getBinary(args[0])
+
+        if img['data'] == None:
+            path = os.path.join(self._basePath, args[0])
+            if os.path.exists(path):
+                data = io.FileIO(path)
+            else:
+                raise cherrypy.HTTPError(404)
+        else:
+            data = io.BytesIO(img['data'])
+
+        cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(img['meta']['name'] + '.' + img['meta']['type'])[0]
+        return file_generator(data)
+
+class ImagesOverhead(object):
+    exposed = True
+    
+    def __init__(self):
+        self._dao = DataAccess()
+        self._basePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'imagesOverhead')
+        
+    def GET(self, *args, **kwargs):
+        if len(args) < 1:
+            raise cherrypy.HTTPError(403, 'Directory Listing Denied')
+
+        img = self._dao.getBinaryOverhead(args[0])
         
         if img['data'] == None:
             path = os.path.join(self._basePath, args[0])
@@ -120,6 +185,7 @@ class Images(object):
 
         cherrypy.response.headers['Content-Type'] = mimetypes.guess_type(img['meta']['name'] + '.' + img['meta']['type'])[0]
         return file_generator(data)
+
 
 class MapHistory(object):
     exposed = True
@@ -137,9 +203,7 @@ class MapHistory(object):
         if len(sensorHist) > 0:
             mp = MapProcessor()
             s = StateResolver()
-            sensors = s.resolveStates(sensorHist)
-            #[{'id': sensor['sensorId'], 'value': sensor['value'], 'state':'on'},]
-            sensors = s.appendSensorMetadata(sensors) #adds location and type            
+            sensors = s.resolveStates(sensorHist)     
             img = mp.buildMap(sensors)
             data = io.BytesIO(img)
             cherrypy.response.headers['Content-Type'] = mimetypes.guess_type('img.svg')[0]

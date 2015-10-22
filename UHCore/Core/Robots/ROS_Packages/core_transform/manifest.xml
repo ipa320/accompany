@@ -1,0 +1,12 @@
+<package>
+  <description brief="actionlib_interface">
+  	Manifest to load ROS dependancies for ros transformations
+  </description>
+  <author>Nathan Burke</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <depend package="tf"/>
+  <depend package="rospy"/>
+</package>
+
+
