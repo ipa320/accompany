@@ -15,6 +15,9 @@ public:
     ~MainWindow();
 
     bool closeDownRequest;
+    QString lv;
+
+    void setup();
 
 
 
@@ -42,6 +45,18 @@ private:
 
 private slots:
 
+    void on_apCheckBox_toggled(bool checked);
+    void on_armCheckBox_toggled(bool checked);
+    void on_HUYTlivingSofa3CheckBox_toggled(bool checked);
+    void on_HUYTlivingSofa2CheckBox_toggled(bool checked);
+    void on_robotExpressionCheckBox_toggled(bool checked);
+    void on_ZUYDFridgeCheckBox_toggled(bool checked);
+    void on_ZUYDDoorbellCheckBox_toggled(bool checked);
+    void on_cupLevelCheckBox_toggled(bool checked);
+    void on_HUYTlivingSofa1CheckBox_toggled(bool checked);
+    void on_Goal1ComboBox_currentIndexChanged(QString );
+    void on_seqTypeComboBox_currentIndexChanged(int index);
+    void on_seqDescLineEdit_editingFinished();
     void on_condAddRuleButton_clicked();
     void on_robotEyesCheckBox_toggled(bool checked);
     void on_robotGoal1CheckBox_toggled(bool checked);
@@ -119,12 +134,11 @@ private slots:
     void on_diningSofa1CheckBox_toggled(bool checked);
     void on_selectSensorsButton_clicked();
     void on_IgnoreSensorsButton_clicked();
-    void on_contextAnyButton_toggled(bool checked);
+
     void on_robotLocationAnyButton_toggled(bool checked);
     void on_AnyUserLocationButton_toggled(bool checked);
     void on_AnyUserLocationButton_clicked();
-    void on_contextSpecButton_clicked();
-    void on_contextAnyButton_clicked();
+
     void on_robotLocationSpecButton_clicked();
     void on_robotLocationAnyButton_clicked();
     void on_specUserLocationButton_clicked();

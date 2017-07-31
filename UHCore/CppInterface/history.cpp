@@ -1,65 +1,75 @@
-#include "history.h"
+#include "include/history.h"
 #include "Python.h"
 #include <string>
 #include <iostream>
 #include <stdio.h>
 
-ActionHistory::ActionHistory(const char* modulePath) :
+ActionHistory::ActionHistory(std::string modulePath) :
 		PythonInterface(modulePath) {
+	pInstance = NULL;
+}
+
+PyObject* ActionHistory::getDefaultClassInstance() {
+	if (pInstance == NULL) {
+		pInstance = getClassInstance("history", "ActionHistory", NULL);
 	}
 
-std::string ActionHistory::getModuleName() {
-	return std::string("history");
-}
-std::string ActionHistory::getClassName() {
-	return std::string("ActionHistory");
+	return pInstance;
 }
 
-bool ActionHistory::cancelPollingHistory(const char* ruleName) {
+bool ActionHistory::cancelPollingHistory(std::string ruleName) {
 	PyObject* pValue = callMethod("cancelPollingHistory", ruleName);
-	bool ret = false;
-	if (PyObject_IsTrue(pValue)) {
-		ret = true;
-	}
 
-	Py_DECREF(pValue);
+	bool ret;
+	{
+		PythonLock lock = PythonLock();
+		ret = PyObject_IsTrue(pValue);
+
+		Py_DECREF(pValue);
+	}
 
 	return ret;
 }
 
-char* ActionHistory::addPollingHistory(const char* ruleName, float delaySeconds) {
-
+char* ActionHistory::addPollingHistory(std::string ruleName, float delaySeconds) {
 	char* m = strdup("addPollingHistory");
 	char* f = strdup("(sf)");
-	PyObject *pValue = PyObject_CallMethod(getClassInstance(), m, f, ruleName,
-			delaySeconds);
-	delete m;
-	delete f;
 
-	if (pValue != NULL) {
-		char* ret = PyString_AsString(pValue);
-		Py_DECREF(pValue);
-		return ret;
-	} else {
-		std::cout << "Error while calling method" << '\n';
-		PyErr_Print();
-		return NULL;
+	PyObject *pValue = callMethod(m, f, ruleName.c_str(), delaySeconds);
+
+	char* ret;
+	{
+		PythonLock lock = PythonLock();
+		if (pValue != NULL) {
+			ret = PyString_AsString(pValue);
+			Py_DECREF(pValue);
+		} else {
+			std::cerr << "Error while calling method" << std::endl;
+			PyErr_Print();
+			PyErr_Clear();
+		}
 	}
+
+	return ret;
 }
 
-void ActionHistory::addHistoryAsync(const char* ruleName) {
+void ActionHistory::addHistoryAsync(std::string ruleName) {
+
 	PyObject* pValue = callMethod("addHistoryAsync", ruleName);
-	Py_DECREF(pValue);
+	{
+		PythonLock lock = PythonLock();
+		Py_DECREF(pValue);
+	}
 }
 
-bool ActionHistory::addHistory(const char* ruleName) {
+bool ActionHistory::addHistory(std::string ruleName) {
 	PyObject* pValue = callMethod("addHistory", ruleName);
-	bool ret = false;
-	if (PyObject_IsTrue(pValue)) {
-		ret = true;
+	bool ret;
+	{
+		PythonLock lock = PythonLock();
+
+		ret = PyObject_IsTrue(pValue);
+		Py_DECREF(pValue);
 	}
-
-	Py_DECREF(pValue);
-
 	return ret;
 }

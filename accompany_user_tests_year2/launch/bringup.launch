@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+
+	<include file="$(find cob_bringup)/robot.launch" >
+		<arg name="robot_env" value="$(env ROBOT_ENV)" />
+		<arg name="pkg_env_config" value="$(find accompany_user_tests_year2)" />
+	</include>
+
+</launch>

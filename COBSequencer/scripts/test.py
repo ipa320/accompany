@@ -42,17 +42,62 @@ class test(script):
 #--------------------------------------------------------------------------------
   def Run(self):
 
-    overallresult=checkRules(self);        # check the rule set
+# No rules found!
+
+    overallresult=True;        # no rules thus execute all actions
 
     if not self.sss.parse:
-       rospy.loginfo("SET ::501::TrayIsLowered TO  true")
+       rospy.loginfo("move torso on ::0::Care-O-Bot 3.2 to home position")
 
     if (overallresult):
-       if not self.sss.parse:
-          cursorSequence = self.conn.cursor()
-          sqlSequence = "INSERT INTO SensorLog (timestamp,sensorId,room,channel,value,status) VALUES (NOW(),501\
-               ,'','','1','true')"
-          cursorSequence.execute(sqlSequence)
+       self.sss.move("arm","home")  
+   #    self.sss.move("arm",[[-2.1572567240035734, -1.9104664691761568, -2.5334780195730255, -1.7853311980377056, -0.072798739390243047, 0.91767934923272776, -1.8876618005378798]])
+   #    self.sss.move("arm","folded-to-look_at_table")
+
+       self.sss.move("arm","folded")
+
+  #      self.sss.move("arm","home")
+  #     self.sss.move("arm","pregrasp")
+  #     self.sss.move("arm","home")
+
+   #    self.sss.move("arm","folded")
+   #    self.sss.move("arm","pregrasp")
+   #     self.sss.move("arm","folded")
+
+   #    self.sss.move("arm","folded")
+   #    self.sss.move("arm","grasp")
+   #    self.sss.move("arm","folded")
+
+   #    self.sss.move("arm","folded")
+   #    self.sss.move("arm","grasp")
+   #    self.sss.move("arm","pregrasp")
+   #    self.sss.move("arm","grasp")
+   #    self.sss.move("arm","folded")
+
+       self.sss.move("arm","intermediatebacklow")
+   
+    #    self.sss.move("arm","folded")
+    #    self.sss.move("arm","intermediateback")
+    #    self.sss.move("arm","intermediatefront")
+    #    self.sss.move("arm","overtray")
+   
+   #     self.sss.move("arm","home")
+   #     self.sss.move("arm","intermediatefront")
+   #     self.sss.move("arm","overtray")
+   #     self.sss.move("arm","tray")
+   #     self.sss.move("arm","grasp")
+
+ #      self.sss.move("arm","home")
+ #      self.sss.move("arm","grasp")
+ #      self.sss.move("arm","home")
+ #      self.sss.move("arm","grasp")
+ #      self.sss.move("arm","folded")
+
+   #    self.sss.move("arm","grasp-to-tray")
+   # //   self.sss.move("arm","waveout")
+   # //   self.sss.move("arm","wavein")
+   #    self.sss.move("arm","overtray")
+   #    self.sss.move("arm","tray-to-folded")
     else:
       if not self.sss.parse:
          rospy.loginfo("Action not executed as rule is invalid!")
@@ -62,119 +107,6 @@ class test(script):
         sys.stderr.write('Success\n')
       else:
         sys.stderr.write('Failure\n')
-
-    if not self.sss.parse:
-       rospy.loginfo("SET ::500::TrayIsRaised TO  false")
-
-    if (overallresult):
-       if not self.sss.parse:
-          cursorSequence = self.conn.cursor()
-          sqlSequence = "INSERT INTO SensorLog (timestamp,sensorId,room,channel,value,status) VALUES (NOW(),500\
-               ,'','','0','false')"
-          cursorSequence.execute(sqlSequence)
-    else:
-      if not self.sss.parse:
-         rospy.loginfo("Action not executed as rule is invalid!")
-
-    if not self.sss.parse:
-      if (overallresult):
-        sys.stderr.write('Success\n')
-      else:
-        sys.stderr.write('Failure\n')
-
-
-#--------------------------------------------------------------------------------
-def checkRules(self):
-
-
-   # this queries the database rules, executes each and veryfies final result
-
-    overallresult = False    # assume the rule set doesn't apply
-
-   # this extracts the rules set for this script from the database and checks each rule in turn
-   # the rules are and'ed or or'ed based on the rule set
-
-    if not self.sss.parse:
-
-         cursorSequence = self.conn.cursor()
-
-         sqlSequence = "SELECT   *  FROM  ActionRules\
-                          WHERE     name = 'test'\
-                            AND     ruleType = 'R'\
-                          ORDER BY  ruleOrder"
-
-         # get the sequence from the sql query
-
-         cursorSequence.execute(sqlSequence)
-
-         sequenceRows = cursorSequence.fetchall()
-
-         # for each row execute the rule to see it is valid
-
-         recCount = 0
-
-         try:
-           for sequenceRow in sequenceRows:
-
-              recCount = recCount + 1
-
-              ANDORSwitch = ""
-
-              andOr = sequenceRow[4]
-
-              if andOr== 1:
-                 ANDORSwitch = "AND"
-
-              if andOr== 2:
-                 ANDORSwitch = "OR"
-
-              rospy.loginfo("%s %s",sequenceRow[5],ANDORSwitch)
-
-              # now do each rule
-
-              cursorRule = self.conn.cursor()
-
-              sqlRule = sequenceRow[6];
-
-              cursorRule.execute(sqlRule)
-
-              ruleRows = cursorRule.fetchone()
-
-              # returning data means that the rule is true
-
-              if (ruleRows==None):
-                 rospy.loginfo("%s FALSE",sqlRule)
-                 result = False
-              else:
-                 rospy.loginfo("%s TRUE",sqlRule)
-                 result = True 
-
-              if (recCount == 1): 
-                 overallresult = result
-                 prevANDORSwitch = ANDORSwitch
-              else:                                  # now AND or OR each row in turn
-                 if (prevANDORSwitch == "OR"):
-                    overallresult = overallresult or result
-                 if (prevANDORSwitch == "AND"):
-                    overallresult = overallresult and result
-                 if (prevANDORSwitch == ""):
-                    overallresult = overallresult and result;
-
-                 prevANDORSwitch = ANDORSwitch
-
-           if (overallresult):                      # final result
-             rospy.loginfo("Total Rule Set is VALID! :) ")
-           else:
-             rospy.loginfo("Total Rule Set is INVALID :( ")
-
-         except MySQLdb.Error, e:
-           rospy.loginfo("Error %d: %s" % (e.args[0],e.args[1]))
-           sys.exit(1)  
-
-         finally:   
-           cursorSequence.close() 
-
-         return overallresult
 
 #--------------------------------------------------------------------------------
 if __name__ == "__main__":

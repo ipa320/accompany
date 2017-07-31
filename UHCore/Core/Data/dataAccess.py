@@ -1,34 +1,112 @@
-import MySQLdb, sys
+import MySQLdb, sys, math, time, datetime
+"""Handles all access to the database"""
+"""Everything eventually filters into either SQLDao.getData or SQLDao.saveData"""
+"""Pattern for all select statements: """
+""" Table names are resolved using python string comprehension"""
+""" Args are passed as a dictionary into the sql library which handles escaping and inserting into the query"""
+""" This can get a bit confusing because they both look like python string comprehension, however when"""
+"""   attempting to pass table names as args into sql, it will fail so we're stuck doing it this way"""
+"""Note: dataAccess.DataAccess is only kept for legacy support, going forward functions are categorised into their """
+"""    own classes.  Additionally, while table names can be passed into some of the constructors, this was dropped in """
+"""    later classes in favour of always reading from the config object"""
 
 class Locations(object):
-    def __init__ (self, robotTable=None, userTable=None, locationTable=None):
+    def __init__ (self, robotTable=None, userTable=None, locationTable=None, locationRange=None):
         from config import server_config
         self._robotTable = robotTable or server_config['mysql_robot_table']
         self._userTable = userTable or server_config['mysql_users_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
-        self._sql = SQLDao()
+        self._experimentLocationTable = server_config['mysql_experimentLocations_table']
+        self._sessionControlTable = server_config['mysql_session_control_table']
+        self._sql = SQLDao()        
+        
+        if locationRange == None:
+            activeLocation = self.getActiveExperimentLocation()
+            if activeLocation == None:
+                locationRange = [0, 0]
+            else:
+                locationRange = (activeLocation['startLocationRange'], activeLocation['endLocationRange'])
+
+        self._sqlQuery = 'SELECT * FROM `%s`' % (self._locationTable)
+        self._locationFilter = " `locationId` >= %(min)s AND `locationId` <= %(max)s" % {
+                                                                                      'min': locationRange[0],
+                                                                                      'max': locationRange[1]
+                                                                                      }
+
+    def getActiveExperimentLocation(self):
+        sql = "SELECT \
+                   `%(experimentLocations)s`.* \
+               FROM \
+                  `%(experimentLocations)s` INNER JOIN `%(session)s` ON \
+                  `%(experimentLocations)s`.`id` = `%(session)s`.`ExperimentalLocationId`" % {
+                                                                                              'experimentLocations': self._experimentLocationTable,
+                                                                                              'session': self._sessionControlTable
+                                                                                              }
+        data = self._sql.getSingle(sql)
+
+        return data
 
     def getLocation(self, locationId):
-        sql = 'SELECT * FROM `%s`' % (self._locationTable)
+        sql = self._sqlQuery
         sql += " WHERE `locationId` = %(locid)s" 
         args = {'locid': locationId }
 
         return self._sql.getSingle(sql, args)
 
+    @staticmethod
+    def resolveLocation(curPos, maxDistance=None, dao=None):
+        if(dao == None):
+            dao = Locations()
+
+        try:
+            locations = dao.findLocations()
+        except Exception:
+            return ('', curPos)
+
+        if len(locations) == 0:
+            return ('', curPos)
+
+        name = None
+        diff = None
+        for loc in locations:
+            dist = 0
+            dist += math.pow(curPos[0] - loc['xCoord'], 2)
+            dist += math.pow(curPos[1] - loc['yCoord'], 2)
+            # We're not worried about orientation for location matching
+            # use a fraction of the orientation in case we get two named
+            # locations with the same x/y and different orientations
+            # needs to be a very small fraction since rotation uses a different unit measurement
+            # than location does (degrees vs. meters)
+            dist += math.pow(curPos[2] - loc['orientation'], 2) / 100000
+            dist = math.sqrt(dist)
+            if name == None or dist < diff:
+                name = loc['name']
+                diff = dist
+
+        if maxDistance == None or diff <= maxDistance:
+            return (name, curPos)
+        else:
+            return ('', curPos)
+        
     def getLocationByName(self, name):
-        sql = 'SELECT * FROM `%s`' % (self._locationTable)
+        sql = self._sqlQuery
         sql += " WHERE `name` = %(name)s" 
         args = {'name': name }
+        
+        sql += " AND " + self._locationFilter
 
         return self._sql.getSingle(sql, args)
 
     def findLocations(self, locationName=None):
-        sql = 'SELECT * FROM `%s`' % (self._locationTable)
+        sql = self._sqlQuery
         args = None
         if locationName != None:
             sql += " WHERE `locationId` like %(locid)s" 
-            args = {'locid': locationName }
-
+            args = {'locid': locationName }        
+            sql += " AND " + self._locationFilter
+        else: 
+            sql += " WHERE " + self._locationFilter
+            
         return self._sql.getData(sql, args)
     
     def saveLocation(self, pk, locid, x, y, orientation, table, pkField):
@@ -52,7 +130,7 @@ class Locations(object):
         return self.saveLocation(robotid, locid, x, y, orientation, self._robotTable, 'robotId')
         
     def saveUserLocation(self, userId, locid, x, y, orientation):
-        return self.saveLocation(userId, locid, x, y, orientation, self._userTable, 'userId')    
+        return self.saveLocation(userId, locid, x, y, orientation, self._userTable, 'userId')
 
 class UserInterface(object):
     
@@ -108,10 +186,13 @@ class UserInterface(object):
         return data
 
 class Users(object):
-    def __init__(self, userTable=None, locationTable=None):
+    def __init__(self, userTable=None, locationTable=None, userPreferencesTable=None, personasTable=None):
         from config import server_config
         self._userTable = userTable or server_config['mysql_users_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
+        self._sessionControlTable = server_config['mysql_session_control_table']
+        self._userPreferencesTable = userPreferencesTable or server_config['mysql_user_preferences_table']
+        self._personasTable = personasTable or server_config['mysql_personas_table']
         self._sql = SQLDao()
     
     def getUser(self, userId):
@@ -123,6 +204,18 @@ class Users(object):
                               }
         sql += " WHERE `userId` = %(uid)s"
         args = {'uid': userId }
+
+        return self._sql.getSingle(sql, args)
+        
+    def getUserByNickName(self, userName):
+        sql = "SELECT `%(user)s`.*, %(loc)s.name as 'locationName' \
+               FROM `%(user)s` \
+               INNER JOIN `%(loc)s` ON %(loc)s.`locationId` = `%(user)s`.`locationId`" % {
+                              'user': self._userTable,
+                              'loc': self._locationTable
+                              }
+        sql += " WHERE `nickname` = %(name)s"
+        args = {'name': userName }
 
         return self._sql.getSingle(sql, args)
     
@@ -151,6 +244,104 @@ class Users(object):
             args = {'name': userName }
 
         return self._sql.getData(sql, args)
+    
+    def updateUser(self, user):
+        sql = "UPDATE `%(user)s` " % { 'user': self._userTable }
+        sql += "\
+                SET \
+                    `firstName` = %(firstName)s, \
+                    `lastName` = %(lastName)s, \
+                    `nickname` = %(nickname)s, \
+                    `locationId` = %(locationId)s, \
+                    `poseId` = %(poseId)s, \
+                    `contextId` = %(contextId)s, \
+                    `uniqueRobotHouseUser` = %(uniqueRobotHouseUser)s, \
+                    `languageId` = %(languageId)s, \
+                    `xCoord` = %(xCoord)s, \
+                    `yCoord` = %(yCoord)s, \
+                    `orientation` = %(orientation)s \
+                WHERE \
+                    `userId` = %(userId)s"
+        if self._sql.saveData(sql, user) >= 0:
+            return True
+        else:
+            return False
+        
+    def setActiveUser(self, uid, sid=1):
+        sql = 'UPDATE `%s` ' % (self._sessionControlTable)
+        sql += ' \
+                SET \
+                    `sessionTime` = %(time)s, \
+                    `sessionDate` = %(date)s, \
+                    `SessionUser` = %(user)s \
+                WHERE \
+                    `sessionId` = %(sid)s'
+        
+        args = { 'time': time.strftime('%X'), 'date': time.strftime('%Y-%m-%d'), 'user': uid, 'sid': sid }
+        
+        if self._sql.saveData(sql, args) >= 0:
+            return sid
+        else:
+            return None
+    
+    def getActiveUser(self):
+        sql = "SELECT `%(user)s`.*, %(loc)s.name as 'locationName' \
+               FROM `%(user)s` \
+               INNER JOIN `%(loc)s` ON %(loc)s.`locationId` = `%(user)s`.`locationId` \
+               INNER JOIN `%(session)s` s ON s.`SessionUser` = `%(user)s`.`userId`" % {
+                              'user': self._userTable,
+                              'loc': self._locationTable,
+                              'session': self._sessionControlTable 
+                              }
+        sql += " WHERE s.`sessionId` = %(sid)s"
+        args = {'sid': 1}
+        
+        return self._sql.getSingle(sql, args)
+    
+    def getUserPreferences(self):
+        sql = "SELECT `%(user)s`.* \
+               FROM `%(user)s` \
+               WHERE `%(user)s`.`userId` IN ( \
+                        SELECT `%(session)s`.`sessionUser` \
+                        FROM `%(session)s` )" % {
+                              'user': self._userPreferencesTable,
+                              'session': self._sessionControlTable
+                              }       
+        args = None
+        
+        return self._sql.getData(sql, args)
+        
+    def setUserPreferences(self, column, value):
+        sql = "UPDATE `%(preferences)s` \
+               SET `%(column)s` = %(value)s \
+               WHERE `%(preferences)s`.`userId` IN ( \
+                        SELECT `%(session)s`.`sessionUser` \
+                        FROM `%(session)s` )" % {
+                              'preferences':  self._userPreferencesTable,
+                              'session': self._sessionControlTable,
+                              'column': column,
+                              'value': "%(value)s"
+                              }
+        args = { 
+                'value': value
+                }
+        
+        return self._sql.saveData(sql, args) >= 0
+            
+    def getPersonaValues(self):
+        sql = "SELECT `%(persona)s`.* \
+               FROM `%(persona)s` \
+               WHERE `%(persona)s`.`personaId` IN ( \
+                        SELECT `%(user)s`.`personaId` \
+                        FROM `%(user)s`, `%(session)s` \
+                        WHERE `%(session)s`.`sessionUser` = `%(user)s`.`userId` )" % {
+                              'persona': self._personasTable,
+                              'user': self._userTable,
+                              'session': self._sessionControlTable
+                              }        
+        args = None
+        
+        return self._sql.getData(sql, args)
 
 class Robots(object):
     
@@ -158,6 +349,7 @@ class Robots(object):
         from config import server_config
         self._robotTable = robotTable or server_config['mysql_robot_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
+        self._sessionControlTable = server_config['mysql_session_control_table']
         self._sql = SQLDao()
 
     def getRobot(self, robotId):
@@ -198,6 +390,16 @@ class Robots(object):
 
         return self._sql.getData(sql, args)
 
+    def getActivatedRobot(self):
+        sql = "SELECT `%(rob)s`.`robotName` \
+               FROM `%(rob)s` \
+               INNER JOIN `%(session)s` ON `%(session)s`.`robotId` = `%(rob)s`.`robotId`" % {
+                              'rob': self._robotTable,
+                              'session': self._sessionControlTable
+                              }
+               
+        return self._sql.getData(sql)
+    
 class ActionHistory(object):
     def __init__(self, actionHistoryTable=None, sensorSnapshotTable=None, sensorTable=None, sensorTypeTable=None, locationTable=None):
         from config import server_config
@@ -286,7 +488,7 @@ class ActionHistory(object):
 
     def saveSensorSnapshot(self, historyId):
         rowCount = 0
-        for row in self.findSensors():
+        for row in Sensors().findSensors():
             sensorId = row['sensorId']
             sensorValue = row['value']
                         
@@ -326,7 +528,7 @@ class ActionHistory(object):
         return historyId
 
     def saveHistoryImage(self, historyId, imageBytes, imageType):
-        imageId = self.saveBinary('Image for history %s' % (historyId), imageBytes, imageType)
+        imageId = Binary().saveBinary('Image for history %s' % (historyId), imageBytes, imageType)
         sql = "UPDATE `%s`" % (self._historyTable)
         sql += " SET `imageId` = %(imgid)s WHERE `actionHistoryId` = %(histid)s" 
         args = {
@@ -338,12 +540,23 @@ class ActionHistory(object):
         return imageId
 
 class Sensors(object):
-    def __init__(self, sensorTable=None, sensorTypeTable=None, sensorLogTable=None, locationTable=None):
+    def __init__(self, sensorTable=None, sensorTypeTable=None, sensorLogTable=None, locationTable=None, sensorRange=None, sensorIconTable=None):
         from config import server_config
         self._sensorTable = sensorTable or server_config['mysql_sensor_table']
         self._sensorTypeTable = sensorTypeTable or server_config['mysql_sensorType_table']
+        self._sensorIconTable = sensorIconTable or server_config['mysql_sensorIcon_table']
         self._sensorLogTable = sensorLogTable or server_config['mysql_log_table']
         self._locationTable = locationTable or server_config['mysql_location_table']
+        
+        self._sql = SQLDao()
+
+        if sensorRange == None:
+            activeLocation = Locations().getActiveExperimentLocation()
+            if activeLocation == None:
+                sensorRange = [0, 0]
+            else:
+                sensorRange = (activeLocation['startSensorRange'], activeLocation['endSensorRange'])
+            
         
         self._sqlQuery = "SELECT `%(sensors)s`.*, `%(type)s`.`sensorType` as `sensorTypeName`, `%(loc)s`.`name` as `locationName` \
                 FROM `%(sensors)s` \
@@ -352,48 +565,84 @@ class Sensors(object):
                                                                                  'sensors': self._sensorTable,
                                                                                  'type': self._sensorTypeTable,
                                                                                  'loc': self._locationTable }
-        self._sql = SQLDao()
+                
+        self._sqlQuery += " WHERE ((`sensorId` >= %(min)s AND `sensorId` <= %(max)s) OR (`sensorId` >= 500 AND `sensorId` <= 799 )) " % {
+                                                                                      'min': sensorRange[0],
+                                                                                      'max': sensorRange[1]
+                                                                                      }
+        
  
     def getSensor(self, sensorId):
         sql = self._sqlQuery
-        sql += " WHERE `sensorId` = %(sid)s" 
+        sql += " AND `sensorId` = %(sid)s" 
         args = {'sid': sensorId }
             
         return self._sql.getSingle(sql, args)
     
     def getSensorByName(self, sensorName):
         sql = self._sqlQuery
-        sql += " WHERE `name` = %(name)s" 
+        sql += " AND `name` = %(name)s" 
         args = {'name': sensorName}
             
         return self._sql.getSingle(sql, args)
     
-    def findSensors(self, sensorName=None):
+    def getSensorType(self, sensorTypeId):
+        sql = "SELECT * FROM `%s` " % self._sensorTypeTable 
+        sql += " WHERE `sensorTypeId` = %(sid)s" 
+        args = {'sid': sensorTypeId }
+            
+        return self._sql.getSingle(sql, args)
+    
+    def getSensorTypeByName(self, sensorTypeName):
+        sql = "SELECT * FROM `%s` " % self._sensorTypeTable 
+        sql += " WHERE `sensorType` = %(name)s" 
+        args = {'name': sensorTypeName }
+            
+        return self._sql.getSingle(sql, args)
+    
+    def getSensorIcon(self, sensorTypeId):
+        sql = "SELECT * FROM `%s` " % self._sensorIconTable 
+        sql += " WHERE `id` = %(sid)s" 
+        args = {'sid': sensorTypeId }
+            
+        return self._sql.getSingle(sql, args)
+    
+    def getSensorIconByName(self, sensorTypeName):
+        sql = "SELECT * FROM `%s` " % self._sensorIconTable 
+        sql += " WHERE `name` = %(name)s" 
+        args = {'name': sensorTypeName }
+            
+        return self._sql.getSingle(sql, args)
+    
+    def findSensors(self, sensorName=None, onlyPhysical=True):
         args = None
         sql = self._sqlQuery
         if sensorName != None:
-            sql += " WHERE `%s`.`name` like" % (self._sensorTable) + " %(name)s" 
+            sql += " AND `%s`.`name` like" % (self._sensorTable) + " %(name)s"
             args = {'name': sensorName}
+        if onlyPhysical:
+            sql += " AND `%s`.`sensorId` < 500" % (self._sensorTable)
             
         return self._sql.getData(sql, args)
 
-    def saveSensorLog(self, sensorId, value, status, timestamp, room='', channel=''):
+    def saveSensorLog(self, sensorId, value, status, timestamp=None, room='', channel=''):
+        timestamp = timestamp or datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
         sql = "INSERT INTO `%(log)s`" % { 'log': self._sensorLogTable }
         sql += "(`timestamp`, `sensorId`, `room`, `channel`, `value`, `status`) \
                     VALUES (%s, %s, %s, %s, %s, %s)"
         
-        args = (            timestamp, 
+        args = (timestamp,
                             sensorId,
-                            room, 
-                            channel, 
-                            value, 
+                            room,
+                            channel,
+                            str(value),
                             status)
         
         if self._sql.saveData(sql, args) >= 0:
             return True
         else:
             return False
-
 
 class Binary(object):
     def __init__(self, binaryTable=None, binaryIdCol=None):
@@ -609,10 +858,11 @@ class SQLDao(object):
             try:
                 self._conn = MySQLdb.connect(self._host, self._user, self._pass, self._db)
             except Exception as e:
-                #TODO: Need to protect this against infinite recursion
-                print >> sys.stderr, e
-                if retry > 0:
-                    return self._getCursor(retry-1)
+                # Access denied error == 1045, no reason to retry
+                # Unknown MySQL server host == 2005
+                if e.args[0] not in [1045, 2005] and retry > 0:
+                    print >> sys.stderr, "Error while connecting: %s, will auto-retry %s more times." % (e, retry)
+                    return self._getCursor(retry - 1)
                 else:
                     raise e
         
@@ -646,7 +896,10 @@ class SQLDao(object):
             if e.args[0] == 2006:
                 return self.getData(sql, args, trimString)
             
-            print "Error %d: %s" % (e.args[0], e.args[1])
+            if len(e.args) > 1:
+                print "Error %d: %s" % (e.args[0], e.args[1])
+            else:
+                print "Error %s" & e.args
             return []
         
     def saveData(self, sql, args=None):
@@ -657,11 +910,11 @@ class SQLDao(object):
             conn.commit()
             rowId = cursor.lastrowid
             cursor.close()
-            #conn.close()
+            # conn.close()
             return rowId
         except MySQLdb.Error, e:
             cursor.close()
-            #conn.close()
+            # conn.close()
             # Server connection was forcibly severed from the server side
             # retry the request
             if e.args[0] == 2006:
@@ -674,5 +927,5 @@ class SQLDao(object):
 
 if __name__ == '__main__':
     h = ActionHistory()
-    hi =h.getHistoryByTag('other')
+    hi = h.getHistoryByTag('other')
     print hi

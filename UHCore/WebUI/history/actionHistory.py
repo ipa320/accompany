@@ -1,6 +1,6 @@
 from Data.dataAccess import DataAccess
 from SensorMap.processor import MapProcessor
-from Data.sensors import StateResolver
+from Data.stateResolver import StateResolver
 
 import cherrypy
 from cherrypy.lib import file_generator
@@ -137,9 +137,7 @@ class MapHistory(object):
         if len(sensorHist) > 0:
             mp = MapProcessor()
             s = StateResolver()
-            sensors = s.resolveStates(sensorHist)
-            #[{'id': sensor['sensorId'], 'value': sensor['value'], 'state':'on'},]
-            sensors = s.appendSensorMetadata(sensors) #adds location and type            
+            sensors = s.resolveStates(sensorHist)     
             img = mp.buildMap(sensors)
             data = io.BytesIO(img)
             cherrypy.response.headers['Content-Type'] = mimetypes.guess_type('img.svg')[0]

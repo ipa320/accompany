@@ -1,5 +1,5 @@
 from Data.dataAccess import Sensors
-from Data.sensors import StateResolver
+from Data.stateResolver import StateResolver
 
 from operator import itemgetter
 import cherrypy

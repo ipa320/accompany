@@ -81,10 +81,21 @@ void MainWindow::on_openDBButton_clicked()
    QString pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password);
    QString host = QInputDialog::getText ( this, "Accompany DB", "Host:");
 
+   ui->locnLabel->setText(lv);
 
-   if (host == "") host = "localhost";
-   if (user == "") user = "root";
-   if (pw=="")     pw = "liverp00l";
+   if (lv=="ZUYD")
+   {
+      if (host=="") host = "accompany1";
+      if (user=="") user = "accompanyUser";
+      if (pw=="") pw = "accompany";
+
+   }
+   else
+   {
+       if (host=="") host = "localhost";
+       if (user=="") user = "rhUser";
+       if (pw=="") pw = "waterloo";
+   }
 
    ui->Userlabel->setText(user);
    ui->serverlabel->setText(host);

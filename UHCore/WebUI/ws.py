@@ -9,6 +9,7 @@ import questions
 import sensorMap
 import sensorDetails
 import listRoot
+import sienagui
 
 from config import server_config
 
@@ -33,5 +34,7 @@ listRoot.setLinks((
               ('question', questions),
               ('details', sensorDetails),
               ('liveMap', sensorMap)))
+
+root.sienagui = sienagui.root
 
 cherrypy.quickstart(root, '/', conf)
