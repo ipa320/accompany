@@ -73,7 +73,7 @@ class GoToUser(smach.State):
 		#sss.set_light("breathing green")
 		#rospy.sleep(3)
 		#sss.move("torso", "home", True)	
-		sss.set_light("flashing yellow")
+		#sss.set_light("flashing yellow")
 		
 		return 'succeeded'
 
@@ -168,7 +168,7 @@ class FollowUser(smach.State):
 					print "human position: ", self.user_position.point.x, self.user_position.point.y
 					# let the robot move there
 					print "robot gets the position:", [rx, ry, theta]
-					sss.set_light("flashing yellow")
+					#sss.set_light("flashing yellow")
 					handle_base=sss.move("base",[rx, ry, theta], blocking=False, mode='linear')
 #					handle_base=sss.move("base",[rx, ry, theta], blocking=False)
 					if self.user_position.point.x > 2 and self.user_position.point.y < -1.7:
@@ -192,7 +192,7 @@ class LetUserEnterDoor(smach.State):
 		sf = ScreenFormat("LetUserEnterDoor")
 
 		# let user enter door first
-		sss.set_light("flashing yellow")
+		#sss.set_light("flashing yellow")
 		handle_base=sss.move("base",[3.085, -2.660, -0.321],False)
 		#sss.move("torso", [[0.0,-0.2,0.0]], False)
 		handle_base.wait()
@@ -204,7 +204,7 @@ class LetUserEnterDoor(smach.State):
 		#handle_base.wait()
 		#handle_base=sss.move("base",[4.746, -4.201,-1.303],True,mode='linear')
 		#handle_base.wait()
-		sss.set_light("white")
+		#sss.set_light("white")
 		return 'succeeded'
 
 
