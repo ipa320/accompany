@@ -15,7 +15,6 @@ from accompany_user_tests_year2.msg import *
 from simple_script_server import *
 
 def shelf():
-	
 	sss = simple_script_server()
 	local_costmap_dynamic_reconfigure_client = dynamic_reconfigure.client.Client("/local_costmap_node/costmap")
 	
@@ -68,7 +67,7 @@ def shelf():
 	rospy.sleep(1)
 	# adjust base footprint
 	local_config = local_costmap_dynamic_reconfigure_client.get_configuration(5.0)
-	local_costmap_dynamic_reconfigure_client.update_configuration({"footprint": "[[0.45,0.37],[0.45,-0.37],[-0.35,-0.37],[-0.35,0.37]]"})
+	local_costmap_dynamic_reconfigure_client.update_configuration({"footprint": "[[0.45,0.37],[0.45,-0.37],[-0.20,-0.37],[-0.20,0.37]]"})
 	rospy.sleep(0.5)
 	rospy.wait_for_service('/update_footprint')
 	try:
@@ -77,11 +76,48 @@ def shelf():
 	except rospy.ServiceException, e:
 		print "Service call to /update_footprint failed: %s" % e
 	
-	sss.set_light("flashing yellow")
+	####sss.set_light("flashing yellow")
 	sss.move("base", [2.293, -2.388, 1.717],True,mode='linear')
 	sss.move("base", [2.293, -2.746, 1.717],True,mode='linear')
 	sss.move("base", [2.293, -2.755, 1.717],True,mode='linear')
+	#sss.move("head", "back") #hack
+	#hack raw_input("after linear approach")
 	
+	sss.move("torso", [[-0.15,0.00,-0.00]])
+
+	sss.set_light("flashing red")
+	
+	handle_arm = sss.move("arm",[p26_troyes],True)
+	##hack raw_input("arm approach middle")
+	handle_arm = sss.move("arm",[p27_troyes],True)
+	
+	
+	#handle_arm = sss.move("arm",[p32_troyes],True)
+	### hack raw_input("arm approach begin")
+	sss.move("sdh","cylopen",True)
+	handle_arm = sss.move("arm",[p33_troyes],True)
+	### Hack raw_input("arm approach middle")
+	handle_arm = sss.move("arm",[p35_troyes],True)
+	
+	
+	
+	
+	#sss.move("base", [2.293, -2.829, 1.717],True,mode='linear')
+	#handle_arm = sss.move("arm",[p31_troyes],True)
+
+	
+	
+	# Hack raw_input("arm approach finished")
+	
+	sss.move("sdh","cylclosed",True)
+	#sss.move("torso","home")
+	sss.move("head","front")
+	sss.set_light("flashing yellow")
+	sss.move("torso", "home")
+	##sss.move("base", [2.293, -2.934, 1.721],True,mode='linear')
+	##sss.move("base", [2.293, -2.746, 1.721],True,mode='linear')
+	sss.move("base", [2.293, -2.388, 1.721],True,mode='linear')
+	##Hack raw_input("tell richard to move")
 	# reset footprint
 	if local_config["footprint"] != None:
 		local_costmap_dynamic_reconfigure_client.update_configuration({"footprint": local_config["footprint"]})
@@ -96,43 +132,7 @@ def shelf():
 	except rospy.ServiceException, e:
 		print "Service call to /update_footprint failed: %s" % e
 	
-	
-	
-	sss.move("torso", [[-0.15,0.00,-0.00]])
-	sss.set_light("flashing red")
-	handle_arm = sss.move("arm",[p26_troyes],True)
-	handle_arm = sss.move("arm",[p27_troyes],True)
-	
-	
-	#handle_arm = sss.move("arm",[p32_troyes],True)
-	sss.move("sdh","cylopen",True)
-	handle_arm = sss.move("arm",[p33_troyes],True)
-	handle_arm = sss.move("arm",[p35_troyes],True)
-	
-	
-	
-	
-	#sss.move("base", [2.293, -2.829, 1.717],True,mode='linear')
-	#handle_arm = sss.move("arm",[p31_troyes],True)
-	
-	
-	
-	#- Translation: [1.724, -1.110, 0.000]
-	#- Rotation: in Quaternion [0.000, 0.000, 0.998, -0.058]
-	#           in RPY [0.000, -0.000, -3.025]
-	
-	
-	
-	
-	sss.move("sdh","cylclosed",True)
-	#sss.move("torso","home")
-	sss.move("head","front")
-	sss.set_light("flashing yellow")
-	sss.move("torso", "home")
-	sss.move("base", [2.293, -2.934, 1.721],True,mode='linear')
-	sss.move("base", [2.293, -2.746, 1.721],True,mode='linear')
-	sss.move("base", [2.293, -2.388, 1.721],True,mode='linear')
-	
+	## hack raw_input("after moving forth")
 	
 	
 	
@@ -148,25 +148,42 @@ def shelf():
 	
 	sss.move("tray", "deliverup", False)
 	sss.set_light("flashing red")
+	
 	handle_arm = sss.move("arm",[p24_troyes,"intermediateback","intermediatefront", grasp4],True)
-	#handle_arm = sss.move("arm",["intermediateback"],True)
-	#handle_arm = sss.move("arm",["intermediatefront", grasp3],True)
-	
+	####HACK #######################
+	###sss.move("arm",[p24_troyes],True)
+	###raw_input("arm movement1")
+	###sss.move("arm", ["intermediateback"], True)
+	###raw_input("arm movement2")
+	###sss.move("arm",["intermediatefront"], True)
+	###raw_input("arm movement3")
+	###sss.move("arm",[grasp4], True)
+	##################################
+	####handle_arm = sss.move("arm",["intermediateback"],True)
+	#####handle_arm = sss.move("arm",["intermediatefront", grasp3],True)
+
+	###raw_input("before opening hand")	
 	sss.move("sdh","cylopen")
+	###raw_input("after opening hand")
+	handle_arm = sss.move("arm",[grasp4,"intermediatefront",p22_troyes],True)
+	####HACK #########################
+	###sss.move("arm",[grasp4], True)
+	#raw_input("after opening hand")
+	#sss.move("arm",["intermediatefront"], True)#
+	#raw_input("after opening hand")
+	#sss.move("arm",[p22_troyes], True)
+	##################################
 	
-	handle_arm = sss.move("arm",[grasp4,"intermediatefront",p22_troyes,"folded"],False)
-	rospy.sleep(4)
-	sss.move("sdh","home")
-	rospy.sleep(4)
+	
+	
+	
+	
+	sss.move("sdh","home", False)
+	handle_arm = sss.move("arm",["folded"],True)
+#	rospy.sleep(4)
+#	rospy.sleep(4)
 	sss.set_light("flashing yellow")
-
-#rospy.sleep(1)
-#handle_arm = sss.move("arm",[p22_troyes,"folded"],True)
-
-#handle_arm = sss.move("arm",["intermediatefront","intermediateback"],True)
-#handle_arm = sss.move("arm",["folded"],True)
-##
-#sss.move("base", [1.724, -1.110, -3.025],True,mode='linear')
+	######HACK raw_input("folded")
 
 
 

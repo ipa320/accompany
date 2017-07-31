@@ -70,8 +70,8 @@ class GoToUser(smach.State):
 		#sss.set_light("yellow")
 		#sss.move("torso", [[-0.1,-0.2,-0.15]], True)
 		#handle_base.wait()
-		sss.set_light("flashing yellow")
-		handle_base=sss.move("base",[0.52, -1.202, -1.357],False)
+		#sss.set_light("flashing yellow")
+		handle_base=sss.move("base",[0.52, -1.202, -1.357],True)
 		#sss.set_light("breathing green")
 		#rospy.sleep(3)
 		#sss.move("torso", "home", True)	
@@ -129,6 +129,7 @@ class FollowUser(smach.State):
 		print "before the while loop"
 		#while followUser_condition[0] == "1": ## todo: find some finishing criterion
 		while True:
+			#######break #hack
 			if self.user_position.point.x >= self.min_x and self.user_position.point.x <= self.max_x and self.user_position.point.y <= self.max_y and self.user_position.point.y >= self.min_y:  #and self.user_speed.vector.x != 0 and self.user_speed.vector.y != 0:
 			#if self.tracking_user == True:
 				# check if the user moved enough and whether we have some significant movement speed
@@ -190,9 +191,9 @@ class LetUserEnterKitchen(smach.State):
 
 	def execute(self, userdata):
 		sf = ScreenFormat("LetUserEnterKitchen")
-
+		##raw_input("user come ?") #hack
 		# let user enter door first
-		#handle_base=sss.move("base",[1.214, -2.384, -1.982],False)
+		###handle_base=sss.move("base",[1.214, -2.384, -1.982],False)
 		handle_base=sss.move("base",[1.665, -2.763, -2.193],False)
 		#sss.move("torso", [[0.0,-0.2,0.0]], False)
 		handle_base.wait()
