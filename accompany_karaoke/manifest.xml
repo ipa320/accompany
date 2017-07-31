@@ -1,0 +1,19 @@
+<package>
+  <description brief="accompany_karaoke">
+
+     accompany_karaoke is a package that permits to play a song from a file and publish text from a file.
+
+  </description>
+  <author>Fabrice Rougeau</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki</url>
+
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+  <rosdep name="sfml-dev"/>
+  <rosdep name="libmysqlclient-dev"/>
+
+</package>
+
+

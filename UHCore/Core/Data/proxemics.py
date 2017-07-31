@@ -13,7 +13,8 @@ class ProxemicMover(object):
         self._robot = robot
         import Robots.rosHelper
         Robots.rosHelper.ROS.configureROS(packageName='accompany_proxemics')
-        Robots.rosHelper.ROS()
+        ros = Robots.rosHelper.ROS()
+        ros.initROS()
         import rospy
         import tf
         import accompany_context_aware_planner.srv
@@ -44,11 +45,14 @@ class ProxemicMover(object):
                                                        self._srvMsg)
         try:
             pose = self._geoMsg()
-            pose.orientation.w = self._tf.transformations.quaternion_from_euler(0,0,math.radians(theta))[3]
+            quaternion = self._tf.transformations.quaternion_from_euler(0,0,math.radians(theta))
+            pose.orientation.x = quaternion[0]
+            pose.orientation.y = quaternion[1]
+            pose.orientation.z = quaternion[2]
+            pose.orientation.w = quaternion[3]
             pose.position.x = x
             pose.position.y = y
             pose.position.z = 0
-            print "pose.orientation is:", self._tf.transformations.quaternion_from_euler(0,0,math.radians(theta))
             
             response = getProxemicLocation(userId=userId,
                                             userPosture=posture, userPose=pose, robotGenericTaskId=taskId)
@@ -76,13 +80,7 @@ class ProxemicMover(object):
                                                                                 target.pose.position.z,
                                                                                 math.degrees(yaw)))
                     location = [target.pose.position.x, target.pose.position.y, yaw]
-                    print location
-                    ret = self._robot.setComponentState('base', location)
-                    print "++++++++++++++++++++++++++++++++++"
-                    print "setComponentState of base returned", ret
-                    print "++++++++++++++++++++++++++++++++++"
-                    if ret == "SUCCEEDED":
-                        print "returning true for base vs location check"
+                    if self._robot.setComponentState('base', location) in [3, 'SUCCEEDED']:
                         return True
 
         except self._rospy.ServiceException, e:

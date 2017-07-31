@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Wed Oct 9 16:06:22 2013
+** Created: Mon Apr 28 09:53:21 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -36,7 +36,6 @@ public:
     QComboBox *messageComboBox;
     QPushButton *changePushButton;
     QLabel *locnLabel;
-    QLabel *userLabel;
     QLineEdit *messageLineEdit;
     QLabel *label_2;
     QLabel *label_3;
@@ -69,10 +68,7 @@ public:
         changePushButton->setGeometry(QRect(250, 290, 161, 41));
         locnLabel = new QLabel(centralWidget);
         locnLabel->setObjectName(QString::fromUtf8("locnLabel"));
-        locnLabel->setGeometry(QRect(630, 10, 62, 16));
-        userLabel = new QLabel(centralWidget);
-        userLabel->setObjectName(QString::fromUtf8("userLabel"));
-        userLabel->setGeometry(QRect(440, 10, 141, 16));
+        locnLabel->setGeometry(QRect(330, 20, 361, 16));
         messageLineEdit = new QLineEdit(centralWidget);
         messageLineEdit->setObjectName(QString::fromUtf8("messageLineEdit"));
         messageLineEdit->setGeometry(QRect(70, 240, 561, 24));
@@ -108,7 +104,6 @@ public:
         label->setText(QApplication::translate("MainWindow", "Message Creator", 0, QApplication::UnicodeUTF8));
         changePushButton->setText(QApplication::translate("MainWindow", "Add/Update message", 0, QApplication::UnicodeUTF8));
         locnLabel->setText(QApplication::translate("MainWindow", "TextLabel", 0, QApplication::UnicodeUTF8));
-        userLabel->setText(QApplication::translate("MainWindow", "TextLabel", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "Language", 0, QApplication::UnicodeUTF8));
         label_3->setText(QApplication::translate("MainWindow", "Message (drop down to see existing messages)", 0, QApplication::UnicodeUTF8));
         label_4->setText(QApplication::translate("MainWindow", "Enter new or changed message here", 0, QApplication::UnicodeUTF8));

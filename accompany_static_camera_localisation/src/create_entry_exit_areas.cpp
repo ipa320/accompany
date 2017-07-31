@@ -102,7 +102,8 @@ int main(int argc, char **argv)
   string imagelist_file, params_file;
 
   // handling arguments
-  po::options_description optionsDescription("Select prior locations where people can walk\nAllowed options\n");
+  po::options_description optionsDescription("Select prior locations where people can walk\n"
+                                             "exmaple:\n  rosrun accompany_static_camera_localisation create_entry_exit_areas -l `rospack find accompany_uva`/res/testRobotHouse/cameras/list_of_images_small.txt -p `rospack find accompany_uva`/res/testRobotHouse/cameras/params.xml\n\nAllowed options");
   optionsDescription.add_options()
     ("help,h","show help message")
     ("list_of_image,l", po::value<string>(&imagelist_file)->required(),"the input image list showing the ground plane\n")

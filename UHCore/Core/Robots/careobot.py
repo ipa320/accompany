@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import math, sys
 import time
 import robot
@@ -13,8 +14,8 @@ class CareOBot(robot.ROSRobot):
 
     def __init__(self, name, rosMaster):
         rosHelper.ROS.configureROS(rosMaster=rosMaster)
-        #super(CareOBot, self).__init__(name, ActionLib, 'script_server', robot_config[name]['head']['camera']['topic'])
-        super(CareOBot, self).__init__(name, ScriptServer, 'script_server', robot_config[name]['head']['camera']['topic'])
+        super(CareOBot, self).__init__(name, ActionLib, 'script_server', robot_config[name]['head']['camera']['topic'])
+        #super(CareOBot, self).__init__(name, ScriptServer, 'script_server', robot_config[name]['head']['camera']['topic'])
                
     def getCameraAngle(self):
         "Return the vertical component of the camera angle, used by getImage for rotating the image when needed"
@@ -30,7 +31,7 @@ class CareOBot(robot.ROSRobot):
             
         return angle
                 
-    def setComponentState(self, name, value, blocking=True):
+    def setComponentState(self, name, value, blocking=True, mode=''):
         # check if the component has been initialised, and init if it hasn't
         if len(self._ros.getTopics('/%(name)s_controller' % { 'name': name })) == 0:
             self._robInt.initComponent(name)
@@ -39,7 +40,7 @@ class CareOBot(robot.ROSRobot):
         if name == 'arm' and str(value).startswith('trayToTable'):
             return self.unloadTray(str(value).split(':')[1], blocking)
         
-        return super(CareOBot, self).setComponentState(name, value, blocking)
+        return super(CareOBot, self).setComponentState(name, value, blocking, mode)
     
     def play(self, fileName, blocking=True):
         self.executeFunction("play", {
@@ -116,10 +117,16 @@ class ScriptServer(object):
         
         #filter kwargs to only args in function
         argspec = inspect.getargspec(func)
-        args = { argName: kwargs[argName] for argName in argspec.args if argName in kwargs.keys() }
+        args = {}
+        for argName in argspec.args:
+            if argName in kwargs.keys():
+                args[argName] = kwargs[argName]
+        #args = { argName: kwargs[argName] for argName in argspec.args if argName in kwargs.keys() }
 
         ah = func(**args)
-        return ah.get_state()
+        
+        if funcName != 'sleep':
+            return ah.get_state()
     
     def stopComponent(self, name):
         if name in ScriptServer._specialCases:
@@ -138,7 +145,7 @@ class ScriptServer(object):
         else:
             func = ScriptServer._specialCases[name]['function']
             mode = ScriptServer._specialCases[name]['mode']
-            
+        
         return self.runFunction(func, 
                                 {
                                    'component_name':name, 
@@ -152,7 +159,8 @@ class ActionLib(object):
     
     _specialCases = {
                     'light': {'function': 'set_light', 'mode': ''},
-                    'sound': {'function': 'say', 'mode': 'FEST_EN' }
+                    'sound': {'function': 'say', 'mode': 'FEST_EN' },
+                    'play': {'function': 'play', 'mode': '' }
                     }
     
     def __init__(self):
@@ -269,12 +277,21 @@ class PoseUpdater(robot.PoseUpdater):
             if rangeMsg == None:
                 if topic not in self._warned: 
                     self._warned.append(topic)
-                    print "Phidget sensor not ready before timeout for topic: %s" % topic
-                
-                return (None, None)
+                    print >> sys.stderr, "Phidget sensor not ready before timeout for topic: %s" % topic                
+                self._rangeHistory.pop(topic)
+                continue
             else:
                 if topic in self._warned:
                     self._warned.remove(topic)
+
+            if rangeMsg.range < 0:
+                if topic + '_rangeErr' not in self._warned:
+                    self._warned.append(topic + '_rangeErr')
+                    print >> sys.stderr,  "Phidget sensor returned invalid range! %s:%s" % (topic, rangeMsg.range)
+                self._rangeHistory.pop(topic)
+                continue
+            elif topic + '_rangeErr' in self._warned:
+                self._warned.remove(topic + '_rangeErr')
 
             self._rangeHistory[topic].append(rangeMsg.range)
             if len(self._rangeHistory[topic]) > self._rangeWindow:
@@ -282,6 +299,10 @@ class PoseUpdater(robot.PoseUpdater):
             
             averages.append(sum(self._rangeHistory[topic]) / len(self._rangeHistory[topic]))
         
+        if len(averages) < len(self._rangeSensors) * 0.60:
+            print "Less than 60% of range sensors are functional, tray Full/Empty not available"
+            return (None, None)
+
         if any(map(lambda x: x <= self._rangeThreshold, averages)):
             trayIsEmpty = 'Full'
         else:
@@ -289,7 +310,7 @@ class PoseUpdater(robot.PoseUpdater):
 
         p = []
         for position in averages:
-            p.append(round(position, 3))
+            p.append(round(min(position, self._rangeThreshold * 1.25), 3))
    
         return (p, trayIsEmpty)
 

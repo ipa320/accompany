@@ -1,0 +1,13 @@
+buttons: [[home,move,home],
+  [kitchen_fridge,move,kitchen_fridge],
+  [charging_station,move,charging_station],
+  [look_at_table,move,look_at_table],
+  [alternative_table_unload,move,alternative_table_unload],
+  [load_cup,move,load_cup],
+  [door_side,move,door_side],
+  [door_front,move,door_front],
+  [light_on,move,light_on],
+  [table_right_offer,move,table_right_offer],
+  [table_right_unload,move,table_right_unload],
+  [table_left_offer,move,table_left_offer],
+  [table_left_unload,move,table_left_unload]]

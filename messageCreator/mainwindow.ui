@@ -68,22 +68,9 @@
    <widget class="QLabel" name="locnLabel">
     <property name="geometry">
      <rect>
-      <x>630</x>
-      <y>10</y>
-      <width>62</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>TextLabel</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="userLabel">
-    <property name="geometry">
-     <rect>
-      <x>440</x>
-      <y>10</y>
-      <width>141</width>
+      <x>330</x>
+      <y>20</y>
+      <width>361</width>
       <height>16</height>
      </rect>
     </property>

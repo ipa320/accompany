@@ -1,19 +1,53 @@
-sudo apt-get -y install aptitude emacs git gitk mercurial libopencv2.3-dev cmake libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev gstreamer-tools gstreamer0.10-x gtk2-engines-pixbuf ros-electric-openni-kinect
 
+
+# install Ubuntu11.10 (64bit), update all packages, reboot
+
+#dirs
+mkdir -p ~/programs
+mkdir -p ~/ros
+
+# init 
+sudo apt-get -y install aptitude emacs git gitk mercurial libopencv-dev cmake gtk2-engines-pixbuf 
+
+# gstreamer
+sudo apt-get -y install gstreamer-tools gstreamer0.10-plugins-base gstreamer0.10-plugins-good gstreamer0.10-plugins-bad gstreamer0.10-plugins-ugly gstreamer0.10-ffmpeg libgstreamer0.10-dev 
+libgstreamer-plugins-bad0.10-dev libgstreamer-plugins-base0.10-dev
+
+# vxl for ubuntu >= 12.04
+sudo apt-get -y install libvxl1-dev
+
+cd ~/ros
+git clone git://basterwijn.nl/home/bterwijn/git/accompany.git
 cd
-mkdir -p ros
+
+# ros
+sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu precise main" > /etc/apt/sources.list.d/ros-latest.list'
+wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+sudo apt-get update
+sudo apt-get -y install ros-groovy-desktop-full
+
+sudo rosdep init
+rosdep update
+echo "" >> ~/.bashrc
+echo "# ROS" >> ~/.bashrc
+echo "source /opt/ros/groovy/setup.bash" >> ~/.bashrc
+echo "export ROS_WORKSPACE=~/ros" >> ~/.bashrc
+echo "export ROS_PACKAGE_PATH=\$ROS_WORKSPACE:\$ROS_PACKAGE_PATH" >> ~/.bashrc
+. ~/.bashrc
+source /opt/ros/groovy/setup.bash
 export ROS_WORKSPACE=~/ros
 export ROS_PACKAGE_PATH=$ROS_WORKSPACE:$ROS_PACKAGE_PATH
-echo "export ROS_WORKSPACE=~/ros" >> ~/.bashrc
-echo "ROS_PACKAGE_PATH=$ROS_WORKSPACE:$ROS_PACKAGE_PATH" >> ~/.bashrc
-cd ros
 
-# accompany
-git clone git://basterwijn.nl/home/bterwijn/git/accompany.git
-
-cd ~
-mkdir -p programs
-
+# vxl only applicable when Ubuntu < 12.04
+# cd ~/programs
+# wget http://downloads.sourceforge.net/project/vxl/vxl/1.17/vxl-1.17.0.zip
+# unzip vxl-1.17.0.zip
+# cd vxl-1.17.0/
+# mkdir build
+# cd build
+# cmake .. -DBUILD_BRL=OFF
+# make -j 4
+# sudo make install
 
 # cmnGwenn
 cd ~/programs
@@ -22,16 +56,6 @@ cd cmnGwenn
 mkdir build
 cd build
 cmake ../src
-make
-sudo make install
-
-# TimTracker
-cd ~/programs
-git clone git://basterwijn.nl/home/bterwijn/git/TimTracker.git
-cd TimTracker
-mkdir build
-cd build
-cmake ..
 make
 sudo make install
 
@@ -45,15 +69,35 @@ cmake ../
 make -j 4
 sudo make install
 
-# gscam
-rosdep install gscam
-rosmake gscam
+# LogProbOp
+cd ~/programs
+git clone git://basterwijn.nl/home/bterwijn/git/LogProbOp.git
+cd LogProbOp
+mkdir build
+cd build
+cmake ../
+make -j 4
+sudo make install
 
-# skeleton_marker
-cd ~/ros
-svn checkout http://pi-robot-ros-pkg.googlecode.com/svn/trunk/skeleton_markers
-rosdep install skeleton_markers
-rosmake skeleton_markers
+# GaussianMixture
+cd ~/programs
+git clone git://basterwijn.nl/home/bterwijn/git/GaussianMixture.git
+cd GaussianMixture
+mkdir build
+cd build
+cmake ../
+make -j 4
+sudo make install
+
+# KalmanFilter
+cd ~/programs
+git clone git://basterwijn.nl/home/bterwijn/git/KalmanFilter.git
+cd KalmanFilter
+mkdir build
+cd build
+cmake ../
+make -j 4
+sudo make install
 
 # cob_perception_common
 cd ~/ros
@@ -64,22 +108,35 @@ rosmake cob_perception_common
 # cob_people_perception
 cd ~/ros
 git clone https://github.com/ipa320/cob_people_perception.git
-# add these lines to cob_people_perception/CMakeLists.txt:
-# target_link_libraries(face_recognizer_node boost_filesystem boost_system)
-# target_link_libraries(detection_tracker_node boost_signals)
-# target_link_libraries(people_detection_display_node boost_signals)
-# target_link_libraries(face_capture_node boost_signals boost_filesystem boost_system)
 rosdep install cob_people_perception
 rosmake cob_people_perception
 
-# UvA localization
-rosdep install accompany_static_camera_localisation
-rosmake accompany_static_camera_localisation
+# gscam
+rosdep install gscam
+rosmake gscam
 
-# Test
-# downloads prerecorded video and does detection and tracking
-roscd accompany_uva/scripts
-./startTestRobotHouse.sh
+# map server
+sudo apt-get -y install ros-groovy-navigation
+rosdep install navigation
+rosmake navigation
 
-# tracks humans and identities using artificial data
-roslaunch accompany_human_tracker testTracker.launch
+# rviz
+sudo apt-get -y install ros-groovy-viz
+rosdep install rviz
+rosmake rviz
+
+# rospy
+#sudo apt-get -y install ros-groovy-rospy
+rosdep install rospy
+rosmake rospy
+
+# rosbag
+#sudo apt-get -y install ros-groovy-rosbag
+rosdep install rosbag
+rosmake rosbag
+
+# accompany
+rosdep install accompany_uva
+rosmake accompany_uva
+
+

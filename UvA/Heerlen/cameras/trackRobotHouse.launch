@@ -1,0 +1,26 @@
+<launch>
+
+  <!-- camera1 -->
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_sofa -e /home/accompany/ros/accompany/UvA/Heerlen/camera_sofa/camera_extrinsic.xml"/>
+  
+
+  <!-- camera3 -->
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_kitchen -e /home/accompany/ros/accompany/UvA/Heerlen/camera_kitchen/camera_extrinsic.xml"/>
+
+
+  <!-- detect -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization"
+        args="-p /home/accompany/ros/accompany/UvA/Heerlen/cameras/params.xml -n 4 -t 7 -v"/>
+
+
+  <!-- track humans using localisation data -->
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
+        args="-p /home/accompany/ros/accompany/UvA/Heerlen/cameras"/>
+        
+   <!-- Map server -->
+  <node pkg="map_server" type="map_server" name="map_server" args="/home/accompany/ros/accompany/UvA/Heerlen/cameras/map.yaml"/>
+
+
+</launch>

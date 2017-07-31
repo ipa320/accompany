@@ -69,16 +69,16 @@ using namespace GausMix;
 #define DYNBG_MAXGAUS 3
 #define INIT_FIRST_FRAMES 1 // use first X frames to initializa the background model
 vector<GaussianMixture<DYNBG_GAUS,DYNBG_TYPE,DYNBG_MAXGAUS> *> gaussianMixtures(CAM_NUM);
-DYNBG_TYPE decay=1/800.0f;
-DYNBG_TYPE initVar=5;
-DYNBG_TYPE minWeight=.2;
-DYNBG_TYPE squareMahanobisMatch=10;
-DYNBG_TYPE weightReduction=0.008;
+DYNBG_TYPE weightGrowthFactor=0.005;
+DYNBG_TYPE meanVarUpdate=0.05;
+DYNBG_TYPE minVar=8;
+DYNBG_TYPE maxVar=20;
+DYNBG_TYPE squareMahanobisMatch=20;
+DYNBG_TYPE minBackgroundLogProb=-100;
 const char* dynBGProb = "Background Probability";
-
+unsigned backgroundFrameCount=0;
 // vizualize
 //vnl_vector<FLOAT> bgProb;
-FLOAT bgProbMin,bgProbMax;
 // ---- dynamic background model ---- end
 
 extern unsigned w2;
@@ -119,7 +119,6 @@ int direction = 1;
 
 ImgProducer *producer;
 
-int waitTime = 30;
 int visualize;
 
 string save_all;
@@ -770,19 +769,21 @@ public:
 
   void operator()()
   {
+    DYNBG_TYPE growthFactor=weightGrowthFactor;
+    if (backgroundFrameCount<10) growthFactor=10; // high growth in first frames
     int updateGaussianID;
     DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
     int channelInd=begin*3;
+          
     for (unsigned int i=begin;i<end;i++)
     {
       data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
       data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
       data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
-      DYNBG_TYPE logProbBG=gaussianMixtures[i].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
-      gaussianMixtures[i].update(data,initVar,decay,weightReduction,updateGaussianID);
+      DYNBG_TYPE logProbBG=2*gaussianMixtures[i].logProbability(data,squareDist,squareMahanobisMatch,updateGaussianID);
+      if (logProbBG<minBackgroundLogProb) logProbBG=minBackgroundLogProb;
+      gaussianMixtures[i].update(data,growthFactor,meanVarUpdate,minVar,maxVar,updateGaussianID);
       bgProb(i)=logProbBG;
-      if (logProbBG<bgProbMin) bgProbMin=logProbBG;
-      if (logProbBG>bgProbMax) bgProbMax=logProbBG;
       channelInd+=3; // next pixel
     }
   }
@@ -801,8 +802,8 @@ void getDynamicBackgroundLogProb(IplImage *smooth,
   unsigned int size=smooth->width*smooth->height;
   if (bgProb.size()!=size)
     bgProb.set_size(size);
-  bgProbMin=std::numeric_limits<float>::max();
-  bgProbMax=-std::numeric_limits<float>::max();
+
+  backgroundFrameCount++;
 
   // threaded version
   boost::thread threads[nrThreads];
@@ -817,24 +818,6 @@ void getDynamicBackgroundLogProb(IplImage *smooth,
   }
   for (unsigned i=0;i<nrThreads;i++)
     threads[i].join();
-
-  /* // non-threaded version
-  int updateGaussianID;
-  DYNBG_TYPE data[DYNBG_DIM],squareDist[DYNBG_DIM];
-  int channelInd=0;
-  for (unsigned int i=0;i<size;i++)
-  {
-    data[0]=(unsigned char)(smooth->imageData[channelInd+0]);
-    data[1]=(unsigned char)(smooth->imageData[channelInd+1]);
-    data[2]=(unsigned char)(smooth->imageData[channelInd+2]);
-    DYNBG_TYPE logProbBG=gaussianMixtures[i].logProbability(data,squareDist,minWeight,squareMahanobisMatch,updateGaussianID);
-    gaussianMixtures[i].update(data,initVar,decay,weightReduction,updateGaussianID);
-    bgProb(i)=logProbBG;
-    if (logProbBG<bgProbMin) bgProbMin=logProbBG;
-    if (logProbBG>bgProbMax) bgProbMax=logProbBG;
-    channelInd+=3; // next pixel
-  }
-  */
 }
 
 void getDynamicBackgroundSumLogProb(IplImage *smooth,
@@ -926,14 +909,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
     {
       bgProbImg=cvCreateImage(cvSize(width,height),IPL_DEPTH_8U,1);
       int size=width*height;
-      bgProbMin=-1000;// improves visualisation
       for (int i=0;i<size;i++)
-      {
-        if (bgProb[c](i)<bgProbMin)
-          bgProbImg->imageData[i]=bgProbMin;// improves visualisation
-        else
-          bgProbImg->imageData[i]=(bgProb[c](i)-bgProbMin)*255.0/(bgProbMax-bgProbMin);
-      }
+        bgProbImg->imageData[i]=255-bgProb[c](i)*255.0/(minBackgroundLogProb);
       // convert to Ros image and publish
       cv_bridge::CvImage bgProbImgRos;
       bgProbImgRos.encoding = "mono8";
@@ -964,8 +941,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& image, const sensor_msgs::C
     else
       ROS_INFO_STREAM("wait for other frames");
 
-    if (visualize) cvWaitKey(waitTime);
-
 #if USE_DYNAMIC_BACKGROUND
     if (visualize)
       cvReleaseImage(&bgProbImg);
@@ -986,7 +961,7 @@ void publishTF()
   {
     frame.header.stamp=ros::Time::now();
     transformBroadcasterPtr->sendTransform(frame);
-    usleep(50*1000); // sleep 50ms for +-20Hz thread
+    usleep(10*1000); // sleep 10ms for +-100Hz thread
   }
 }
 
@@ -1048,7 +1023,6 @@ int main(int argc, char **argv)
   frame_file = path + "/" + "frame.dat";
 
   
-  ROS_INFO_STREAM("loading '"<<bgmodel_file.c_str()<<"'");
   // load coordinate frame of camera
   if (!load_msg(frame,frame_file))
   {
@@ -1090,7 +1064,7 @@ int main(int argc, char **argv)
   
   image_transport::ImageTransport it(n);
   humanDetectionsPub = n.advertise<accompany_uva_msg::HumanDetections>(resolved_humanDetections, 10);
-  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("visualization_marker_array",0);
+  markerArrayPub = n.advertise<visualization_msgs::MarkerArray>("camera_localization_visualization_marker_array",0);
 
   frameCounter=new FrameCounter(cam.size());
   backgroundsPub=new image_transport::Publisher[cam.size()];

@@ -1,25 +1,27 @@
 #include "accompany_context_aware_planner/proxemics.h"
 #include <ros/ros.h>
 
-//RH's Setting
-//#define DBHOST "tcp://localhost:3306"
-//#define DBHOST "tcp://10.0.1.54:3306" //robothouse database ip
-//#define USER "rhUser"
-//#define PASSWORD "waterloo"
-//#define DATABASE "Accompany"
-
-
-//Heerlen's Setting
-#define DBHOST "tcp://192.168.1.142:3306" //robothouse database ip
-#define USER "accompanyUser"
-#define PASSWORD "accompany"
-#define DATABASE "Accompany"
-
-
 int main(int argc, char * argv[])
 {
   ros::init(argc, argv, "context_aware_planner_server");
   ros::NodeHandle n;
+
+  //Declare MySQL server variables that can be modified by launch file or command line.
+  std::string DBHOST;
+  std::string USER;
+  std::string PASSWORD;
+  std::string DATABASE;
+
+  //Initialize node parameters from launch file or command line.
+  //Use a private node handle so hat multiple instances of the node can be run simultaneously while using different parameters.
+  ros::NodeHandle private_node_handle_("~");
+
+  //Default MySQL setting for local host
+  private_node_handle_.param("DBHOST",		DBHOST, 	string("tcp://localhost:3306"));
+  private_node_handle_.param("USER",		USER, 		string("rhUser"));
+  private_node_handle_.param("PASSWORD",	PASSWORD, 	string("waterloo"));
+  private_node_handle_.param("DATABASE",	DATABASE, 	string("Accompany"));
+
   Proxemics p;
   p.init(n, DBHOST, USER, PASSWORD, DATABASE);
   ros::spin();

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-#TODO transformation from coordinate fmrame of camera to map necessary
+#TODO transformation from coordinate frame of camera to map necessary
 
 ############### PARAMETER SETTINGS #######################
 import roslib

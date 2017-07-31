@@ -189,6 +189,21 @@ protected:
     return out;
   }
 
+  /**
+   * Weighted intersect, linear value between 0 (no intersection) and 1 (full intersection).
+   */
+  TYPE_WEIGHT intersect(const Histogram<TYPE_DATA,TYPE_WEIGHT,BINS,DIM>& histogram)
+  {
+    TYPE_WEIGHT intersect=0;
+    for (unsigned i=0;i<this->hist.size();i++)
+    {
+      TYPE_WEIGHT h1=this->hist[i]/this->weightCount;
+      TYPE_WEIGHT h2=histogram.hist[i]/histogram.weightCount;
+      intersect+=(h1<h2)?h1:h2;// get minimum
+    }
+    return intersect;
+  }
+
  private:
   
   virtual unsigned bin(TYPE_DATA d)

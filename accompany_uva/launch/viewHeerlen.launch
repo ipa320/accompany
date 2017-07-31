@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- fish-eye cam -->
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_kitchen/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_sofa/image_raw"/>      
+
+  <!-- background -->
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_kitchen/background/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_sofa/background/image_raw"/>      
+
+  <!-- detect -->
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_kitchen/detect/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon view)" 
+        args="image:=/camera_sofa/detect/image_raw"/>
+
+</launch>

@@ -107,28 +107,28 @@ bool Proxemics::getPotentialProxemicsLocations(
 {
   Pose targetPose, robotLocation;
   Bearing proxemics_bearing;
-  Bearing ranked_bearing[21];
+  //Bearing ranked_bearing[21];
 
-  float x, y, orientation;
+  //float x, y, orientation;
+ /*
   Driver *driver;
   Connection *con;
   Statement *stmt;
   ResultSet *result;
   string sql;
+*/
+  //int locationId, ValidRobotLocation;
 
-  int locationId, ValidRobotLocation;
-
-  int validDataCount = 0;
+  //int validDataCount = 0;
   tf::Stamped<tf::Pose> p;
   geometry_msgs::PoseStamped pose; //create a PoseStamped variable to store the StampedPost TF
-
+/*
   driver = get_driver_instance();
   con = driver->connect(DBHOST, USER, PASSWORD); // create a database connection using the Driver
   con->setAutoCommit(0); // turn off the autocommit
   con->setSchema(DATABASE); // select appropriate database schema
   stmt = con->createStatement(); // create a statement object
-
-
+*/
   SQL_error = false; //reset the SQL error flag to false before begin processing
 
   //1. Process the request data from the client.
@@ -142,53 +142,30 @@ bool Proxemics::getPotentialProxemicsLocations(
   ROS_INFO("robotGenericTask: %d", req.robotGenericTaskId);
 
 
-  //if user is sitting
-  /*if (req.userPosture == 2)    //sitting on sofa
-  {
-    //getsensorlocation id and check if user is in locationid
-
-      getPotentialProxemicsLocations_Sofa(req,res);
-
-
-
-    if (SQL_error == true)
-    {
-      cout<<"SQL_error!!!"<<endl;
-      return true;
-    }
-  }
-  */
+  //Process user's proxemics using ExceptionCase table - for user in sitting posture or for special cases regular proxemics implementation is not suitable
   if(getPotentialProxemicsLocations_ExceptionCase(req,res) == true)
   {
     cout<<"Done processing ExceptionCase."<<endl;
-    //cout<<SQL_error<<endl;
   }
   else if (req.userPosture == 1) //standing
   {
-    SQL_error = false;  //reset it to false incase it was set by getPotentialProxemicsLocations_ExceptionCase
+    SQL_error = false;  //reset it to false in case it was set to true by getPotentialProxemicsLocations_ExceptionCase
     if(getPotentialProxemicsLocations_Standing(req,res) == false)
       cout<<"Error!"<<endl;
-
   }
   else
-  {
+  {	//for now, we apply standing posture proxemics for different posture that is not taken care by the ExceptionCase table
 	  cout<<"User is not in standing posture"<< endl;
+	  SQL_error = false;  //reset it to false inc ase it was set by getPotentialProxemicsLocations_ExceptionCase
+	  if(getPotentialProxemicsLocations_Standing(req,res) == false)
+	       cout<<"Error!"<<endl;
   }
-  //check if there are data in it.
-  /*if ((validDataCount>0) && (SQL_error != true))
-  {
-    cout<<validDataCount<<" valid pose(s) found."<<endl;
-    cout<<"Sending pose(s) out."<<endl;
-    return true;
-  }
-  else if (req.userPosture!=2)
-  {
-    cout<<"No valid target pose was found."<<endl;
-    return true;
-  }
-
-  cout<<"Found an exceptionCaseProxemicPose."<<endl;*/
-
+/*
+  delete result;
+  delete stmt;
+  con->close();
+  delete con;
+*/
   return true;
 }
 /************************************************************************************************/
@@ -205,12 +182,17 @@ ResultSet *result;
 string sql;
 
 int locationId, ValidRobotLocation;
-float temp_x, temp_y, temp_orientation;
+float temp_x = 0;
+float temp_y = 0;
+float temp_orientation = 0;
 
 int validDataCount = 0;
 
+visualization_msgs::MarkerArray proxemicsMarkerArray;
+
 tf::Stamped<tf::Pose> p;
 geometry_msgs::PoseStamped pose; //create a PoseStamped variable to store the StampedPost TF
+geometry_msgs::PoseStamped poseTemp[21];
 
 Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw(req.userPose.orientation));
 
@@ -220,7 +202,7 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
   con->setSchema(DATABASE); // select appropriate database schema
   stmt = con->createStatement(); // create a statement object
 
-  //retrieved user's locationId
+//1. Retrieved user's locationId
   sql  = "SELECT locationId FROM Users WHERE userId = ";
   sql += to_string(req.userId);
   cout<<sql<<endl;
@@ -233,10 +215,16 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
   {
     SQL_error = true;
     cout<<"SQL_error!!!, no user's locationId found."<<endl;
+
+    delete result;
+    delete stmt;
+    con->close();
+    delete con;
+
     return false;
   }
 
-  //check if locationId has valid robot location
+  //check if the locationId is robot friendly
   sql = "SELECT ValidRobotLocation FROM Locations WHERE locationId = ";
   sql += to_string(locationId);
   cout<<sql<<endl;
@@ -249,40 +237,51 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
   {
     SQL_error = true;
     cout<<"SQL_error!!!, no ValidRobotLocation found."<<endl;
+
+    delete result;
+    delete stmt;
+    con->close();
+    delete con;
+
     return false;
   }
 
-  if (ValidRobotLocation)
+  if (ValidRobotLocation)  //if the current location is robot friendly
   {
     robotLocation = getRobotPose();
 
     //2. Retrieves user's preference - create a prioritise list of all possible bearing based on user's preference
-
     retrieveProxemicsPreferences_ranking(req.userId, req.robotGenericTaskId, ranked_bearing);
     if (SQL_error == true)
     {
       cout<<"Error after retrieveProxemicsPreferences_ranking."<<endl;
-      return false; //true;
+
+      delete result;
+      delete stmt;
+      con->close();
+      delete con;
+
+      return false;
     }
+
     //To do //search based on distance  //search based on orientation
     for(int i=0; i<21; i++)
     {
-      if (ranked_bearing[i].orientation == 999)
+      if (ranked_bearing[i].orientation == 999) //stop the loop when we reached the end of the ranked bearing
         i = 21;     //21 possible approach target' poses, ignoring the back approach.
       else
-      { //calculate each bearing
+      { //calculate each valid bearing
         proxemics_bearing = ranked_bearing[i];
         //ROS_INFO("Ranked Bearing %d orientation is %f distance is %f",i, radian2degree(proxemics_bearing.orientation), proxemics_bearing.distance);
 
         //3. Calculate all the target poses from the database, where distance and orientation can be obtain from step2
         targetPose = calculateRobotPoseFromProxemicsPreference(req.userPose, proxemics_bearing);
-        if (SQL_error == true)
-          return false; //true;
 
         //4. Eliminate target poses that could not be occupied by the robot based on static map (i.e. too close to obstacle or on obstacle)
         //   Eliminate target poses that could not be reach by the robot based on static map
         //5. Elimimate target poses that are not in the same location as the user (i.e. user is in living room, therefore all potential robot poses have to be in the living room for HRI)
         bool validApproach = validApproachPosition(personLocation, robotLocation, targetPose);
+
         if (validApproach == true)
         {
           p = tf::Stamped<tf::Pose>(tf::Pose(tf::createQuaternionFromYaw(targetPose.orientation),
@@ -292,7 +291,9 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
 
           //6. Compile the respond message for the client.
           tf::poseStampedTFToMsg(p, pose); //convert the PoseStamped data into message format and store in pose
+
           res.targetPoses.push_back(pose); //push the pose message into the respond vector to be send back to the client
+
 
           validDataCount++;
         }
@@ -304,7 +305,7 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
       }
     }
   }
-  else
+  else //if the current location is not robot friendly/not valid for robot, search for the next valid location, no proxemics will be used currently (the robot might not faced the user)
   {
     while (ValidRobotLocation == 0)
     {
@@ -330,9 +331,16 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
       {
         SQL_error = true;
         cout<<"SQL_error!!!, no ValidRobotLocation can be found."<<endl;
+
+        delete result;
+        delete stmt;
+        con->close();
+        delete con;
+
         return false;
       }
     }
+
     targetPose.x = temp_x;
     targetPose.y = temp_y;
     targetPose.orientation = degree2radian(temp_orientation);
@@ -340,6 +348,8 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
                                                        tf::Point(targetPose.x, targetPose.y, 0.0)), ros::Time::now(), "map");
     tf::poseStampedTFToMsg(p, pose);    //Convert the PoseStamped data into message format and store in pose.
     res.targetPoses.push_back(pose);    //Store the pose in the respond message for the client.
+
+    poseTemp[0] = pose;
     validDataCount++;
   }
 
@@ -347,11 +357,61 @@ Pose personLocation(req.userPose.position.x, req.userPose.position.y, tf::getYaw
   {
     cout<<validDataCount<<" valid pose(s) found."<<endl;
     cout<<"Sending pose(s) out."<<endl;
+
+    ros::Time rosCurrentTime = ros::Time(0);
+
+    proxemicsMarkerArray.markers.resize(validDataCount);
+
+    for(unsigned int j=0; j < validDataCount; j++)
+    {
+      proxemicsMarkerArray.markers[j].header.frame_id = "map";
+      proxemicsMarkerArray.markers[j].header.stamp = rosCurrentTime;
+      proxemicsMarkerArray.markers[j].id = j;
+      proxemicsMarkerArray.markers[j].type = visualization_msgs::Marker::ARROW;
+      proxemicsMarkerArray.markers[j].action = visualization_msgs::Marker::ADD;
+
+      proxemicsMarkerArray.markers[j].pose= res.targetPoses[j].pose;
+      /*
+      proxemicsMarkerArray.markers[j].pose.position.x = ;
+      proxemicsMarkerArray.markers[j].pose.position.y = ;
+      proxemicsMarkerArray.markers[j].pose.position.z = ;
+
+      proxemicsMarkerArray.markers[j].pose.orientation.x = 0.0;
+      proxemicsMarkerArray.markers[j].pose.orientation.y = 0.0;
+      proxemicsMarkerArray.markers[j].pose.orientation.z = 0.0;
+      proxemicsMarkerArray.markers[j].pose.orientation.w = 1.0;
+      */
+
+      proxemicsMarkerArray.markers[j].scale.x = 0.3;
+      proxemicsMarkerArray.markers[j].scale.y = 0.1;
+      proxemicsMarkerArray.markers[j].scale.z = 0.1;
+
+      float colour = (j / (float)validDataCount) * 0.6 + 0.2;
+      proxemicsMarkerArray.markers[j].color.a = 1.0;
+      proxemicsMarkerArray.markers[j].color.r = colour;
+      proxemicsMarkerArray.markers[j].color.g = 1.0 - colour;
+      proxemicsMarkerArray.markers[j].color.b = 0.0;
+    }
+    potentialProxemicsPosePublisher.publish(proxemicsMarkerArray);
+
+    delete result;
+    delete stmt;
+    con->close();
+    delete con;
+
     return true;
+  }
+  else
+  {
+    delete result;
+    delete stmt;
+    con->close();
+    delete con;
+
+    return false;
   }
 
 }
-
 
 bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_aware_planner::GetPotentialProxemicsLocations::Request &req,
                             accompany_context_aware_planner::GetPotentialProxemicsLocations::Response &res)
@@ -391,22 +451,11 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
     delete stmt;
     con->close();
     delete con;
+
     return false;
   }
 
-  /*
-   SELECT
-     e.*
-   FROM
-     ExceptionCaseProxemicsPose e
-     INNER JOIN SensorBasedProxemicsPreferences p ON p.exceptionCaseProxemicsPoseId = e.exceptionCaseProxemicsPoseId
-     INNER JOIN Sensors s ON s.sensorID = p.sensorID
-   WHERE
-     s.locationId = 14 AND (
-        s.status = 'On' OR
-        s.status = 'Open' OR
-        s.status = 'Occupied')
-   */
+  //Count how many Sensors with ExceptionCaseProxemicsPose entry at user current location are triggered.
   sql = "SELECT \
            COUNT(e.environmentId) as `count` \
          FROM \
@@ -422,24 +471,26 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
          s.status = 'Occupied')";
 
    cout<<sql<<endl;
-   result = stmt->executeQuery(sql);     //Search for the pose of the proxemicsPoseId in the current environment.
+   result = stmt->executeQuery(sql);
    if (result->next())
    {
      int count = result->getInt("count");
 
-     if (count == 0)
+     if (count == 0) // in the future we can use this location for non-sensor based ExceptionCaseProxemicsPose
      {
        cout<<"Sensor based proxemics were not found in ExceptionCaseProxemicsPose table, switching to general proxemics processing."<<endl;
        SQL_error = true;
+
        delete result;
        delete stmt;
        con->close();
        delete con;
+
        return false;
      }
-     else if (count == 1)
+     else if (count == 1) //Retrieve the ExceptionCaseProxemicsPose for the triggered Sensor at user current location.
      {
-       //selecting exception case proxememics pose that has a sensor based proxemic that matched one of the selected sensors.
+       //selecting exception case proxememics pose that has a sensor based proxemics that matched one of the selected sensors.
        //selecting sensors that are 'ON' in the user's location, it assume the user is in the current experimental location.
        sql = " SELECT \
                  e.* \
@@ -454,7 +505,7 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
                         s.status = 'Open' OR \
                         s.status = 'Occupied')";
          cout<<sql<<endl;
-         result = stmt->executeQuery(sql);     //Search for the pose of the proxemicsPoseId in the current environment.
+         result = stmt->executeQuery(sql);
          if (result->next())
          {
            targetPose.x=result->getDouble("x");
@@ -466,19 +517,21 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
            res.targetPoses.push_back(pose);    //Store the pose in the respond message for the client.
            cout<<"Done processing - Found user triggering sensor based proxemics."<<endl;
          }
-         else
+
+         else //in theory it should never reach "else" since we already found a matching with in the ExceptionCaseProxemicsPose table previously i.e. count == 1
          {
-           cout<<"Sensor based proxemics were not found in ExceptionCaseProxemicsPose table, switching to general proxemics processing."<<endl;
+           cout<<"Sensor based proxemics were not found in ExceptionCaseProxemicsPose table, switching to general proxemics processing. report Error Code !1 -+- "<<endl;
            SQL_error = true;
+
            delete result;
            delete stmt;
            con->close();
            delete con;
+
            return false;
          }
-
      }
-     else if (count >=1 )
+     else if (count >=1 )  //For more than one sensors triggered at the user's location, we send the robot to a general valid location
      {
        sql = "SELECT * FROM Locations WHERE locationId = ";
        sql+= to_string(userLocationId);
@@ -487,24 +540,33 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
        if (result->next())
        {
          ValidRobotLocation = result->getInt("ValidRobotLocation");
-         while (!ValidRobotLocation)     //find a valid robot location near the sofa locationId
+
+         while (!ValidRobotLocation)    //if no valid robot location can be found, find next closest valid robot location using the Locations table
          {
            closestValidRobotLocation = result->getInt("closestValidRobotLocation");
            sql = "SELECT * FROM Locations WHERE locationId = ";
            sql+= to_string(closestValidRobotLocation);
            cout<<sql<<endl;
            result = stmt->executeQuery(sql);
-           if (result->next())
+           if (result->next()) //if there is data
            {
              ValidRobotLocation = result->getInt("ValidRobotLocation");
            }
            else
            {
              SQL_error = true;
-             cout<<"SQL_error!!!, no ValidRobotLocation can be found."<<endl;
+             cout<<"SQL_error!!!, no ValidRobotLocation can be found with the statement : "<<endl;
+             cout<<sql<<endl;
+
+             delete result;
+             delete stmt;
+             con -> close();
+             delete con;
+
              return false;
            }
          }
+
          targetPose.x=result->getDouble("xCoord");
          targetPose.y=result->getDouble("yCoord");
          targetPose.orientation=degree2radian(result->getDouble("orientation"));
@@ -513,20 +575,24 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
          tf::poseStampedTFToMsg(p, pose);    //Convert the PoseStamped data into message format and store in pose.
          res.targetPoses.push_back(pose);    //Store the pose in the respond message for the client.
          cout<<"Done processing user on sofa in living room"<<endl;
+
          delete result;
          delete stmt;
          con -> close();
          delete con;
+
          return true;
        }
        else
        {
          SQL_error = true;
-         cout<<"Sofa's locationId not found."<<endl;
+         cout<<"No ValidRobotLocation found at user's location, report Error Code !2 - Database need to be fixed."<<endl;
+         cout<<sql<<endl;
          delete result;
          delete stmt;
          con -> close();
          delete con;
+
          return false;
        }
      }
@@ -535,14 +601,21 @@ bool Proxemics::getPotentialProxemicsLocations_ExceptionCase(accompany_context_a
    {
      cout<<"Sensor based proxemics were not found in ExceptionCaseProxemicsPose table, switching to general proxemics processing."<<endl;
      SQL_error = true;
+
      delete result;
      delete stmt;
      con->close();
      delete con;
+
      return false;
    }
 
-  return true;
+   delete result;
+   delete stmt;
+   con->close();
+   delete con;
+
+   return true;
 }
 
 /******************************************************************************
@@ -753,6 +826,7 @@ Proxemics::Bearing Proxemics::retrieveProxemicsPreferences(int userId, int robot
   con -> close();
   delete con;
 
+
   return bearing;
 }
 /************************************************************************************************/
@@ -793,21 +867,23 @@ bool Proxemics::isUserIn(int userId, string locationName)
     cout << sql << endl;
     if (stmt->execute(sql)) // return row , if rowcnt >= 1 user is in Living Room
     {
+      cout << "User is in the "<<locationName <<endl; //check which sofa the user is sitting
+
       delete result;
       delete stmt;
       con->close();
       delete con;  //this is to avoid issue where the "spCheckUserLocation" not returning when rowcnt = null?
-      cout << "User is in the "<<locationName <<endl; //check which sofa the user is sitting
 
       return true;
     }
     else
       {
+        cout << "User is not in the "<<locationName<<endl; //check which sofa the user is sitting
+
         delete result;
         delete stmt;
         con->close();
         delete con;  //this is to avoid issue where the "spCheckUserLocation" not returning when rowcnt = null?
-        cout << "User is not in the "<<locationName<<endl; //check which sofa the user is sitting
 
         return false; //user is not in living room
       }
@@ -816,6 +892,12 @@ bool Proxemics::isUserIn(int userId, string locationName)
   {
     cout<<"No locationId for "<<locationName<<" was found in the Locations table."<<endl;
     SQL_error = true;
+
+    delete result;
+    delete stmt;
+    con->close();
+    delete con;
+
     return false;
   }
 }
@@ -978,12 +1060,24 @@ void Proxemics::rankDistanceBasedPriority( int distancePriority, Bearing* ranked
       {
         cout<<"Error executing "<<sql<<" statement."<<endl;
         SQL_error = true;
+
+        delete result;
+        delete stmt;
+        con->close();
+        delete con;
+
         return;
       }
       else
       {
         cout<<"Error retrieving (the "<<i<<"th) result from "<<sql<<" statement."<<endl;
         SQL_error = true;
+
+        delete result;
+        delete stmt;
+        con->close();
+        delete con;
+
         return;
       }
    }
@@ -993,11 +1087,11 @@ void Proxemics::rankDistanceBasedPriority( int distancePriority, Bearing* ranked
   float distance = 0;
 
   if (distancePriority == 1)
-    distance = 0.825; //read from database
+    distance = 0.45; //read from database little modification 0.825 before
   else if (distancePriority == 2)
-    distance = 1.5;
+    distance = 0.8; //1.5
   else if (distancePriority == 3)
-    distance = 2;
+    distance = 1.5; //2
 
   //perform the first ranking cycle around the user's preferred distance, based on their preferred bearing( distance, orientation).
   if (rankedBearing[0].orientation == degree2radian(0)) //then check id 1, then check RobotApproachOrientation id 2, 3 or 3, 2 depending on user's handedness or current robot location //front
@@ -1082,11 +1176,11 @@ void Proxemics::rankDistanceBasedPriority( int distancePriority, Bearing* ranked
     if (distancePriority != i) //if the orientation ranking haven't being done for this distance then do it
     {
       if (i == 1)
-        distance = 0.825; //read from database
+        distance = 0.45; //read from database little modification 0.825 before
       else if (i == 2)
-        distance = 1.5;
+        distance = 0.8; // 1.5
       else if (i == 3)
-        distance = 2;
+        distance = 1.5; //2 
 
       for (int j=0; j<7; j++) //use the new rank list and replicate for other distances
          {
@@ -1199,66 +1293,97 @@ bool Proxemics::validApproachPosition(Pose personLocation, Pose robotLocation, P
   //std::vector<cv::Vec4i> hierarchy;
   cv::Mat expanded_map_with_person_copy = expanded_map_with_person.clone();
   cv::findContours(expanded_map_with_person_copy, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
-
   // display found contours
   cv::drawContours(expanded_map_with_person, contours, -1, cv::Scalar(128, 128, 128, 128), 2);
+
+
   cv::circle(expanded_map_with_person, convertFromMeterToPixelCoordinates<cv::Point> (robotLocation), 3,
              cv::Scalar(100, 100, 100, 100), -1); //robot position
+
   cv::circle(expanded_map_with_person, potentialApproachPosePixel, 3, cv::Scalar(200, 200, 200, 200), -1); //approach position
+
   //cv::line(expanded_map_with_person, convertFromMeterToPixelCoordinates<cv::Point>(Pose(1.f,0.2f,0.f)), convertFromMeterToPixelCoordinates<cv::Point>(Pose(-1.f,0.2f,0.f)), cv::Scalar(0,0,0,0), 2);
   //cv::line(map_, convertFromMeterToPixelCoordinates<cv::Point>(Pose(1.f,0.2f,0.f)), convertFromMeterToPixelCoordinates<cv::Point>(Pose(-1.f,0.2f,0.f)), cv::Scalar(0,0,0,0), 2);
 
-//To Display the results
-/*
-  cv::imshow("contour areas", expanded_map_with_person);
 
+  //To Display the results
+  /*
+  cv::imshow("contour areas", expanded_map_with_person);
   cv::Mat expanded_map_with_person_flip;
   cv::flip(expanded_map_with_person, expanded_map_with_person_flip,0);
   cv::imshow("contour areas flip",expanded_map_with_person_flip);
-
   cv::waitKey(100);
-*/
+  */
 
   // Eliminate poses that could not be reach by the robot based on static map
   // i.e. check whether potentialApproachPose and robotLocation are in the same area (=same contour)
   int contourIndexRobot = -1;
   int contourIndexPotentialApproachPose = -1;
+
+  //check if robot pose and potential pose are in the same contour/region i.e. robot reachable potential pose
   for (unsigned int i = 0; i < contours.size(); i++)
   {
-    if (0 <= cv::pointPolygonTest(contours[i], convertFromMeterToPixelCoordinates<cv::Point2f> (potentialApproachPose),
-                                  false))
+    //pointPologonTest function determines whether the point is inside a contour, outside, or lies on an edge (or coincides with a vertex).
+    //It returns positive (inside), negative (outside), or zero (on an edge) value, correspondingly.
+    if (0 <= cv::pointPolygonTest(contours[i], convertFromMeterToPixelCoordinates<cv::Point2f> (potentialApproachPose), false))
       contourIndexPotentialApproachPose = i;
     if (0 <= cv::pointPolygonTest(contours[i], convertFromMeterToPixelCoordinates<cv::Point2f> (robotLocation), false))
       contourIndexRobot = i;
   }
   std::cout << "contourIndexPotentialApproachPose=" << contourIndexPotentialApproachPose << "  contourIndexRobot="
       << contourIndexRobot << std::endl;
+
+  //
   if (contourIndexRobot != contourIndexPotentialApproachPose || (contourIndexRobot == -1
-      && contourIndexPotentialApproachPose == -1))
+      && contourIndexPotentialApproachPose == -1)){
+    std::cout << "Robot cannot reach this potential approach location" << endl;
     return false;
+  }
 
   // Eliminate poses that are not in the same location as the user (i.e. user is in living room, therefore all potential robot poses have to be in the living room for HRI)
   // check whether there is an obstacle in direct line of sight between personLocation and potentialApproachPose
   double dx = personLocationPixel.x - potentialApproachPosePixel.x;
   double dy = personLocationPixel.y - potentialApproachPosePixel.y;
   double interpolationSteps = 0.;
-  if (dx >= dy) // normalize
+
+  //cout<<personLocationPixel.x <<" - "<< potentialApproachPosePixel.x <<"="<< dx<<endl;
+  //cout<<personLocationPixel.y <<" - "<< potentialApproachPosePixel.y <<"="<< dy<<endl;
+
+  //calculate a direct path from potential pose towards the user
+  if ((dx == 0) && (dy != 0))
   {
-    interpolationSteps = dx;
-    dy /= dx;
-    dx = 1.;
+    interpolationSteps = sqrt(dy*dy); //steps is always positive
+    dy = 1.0*(sqrt(dy*dy)/dy);        //direction to move towards the user's position
+  }
+  else if ((dy == 0) && (dx != 0))
+  {
+    interpolationSteps = sqrt(dx*dx);
+    dx = 1.0*(sqrt(dx*dx)/dx);
+  }
+  else if (sqrt(dx*dx) >= sqrt(dy*dy))
+  {
+    interpolationSteps = sqrt(dx*dx);
+    dy = dy/interpolationSteps;
+    dx = sqrt(dx*dx)/dx;
   }
   else
   {
-    interpolationSteps = dy;
-    dx /= dy;
-    dy = 1.;
+    interpolationSteps = sqrt(dy*dy);
+    dx = dx/interpolationSteps;
+    dy = sqrt(dy*dy)/dy;
   }
 
+  //check to make sure there is no obstacle along the way.
   for (int i = 0; i < interpolationSteps; i++)
   {
     if (map_.at<unsigned char> (potentialApproachPosePixel.y + i * dy, potentialApproachPosePixel.x + i * dx) == 0) // if there is an obstacle in line of sight (map(y,x)==0)
+    {
+      //cout<<static_cast<unsigned> (map_.at<unsigned char> (potentialApproachPosePixel.y + i * dy, potentialApproachPosePixel.x + i * dx))<<endl;
+      cout<<"Encountered obstacle"<<endl;
       return false;
+    }
+  //cout<<static_cast<unsigned> (map_.at<unsigned char> (potentialApproachPosePixel.y + i * dy, potentialApproachPosePixel.x + i * dx))<<endl;
+
   }
 
   return true;
@@ -1288,29 +1413,37 @@ void Proxemics::updateMapCallback(const nav_msgs::OccupancyGridConstPtr& map_msg
     }
   }
 
+  //display the map
+  /*
+  cv::Mat map_flip;
+  cv::flip(map_, map_flip, 0);
+  cv::imshow("map flip",map_flip);
+  cv::waitKey(100);
+  */
+
   // create the inflated map
   int iterations = (int)(robotRadius / map_resolution_);
   //std::cout << "iterations=" << iterations << std::endl;
   cv::erode(map_, expanded_map_, cv::Mat(), cv::Point(-1, -1), iterations);
 
-//  display maps
-/*
-    cv::imshow("blown up map", expanded_map_);
-    cv::imshow("map", map_);
-    cv::waitKey(10);
-*/
+  //  display maps
+  /*
+  cv::imshow("blown up map", expanded_map_);
+  cv::imshow("map", map_);
+  cv::waitKey(10);
+  */
 
   ROS_INFO("Map received.");
 }
 
 Proxemics::Pose Proxemics::getRobotPose()
 {
-  // Calculate robot pose in map coordinate frame
-  //stored the robot's origin in base_link frame
+  //Calculate robot pose in map coordinate frame
+  //    stored the robot's origin in base_link frame
   tf::Stamped<tf::Pose> robotOrigin = tf::Stamped<tf::Pose>(tf::Pose(tf::createQuaternionFromYaw(0),
                                                                        tf::Point(0.0, 0.0, 0.0)), ros::Time(0),
                                                               "base_link"); //base_link origin is the robot coordinate frame
-  //create a PoseStamped variable to store the StampedPost TF
+  //    create a PoseStamped variable to store the StampedPost TF
   geometry_msgs::PoseStamped map_frame; // create a map_frame to store robotOrigin in map frame
   geometry_msgs::PoseStamped base_link_frame; // create a base_link_frame to store robotOrigin in base_link frame
   tf::poseStampedTFToMsg(robotOrigin, base_link_frame); //stored the robot coordinate in base_link frame

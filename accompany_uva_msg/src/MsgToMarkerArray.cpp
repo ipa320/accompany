@@ -13,7 +13,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
   for (unsigned int i=0;i<msg.locations.size();i++)
   {
     markerArray.markers[i].header.frame_id = msg.locations[0].header.frame_id;
-    markerArray.markers[i].header.stamp = ros::Time();
+    markerArray.markers[i].header.stamp = ros::Time::now();
     markerArray.markers[i].type = visualization_msgs::Marker::SPHERE;
     markerArray.markers[i].pose.position.x = msg.locations[i].point.x;
     markerArray.markers[i].pose.position.y = msg.locations[i].point.y;
@@ -39,7 +39,7 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
   for (unsigned int i=0;i<msg.detections.size();i++)
   {
     markerArray.markers[i].header.frame_id = msg.detections[0].location.header.frame_id;
-    markerArray.markers[i].header.stamp = ros::Time();
+    markerArray.markers[i].header.stamp = ros::Time::now();
     markerArray.markers[i].type = visualization_msgs::Marker::SPHERE;
     markerArray.markers[i].pose.position.x = msg.detections[i].location.point.x;
     markerArray.markers[i].pose.position.y = msg.detections[i].location.point.y;
@@ -61,7 +61,6 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
                                                                  std::string name)
 {
   visualization_msgs::MarkerArray &markerArray=getMarkerArray(name,msg.trackedHumans.size()*3);
-  int ind=0;
   // sphere
   double radius=0.2;
   std_msgs::ColorRGBA red;
@@ -70,10 +69,12 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
   std_msgs::ColorRGBA blue;
   blue.b=1;
   blue.a=0.3;
+  int ind=0;
   for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
     markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
-    markerArray.markers[ind].header.stamp = ros::Time();
+    markerArray.markers[ind].header.seq = sequence_counter_;
+    markerArray.markers[ind].header.stamp = ros::Time::now();
     markerArray.markers[ind].type = visualization_msgs::Marker::SPHERE;
     markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
     markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
@@ -89,22 +90,25 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
       markerArray.markers[ind].color=blue;
     else
       markerArray.markers[ind].color=red;
+    markerArray.markers[ind].text="";
     markerArray.markers[ind].lifetime = ros::Duration(10);
-    ind++;
+    ind+=3;
   }
   // speed
+  ind = 1;
   for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
     markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
-    markerArray.markers[ind].header.stamp = ros::Time();
-    markerArray.markers[ind].type = visualization_msgs::Marker::ARROW; 
+    markerArray.markers[ind].header.seq = sequence_counter_;
+    markerArray.markers[ind].header.stamp = ros::Time::now();
+    markerArray.markers[ind].type = visualization_msgs::Marker::ARROW;
     markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
     markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
     markerArray.markers[ind].pose.position.z = msg.trackedHumans[i].location.point.z+radius;
     double sx=msg.trackedHumans[i].speed.vector.x; // speed vector
-    double sy=msg.trackedHumans[i].speed.vector.y; 
+    double sy=msg.trackedHumans[i].speed.vector.y;
     double angle=atan2(sy,sx);
-    double length=sqrt(sx*sx+sy*sy); 
+    double length=sqrt(sx*sx+sy*sy);
     markerArray.markers[ind].pose.orientation=tf::createQuaternionMsgFromRollPitchYaw(0,0,angle);// yaw
     markerArray.markers[ind].scale.x = length;
     markerArray.markers[ind].scale.y = .1;
@@ -113,14 +117,17 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
       markerArray.markers[ind].color=blue;
     else
       markerArray.markers[ind].color=red;
+    markerArray.markers[ind].text="";
     markerArray.markers[ind].lifetime = ros::Duration(10);
-    ind++;
+    ind+=3;
   }
   // text
+  ind = 2;
   for (unsigned int i=0;i<msg.trackedHumans.size();i++)
   {
     markerArray.markers[ind].header.frame_id = msg.trackedHumans[i].location.header.frame_id;
-    markerArray.markers[ind].header.stamp = ros::Time();
+    markerArray.markers[ind].header.seq = sequence_counter_;
+    markerArray.markers[ind].header.stamp = ros::Time::now();
     markerArray.markers[ind].type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     markerArray.markers[ind].pose.position.x = msg.trackedHumans[i].location.point.x;
     markerArray.markers[ind].pose.position.y = msg.trackedHumans[i].location.point.y;
@@ -137,13 +144,18 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::toMarkerArray(const accompany
     else
       markerArray.markers[ind].color=red;
     stringstream ss;
-    ss<<msg.trackedHumans[i].id;
-    if (msg.trackedHumans[i].identity.size()>0)
-      ss<<","<<msg.trackedHumans[i].identity;
+    //can show the ID
+    //ss<<msg.trackedHumans[i].id;
+
+    if (msg.trackedHumans[i].identity.size()>0 && msg.trackedHumans[i].identity.compare("unknown")!=0 && msg.trackedHumans[i].identity.compare("Unknown")!=0)
+    	ss<<msg.trackedHumans[i].identity;
+    else ss << "unknown";
+
     markerArray.markers[ind].text=ss.str();
     markerArray.markers[ind].lifetime = ros::Duration(10);
-    ind++;
+    ind+=3;
   }
+  sequence_counter_++;
   return markerArray;
 }
 
@@ -169,30 +181,27 @@ visualization_msgs::MarkerArray &MsgToMarkerArray::getMarkerArray(std::string na
     // requested size in previous call
     unsigned prevSize=nameToSize[name];
     
-    // reduce length after deleting in previous step
-    unsigned reduce=prevSize;
-    if (size>reduce)
-      reduce=size;
-    if (reduce<it->second.markers.size())
-      it->second.markers.resize(reduce);
-
-    // delete unused markers
-    for (unsigned i=size;i<it->second.markers.size();i++)
-      it->second.markers[i].action = visualization_msgs::Marker::DELETE;
+    // increase array size if necessary
+    if (size >= prevSize)
+    	it->second.markers.resize(size);
 
     // add markers
-    for (unsigned i=it->second.markers.size();i<size;i++)
+    for (unsigned i=0;i<prevSize;i++)
     {
-      visualization_msgs::Marker marker;
-      marker.ns = name;
-      marker.id = i;
-      marker.action = visualization_msgs::Marker::ADD;
-      it->second.markers.push_back(marker);
+      it->second.markers[i].ns = name;
+      it->second.markers[i].id = i;
+      it->second.markers[i].action = visualization_msgs::Marker::MODIFY;
+    }
+    for (unsigned i=prevSize;i<size;i++)
+    {
+      it->second.markers[i].ns = name;
+      it->second.markers[i].id = i;
+      it->second.markers[i].action = visualization_msgs::Marker::ADD;
     }
 
-    // reactivate previously deleted markers
-    for (unsigned i=prevSize;i<size;i++)
-      it->second.markers[i].action=visualization_msgs::Marker::ADD;
+    // delete unused markers
+    for (unsigned i=size;i<prevSize;i++)
+      it->second.markers[i].action = visualization_msgs::Marker::DELETE;
   }
   nameToSize[name]=size;
   return it->second;

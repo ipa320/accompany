@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- view images -->
+  <node pkg="image_view" type="image_view" name="$(anon image_view)"
+  	args="image:=/camera1/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon image_view)"
+  	args="image:=/camera3/image_raw"/>
+
+  <!-- view backgrounds -->
+  <node pkg="image_view" type="image_view" name="$(anon image_view)" 
+        args="image:=/camera1/background/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon image_view)" 
+        args="image:=/camera3/background/image_raw"/>
+
+  <!-- view detections -->
+  <node pkg="image_view" type="image_view" name="$(anon image_view)" 
+        args="image:=/camera1/detect/image_raw"/>
+  <node pkg="image_view" type="image_view" name="$(anon image_view)" 
+        args="image:=/camera3/detect/image_raw"/>
+
+</launch>

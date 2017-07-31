@@ -59,4 +59,7 @@ int main()
   cout<<"  histogram+histogram:"<<hh<<endl;
   cout<<endl;
 
+  cout<<"intersect:"<<histogram.intersect(histogram)<<endl;
+  cout<<"intersect:"<<histogram.intersect(hh)<<endl;
+
 }

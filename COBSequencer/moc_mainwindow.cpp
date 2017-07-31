@@ -1,7 +1,7 @@
 /****************************************************************************
 ** Meta object code from reading C++ file 'mainwindow.h'
 **
-** Created: Mon Sep 16 10:03:28 2013
+** Created: Tue Aug 19 14:44:12 2014
 **      by: The Qt Meta Object Compiler version 63 (Qt 4.8.1)
 **
 ** WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ static const uint qt_meta_data_MainWindow[] = {
        6,       // revision
        0,       // classname
        0,    0, // classinfo
-      93,   14, // methods
+      97,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -124,6 +124,10 @@ static const uint qt_meta_data_MainWindow[] = {
     3349,   11,   11,   11, 0x08,
     3386,   11,   11,   11, 0x08,
     3422,   11,   11,   11, 0x08,
+    3458,   12,   11,   11, 0x08,
+    3493,   12,   11,   11, 0x08,
+    3534,   12,   11,   11, 0x08,
+    3570,   12,   11,   11, 0x08,
 
        0        // eod
 };
@@ -221,6 +225,10 @@ static const char qt_meta_stringdata_MainWindow[] = {
     "on_robotLocationSpecButton_clicked()\0"
     "on_robotLocationAnyButton_clicked()\0"
     "on_specUserLocationButton_clicked()\0"
+    "on_playSoundCheckBox_toggled(bool)\0"
+    "on_robotSaveMemoryCheckBox_toggled(bool)\0"
+    "on_UHcupLevelCheckBox_toggled(bool)\0"
+    "on_systemCallCheckbox_toggled(bool)\0"
 };
 
 void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -322,6 +330,10 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         case 90: _t->on_robotLocationSpecButton_clicked(); break;
         case 91: _t->on_robotLocationAnyButton_clicked(); break;
         case 92: _t->on_specUserLocationButton_clicked(); break;
+        case 93: _t->on_playSoundCheckBox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 94: _t->on_robotSaveMemoryCheckBox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 95: _t->on_UHcupLevelCheckBox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 96: _t->on_systemCallCheckbox_toggled((*reinterpret_cast< bool(*)>(_a[1]))); break;
         default: ;
         }
     }
@@ -359,9 +371,9 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 93)
+        if (_id < 97)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 93;
+        _id -= 97;
     }
     return _id;
 }

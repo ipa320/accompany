@@ -34,7 +34,11 @@ protected:
 	PyObject* callMethod(std::string methodName, std::string argFormat, T arg1, R arg2, K arg3) {
 		return callMethod(getDefaultClassInstance(), methodName, argFormat, arg1, arg2, arg3);
 	}
-	PyObject* callMethod(std::string methodName) {
+    template<typename T, typename R, typename K, typename M>
+    PyObject* callMethod(std::string methodName, std::string argFormat, T arg1, R arg2, K arg3, M arg4) {
+        return callMethod(getDefaultClassInstance(), methodName, argFormat, arg1, arg2, arg3, arg4);
+    }
+    PyObject* callMethod(std::string methodName) {
 		return callMethod(getDefaultClassInstance(), methodName);
 	}
 	PyObject* callMethod(std::string methodName, std::string value) {
@@ -55,11 +59,43 @@ protected:
 	PyObject* callMethod(PyObject* pInstance, std::string methodName, std::string argFormat, T arg1, R arg2);
 	template<typename T, typename R, typename K>
 	PyObject* callMethod(PyObject* pInstance, std::string methodName, std::string argFormat, T arg1, R arg2, K arg3);
+    template<typename T, typename R, typename K, typename M>
+    PyObject* callMethod(PyObject* pInstance, std::string methodName, std::string argFormat, T arg1, R arg2, K arg3, M arg4);
 private:
 	std::string modulePath;
 	std::map<std::string, PyObject*> pObjectCache;
-	PyThreadState* threadState;
+	static PyThreadState* threadState;
+	static int refCount;
 };
+
+
+template<typename T, typename R, typename K, typename M>
+PyObject* PythonInterface::callMethod(PyObject* instance, std::string methodName, std::string argFormat, T arg1, R arg2,
+        K arg3, M arg4) {
+    PyObject *pValue;
+    if (instance == NULL) {
+        std::cerr << "Cannot call method " << methodName << " on NULL instance" << std::endl;
+    } else {
+        char* m = strdup(methodName.c_str());
+        {
+            PythonLock lock = PythonLock();
+            if (!argFormat.empty()) {
+                char* f = strdup(argFormat.c_str());
+                pValue = PyObject_CallMethod(instance, m, f, arg1, arg2, arg3, arg4);
+            } else {
+                pValue = PyObject_CallMethod(instance, m, NULL);
+            }
+
+            if (pValue == NULL) {
+                std::cerr << "Error while calling method " << methodName << std::endl;
+                PyErr_Print();
+                PyErr_Clear();
+            }
+        }
+    }
+
+    return pValue;
+}
 
 template<typename T, typename R, typename K>
 PyObject* PythonInterface::callMethod(PyObject* instance, std::string methodName, std::string argFormat, T arg1, R arg2,

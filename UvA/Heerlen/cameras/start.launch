@@ -1,0 +1,44 @@
+<launch>
+
+
+  <!-- camera_sofa -->
+
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@192.168.1.20:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+
+  <node pkg="gscam" type="gscam" name="gscam_sofa"
+        args="-f camera_sofa gscam:=/camera_sofa -i /home/accompany/ros/accompany/UvA/Heerlen/cameras/camera_intrinsic_sofa.xml --sync false"/>
+
+
+
+  <!-- camera_kitchen -->
+
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@192.168.1.21:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+
+  <node pkg="gscam" type="gscam" name="gscam_kitchen"
+        args="-f camera_kitchen gscam:=/camera_kitchen -i /home/accompany/ros/accompany/UvA/Heerlen/cameras/camera_intrinsic_kitchen.xml --sync false"/>
+
+
+
+  <!-- human detection -->
+
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization"
+        args="-p /home/accompany/ros/accompany/UvA/Heerlen/cameras/params.xml -n 5 -t 8 -v"/>
+
+
+  <!-- human tracker -->
+
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
+        args="-p /home/accompany/ros/accompany/UvA/Heerlen/cameras"/>
+
+
+  <!-- cameras tf -->
+
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_sofa -e /home/accompany/ros/accompany/UvA/Heerlen/camera_sofa/camera_extrinsic.xml"/>
+  
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_kitchen -e /home/accompany/ros/accompany/UvA/Heerlen/camera_kitchen/camera_extrinsic.xml"/>
+
+
+
+</launch>

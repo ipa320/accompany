@@ -1,3 +1,7 @@
+#!/usr/bin/env python
+
+import roslib; roslib.load_manifest('accompany_uva')
+import rospy
 import rosbag
 import sys
 
@@ -12,3 +16,4 @@ topicPrefix=sys.argv[3]
 with rosbag.Bag(outputBag, 'w') as outbag:
     for topic, msg, t in rosbag.Bag(inputBag).read_messages():
         outbag.write(topicPrefix + topic, msg, t)
+

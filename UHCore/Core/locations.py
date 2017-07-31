@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from Data.dataAccess import DataAccess, Locations
 from config import server_config
 from extensions import PollingProcessor
@@ -84,7 +85,7 @@ class HumanLocationProcessor(LocationProcessor):
         self._ros = ROS()
         self._topic = '/trackedHumans'
         self._tm = None        
-        self._transform = Transform(toTopic='/map', fromTopic='/room_frame')
+        self._transform = Transform(toTopic='/map', fromTopic='/camera_frame')
         
         self._targetName = "Humans"
         self._storedLoc = self._getStoredLoc
@@ -96,7 +97,7 @@ class HumanLocationProcessor(LocationProcessor):
         if self._tm == None:
             ((x, y, _), rxy) = self._transform.getTransform()
             if x == None or y == None:
-                return ('', (None, None, None))
+                return (None, None, None)
             
             angle = round(math.degrees(rxy))
             self._tm = (round(x, 3), round(y, 3), angle)
@@ -111,6 +112,8 @@ class HumanLocationProcessor(LocationProcessor):
         user['xCoord'] = x
         user['yCoord'] = y
         user['orientation'] = theta
+        user['locationId'] = locid 
+
         self._dao.users.updateUser(user)
     
     def _getCurrentLoc(self):
@@ -129,12 +132,17 @@ class HumanLocationProcessor(LocationProcessor):
             print "No human returned from location tracker"
             return ('', (None, None, None))
         
-        x = loc.location.point.x + self._transformMatrix[0]
-        y = loc.location.point.y + self._transformMatrix[1]
-        angle = 0 + self._transformMatrix[2]
-        print "Using human location from id: %s" % loc.id
-        
-        pos = (round(x, 3), round(y, 3), angle)        
+        #tm = self._transformMatrix
+        #loc.header.frame_id is 'usually' /camera_frame
+        (x, y, _) = self._transform.transformPoint(loc.location, toTopic='/map', fromTopic=loc.location.header.frame_id)
+        if x == None or y == None:
+            print "Error getting transform"
+            return ('', (None, None, None))
+        #else:
+        #    angle = 0 #TODO: UVA Orientation
+        #    print "Using human location from id: %s" % loc.id
+            
+        pos = (round(x, 3), round(y, 3), 0)
         return Locations.resolveLocation(pos)
     
     def _getStoredLoc(self):

@@ -1,0 +1,57 @@
+Notes to get the OpenNI2 skeleton tracker working.
+Used instructions: https://github.com/futureneer/openni2-tracker
+
+mkdir -p ~/ros
+
+sudo aptitude install ros-groovy-openni2-camera
+
+cd ~/ros
+git clone https://github.com/OpenNI/OpenNI2
+cd OpenNI2
+# get develop branch, to avoid compile errors:
+git checkout develop
+git pull origin develop
+# install dependencies
+sudo aptitude install libudev-dev openjdk-7-jdk
+make
+sudo make install
+sudo cp ~/ros/OpenNI2/Bin/x86-Release/*.so /usr/local/lib/
+# make sure lib in /usr/local/lib are found:
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
+# cd ~/ros
+# wget http://www.openni.org/wp-content/uploads/2013/11/OpenNI-Linux-x64-2.2.0.33.tar.zip
+# # or 32 bit?
+# # wget http://www.openni.org/wp-content/uploads/2013/11/OpenNI-Linux-x86-2.2.0.33.tar.zip
+# unzip OpenNI-Linux-x*
+# tar -xf OpenNI-Linux-x*.bz2
+# cd OpenNI-Linux-x??-2.2
+# sudo ./install.sh
+
+cd ~/ros
+wget http://www.openni.org/wp-content/uploads/2013/10/NiTE-Linux-x64-2.2.tar1.zip
+# or 32 bit?
+#wget http://www.openni.org/wp-content/uploads/2013/08/NiTE-Linux-x86-2.2.tar.zip
+tar -xf NiTE-Linux-x*.bz2
+cd NiTE-Linux-x??-2.2
+sudo ./install.sh
+
+cd ~/ros
+git clone https://github.com/futureneer/openni2-tracker openni2_tracker
+cd openni2_tracker
+
+# set some paths
+sed -i 's\~/dev/OpenNI2\~/ros/OpenNI2\g' ./CMakeLists.txt
+sed -i 's\~/dev/NiTE-Linux-x64-2.2/\~/ros/NiTE-Linux-x64-2.2\g' ./CMakeLists.txt
+# or 32 bit?
+# sed -i 's\~/dev/NiTE-Linux-x64-2.2/\~/ros/NiTE-Linux-x86-2.2\g' ./CMakeLists.txt
+rosmake openni2_tracker
+
+# make ros find the 'Nite/s.dat' file:
+cd ~/.ros
+ln -s ~/ros/NiTE-Linux-x64-2.2/Redist/NiTE2/
+# or 32 bit?
+# ln -s ~/ros/NiTE-Linux-x86-2.2/Redist/NiTE2/
+
+# run tracker
+roslaunch openni2_tracker tracker.launch

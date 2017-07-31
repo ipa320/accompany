@@ -1,0 +1,23 @@
+<package>
+  <description brief="accompany_object_detection">
+
+     accompany_object_detection
+
+  </description>
+  <author>Richard Bormann</author>
+  <license>LGPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/accompany_object_detection</url>
+
+  <depend package="roscpp"/>
+  <depend package="opencv2"/>
+  <depend package="cv_bridge"/>
+  <depend package="pcl"/>
+  <depend package="pcl_ros"/>
+  <depend package="sensor_msgs"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+
+</package>
+
+

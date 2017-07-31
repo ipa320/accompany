@@ -37,12 +37,12 @@
      <string>Behaviour/Sequence</string>
     </property>
    </widget>
-   <widget class="QLabel" name="userLabel">
+   <widget class="QLabel" name="locnLabel">
     <property name="geometry">
      <rect>
-      <x>840</x>
-      <y>60</y>
-      <width>281</width>
+      <x>330</x>
+      <y>470</y>
+      <width>501</width>
       <height>20</height>
      </rect>
     </property>
@@ -56,8 +56,11 @@
       <x>50</x>
       <y>80</y>
       <width>1171</width>
-      <height>421</height>
+      <height>381</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::AllEditTriggers</set>
     </property>
     <property name="horizontalScrollMode">
      <enum>QAbstractItemView::ScrollPerPixel</enum>
@@ -96,19 +99,6 @@
      <string>Only Show Scheduled </string>
     </property>
    </widget>
-   <widget class="QLabel" name="locnLabel">
-    <property name="geometry">
-     <rect>
-      <x>1130</x>
-      <y>60</y>
-      <width>53</width>
-      <height>14</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
@@ -120,6 +110,29 @@
     </property>
     <property name="text">
      <string>Print</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="scenComboBox">
+    <property name="geometry">
+     <rect>
+      <x>730</x>
+      <y>50</y>
+      <width>321</width>
+      <height>25</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>50</y>
+      <width>62</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Scenario</string>
     </property>
    </widget>
   </widget>

@@ -1,7 +1,7 @@
 cob_version cob3-6
-sampling_rate 5
+sampling_rate 3
 output_topic accompany/GUIimage
-input_topic stereo/left/image_color
+input_topic cam3d/rgb/image_color
 head_input_topic head_controller/state
 head_downsampled_control_topic head_controller/state_downsampled
 head_sampling_rate 100

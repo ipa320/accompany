@@ -1,0 +1,37 @@
+<launch>
+
+
+  <!-- camera_living -->
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.0.1.61:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+
+  <node pkg="gscam" type="gscam" name="gscam_living"
+        args="-f camera_living gscam:=/camera_living -i /home/uh-common/ros/accompany/UvA/RobotHouse/cameras/camera_intrinsic_living.xml --sync false"/>
+
+
+
+  <!-- camera_stairway -->
+  <env name="GSCAM_CONFIG" value="rtspsrc location=rtsp://admin:admin@10.0.1.62:8554/CH001.sdp ! decodebin ! videoscale ! videorate ! video/x-raw-yuv, width=512, height=486, framerate=15/1 ! ffmpegcolorspace"/>
+
+  <node pkg="gscam" type="gscam" name="gscam_stairway"
+        args="-f camera_stairway gscam:=/camera_stairway -i /home/uh-common/ros/accompany/UvA/RobotHouse/cameras/camera_intrinsic_stairway.xml --sync false"/>
+
+
+  <!-- human detection -->
+  <node pkg="accompany_static_camera_localisation" type="camera_localization" name="camera_localization"
+        args="-p /home/uh-common/ros/accompany/UvA/RobotHouse/cameras/params.xml -n 5 -t 8 -v"/>
+
+
+  <!-- human tracker -->
+  <node pkg="accompany_human_tracker" type="human_tracker" name="human_tracker" output="screen"
+        args="-p /home/uh-common/ros/accompany/UvA/RobotHouse/cameras"/>
+
+
+  <!-- cameras tf -->
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_living -e /home/uh-common/ros/accompany/UvA/RobotHouse/cameras/camera_extrinsic_living.xml"/>
+  
+  <node pkg="accompany_static_camera_localisation" type="publish_tf_from_extrinsic" name="$(anon publish_tf_from_extrinsic)"
+        args="-p room_frame -c camera_stairway -e /home/uh-common/ros/accompany/UvA/RobotHouse/cameras/camera_extrinsic_stairway.xml"/>
+
+
+</launch>

@@ -3,14 +3,17 @@
 
 #include <map>
 #include <string>
+#include <iostream>
 
 class IDToName
 {
  public:
-  static const char unkown[];
+  static const char unknown[];
 
   void setIDName(unsigned id,std::string name);
   std::string getIDName(unsigned id);
+
+  friend std::ostream& operator<<(std::ostream& out,const IDToName& itn);
 
  private:
 

@@ -8,27 +8,32 @@
 Robot::Robot(std::string modulePath, std::string robotName) :
 		PythonInterface(modulePath) {
 	Robot::name = robotName;
+	Robot::pInstance = NULL;
 	Robot::pInstance = getDefaultClassInstance();
+
+	if(Robot::pInstance == NULL) {
+		throw RobotBuildException(("getInstance returned null for robot '" + robotName + "', check console for messages.").c_str());
+	}
 }
 
 PyObject* Robot::getDefaultClassInstance() {
-	if (pInstance == NULL) {
+	if (Robot::pInstance == NULL) {
 		PyObject* pClass = getClassObject("Robots.robotFactory", "Factory");
 		if (pClass == NULL) {
 			std::cerr << "Error locating class object Robots.robotFactory.Factory" << std::endl;
 		} else {
 			if (Robot::name != "") {
 				std::cout << "Getting class for robot: " << name << std::endl;
-				pInstance = callMethod(pClass, "getRobot", Robot::name.c_str());
+				Robot::pInstance = callMethod(pClass, "getRobot", Robot::name.c_str());
 			} else {
 				std::cout << "Getting class for active robot" << std::endl;
-				pInstance = callMethod(pClass, "getCurrentRobot");
+				Robot::pInstance = callMethod(pClass, "getCurrentRobot");
 			}
 
 			{
 				PythonLock lock = PythonLock();
 				const char* pName = strdup("name");
-				PyObject* nm = PyObject_GetAttrString(getDefaultClassInstance(), pName);
+				PyObject* nm = PyObject_GetAttrString(Robot::pInstance, pName);
 				Robot::name = std::string(PyString_AsString(nm));
 				Py_XDECREF(nm);
 				Py_DECREF(pClass);
@@ -36,7 +41,7 @@ PyObject* Robot::getDefaultClassInstance() {
 		}
 	}
 
-	return pInstance;
+	return Robot::pInstance;
 }
 
 std::string Robot::getName() {
@@ -109,7 +114,7 @@ Robot::Location Robot::getLocation() {
 	return l;
 }
 
-std::string Robot::setComponentState(std::string name, std::vector<double> jointGoals, bool blocking) {
+std::string Robot::setComponentState(std::string name, std::vector<double> jointGoals, bool blocking, std::string mode) {
 
 	PyObject* g;
 	{
@@ -120,11 +125,21 @@ std::string Robot::setComponentState(std::string name, std::vector<double> joint
 		}
 	}
 
-	std::string format = "(s, O, b)";
+    std::string format = "(s, O, b)";
+    if (mode.length() > 0)
+        format = "(s, O, b, s)";
 	char* n = strdup(name.c_str());
 	char* f = strdup(format.c_str());
 
-	PyObject *pValue = callMethod("setComponentState", f, n, g, blocking);
+    PyObject *pValue;
+    if (mode.length() > 0)
+    {
+        char* m = strdup(mode.c_str());
+        pValue = callMethod("setComponentState", f, n, g, blocking, m);
+    }
+    else
+        pValue = callMethod("setComponentState", f, n, g, blocking);
+
 	/** pValue = "SUCCESS" **/
 
 	std::string ret;
@@ -146,11 +161,22 @@ std::string Robot::setComponentState(std::string name, std::vector<double> joint
 	return ret;
 }
 
-std::string Robot::setComponentState(std::string name, std::string value, bool blocking) {
-
+std::string Robot::setComponentState(std::string name, std::string value, bool blocking, std::string mode)
+{
+    std::string format = "(s,s, b)";
+    if (mode.length() > 0)
+        format = "(s,s, b, s)";
+    char* f = strdup(format.c_str());
 	char* n = strdup(name.c_str());
 	char* v = strdup(value.c_str());
-	PyObject *pValue = callMethod("setComponentState", "(s,s, b)", n, v, blocking);
+    PyObject *pValue;
+    if (mode.length() > 0)
+    {
+        char* m = strdup(mode.c_str());
+        pValue = callMethod("setComponentState", f, n, v, blocking, m);
+    }
+    else
+        pValue = callMethod("setComponentState", f, n, v, blocking);
 	/** pValue = "SUCCESS" **/
 
 	std::string ret;

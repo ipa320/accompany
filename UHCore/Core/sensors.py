@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import sys
 from socket import AF_INET, SOCK_DGRAM, socket, timeout
 from Data.dataAccess import SQLDao, Sensors, Locations
@@ -86,9 +87,9 @@ class ZWaveHomeController(PollingProcessor):
 			result = urllib2.urlopen(request)
 			data = json.load(result) 
 		except Exception as e:
-			if id(self) + type(e) not in self._warned:
+			if str(type(e)) not in self._warned:
 				print >> sys.stderr, "Error while receiving data from ZWaveHomeController: %s" % e
-				self._warned.append(id(self) + type(e))
+				self._warned.append(str(type(e)))
 			return
 		
 		for device in data:
@@ -188,9 +189,9 @@ class ZWaveVeraLite(PollingProcessor):
 				url += '&loadtime=%(load)s&dataversion=(dataversion)s' % {'load': self._loadTime, 'dataversion': self._dataVersion }
 			data = json.load(urllib2.urlopen(url)) 
 		except Exception as e:
-			if id(self) + type(e) not in self._warned:
+			if str(type(e)) not in self._warned:
 				print >> sys.stderr, "Error while receiving data from ZWaveVeraLite: %s" % e
-				self._warned.append(id(self) + type(e))
+				self._warned.append(str(type(e)))
 			return
 		
 		self._loadTime = data['loadtime']
@@ -240,7 +241,11 @@ class ZigBeeDirect(PollingProcessor):
 		super(ZigBeeDirect, self).__init__()
 		import serial
 		from Lib.xbee import ZigBee
-		self._port = serial.Serial(usbPort, baudRate)
+		try:
+			self._port = serial.Serial(usbPort, baudRate)
+		except Exception as e:
+			print >> sys.stderr, "Unable to connect to zigbee port, check that the port name (%s) and permissions are correct (should be a+rw)" % (usbPort)
+			raise e
 		self._zigbee = ZigBee(self._port)
 		
 		# Place for the callback methods to store "static" values.
@@ -279,9 +284,9 @@ class ZigBeeDirect(PollingProcessor):
 			#data, _ = self._xbee.wait_read_frame()
 			data = self._zigbee.wait_read_frame()
 		except Exception as e:
-			if id(self) + type(e) not in self._warned:
+			if str(type(e)) not in self._warned:
 				print >> sys.stderr, "Error while receiving data from ZigBeeDirect: %s" % e
-				self._warned.append(id(self) + type(e))
+				self._warned.append(str(type(e)))
 			return
 
 		if data["id"] == "rx_explicit":

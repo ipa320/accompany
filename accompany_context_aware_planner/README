@@ -7,20 +7,20 @@
   Extract the file with 
 	>tar xfvz mysql-connector-c++-1.1.3.tar.gz
 
-  then follow the installation instractions from the "INSTALL" file in the extracted folder to compile and install the library and the include files.
+  Follow the installation instractions from the "INSTALL" file in the extracted folder to compile and install the library and the include files.
 
 2.To compile this package, go into the package root directory (i.e. accompany_context_aware_planner folder) and execute the following command
 
 	> make
 
-3.To test this package, you need access to robot house mysql database. You can easilly set this up on your local machine. 
-  The package is currently set to look for the database on the local machine i.e. #define DBHOST "tcp://localhost:3306"
-  If the database is not on your local machine, you need to redefine DBHOST in ContextAwarePlanner.cpp with the new host 
-  machine's ip/hostname and recompile the package.
+3.To test this package, you need access to robot house mysql database. You can easilly clone this to your local machine. 
+
+  The package is currently set to search for the database on the local machine i.e. #define DBHOST "tcp://localhost:3306"
+
+  However, you can easily reconfigure this package to use your MYSQL Server by modify and uncomment the MySQL server setting in thelaunch file:
 	
-   i.e. set #define DBHOST "tcp://NewMachineIP:3306"
-  	or 
-  	set #define DBHOST "tcp://NewMachineHostname:3306"
+	accompany_context_aware_planner/ros/launch/accompany_context_aware_planner.launch
+
   	 	
 4.To make eclipse project files for this package, follow the instructions @ http://www.ros.org/wiki/IDEs#Creating_the_Eclipse_project_files
   A summary of the instructions is listed below.
@@ -39,10 +39,9 @@ Usage:
 	>roslaunch accompany_context_aware_planner accompany_context_aware_planner.launch 
 
   Testing: running the client with the following parameters "userId userPosture X(m) Y(m) Orientation(deg) robotGenericTaskId"
-	i.e. >.getPotentialProxemicsLocations 1 1 0 0 0 3
+	i.e. bin$./getPotentialProxemicsLocations 1 1 0 0 0 3
 	
 //Proxemics Context Aware Planner Server currently require the client to send userId, userPosture, coordinate(x,y,theta) 
 // and the task the robot is going to do. 
-// In the future, only userId and robot's task are needed, the rest of the data will be 
-// retrieved directly from the database.
+// In the future, only userId and robot's task are needed, the rest of the data will be retrieved directly from the database.
 

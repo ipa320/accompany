@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Mon Sep 16 09:54:18 2013
+** Created: Tue Aug 19 14:14:08 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -21,6 +21,7 @@
 #include <QtGui/QMainWindow>
 #include <QtGui/QPushButton>
 #include <QtGui/QRadioButton>
+#include <QtGui/QSpinBox>
 #include <QtGui/QStatusBar>
 #include <QtGui/QTableWidget>
 #include <QtGui/QToolBar>
@@ -56,6 +57,10 @@ public:
     QRadioButton *GUIradioButton2;
     QRadioButton *GUIradioButton3;
     QRadioButton *GUIradioButton4;
+    QSpinBox *speedSpinBox;
+    QLabel *label_3;
+    QLabel *label_4;
+    QLabel *sceanrioLabel;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
 
@@ -68,7 +73,7 @@ public:
         centralWidget->setObjectName(QString::fromUtf8("centralWidget"));
         sequenceTableWidget = new QTableWidget(centralWidget);
         sequenceTableWidget->setObjectName(QString::fromUtf8("sequenceTableWidget"));
-        sequenceTableWidget->setGeometry(QRect(0, 60, 401, 701));
+        sequenceTableWidget->setGeometry(QRect(0, 60, 401, 591));
         QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -88,7 +93,7 @@ public:
         evaluateAllPushButton->setGeometry(QRect(130, 20, 102, 24));
         userlabel = new QLabel(centralWidget);
         userlabel->setObjectName(QString::fromUtf8("userlabel"));
-        userlabel->setGeometry(QRect(910, 670, 161, 16));
+        userlabel->setGeometry(QRect(410, 630, 531, 16));
         SQLtableWidget = new QTableWidget(centralWidget);
         SQLtableWidget->setObjectName(QString::fromUtf8("SQLtableWidget"));
         SQLtableWidget->setGeometry(QRect(400, 60, 881, 331));
@@ -109,7 +114,7 @@ public:
         label->setGeometry(QRect(510, 0, 221, 16));
         logTableWidget = new QTableWidget(centralWidget);
         logTableWidget->setObjectName(QString::fromUtf8("logTableWidget"));
-        logTableWidget->setGeometry(QRect(400, 390, 881, 271));
+        logTableWidget->setGeometry(QRect(400, 390, 881, 261));
         logTableWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
         logTableWidget->setColumnCount(0);
         COBTestPushButton = new QPushButton(centralWidget);
@@ -145,7 +150,7 @@ public:
         label_2->setFont(font);
         GUIgroupBox = new QGroupBox(centralWidget);
         GUIgroupBox->setObjectName(QString::fromUtf8("GUIgroupBox"));
-        GUIgroupBox->setGeometry(QRect(750, 670, 231, 21));
+        GUIgroupBox->setGeometry(QRect(750, 670, 191, 21));
         GUIradioButton1 = new QRadioButton(GUIgroupBox);
         GUIradioButton1->setObjectName(QString::fromUtf8("GUIradioButton1"));
         GUIradioButton1->setGeometry(QRect(10, 0, 41, 21));
@@ -158,6 +163,21 @@ public:
         GUIradioButton4 = new QRadioButton(GUIgroupBox);
         GUIradioButton4->setObjectName(QString::fromUtf8("GUIradioButton4"));
         GUIradioButton4->setGeometry(QRect(140, 0, 41, 21));
+        speedSpinBox = new QSpinBox(centralWidget);
+        speedSpinBox->setObjectName(QString::fromUtf8("speedSpinBox"));
+        speedSpinBox->setGeometry(QRect(1150, 670, 71, 24));
+        speedSpinBox->setMinimum(100);
+        speedSpinBox->setMaximum(3001);
+        speedSpinBox->setSingleStep(50);
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QString::fromUtf8("label_3"));
+        label_3->setGeometry(QRect(960, 670, 181, 16));
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QString::fromUtf8("label_4"));
+        label_4->setGeometry(QRect(20, 660, 61, 16));
+        sceanrioLabel = new QLabel(centralWidget);
+        sceanrioLabel->setObjectName(QString::fromUtf8("sceanrioLabel"));
+        sceanrioLabel->setGeometry(QRect(80, 660, 221, 16));
         MainWindow->setCentralWidget(centralWidget);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -195,6 +215,9 @@ public:
         GUIradioButton2->setText(QApplication::translate("MainWindow", "2", 0, QApplication::UnicodeUTF8));
         GUIradioButton3->setText(QApplication::translate("MainWindow", "3", 0, QApplication::UnicodeUTF8));
         GUIradioButton4->setText(QApplication::translate("MainWindow", "4", 0, QApplication::UnicodeUTF8));
+        label_3->setText(QApplication::translate("MainWindow", "Scheduler Loop Speed (ms)", 0, QApplication::UnicodeUTF8));
+        label_4->setText(QApplication::translate("MainWindow", "Using -> ", 0, QApplication::UnicodeUTF8));
+        sceanrioLabel->setText(QString());
     } // retranslateUi
 
 };

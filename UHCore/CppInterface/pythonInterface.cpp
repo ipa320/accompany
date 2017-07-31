@@ -7,6 +7,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#ifndef PYTHON_REFCOUNT
+#define	PYTHON_REFCOUNT
+
+int PythonInterface::refCount = 0;
+PyThreadState* PythonInterface::threadState = NULL;
+
+#endif
+
 PythonLock::PythonLock() {
 	if (PyEval_ThreadsInitialized()) {
 		gstate = PyGILState_Ensure();
@@ -33,11 +41,20 @@ PythonInterface::PythonInterface(std::string modulePath) {
 	}
 
 	PyEval_InitThreads();
-	threadState = PyEval_SaveThread();
+
+	if (threadState == NULL) {
+		threadState = PyEval_SaveThread();
+	}
+
+	refCount++;
 }
 
 PythonInterface::~PythonInterface() {
-	PyEval_RestoreThread(threadState);
+
+	refCount--;
+	if (refCount == 0) {
+		PyEval_RestoreThread(threadState);
+	}
 
 	for (std::map<std::string, PyObject*>::iterator ii = pObjectCache.begin(); ii != pObjectCache.end(); ++ii) {
 		Py_DECREF((*ii).second);

@@ -1,0 +1,1 @@
+../camera_kitchen/marker/frame0000.jpg ../camera_sofa/marker/frame0000.jpg

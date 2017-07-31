@@ -9,6 +9,7 @@ public:
 	bool cancelPollingHistory(std::string ruleName);
 	char* addPollingHistory(std::string ruleName, float delaySeconds);
 	void addHistoryAsync(std::string ruleName);
+    void addHistoryCompleteAsync(std::string ruleName);
 	bool addHistory(std::string ruleName);
 private:
 	PyObject* pInstance;

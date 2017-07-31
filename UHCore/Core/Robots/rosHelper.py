@@ -152,7 +152,16 @@ class ROS(object):
             command = ['bash', '-i', '-c', ('%s; env' % ". %s/.bashrc" % os.getenv("HOME")).strip('; ')]
             pipe = Popen(command, stdout=PIPE, stderr=PIPE)
             (data, _) = pipe.communicate()
-            env = dict((line.split("=", 1) for line in data.splitlines()))
+            env = {}
+            for line in data.splitlines():
+                try:
+                    key, value = line.split("=", 1)
+                    env[key] = value
+                except ValueError:
+                    #TODO: This happens when an environment value has a newline in it
+                    #  should fine a proper way to handle it in the future
+                    continue
+            #env = dict((line.split("=", 1) for line in data.splitlines()))
             ROS._userVars = env
         
         return ROS._userVars
@@ -378,6 +387,38 @@ class Transform(object):
         self._defaultFrom = fromTopic
         self._defaultTo = toTopic
     
+    def transformPoint(self, point, fromTopic=None, toTopic=None):
+        """ Call ros transform between specified coordinate frames (or constructor defaults if None) """
+        if fromTopic == None:
+            fromTopic = self._defaultFrom
+        if toTopic == None:
+            toTopic = self._defaultTo
+        
+        """
+        Waits for the /fromTopic to /toTopic transform to be availalble and 
+        returns two tuples: (x, y, z) and a quaternion ( rx, ry, rz, rxy)
+        Note: z values are 0 for 2D mapping and navigation.
+        """
+        if self._listener == None:
+            self._listener = self._tf.TransformListener()
+
+        # Wait for tf to get the frames
+        with _threadLock:
+            now = self._rospy.Time(0)
+            try:
+                self._listener.waitForTransform(toTopic, fromTopic, now, self._rospy.Duration(1.0))
+            except self._tf.Exception as e:
+                # if str(e) != 'Unable to lookup transform, cache is empty, when looking up transform from frame [' + baseTopic + '] to frame [' + mapTopic + ']':
+                print >> sys.stderr, "Error while waiting for transform: " + str(e)
+                return ((None, None, None), None)
+        
+        try:
+            xyPos = self._listener.transformPoint(toTopic, point)
+            return (xyPos.point.x, xyPos.point.y, xyPos.point.z)
+        except (self._tf.LookupException, self._tf.ConnectivityException, self._tf.ExtrapolationException) as e:
+            print >> sys.stderr, "Error while looking up transform: " + str(e)
+            return (None, None, None)
+    
     def getTransform(self, fromTopic=None, toTopic=None):
         """ Call ros transform between specified coordinate frames (or constructor defaults if None) """
         if fromTopic == None:
@@ -406,7 +447,7 @@ class Transform(object):
                     return ((None, None, None), None)
             
             try:
-                (xyPos, heading) = self._listener.lookupTransform(toTopic, fromTopic, now)
+                (xyPos, heading) = self._listener.lookupTransform(fromTopic, toTopic, now)
                 (_, _, orientation) = self._tf.transformations.euler_from_quaternion(heading)
                 return (xyPos, orientation)
             except (self._tf.LookupException, self._tf.ConnectivityException, self._tf.ExtrapolationException) as e:

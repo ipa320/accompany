@@ -32,6 +32,7 @@ int andCount;
 
 int experimentLocation;   // 1 = UH, 2=ZUYD, 3=Madopa
 int defaultUserId;
+int activeRobot;
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -48,18 +49,52 @@ void MainWindow::setup()
     bool ok;
     QString host, user, pw, dBase;
 
+    QFile file("../UHCore/Core/config.py");
+
+    if (!file.exists())
+    {
+       qDebug()<<"No config.py found!!";
+    }
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        closeDownRequest = true;
+        return;
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+       QString line = in.readLine();
+
+       if (line.contains("mysql_log_user"))
+       {
+          user = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_password"))
+       {
+           pw = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_server"))
+       {
+          host = line.section("'",3,3);
+       }
+       if (line.contains("mysql_log_db"))
+       {
+          dBase = line.section("'",3,3);
+       }
+    }
+
     user = QInputDialog::getText ( this, "Accompany DB", "User:",QLineEdit::Normal,
-                                   "", &ok);
+                                     user, &ok);
     if (!ok)
     {
        closeDownRequest = true;
        return;
     }
 
-
-
     pw = QInputDialog::getText ( this, "Accompany DB", "Password:", QLineEdit::Password,
-                                                                    "", &ok);
+                                                                      pw, &ok);
     if (!ok)
     {
        closeDownRequest = true;
@@ -68,41 +103,28 @@ void MainWindow::setup()
 
 
     host = QInputDialog::getText ( this, "Accompany DB", "Host:",QLineEdit::Normal,
-                                   "", &ok);
+                                     host, &ok);
     if (!ok)
     {
-       closeDownRequest = true;
-       return;
+      closeDownRequest = true;
+      return;
     };
 
     dBase = QInputDialog::getText ( this, "Accompany DB", "Database:",QLineEdit::Normal,
-                                   "", &ok);
+                                     dBase, &ok);
     if (!ok)
     {
-       closeDownRequest = true;
-       return;
+      closeDownRequest = true;
+      return;
     };
 
 
-    if (lv=="ZUYD")
-    {
-       if (host=="") host = "accompany1";
-       if (user=="") user = "accompanyUser";
-       if (pw=="") pw = "accompany";
-
-    }
-    else
-    {
-        if (host=="") host = "localhost";
-        if (user=="") user = "rhUser";
-        if (pw=="") pw = "waterloo";
-    }
 
 
-    if (dBase=="")  dBase = "Accompany";
 
 
-    ui->userlabel->setText(lv + ":" + user + ":" + host);
+
+    ui->userlabel->setText(lv + ":" + user + ":" + host + ":" + dBase);
 
 
     db = QSqlDatabase::addDatabase("QMYSQL");
@@ -154,7 +176,7 @@ void MainWindow::setup()
         QMessageBox msgBox;
         msgBox.setIcon(QMessageBox::Critical);
 
-        msgBox.setText("Can find session control table!");
+        msgBox.setText("Can't find session control table!");
         msgBox.exec();
         closeDownRequest = true;
         return;
@@ -309,17 +331,17 @@ void MainWindow::on_robotLocationSpecButton_clicked()
 
     if (experimentLocation == 1)
     {
-        locQuery += " AND (L1.locationId < 500 OR L1.locationId = 999) ORDER BY L1.locationId";
+        locQuery += " AND (L1.locationId < 500 OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
     }
 
      if (experimentLocation == 2)
      {
-         locQuery += " AND ((L1.locationId > 599 AND L1.locationId < 700) OR L1.locationId = 999) ORDER BY L1.locationId";
+         locQuery += " AND ((L1.locationId > 599 AND L1.locationId < 700) OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
      }
 
      if (experimentLocation == 3)
      {
-         locQuery += " AND ((L1.locationId > 699 AND L1.locationId < 800) OR L1.locationId = 999) ORDER BY L1.locationId";
+         locQuery += " AND ((L1.locationId > 699 AND L1.locationId < 800) OR L1.locationId = 999 OR L1.locationId = 911) ORDER BY L1.locationId";
      }
     QSqlQuery query(locQuery);
 
@@ -364,6 +386,20 @@ void MainWindow::on_robotLocationSpecButton_clicked()
         ui->robotLocationComboBox->addItem( "::" + query.value(0).toString() + ":: " + query.value(3).toString() + q1 + q2 );
     }
 
+    QString expLoc;
+    expLoc.setNum(experimentLocation);
+    QString qry = "SELECT activeRobot FROM ExperimentalLocation where id = ";
+    qry += expLoc + " LIMIT 1";
+
+    query.prepare(qry);
+
+    query.exec();
+
+    while(query.next())
+    {
+        activeRobot = query.value(0).toInt();
+    }
+
     query.clear();
 
     query.prepare("SELECT robotId, robotName FROM Robot");
@@ -372,12 +408,23 @@ void MainWindow::on_robotLocationSpecButton_clicked()
 
     ui->robotLocationRobotComboBox->clear();
 
+    int current = 0;
+    int actual = 0;
     while(query.next())
     {
         ui->robotLocationRobotComboBox->addItem("::"+ query.value(0).toString() + "::" + query.value(1).toString());
-        ui->robotLocationRobotComboBox->setCurrentIndex(3);
+        if (query.value(0).toInt() != activeRobot)
+        {
+           current++;
+        }
+        else
+        {
+           actual=current;
+        }
+
     }
 
+    ui->robotLocationRobotComboBox->setCurrentIndex(actual);
 
 }
 
@@ -596,7 +643,7 @@ void MainWindow::on_seqAddButton_clicked()
 
     ui->addActionButton->setEnabled(true);
 
- //   ui->pythonCreatePushButton->setEnabled(true);
+    ui->pythonCreatePushButton->setEnabled(true);
 
     fillActionRuleTable("");
 
@@ -869,7 +916,7 @@ void MainWindow::fillActionRuleTable(QString seqName)
    ui->delRuleButton->setEnabled(false);
 
    ui->addActionButton->setEnabled(true);
-//   ui->pythonCreatePushButton->setEnabled(true);
+   ui->pythonCreatePushButton->setEnabled(true);
 
 
 
@@ -983,9 +1030,17 @@ void MainWindow::on_addRuleButton_clicked()
         QString QuestionRobotId    = ui->robotLocationRobotComboBox->currentText().section("::", 1, 1);
         QString QuestionUserId     = ui->userLocationUserComboBox->currentText().section("::", 1, 1);
 
-        if (QuestionLocationId == "999")
+        if (QuestionLocationId == "999" || QuestionLocationId == "911")
         {
-            rule = "SELECT r.locationId, u.locationId FROM Robot r, Users u WHERE u.userid = " + QuestionUserId + " AND r.robotId = " + QuestionRobotId + " AND r.locationId = u.locationId";
+            if (QuestionLocationId == "999")
+            {
+             rule = "SELECT r.locationId, u.locationId FROM Robot r, Users u WHERE u.userid = " + QuestionUserId + " AND r.robotId = " + QuestionRobotId + " AND r.locationId = u.locationId";
+            }
+            else
+            {
+             rule = "SELECT r.locationId, u.locationId FROM Robot r, Users u WHERE u.userid = " + QuestionUserId + " AND r.robotId = " + QuestionRobotId + " AND r.locationId != u.locationId";
+            }
+
         }
         else
         {                                                                   // complex rule due to hierachy of locns
@@ -1281,9 +1336,9 @@ void MainWindow::on_addRuleButton_clicked()
 
            fillRuleActionTable("Fridge Freezer",
                                50,
-                               "Wattage",
+                               "On:Off",
                                ui->fridgeCheckBox->isChecked(),
-                               ui->fridgeSpinBox->value(),
+                               ui->FridgeOpenRadioButton->isChecked(),
                                ui->fridgeANDRadioButton->isChecked(),
                                ui->fridgeORRadioButton->isChecked());
 
@@ -1313,11 +1368,21 @@ void MainWindow::on_addRuleButton_clicked()
 
            fillRuleActionTable("Doorbell",
                                59,
-                               "Wattage",
+                               "On:Off",
                                ui->doorbellCheckBox->isChecked(),
-                               ui->doorbellSpinBox->value(),
+                               ui->UHDoorbellOnRadioButton->isChecked(),
                                ui->doorbellANDRadioButton->isChecked(),
                                ui->doorbellORRadioButton->isChecked());
+
+           fillRuleActionTable("UH Cup",
+                               60,
+                               "Full:Empty",
+                               ui->UHcupLevelCheckBox->isChecked(),
+                               ui->UHCupFullRadioButton->isChecked(),
+                               ui->UHcupLevelANDRadioButton->isChecked(),
+                               ui->UHcupLevelORRadioButton->isChecked());
+
+
 
     // ZUYD Sensors
 
@@ -1827,6 +1892,18 @@ void MainWindow::on_robotTrayCheckBox_toggled(bool checked)
          }
 }
 
+void MainWindow::on_systemCallCheckbox_toggled(bool checked)
+{
+         if (checked)
+         {
+            actionCount++;
+         }
+         else
+         {
+             actionCount--;
+         }
+}
+
 void MainWindow::on_addActionButton_clicked()
 {
     // add new actions
@@ -1887,6 +1964,20 @@ void MainWindow::on_addActionButton_clicked()
             actiontext+=" and wait for completion";
             action +=   ",wait";
        }
+       else
+       {
+           action += ",";
+       }
+
+       if (ui->moveLinearCheckBox->isChecked())
+       {
+            actiontext+=" and use mode linear";
+            action +=   ",linear";
+       }
+       else
+       {
+           action += ",";
+       }
 
        updateActionDB("base", sequenceName,actiontext,action);
 
@@ -1895,18 +1986,39 @@ void MainWindow::on_addActionButton_clicked()
     if (ui->robotTrayCheckBox->isChecked())
     {
 
+// intermediate position added for Troyes
 
        actiontext = "move tray on " + ui->robotComboBox->currentText() + " to ";
 
-       if (ui->trayRaiseRadioButton->isChecked())
+
+       if (ui->trayDelUp->isChecked())
        {
-            actiontext+="Raised";
-            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",deliverup";
+            actiontext+="DeliverUp";
+            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",raised";
        }
-       else
+
+       if (ui->trayDelDown->isChecked())
        {
-             actiontext+="Lowered";
-             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",store";
+            actiontext+="DeliverDown";
+            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",intermediate";
+       }
+
+       if (ui->trayDispUp->isChecked())
+       {
+             actiontext+="DisplayUp";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",displayup";
+       }
+
+       if (ui->trayDispDown->isChecked())
+       {
+             actiontext+="DisplayDown";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",displaydown";
+       }
+
+       if (ui->trayStore->isChecked())
+       {
+             actiontext+="StoreTray";
+             action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",lowered";
        }
 
        if (ui->trayWaitCheckBox->isChecked())
@@ -1914,6 +2026,23 @@ void MainWindow::on_addActionButton_clicked()
             actiontext+=" and wait for completion";
             action +=   ",,wait";
        }
+
+ //      if (ui->trayRaiseRadioButton->isChecked())
+ //      {
+ //           actiontext+="Raised";
+ //           action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",deliverup";
+ //      }
+ //      else
+ //      {
+ //            actiontext+="Lowered";
+ //            action = "tray," + ui->robotComboBox->currentText().section("::", 1, 1) + ",store";
+ //      }
+
+ //      if (ui->trayWaitCheckBox->isChecked())
+ //      {
+ //           actiontext+=" and wait for completion";
+ //           action +=   ",,wait";
+ //      }
 
        updateActionDB("tray", sequenceName,actiontext,action);
 
@@ -1928,8 +2057,15 @@ void MainWindow::on_addActionButton_clicked()
        height.setNum(ui->armHeightSpinBox->value());
 
        actiontext = "arm to " + ui->armComboBox->currentText() + " height " + height ;
-       action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",trayToTable," + height;
 
+       if (ui->armComboBox->currentText().contains("vase"))
+       {
+          action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",vaseToTray," + height;
+       }
+       else
+       {
+            action = "arm," + ui->robotComboBox->currentText().section("::", 1, 1) + ",trayToTable," + height;
+       }
        if (ui->armWaitCheckBox->isChecked())
        {
             actiontext+=" and wait for completion";
@@ -2137,6 +2273,44 @@ void MainWindow::on_addActionButton_clicked()
 
         updateActionDB("speak", sequenceName,actiontext,action);
     }
+
+    if (ui->robotSaveMemoryCheckBox->isChecked())
+    {
+        actiontext = "save action history async";
+        action = "save";
+        updateActionDB("save", sequenceName,actiontext,action);
+    }
+
+    //-------------------------------------------------------
+    if (ui->playSoundCheckBox->isChecked())
+    {
+        QString play = ui->playComboBox->currentText();
+
+        if (play == "")
+        {
+            QMessageBox msgBox;
+            msgBox.setIcon(QMessageBox::Warning);
+
+            msgBox.setText("Nothing for robot to play!");
+            msgBox.exec();
+            return;
+
+        }
+
+
+        actiontext = ui->robotComboBox->currentText() + " plays '" + play + "'";
+        action = "play," + ui->robotComboBox->currentText().section("::", 1, 1) + "," + play;
+
+        if (ui->playWaitCheckBox->isChecked())
+        {
+             actiontext+=" and wait for completion";
+             action +=   ",,wait";
+        }
+
+        updateActionDB("play", sequenceName,actiontext,action);
+    }
+
+
     //-------------------------------------------------------
     if (ui->actionSequenceCheckBox->isChecked())
     {
@@ -2176,6 +2350,14 @@ void MainWindow::on_addActionButton_clicked()
     }
     //------------------------------------------
 
+
+    //systemcall,3,~/git/accompany/accompany_user_tests_year2/src/walkTogetherToDoorClient.py
+    if (ui->systemCallCheckbox->isChecked())
+    {
+        actiontext = "Make system call to " + ui->systemCallText->currentText();
+        action = "systemcall," + ui->robotComboBox->currentText().section("::", 1, 1) + "," + ui->systemCallText->currentText();
+        updateActionDB("systemcall", sequenceName, actiontext, action);
+    }
 
     if (ui->robotGUI->isChecked())
     {
@@ -2638,7 +2820,8 @@ void MainWindow::on_cookerCheckBox_toggled(bool checked)
 
 void MainWindow::on_fridgeCheckBox_toggled(bool checked)
 {
-    ui->fridgeSpinBox->setEnabled(checked);
+    ui->FridgeOpenRadioButton->setEnabled(checked);
+    ui->FridgeClosedRadioButton->setEnabled(checked);
     ui->fridgeANDRadioButton->setEnabled(checked);
     ui->fridgeORRadioButton->setEnabled(checked);
 
@@ -2703,7 +2886,9 @@ void MainWindow::on_dishwasherCheckBox_toggled(bool checked)
 
 void MainWindow::on_doorbellCheckBox_toggled(bool checked)
 {
-    ui->doorbellSpinBox->setEnabled(checked);
+    ui->UHDoorbellOnRadioButton->setChecked(true);
+    ui->UHDoorbellOnRadioButton->setEnabled(checked);
+    ui->UHDoorbellOffRadioButton->setEnabled(checked);
     ui->doorbellANDRadioButton->setEnabled(checked);
     ui->doorbellORRadioButton->setEnabled(checked);
 
@@ -2889,22 +3074,35 @@ void MainWindow::fillRuleActionTable(QString name, int Id, QString type, bool ch
                   ruletext = name + " is " + status;
               }
 
-              if ( Id > 499 && Id < 600 )   // goals/conditions
+              // trayIs and trayStatus use sensor status as value contains the actual positions or sensor values
+              // codes 500 and 501 therefore check sensor-status
+
+              if ( Id == 500 || Id == 501 )   // goals/conditions
               {
-                 rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND value = \"" + type + "\"";
+                 rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND status = \"" + type + "\"";
               }
               else
               {
-                  if (type == "On:Off")
-                  {
+                 if ( Id > 501 && Id < 600 )   // goals/conditions
+                 {
+                   rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND value = \"" + type + "\"";
+                 }
+                 else
+                 {
+                   if (type == "On:Off")
+                   {
                     rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND status = \"" + status + "\"";
-                  }
-                  else
-                  {
-                    rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND value = " + v;
-                  }
-              }
+                   }
+                   else
+                   {
+                     rule = "SELECT * FROM Sensors WHERE sensorId = "  + v1.setNum(Id) + " AND value = " + v;
+                   }
+                 }
+             }
           }
+
+
+
 
 
           if (ui->sensorActiveCheckBox->isChecked())
@@ -2930,6 +3128,16 @@ void MainWindow::fillRuleActionTable(QString name, int Id, QString type, bool ch
       query.bindValue(":actionText",action);
 
       query.bindValue(":locn",experimentLocation);
+
+      // temporary hack to handle or conditions on tray
+
+      if ( Id == 501 )
+      {
+        if (ORRadio)
+        {
+           query.bindValue(":andOrConnector",2);
+        }
+      }
 
       if (ruleCount > 1)
       {
@@ -3232,7 +3440,12 @@ void MainWindow::resetGui()
     ui->toasterANDRadioButton->setChecked(true);
     ui->toasterORRadioButton->setEnabled(false);
 
-    ui->fridgeSpinBox->setEnabled(false);
+
+    ui->FridgeOpenRadioButton->setEnabled(false);
+    ui->FridgeOpenRadioButton->setChecked(false);
+    ui->FridgeClosedRadioButton->setChecked(true);
+    ui->FridgeClosedRadioButton->setEnabled(false);
+
     ui->fridgeANDRadioButton->setEnabled(false);
     ui->fridgeANDRadioButton->setChecked(true);
     ui->fridgeORRadioButton->setEnabled(false);
@@ -3250,7 +3463,8 @@ void MainWindow::resetGui()
     ui->kettleANDRadioButton->setChecked(true);
     ui->kettleORRadioButton->setEnabled(false);
 
-    ui->doorbellSpinBox->setEnabled(false);
+    ui->UHDoorbellOnRadioButton->setEnabled(false);
+    ui->UHDoorbellOffRadioButton->setEnabled(false);
     ui->doorbellANDRadioButton->setEnabled(false);
     ui->doorbellANDRadioButton->setChecked(true);
     ui->doorbellORRadioButton->setEnabled(false);
@@ -3287,6 +3501,15 @@ void MainWindow::resetGui()
 
     ui->sensorActiveSpinBox->setEnabled(false);
     ui->lastActiveSpinBox->setEnabled(false);
+
+
+    ui->UHCupEmptyRadioButton->setEnabled(false);
+    ui->UHCupFullRadioButton->setEnabled(false);
+    ui->UHcupLevelANDRadioButton->setEnabled(false);
+    ui->UHcupLevelORRadioButton->setEnabled(false);
+    ui->UHcupLevelANDRadioButton->setChecked(true);
+    ui->UHCupEmptyRadioButton->setChecked(true);
+
 
     // ZUYD Sensors
 
@@ -3357,18 +3580,20 @@ void MainWindow::resetGui()
 
      ui->SeqComboBox->clearEditText();
 
+
+     query.clear();
+
+     query.prepare("SELECT scenario FROM ScenarioType order by scenario");
+
+     query.exec();
+
      ui->seqTypeComboBox->clear();
-     ui->seqTypeComboBox->addItem("High Level");
-     ui->seqTypeComboBox->addItem("user");
-     ui->seqTypeComboBox->addItem("Mid level");
-     ui->seqTypeComboBox->addItem("Low Level");
-     ui->seqTypeComboBox->addItem("Protected");
-     ui->seqTypeComboBox->addItem("scenario1");
-     ui->seqTypeComboBox->addItem("scenario2");
-     ui->seqTypeComboBox->addItem("scenario3");
-     ui->seqTypeComboBox->addItem("scenario4");
-     ui->seqTypeComboBox->addItem("scenario5");
-     ui->seqTypeComboBox->addItem("scenario6");
+
+      while(query.next())
+      {
+          ui->seqTypeComboBox->addItem(query.value(0).toString());
+      }
+
 
 
      ui->prioritySpinBox->setEnabled(false);
@@ -3396,8 +3621,22 @@ void MainWindow::resetGui()
 
      ui->actionGroupBox->setEnabled(false);
 
+     query.clear();
 
+     QString expLoc;
+     expLoc.setNum(experimentLocation);
 
+     QString qry = "SELECT activeRobot FROM ExperimentalLocation where id = ";
+     qry += expLoc + " LIMIT 1";
+
+     query.prepare(qry);
+
+     query.exec();
+
+     while(query.next())
+     {
+         activeRobot = query.value(0).toInt();
+     }
 
      query.clear();
 
@@ -3406,16 +3645,30 @@ void MainWindow::resetGui()
      query.exec();
 
      ui->robotComboBox->clear();
-
+     int current = 0;
+     int actual = 0;
      while(query.next())
      {
          ui->robotComboBox->addItem("::"+ query.value(0).toString() + "::" + query.value(1).toString());
+
+         if (query.value(0).toInt() != activeRobot)
+         {
+            current++;
+         }
+         else
+         {
+            actual=current;
+         }
      }
 
-     ui->robotComboBox->setCurrentIndex(3);
-     ui->trayRaiseRadioButton->setChecked(false);
-     ui->trayLowerRadioButton->setChecked(true);
+     ui->robotComboBox->setCurrentIndex(actual);
+     ui->trayDelUp->setChecked(false);
+     ui->trayDelDown->setChecked(true);
+     ui->trayStore->setChecked(false);
+     ui->trayDispDown->setChecked(false);
+     ui->trayDispUp->setChecked(false);
      ui->robotTrayGroupBox->setEnabled(false);
+
 
      ui->TorsoGroupBox->setEnabled(false);
      ui->moveWaitGroupBox->setEnabled(false);
@@ -3432,6 +3685,7 @@ void MainWindow::resetGui()
 
      ui->robotArmGroupBox->setEnabled(false);
      ui->armComboBox->addItem("Grasp from tray, place on table");
+     ui->armComboBox->addItem("Grasp vase from shelf, place on tray");
      ui->armHeightSpinBox->setValue(0.45);
      ui->armWaitCheckBox->setChecked(true);
 
@@ -3443,6 +3697,7 @@ void MainWindow::resetGui()
 
 
      ui->speakGroupBox->setEnabled(false);
+     ui->playGroupBox->setEnabled(false);
 
      ui->colourComboBox->clear();
      ui->colourComboBox->addItem("red");
@@ -3450,6 +3705,16 @@ void MainWindow::resetGui()
      ui->colourComboBox->addItem("yellow");
      ui->colourComboBox->addItem("blue");
      ui->colourComboBox->addItem("white");
+     ui->colourComboBox->addItem("flashing red");
+     ui->colourComboBox->addItem("flashing green");
+     ui->colourComboBox->addItem("flashing yellow");
+     ui->colourComboBox->addItem("flashing blue");
+     ui->colourComboBox->addItem("flashing white");
+     ui->colourComboBox->addItem("breathing red");
+     ui->colourComboBox->addItem("breathing green");
+     ui->colourComboBox->addItem("breathing yellow");
+     ui->colourComboBox->addItem("breathing blue");
+     ui->colourComboBox->addItem("breathing white");
 
       ui->colourGroupBox->setEnabled(false);
 
@@ -3480,7 +3745,7 @@ void MainWindow::resetGui()
 
      fillActionRuleTable("");
 
-  //   ui->pythonCreatePushButton->setEnabled(false);
+     ui->pythonCreatePushButton->setEnabled(false);
      ui->addActionButton->setEnabled(false);
      ui->addRuleButton->setEnabled(false);
      ui->delRuleButton->setEnabled(false);
@@ -3643,6 +3908,34 @@ void MainWindow::on_robotSpeakCheckBox_toggled(bool checked)
         actionCount--;
     }
 }
+
+void MainWindow::on_playSoundCheckBox_toggled(bool checked)
+{
+    ui->playGroupBox->setEnabled(checked);
+
+    QString Qry = "SELECT playFileName FROM PlaySounds";
+
+    if (checked)
+    {
+        QSqlQuery query(Qry);
+
+        ui->playComboBox->clear();
+
+        while(query.next())
+        {
+            ui->playComboBox->addItem(query.value(0).toString());
+        }
+
+        actionCount++;
+    }
+    else
+    {
+        actionCount--;
+    }
+}
+
+
+
 
 void MainWindow::on_actionSequenceCheckBox_toggled(bool checked)
 {
@@ -3913,7 +4206,7 @@ void MainWindow::on_pythonCreatePushButton_clicked()
 
                msgBox.setText("Can only generate python for Care-o-Bot at present!");
                msgBox.exec();
-               return;
+       //        return;
             }
             
             if (action == "base")
@@ -4831,7 +5124,7 @@ void MainWindow::on_condAddRuleButton_clicked()
 
     QSqlQuery query;
 
-    query.prepare("SELECT MAX(sensorId) FROM Accompany.Sensors where sensorId >499 and sensorId < 600 ");
+    query.prepare("SELECT MAX(sensorId) FROM Sensors where sensorId >499 and sensorId < 600 ");
 
     if (!query.exec())
     {
@@ -4865,7 +5158,7 @@ void MainWindow::on_condAddRuleButton_clicked()
 
         qDebug() << sId;
 
-        query.prepare("INSERT INTO Sensors VALUES (:sensorId, '0', '0', :name, '5', 'Predicate', 'N/A', '6',NOW(),NOW(),0,'false','false')");
+        query.prepare("INSERT INTO Sensors VALUES (:sensorId, '0', '0', :name, '5', 'Predicate', 'N/A', '6',NOW(),NOW(),0,'false','false',NULL,NULL,NULL,NULL)");
 
        query.bindValue(":sensorId",sId);
        query.bindValue(":name",ui->condLineEdit->text());
@@ -5097,4 +5390,37 @@ void MainWindow::on_apCheckBox_toggled(bool checked)
     {
         actionCount--;
     }
+}
+
+
+void MainWindow::on_robotSaveMemoryCheckBox_toggled(bool checked)
+{
+    if (checked)
+    {
+       actionCount++;
+    }
+    else
+    {
+        actionCount--;
+    }
+
+}
+
+void MainWindow::on_UHcupLevelCheckBox_toggled(bool checked)
+{
+
+    ui->UHCupEmptyRadioButton->setEnabled(checked);
+    ui->UHCupFullRadioButton->setEnabled(checked);
+    ui->UHcupLevelANDRadioButton->setEnabled(checked);
+    ui->UHcupLevelORRadioButton->setEnabled(checked);
+
+    if (checked)
+    {
+       ruleCount++;
+    }
+    else
+    {
+        ruleCount--;
+    }
+
 }

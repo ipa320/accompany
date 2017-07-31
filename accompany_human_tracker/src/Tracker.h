@@ -20,15 +20,23 @@
 class Tracker
 {
  public:
+  
   Tracker(const ros::Publisher& trackedHumansPub,
           const ros::Publisher& markerArrayPub,
           const std::vector<WorldPoint>& priorHull,
           const std::vector< std::vector<WorldPoint> >& entryExitHulls,
           double stateThreshold,
           double appearanceThreshold,
-          double totalThreshold,
+          double appearanceUpdate,
+          double maxSpeed,
+          double maxCovar,
+          int minTrackCreateTime,
+          int maxTrackCreateTime,
+          double robotRadius,
+          int nrTracks,
           unsigned minMatchCount=10,
-          unsigned maxUnmatchCount=20);
+          unsigned maxUnmatchCount=20
+          );
   
   void processDetections(const accompany_uva_msg::HumanDetections::ConstPtr& humanDetections);
   void identityReceived(const cob_people_detection_msgs::DetectionArray::ConstPtr& detectionArray);
@@ -38,12 +46,18 @@ class Tracker
 
  private:
   std::vector<Track> tracks;
+  Track *robot;
+
+  int trackerCount;
+  int minTrackCreateTime;
+  int maxTrackCreateTime;
+  int nrTracks;
 
   DataAssociation dataAssociation;
   std::vector<WorldPoint> priorHull;
   std::vector< std::vector<WorldPoint> > entryExitHulls;
   
-  double stateThreshold,appearanceThreshold,totalThreshold;
+  double stateThreshold,appearanceThreshold,appearanceUpdate,maxSpeed,maxCovar,robotRadius;
   unsigned minMatchCount,maxUnmatchCount;
 
   vnl_matrix<double>
@@ -58,11 +72,14 @@ class Tracker
   ros::Publisher markerArrayPub;
   tf::TransformListener transformListener;
 
+  int mostUnmatchedTrackIndex();
   void label(geometry_msgs::PointStamped point,std::string label);
   IDToName idToName;
 
   void reduceSpeed();
   void removeTracks();
+  void humanProbMultiply();
+  void annotatetracks();
   void publishTracks();
 
 };

@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'mainwindow.ui'
 **
-** Created: Mon Sep 16 10:03:25 2013
+** Created: Tue Aug 19 14:44:08 2014
 **      by: Qt User Interface Compiler version 4.8.1
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
@@ -10,6 +10,7 @@
 #ifndef UI_MAINWINDOW_H
 #define UI_MAINWINDOW_H
 
+#include <QtCore/QLocale>
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
 #include <QtGui/QApplication>
@@ -270,8 +271,9 @@ public:
     QGroupBox *groupBox_59;
     QRadioButton *fridgeANDRadioButton;
     QRadioButton *fridgeORRadioButton;
-    QSpinBox *fridgeSpinBox;
-    QLabel *label_9;
+    QGroupBox *groupBox_108;
+    QRadioButton *FridgeOpenRadioButton;
+    QRadioButton *FridgeClosedRadioButton;
     QGroupBox *groupBox_60;
     QCheckBox *kettleCheckBox;
     QGroupBox *groupBox_61;
@@ -300,8 +302,17 @@ public:
     QGroupBox *groupBox_67;
     QRadioButton *doorbellANDRadioButton;
     QRadioButton *doorbellORRadioButton;
-    QSpinBox *doorbellSpinBox;
-    QLabel *label_13;
+    QGroupBox *groupBox_107;
+    QRadioButton *UHDoorbellOnRadioButton;
+    QRadioButton *UHDoorbellOffRadioButton;
+    QGroupBox *groupBox_104;
+    QCheckBox *UHcupLevelCheckBox;
+    QGroupBox *groupBox_105;
+    QRadioButton *UHcupLevelANDRadioButton;
+    QRadioButton *UHcupLevelORRadioButton;
+    QGroupBox *groupBox_106;
+    QRadioButton *UHCupFullRadioButton;
+    QRadioButton *UHCupEmptyRadioButton;
     QWidget *tab_3;
     QGroupBox *groupBox_3;
     QCheckBox *diningSofa1CheckBox_2;
@@ -436,7 +447,6 @@ public:
     QLabel *label_3;
     QCheckBox *InterruptcheckBox;
     QGroupBox *groupBox_9;
-    QLabel *userlabel;
     QPushButton *seqDelButton;
     QPushButton *delRuleButton;
     QPushButton *addRuleButton;
@@ -453,13 +463,17 @@ public:
     QCheckBox *moveWaitCheckBox;
     QComboBox *moveRobotComboBox;
     QSpinBox *moveRobotSpinBox;
+    QCheckBox *moveLinearCheckBox;
     QLabel *label_15;
     QGroupBox *UserLocGroupBox_6;
     QCheckBox *robotTrayCheckBox;
     QGroupBox *robotTrayGroupBox;
-    QRadioButton *trayRaiseRadioButton;
-    QRadioButton *trayLowerRadioButton;
+    QRadioButton *trayDispDown;
+    QRadioButton *trayDelDown;
     QCheckBox *trayWaitCheckBox;
+    QRadioButton *trayStore;
+    QRadioButton *trayDispUp;
+    QRadioButton *trayDelUp;
     QGroupBox *robotTorsoGroupBox;
     QCheckBox *robotTorsoCheckBox;
     QGroupBox *TorsoGroupBox;
@@ -507,6 +521,12 @@ public:
     QGroupBox *expressionGroupBox;
     QComboBox *expressionComboBox;
     QCheckBox *robotExpressionCheckBox;
+    QGroupBox *playGroupBox1;
+    QCheckBox *playSoundCheckBox;
+    QGroupBox *playGroupBox;
+    QComboBox *playComboBox;
+    QCheckBox *playWaitCheckBox;
+    QCheckBox *robotSaveMemoryCheckBox;
     QWidget *tab_8;
     QGroupBox *robotGUIgroupBox;
     QCheckBox *GUI1CheckBox;
@@ -547,6 +567,9 @@ public:
     QDoubleSpinBox *apSpinBox;
     QComboBox *apComboBox;
     QLabel *label_29;
+    QWidget *tab_12;
+    QComboBox *systemCallText;
+    QCheckBox *systemCallCheckbox;
     QLabel *seqLabel_4;
     QGroupBox *sensorActiveGroupBox;
     QCheckBox *sensorActiveCheckBox;
@@ -566,6 +589,7 @@ public:
     QComboBox *seqTypeComboBox;
     QLabel *seqLabel_7;
     QLabel *UserLocLabel_2;
+    QLabel *userlabel;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -1272,7 +1296,7 @@ public:
         label_8->setGeometry(QRect(160, 10, 101, 16));
         groupBox_58 = new QGroupBox(tab);
         groupBox_58->setObjectName(QString::fromUtf8("groupBox_58"));
-        groupBox_58->setGeometry(QRect(20, 90, 591, 31));
+        groupBox_58->setGeometry(QRect(20, 90, 591, 41));
         fridgeCheckBox = new QCheckBox(groupBox_58);
         fridgeCheckBox->setObjectName(QString::fromUtf8("fridgeCheckBox"));
         fridgeCheckBox->setGeometry(QRect(10, 10, 121, 23));
@@ -1285,12 +1309,15 @@ public:
         fridgeORRadioButton = new QRadioButton(groupBox_59);
         fridgeORRadioButton->setObjectName(QString::fromUtf8("fridgeORRadioButton"));
         fridgeORRadioButton->setGeometry(QRect(70, 0, 61, 21));
-        fridgeSpinBox = new QSpinBox(groupBox_58);
-        fridgeSpinBox->setObjectName(QString::fromUtf8("fridgeSpinBox"));
-        fridgeSpinBox->setGeometry(QRect(260, 0, 58, 31));
-        label_9 = new QLabel(groupBox_58);
-        label_9->setObjectName(QString::fromUtf8("label_9"));
-        label_9->setGeometry(QRect(160, 10, 101, 16));
+        groupBox_108 = new QGroupBox(groupBox_58);
+        groupBox_108->setObjectName(QString::fromUtf8("groupBox_108"));
+        groupBox_108->setGeometry(QRect(150, 0, 181, 31));
+        FridgeOpenRadioButton = new QRadioButton(groupBox_108);
+        FridgeOpenRadioButton->setObjectName(QString::fromUtf8("FridgeOpenRadioButton"));
+        FridgeOpenRadioButton->setGeometry(QRect(10, 10, 61, 21));
+        FridgeClosedRadioButton = new QRadioButton(groupBox_108);
+        FridgeClosedRadioButton->setObjectName(QString::fromUtf8("FridgeClosedRadioButton"));
+        FridgeClosedRadioButton->setGeometry(QRect(80, 10, 81, 21));
         groupBox_60 = new QGroupBox(tab);
         groupBox_60->setObjectName(QString::fromUtf8("groupBox_60"));
         groupBox_60->setGeometry(QRect(20, 130, 591, 41));
@@ -1362,7 +1389,7 @@ public:
         hallTab->setObjectName(QString::fromUtf8("hallTab"));
         groupBox_66 = new QGroupBox(hallTab);
         groupBox_66->setObjectName(QString::fromUtf8("groupBox_66"));
-        groupBox_66->setGeometry(QRect(10, 90, 591, 31));
+        groupBox_66->setGeometry(QRect(10, 90, 591, 41));
         doorbellCheckBox = new QCheckBox(groupBox_66);
         doorbellCheckBox->setObjectName(QString::fromUtf8("doorbellCheckBox"));
         doorbellCheckBox->setGeometry(QRect(10, 10, 121, 23));
@@ -1375,12 +1402,39 @@ public:
         doorbellORRadioButton = new QRadioButton(groupBox_67);
         doorbellORRadioButton->setObjectName(QString::fromUtf8("doorbellORRadioButton"));
         doorbellORRadioButton->setGeometry(QRect(70, 0, 61, 21));
-        doorbellSpinBox = new QSpinBox(groupBox_66);
-        doorbellSpinBox->setObjectName(QString::fromUtf8("doorbellSpinBox"));
-        doorbellSpinBox->setGeometry(QRect(260, 0, 58, 31));
-        label_13 = new QLabel(groupBox_66);
-        label_13->setObjectName(QString::fromUtf8("label_13"));
-        label_13->setGeometry(QRect(160, 10, 101, 16));
+        groupBox_107 = new QGroupBox(groupBox_66);
+        groupBox_107->setObjectName(QString::fromUtf8("groupBox_107"));
+        groupBox_107->setGeometry(QRect(140, 0, 121, 31));
+        UHDoorbellOnRadioButton = new QRadioButton(groupBox_107);
+        UHDoorbellOnRadioButton->setObjectName(QString::fromUtf8("UHDoorbellOnRadioButton"));
+        UHDoorbellOnRadioButton->setGeometry(QRect(10, 10, 61, 21));
+        UHDoorbellOffRadioButton = new QRadioButton(groupBox_107);
+        UHDoorbellOffRadioButton->setObjectName(QString::fromUtf8("UHDoorbellOffRadioButton"));
+        UHDoorbellOffRadioButton->setGeometry(QRect(60, 10, 61, 21));
+        groupBox_104 = new QGroupBox(hallTab);
+        groupBox_104->setObjectName(QString::fromUtf8("groupBox_104"));
+        groupBox_104->setGeometry(QRect(10, 140, 591, 31));
+        UHcupLevelCheckBox = new QCheckBox(groupBox_104);
+        UHcupLevelCheckBox->setObjectName(QString::fromUtf8("UHcupLevelCheckBox"));
+        UHcupLevelCheckBox->setGeometry(QRect(10, 10, 121, 23));
+        groupBox_105 = new QGroupBox(groupBox_104);
+        groupBox_105->setObjectName(QString::fromUtf8("groupBox_105"));
+        groupBox_105->setGeometry(QRect(450, 10, 121, 21));
+        UHcupLevelANDRadioButton = new QRadioButton(groupBox_105);
+        UHcupLevelANDRadioButton->setObjectName(QString::fromUtf8("UHcupLevelANDRadioButton"));
+        UHcupLevelANDRadioButton->setGeometry(QRect(10, 0, 61, 21));
+        UHcupLevelORRadioButton = new QRadioButton(groupBox_105);
+        UHcupLevelORRadioButton->setObjectName(QString::fromUtf8("UHcupLevelORRadioButton"));
+        UHcupLevelORRadioButton->setGeometry(QRect(70, 0, 61, 21));
+        groupBox_106 = new QGroupBox(groupBox_104);
+        groupBox_106->setObjectName(QString::fromUtf8("groupBox_106"));
+        groupBox_106->setGeometry(QRect(140, 0, 161, 31));
+        UHCupFullRadioButton = new QRadioButton(groupBox_106);
+        UHCupFullRadioButton->setObjectName(QString::fromUtf8("UHCupFullRadioButton"));
+        UHCupFullRadioButton->setGeometry(QRect(10, 10, 61, 21));
+        UHCupEmptyRadioButton = new QRadioButton(groupBox_106);
+        UHCupEmptyRadioButton->setObjectName(QString::fromUtf8("UHCupEmptyRadioButton"));
+        UHCupEmptyRadioButton->setGeometry(QRect(70, 10, 81, 21));
         sensorTab->addTab(hallTab, QString());
         tab_3 = new QWidget();
         tab_3->setObjectName(QString::fromUtf8("tab_3"));
@@ -1796,9 +1850,6 @@ public:
         groupBox_9 = new QGroupBox(centralWidget);
         groupBox_9->setObjectName(QString::fromUtf8("groupBox_9"));
         groupBox_9->setGeometry(QRect(1120, 0, 231, 31));
-        userlabel = new QLabel(groupBox_9);
-        userlabel->setObjectName(QString::fromUtf8("userlabel"));
-        userlabel->setGeometry(QRect(10, 10, 201, 20));
         seqDelButton = new QPushButton(centralWidget);
         seqDelButton->setObjectName(QString::fromUtf8("seqDelButton"));
         seqDelButton->setGeometry(QRect(500, 0, 71, 24));
@@ -1826,12 +1877,12 @@ public:
         robotComboBox->setGeometry(QRect(140, 10, 241, 25));
         SiennaGUI = new QTabWidget(actionGroupBox);
         SiennaGUI->setObjectName(QString::fromUtf8("SiennaGUI"));
-        SiennaGUI->setGeometry(QRect(10, 60, 621, 281));
+        SiennaGUI->setGeometry(QRect(10, 60, 641, 291));
         tab_6 = new QWidget();
         tab_6->setObjectName(QString::fromUtf8("tab_6"));
         UserLocGroupBox_5 = new QGroupBox(tab_6);
         UserLocGroupBox_5->setObjectName(QString::fromUtf8("UserLocGroupBox_5"));
-        UserLocGroupBox_5->setGeometry(QRect(0, 0, 601, 51));
+        UserLocGroupBox_5->setGeometry(QRect(0, 0, 611, 51));
         UserLocGroupBox_5->setFont(font);
         UserLocGroupBox_5->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         moveRobotCheckBox = new QCheckBox(UserLocGroupBox_5);
@@ -1842,19 +1893,22 @@ public:
         moveWaitGroupBox->setGeometry(QRect(130, 20, 461, 31));
         moveWaitCheckBox = new QCheckBox(moveWaitGroupBox);
         moveWaitCheckBox->setObjectName(QString::fromUtf8("moveWaitCheckBox"));
-        moveWaitCheckBox->setGeometry(QRect(400, 10, 61, 23));
+        moveWaitCheckBox->setGeometry(QRect(330, 10, 61, 23));
         moveRobotComboBox = new QComboBox(moveWaitGroupBox);
         moveRobotComboBox->setObjectName(QString::fromUtf8("moveRobotComboBox"));
         moveRobotComboBox->setEnabled(false);
-        moveRobotComboBox->setGeometry(QRect(10, 10, 331, 25));
+        moveRobotComboBox->setGeometry(QRect(10, 10, 251, 25));
         moveRobotSpinBox = new QSpinBox(moveWaitGroupBox);
         moveRobotSpinBox->setObjectName(QString::fromUtf8("moveRobotSpinBox"));
-        moveRobotSpinBox->setGeometry(QRect(350, 10, 54, 24));
+        moveRobotSpinBox->setGeometry(QRect(270, 10, 54, 24));
         moveRobotSpinBox->setMinimum(-180);
         moveRobotSpinBox->setMaximum(180);
+        moveLinearCheckBox = new QCheckBox(moveWaitGroupBox);
+        moveLinearCheckBox->setObjectName(QString::fromUtf8("moveLinearCheckBox"));
+        moveLinearCheckBox->setGeometry(QRect(390, 10, 71, 23));
         label_15 = new QLabel(UserLocGroupBox_5);
         label_15->setObjectName(QString::fromUtf8("label_15"));
-        label_15->setGeometry(QRect(480, 10, 71, 16));
+        label_15->setGeometry(QRect(400, 10, 81, 16));
         UserLocGroupBox_6 = new QGroupBox(tab_6);
         UserLocGroupBox_6->setObjectName(QString::fromUtf8("UserLocGroupBox_6"));
         UserLocGroupBox_6->setGeometry(QRect(0, 60, 601, 41));
@@ -1862,19 +1916,28 @@ public:
         UserLocGroupBox_6->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         robotTrayCheckBox = new QCheckBox(UserLocGroupBox_6);
         robotTrayCheckBox->setObjectName(QString::fromUtf8("robotTrayCheckBox"));
-        robotTrayCheckBox->setGeometry(QRect(10, 10, 131, 23));
+        robotTrayCheckBox->setGeometry(QRect(10, 10, 101, 23));
         robotTrayGroupBox = new QGroupBox(UserLocGroupBox_6);
         robotTrayGroupBox->setObjectName(QString::fromUtf8("robotTrayGroupBox"));
-        robotTrayGroupBox->setGeometry(QRect(160, 0, 431, 31));
-        trayRaiseRadioButton = new QRadioButton(robotTrayGroupBox);
-        trayRaiseRadioButton->setObjectName(QString::fromUtf8("trayRaiseRadioButton"));
-        trayRaiseRadioButton->setGeometry(QRect(10, 10, 99, 21));
-        trayLowerRadioButton = new QRadioButton(robotTrayGroupBox);
-        trayLowerRadioButton->setObjectName(QString::fromUtf8("trayLowerRadioButton"));
-        trayLowerRadioButton->setGeometry(QRect(80, 10, 99, 21));
+        robotTrayGroupBox->setGeometry(QRect(110, 0, 481, 31));
+        trayDispDown = new QRadioButton(robotTrayGroupBox);
+        trayDispDown->setObjectName(QString::fromUtf8("trayDispDown"));
+        trayDispDown->setGeometry(QRect(250, 10, 91, 21));
+        trayDelDown = new QRadioButton(robotTrayGroupBox);
+        trayDelDown->setObjectName(QString::fromUtf8("trayDelDown"));
+        trayDelDown->setGeometry(QRect(80, 10, 91, 21));
         trayWaitCheckBox = new QCheckBox(robotTrayGroupBox);
         trayWaitCheckBox->setObjectName(QString::fromUtf8("trayWaitCheckBox"));
-        trayWaitCheckBox->setGeometry(QRect(360, 10, 61, 23));
+        trayWaitCheckBox->setGeometry(QRect(410, 10, 61, 23));
+        trayStore = new QRadioButton(robotTrayGroupBox);
+        trayStore->setObjectName(QString::fromUtf8("trayStore"));
+        trayStore->setGeometry(QRect(340, 10, 61, 21));
+        trayDispUp = new QRadioButton(robotTrayGroupBox);
+        trayDispUp->setObjectName(QString::fromUtf8("trayDispUp"));
+        trayDispUp->setGeometry(QRect(170, 10, 71, 21));
+        trayDelUp = new QRadioButton(robotTrayGroupBox);
+        trayDelUp->setObjectName(QString::fromUtf8("trayDelUp"));
+        trayDelUp->setGeometry(QRect(0, 10, 71, 21));
         robotTorsoGroupBox = new QGroupBox(tab_6);
         robotTorsoGroupBox->setObjectName(QString::fromUtf8("robotTorsoGroupBox"));
         robotTorsoGroupBox->setGeometry(QRect(0, 100, 601, 51));
@@ -1968,7 +2031,7 @@ public:
         tab_7->setObjectName(QString::fromUtf8("tab_7"));
         UserLocGroupBox_10 = new QGroupBox(tab_7);
         UserLocGroupBox_10->setObjectName(QString::fromUtf8("UserLocGroupBox_10"));
-        UserLocGroupBox_10->setGeometry(QRect(0, 20, 581, 41));
+        UserLocGroupBox_10->setGeometry(QRect(0, 0, 581, 41));
         UserLocGroupBox_10->setFont(font);
         UserLocGroupBox_10->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         robotLightCheckBox = new QCheckBox(UserLocGroupBox_10);
@@ -1988,7 +2051,7 @@ public:
         colourWaitCheckBox->setGeometry(QRect(340, 10, 61, 23));
         UserLocGroupBox_11 = new QGroupBox(tab_7);
         UserLocGroupBox_11->setObjectName(QString::fromUtf8("UserLocGroupBox_11"));
-        UserLocGroupBox_11->setGeometry(QRect(0, 60, 581, 51));
+        UserLocGroupBox_11->setGeometry(QRect(0, 40, 581, 51));
         UserLocGroupBox_11->setFont(font);
         UserLocGroupBox_11->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         robotSpeakCheckBox = new QCheckBox(UserLocGroupBox_11);
@@ -2006,7 +2069,7 @@ public:
         speakWaitCheckBox->setGeometry(QRect(360, 10, 61, 23));
         UserLocGroupBox_13 = new QGroupBox(tab_7);
         UserLocGroupBox_13->setObjectName(QString::fromUtf8("UserLocGroupBox_13"));
-        UserLocGroupBox_13->setGeometry(QRect(0, 110, 511, 51));
+        UserLocGroupBox_13->setGeometry(QRect(20, 130, 511, 41));
         UserLocGroupBox_13->setFont(font);
         UserLocGroupBox_13->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         actionSequenceCheckBox = new QCheckBox(UserLocGroupBox_13);
@@ -2015,10 +2078,10 @@ public:
         actionSequenceComboBox = new QComboBox(UserLocGroupBox_13);
         actionSequenceComboBox->setObjectName(QString::fromUtf8("actionSequenceComboBox"));
         actionSequenceComboBox->setEnabled(false);
-        actionSequenceComboBox->setGeometry(QRect(160, 10, 341, 25));
+        actionSequenceComboBox->setGeometry(QRect(140, 10, 341, 25));
         UserLocGroupBox_12 = new QGroupBox(tab_7);
         UserLocGroupBox_12->setObjectName(QString::fromUtf8("UserLocGroupBox_12"));
-        UserLocGroupBox_12->setGeometry(QRect(0, 160, 261, 31));
+        UserLocGroupBox_12->setGeometry(QRect(10, 180, 261, 31));
         UserLocGroupBox_12->setFont(font);
         UserLocGroupBox_12->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         robotDelayCheckBox = new QCheckBox(UserLocGroupBox_12);
@@ -2032,7 +2095,7 @@ public:
         robotDelaySpinBox->setGeometry(QRect(120, 10, 62, 25));
         expressionGroupBox = new QGroupBox(tab_7);
         expressionGroupBox->setObjectName(QString::fromUtf8("expressionGroupBox"));
-        expressionGroupBox->setGeometry(QRect(410, 160, 141, 41));
+        expressionGroupBox->setGeometry(QRect(400, 180, 141, 41));
         expressionGroupBox->setFont(font);
         expressionGroupBox->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
         expressionComboBox = new QComboBox(expressionGroupBox);
@@ -2040,7 +2103,28 @@ public:
         expressionComboBox->setGeometry(QRect(10, 10, 121, 25));
         robotExpressionCheckBox = new QCheckBox(tab_7);
         robotExpressionCheckBox->setObjectName(QString::fromUtf8("robotExpressionCheckBox"));
-        robotExpressionCheckBox->setGeometry(QRect(280, 170, 131, 23));
+        robotExpressionCheckBox->setGeometry(QRect(280, 190, 131, 23));
+        playGroupBox1 = new QGroupBox(tab_7);
+        playGroupBox1->setObjectName(QString::fromUtf8("playGroupBox1"));
+        playGroupBox1->setGeometry(QRect(0, 80, 581, 51));
+        playGroupBox1->setFont(font);
+        playGroupBox1->setAlignment(Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter);
+        playSoundCheckBox = new QCheckBox(playGroupBox1);
+        playSoundCheckBox->setObjectName(QString::fromUtf8("playSoundCheckBox"));
+        playSoundCheckBox->setGeometry(QRect(10, 10, 111, 23));
+        playGroupBox = new QGroupBox(playGroupBox1);
+        playGroupBox->setObjectName(QString::fromUtf8("playGroupBox"));
+        playGroupBox->setGeometry(QRect(120, 0, 451, 41));
+        playComboBox = new QComboBox(playGroupBox);
+        playComboBox->setObjectName(QString::fromUtf8("playComboBox"));
+        playComboBox->setGeometry(QRect(0, 10, 361, 24));
+        playComboBox->setEditable(true);
+        playWaitCheckBox = new QCheckBox(playGroupBox);
+        playWaitCheckBox->setObjectName(QString::fromUtf8("playWaitCheckBox"));
+        playWaitCheckBox->setGeometry(QRect(360, 10, 61, 23));
+        robotSaveMemoryCheckBox = new QCheckBox(tab_7);
+        robotSaveMemoryCheckBox->setObjectName(QString::fromUtf8("robotSaveMemoryCheckBox"));
+        robotSaveMemoryCheckBox->setGeometry(QRect(20, 230, 151, 21));
         SiennaGUI->addTab(tab_7, QString());
         tab_8 = new QWidget();
         tab_8->setObjectName(QString::fromUtf8("tab_8"));
@@ -2179,6 +2263,18 @@ public:
         label_29->setObjectName(QString::fromUtf8("label_29"));
         label_29->setGeometry(QRect(90, 10, 111, 20));
         SiennaGUI->addTab(tab_11, QString());
+        tab_12 = new QWidget();
+        tab_12->setObjectName(QString::fromUtf8("tab_12"));
+        tab_12->setLocale(QLocale(QLocale::English, QLocale::UnitedStates));
+        systemCallText = new QComboBox(tab_12);
+        systemCallText->setObjectName(QString::fromUtf8("systemCallText"));
+        systemCallText->setGeometry(QRect(10, 80, 621, 31));
+        systemCallText->setEditable(true);
+        systemCallCheckbox = new QCheckBox(tab_12);
+        systemCallCheckbox->setObjectName(QString::fromUtf8("systemCallCheckbox"));
+        systemCallCheckbox->setGeometry(QRect(20, 50, 151, 22));
+        systemCallCheckbox->setChecked(false);
+        SiennaGUI->addTab(tab_12, QString());
         seqLabel_4 = new QLabel(centralWidget);
         seqLabel_4->setObjectName(QString::fromUtf8("seqLabel_4"));
         seqLabel_4->setGeometry(QRect(720, 390, 151, 16));
@@ -2204,8 +2300,8 @@ public:
         lastActiveSpinBox->setMaximum(86400);
         pythonCreatePushButton = new QPushButton(centralWidget);
         pythonCreatePushButton->setObjectName(QString::fromUtf8("pythonCreatePushButton"));
-        pythonCreatePushButton->setEnabled(false);
-        pythonCreatePushButton->setGeometry(QRect(840, 710, 221, 24));
+        pythonCreatePushButton->setEnabled(true);
+        pythonCreatePushButton->setGeometry(QRect(700, 720, 221, 24));
         QBpushButton = new QPushButton(centralWidget);
         QBpushButton->setObjectName(QString::fromUtf8("QBpushButton"));
         QBpushButton->setEnabled(false);
@@ -2240,10 +2336,13 @@ public:
         UserLocLabel_2 = new QLabel(centralWidget);
         UserLocLabel_2->setObjectName(QString::fromUtf8("UserLocLabel_2"));
         UserLocLabel_2->setGeometry(QRect(280, 180, 101, 16));
+        userlabel = new QLabel(centralWidget);
+        userlabel->setObjectName(QString::fromUtf8("userlabel"));
+        userlabel->setGeometry(QRect(860, 390, 481, 20));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QString::fromUtf8("menuBar"));
-        menuBar->setGeometry(QRect(0, 0, 1363, 22));
+        menuBar->setGeometry(QRect(0, 0, 1363, 25));
         MainWindow->setMenuBar(menuBar);
         mainToolBar = new QToolBar(MainWindow);
         mainToolBar->setObjectName(QString::fromUtf8("mainToolBar"));
@@ -2254,8 +2353,8 @@ public:
 
         retranslateUi(MainWindow);
 
-        sensorTab->setCurrentIndex(7);
-        SiennaGUI->setCurrentIndex(4);
+        sensorTab->setCurrentIndex(4);
+        SiennaGUI->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -2482,7 +2581,9 @@ public:
         groupBox_59->setTitle(QString());
         fridgeANDRadioButton->setText(QApplication::translate("MainWindow", "And", 0, QApplication::UnicodeUTF8));
         fridgeORRadioButton->setText(QApplication::translate("MainWindow", "Or", 0, QApplication::UnicodeUTF8));
-        label_9->setText(QApplication::translate("MainWindow", "Wattage>", 0, QApplication::UnicodeUTF8));
+        groupBox_108->setTitle(QString());
+        FridgeOpenRadioButton->setText(QApplication::translate("MainWindow", "Open", 0, QApplication::UnicodeUTF8));
+        FridgeClosedRadioButton->setText(QApplication::translate("MainWindow", "Closed", 0, QApplication::UnicodeUTF8));
         groupBox_60->setTitle(QString());
         kettleCheckBox->setText(QApplication::translate("MainWindow", "Kettle", 0, QApplication::UnicodeUTF8));
         groupBox_61->setTitle(QString());
@@ -2509,8 +2610,18 @@ public:
         groupBox_67->setTitle(QString());
         doorbellANDRadioButton->setText(QApplication::translate("MainWindow", "And", 0, QApplication::UnicodeUTF8));
         doorbellORRadioButton->setText(QApplication::translate("MainWindow", "Or", 0, QApplication::UnicodeUTF8));
-        label_13->setText(QApplication::translate("MainWindow", "Wattage>", 0, QApplication::UnicodeUTF8));
-        sensorTab->setTabText(sensorTab->indexOf(hallTab), QApplication::translate("MainWindow", "Hall", 0, QApplication::UnicodeUTF8));
+        groupBox_107->setTitle(QString());
+        UHDoorbellOnRadioButton->setText(QApplication::translate("MainWindow", "On", 0, QApplication::UnicodeUTF8));
+        UHDoorbellOffRadioButton->setText(QApplication::translate("MainWindow", "Off", 0, QApplication::UnicodeUTF8));
+        groupBox_104->setTitle(QString());
+        UHcupLevelCheckBox->setText(QApplication::translate("MainWindow", "Cup", 0, QApplication::UnicodeUTF8));
+        groupBox_105->setTitle(QString());
+        UHcupLevelANDRadioButton->setText(QApplication::translate("MainWindow", "And", 0, QApplication::UnicodeUTF8));
+        UHcupLevelORRadioButton->setText(QApplication::translate("MainWindow", "Or", 0, QApplication::UnicodeUTF8));
+        groupBox_106->setTitle(QString());
+        UHCupFullRadioButton->setText(QApplication::translate("MainWindow", "Full", 0, QApplication::UnicodeUTF8));
+        UHCupEmptyRadioButton->setText(QApplication::translate("MainWindow", "Empty", 0, QApplication::UnicodeUTF8));
+        sensorTab->setTabText(sensorTab->indexOf(hallTab), QApplication::translate("MainWindow", "Other", 0, QApplication::UnicodeUTF8));
         groupBox_3->setTitle(QString());
         diningSofa1CheckBox_2->setText(QApplication::translate("MainWindow", "Objects on Tray", 0, QApplication::UnicodeUTF8));
         DRS1OccupiedRadioButton_2->setText(QApplication::translate("MainWindow", "Yes", 0, QApplication::UnicodeUTF8));
@@ -2635,7 +2746,6 @@ public:
         label_3->setText(QApplication::translate("MainWindow", "Priority", 0, QApplication::UnicodeUTF8));
         InterruptcheckBox->setText(QApplication::translate("MainWindow", "Interruptable", 0, QApplication::UnicodeUTF8));
         groupBox_9->setTitle(QString());
-        userlabel->setText(QString());
         seqDelButton->setText(QApplication::translate("MainWindow", "Delete", 0, QApplication::UnicodeUTF8));
         delRuleButton->setText(QApplication::translate("MainWindow", "Delete ", 0, QApplication::UnicodeUTF8));
         addRuleButton->setText(QApplication::translate("MainWindow", "Add Rule", 0, QApplication::UnicodeUTF8));
@@ -2646,12 +2756,16 @@ public:
         moveRobotCheckBox->setText(QApplication::translate("MainWindow", "Move Robot To", 0, QApplication::UnicodeUTF8));
         moveWaitGroupBox->setTitle(QString());
         moveWaitCheckBox->setText(QApplication::translate("MainWindow", "Wait  ", 0, QApplication::UnicodeUTF8));
+        moveLinearCheckBox->setText(QApplication::translate("MainWindow", "Linear", 0, QApplication::UnicodeUTF8));
         label_15->setText(QApplication::translate("MainWindow", "Orientation", 0, QApplication::UnicodeUTF8));
         robotTrayCheckBox->setText(QApplication::translate("MainWindow", "Robot Tray", 0, QApplication::UnicodeUTF8));
         robotTrayGroupBox->setTitle(QString());
-        trayRaiseRadioButton->setText(QApplication::translate("MainWindow", "Raise", 0, QApplication::UnicodeUTF8));
-        trayLowerRadioButton->setText(QApplication::translate("MainWindow", "Lower", 0, QApplication::UnicodeUTF8));
+        trayDispDown->setText(QApplication::translate("MainWindow", "Disp.Down", 0, QApplication::UnicodeUTF8));
+        trayDelDown->setText(QApplication::translate("MainWindow", "Del.Down", 0, QApplication::UnicodeUTF8));
         trayWaitCheckBox->setText(QApplication::translate("MainWindow", "Wait  ", 0, QApplication::UnicodeUTF8));
+        trayStore->setText(QApplication::translate("MainWindow", "Store", 0, QApplication::UnicodeUTF8));
+        trayDispUp->setText(QApplication::translate("MainWindow", "Disp.Up", 0, QApplication::UnicodeUTF8));
+        trayDelUp->setText(QApplication::translate("MainWindow", "Del.Up", 0, QApplication::UnicodeUTF8));
         robotTorsoCheckBox->setText(QApplication::translate("MainWindow", "Robot Torso", 0, QApplication::UnicodeUTF8));
         TorsoGroupBox->setTitle(QString());
         TorsoBFGroupBox->setTitle(QString());
@@ -2684,6 +2798,10 @@ public:
         robotDelayCheckBox->setText(QApplication::translate("MainWindow", "Sleep", 0, QApplication::UnicodeUTF8));
         label_2->setText(QApplication::translate("MainWindow", "Seconds", 0, QApplication::UnicodeUTF8));
         robotExpressionCheckBox->setText(QApplication::translate("MainWindow", "Gui Expressions", 0, QApplication::UnicodeUTF8));
+        playSoundCheckBox->setText(QApplication::translate("MainWindow", "Play Sound", 0, QApplication::UnicodeUTF8));
+        playGroupBox->setTitle(QString());
+        playWaitCheckBox->setText(QApplication::translate("MainWindow", "Wait  ", 0, QApplication::UnicodeUTF8));
+        robotSaveMemoryCheckBox->setText(QApplication::translate("MainWindow", "Save Action History", 0, QApplication::UnicodeUTF8));
         SiennaGUI->setTabText(SiennaGUI->indexOf(tab_7), QApplication::translate("MainWindow", "SIgnals and Speech", 0, QApplication::UnicodeUTF8));
         robotGUIgroupBox->setTitle(QString());
         GUI1CheckBox->setText(QApplication::translate("MainWindow", "Message 1", 0, QApplication::UnicodeUTF8));
@@ -2711,6 +2829,15 @@ public:
         label_28->setText(QApplication::translate("MainWindow", "Set Likelyhood to", 0, QApplication::UnicodeUTF8));
         label_29->setText(QApplication::translate("MainWindow", "Action Possibility", 0, QApplication::UnicodeUTF8));
         SiennaGUI->setTabText(SiennaGUI->indexOf(tab_11), QApplication::translate("MainWindow", "Sienna GUI", 0, QApplication::UnicodeUTF8));
+        systemCallText->clear();
+        systemCallText->insertItems(0, QStringList()
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToDoorClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToKitchenClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/walkTogetherToSofaClient.py", 0, QApplication::UnicodeUTF8)
+         << QApplication::translate("MainWindow", "~/git/accompany/accompany_user_tests_year2/src/take_object_client.py", 0, QApplication::UnicodeUTF8)
+        );
+        systemCallCheckbox->setText(QApplication::translate("MainWindow", "Make System Call", 0, QApplication::UnicodeUTF8));
+        SiennaGUI->setTabText(SiennaGUI->indexOf(tab_12), QApplication::translate("MainWindow", "System Call", 0, QApplication::UnicodeUTF8));
         seqLabel_4->setText(QApplication::translate("MainWindow", "RULES and ACTIONS", 0, QApplication::UnicodeUTF8));
         sensorActiveGroupBox->setTitle(QString());
         sensorActiveCheckBox->setText(QApplication::translate("MainWindow", "Sensor Active Since (secs)", 0, QApplication::UnicodeUTF8));
@@ -2729,6 +2856,7 @@ public:
         seqLabel_6->setText(QApplication::translate("MainWindow", "Description", 0, QApplication::UnicodeUTF8));
         seqLabel_7->setText(QApplication::translate("MainWindow", "Type", 0, QApplication::UnicodeUTF8));
         UserLocLabel_2->setText(QApplication::translate("MainWindow", "Robot Location", 0, QApplication::UnicodeUTF8));
+        userlabel->setText(QString());
     } // retranslateUi
 
 };
