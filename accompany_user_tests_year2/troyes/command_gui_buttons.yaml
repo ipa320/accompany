@@ -1,0 +1,9 @@
+buttons: [[home,move,home],
+  [kitchen fridge,move,kitchen_fridge],
+  [kitchen tabletop,move,kitchen_tabletop],
+  [door_side,move,door_side],
+  [door_front,move,door_front],
+  [table_right_offer,move,table_right_offer],
+  [table_right_unload,move,table_right_unload],
+  [table_left_offer,move,table_left_offer],
+  [table_left_unload,move,table_left_unload]]
